@@ -26,7 +26,10 @@ NB.unit({
     
     var st = NB.h('<div class="stage" style="background:var(--paper); border-radius:8px; margin-top:10px; text-align:center;"></div>');
     b.appendChild(st);
-    var v = NB.svg(st, 500, 220);
+    
+    // 將 SVG 畫布高度稍微拉高，把判定標示放進 SVG 內，並套用標準無襯線字體
+    var v = NB.svg(st, 500, 260);
+    v.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
     cases.forEach(function(c, i) {
       var btn = NB.h('<button class="pen ' + (i === 0 ? 'on' : '') + '">' + c.name + '</button>');
@@ -40,37 +43,38 @@ NB.unit({
     });
     b.appendChild(btnRow);
 
-    // 手工 SVG 打勾與打叉函數 (取代 Emoji)
-    function drawIcon(isOK, x, y) {
+    // 在 SVG 內部繪製打勾與打叉圖示 + 判定文字
+    function drawVerdict(isOK, text, cx, cy) {
+        // 群組容器置中
+        var g = NB.mk("g", { transform: "translate(" + cx + "," + cy + ")" }, v, 5);
+        
         if (isOK) {
-            NB.mk("circle", { cx: x, cy: y, r: 12, fill: "var(--p1)" }, v, 5);
-            NB.mk("path", { d: "M" + (x-5) + " " + y + " L" + (x-1) + " " + (y+5) + " L" + (x+6) + " " + (y-4), stroke: "white", "stroke-width": 3, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, v, 6);
+            NB.mk("circle", { cx: -55, cy: 0, r: 12, fill: "var(--p1)" }, g, 6);
+            NB.mk("path", { d: "M -60 0 L -57 4 L -50 -4", stroke: "white", "stroke-width": 3, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, g, 7);
+            NB.t(g, -35, 6, text, { z: 18, c: "var(--p1)", b: 1 });
         } else {
-            NB.mk("circle", { cx: x, cy: y, r: 12, fill: "#e91e63" }, v, 5);
-            NB.mk("path", { d: "M" + (x-4) + " " + (y-4) + " L" + (x+4) + " " + (y+4) + " M" + (x+4) + " " + (y-4) + " L" + (x-4) + " " + (y+4), stroke: "white", "stroke-width": 3, fill: "none", "stroke-linecap": "round" }, v, 6);
+            NB.mk("circle", { cx: -65, cy: 0, r: 12, fill: "#e91e63" }, g, 6);
+            NB.mk("path", { d: "M -71 -4 L -59 4 M -59 -4 L -71 4", stroke: "white", "stroke-width": 3, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, g, 7);
+            NB.t(g, -45, 6, text, { z: 18, c: "#e91e63", b: 1 });
         }
     }
 
     function draw() {
       v.innerHTML = ""; 
       var c = cases[currentCase];
-      var cx = 250, cy = 110;
+      var cx = 250, cy = 95; // 圖形中心往上移一點，空出下方給判定結果
       
       var pathD = "";
       if (c.type === "polygon" && c.isRegular) {
-         // 正五邊形
          var pts = [];
-         for(var i=0; i<5; i++){ pts.push((cx + 80 * Math.cos(-Math.PI/2 + i*2*Math.PI/5)) + "," + (cy + 80 * Math.sin(-Math.PI/2 + i*2*Math.PI/5))); }
+         for(var i=0; i<5; i++){ pts.push((cx + 75 * Math.cos(-Math.PI/2 + i*2*Math.PI/5)) + "," + (cy + 75 * Math.sin(-Math.PI/2 + i*2*Math.PI/5))); }
          pathD = "M" + pts.join("L") + "Z";
       } else if (c.type === "polygon" && !c.isRegular) {
-         // 不規則五邊形
-         pathD = "M" + cx + " " + (cy-80) + " L" + (cx+90) + " " + (cy-20) + " L" + (cx+40) + " " + (cy+80) + " L" + (cx-60) + " " + (cy+70) + " L" + (cx-80) + " " + (cy-10) + " Z";
+         pathD = "M" + cx + " " + (cy-75) + " L" + (cx+85) + " " + (cy-15) + " L" + (cx+35) + " " + (cy+75) + " L" + (cx-55) + " " + (cy+65) + " L" + (cx-75) + " " + (cy-10) + " Z";
       } else if (c.type === "open") {
-         // 有缺口
-         pathD = "M" + (cx-50) + " " + (cy-60) + " L" + (cx+50) + " " + (cy-60) + " L" + (cx+70) + " " + (cy+60) + " L" + (cx-70) + " " + (cy+60); // 不加 Z 就不會封閉
+         pathD = "M" + (cx-50) + " " + (cy-55) + " L" + (cx+50) + " " + (cy-55) + " L" + (cx+65) + " " + (cy+55) + " L" + (cx-65) + " " + (cy+55);
       } else if (c.type === "curve") {
-         // 有曲線
-         pathD = "M" + cx + " " + (cy-80) + " L" + (cx+70) + " " + (cy+60) + " Q" + cx + " " + (cy+100) + " " + (cx-70) + " " + (cy+60) + " Z";
+         pathD = "M" + cx + " " + (cy-75) + " L" + (cx+65) + " " + (cy+55) + " Q" + cx + " " + (cy+95) + " " + (cx-65) + " " + (cy+55) + " Z";
       }
 
       NB.mk("path", { 
@@ -82,8 +86,8 @@ NB.unit({
       }, v, 2);
 
       var isPolygon = (c.type === "polygon");
-      drawIcon(isPolygon, cx - 60, cy + 85);
-      NB.t(v, cx, cy + 90, isPolygon ? "是多邊形" : "不是多邊形", { z: 20, c: isPolygon ? "var(--p1)" : "#e91e63", b: 1 });
+      // 把判定結果畫在 SVG 內部的下方 (y = 210)
+      drawVerdict(isPolygon, isPolygon ? "是多邊形" : "不是多邊形", cx, 215);
 
       if (isPolygon) {
           eq.innerHTML = c.isRegular ? '它是<b>封閉</b>的，全部由<b>直線</b>組成，而且邊長和角都相等，所以是<b style="color:var(--p1)">正多邊形</b>！' : '它是<b>封閉</b>的，且全部由<b>直線</b>組成，所以是多邊形。但邊長沒有全部一樣，所以不加「正」字。';
