@@ -13,7 +13,7 @@ NB.unit({
   
   var ctl = NB.h('<div class="ctl" style="justify-content:center; margin-bottom:10px;"></div>');
   var btns = [];
-  var modes = ["縮小 1/2 倍", "🌟 原始圖形", "放大 2 倍"];
+  var modes = ["縮小 1/2 倍", "◎ 原始圖形", "放大 2 倍"];
   var scales = [0.5, 1, 2];
   
   modes.forEach(function(txt, i){
