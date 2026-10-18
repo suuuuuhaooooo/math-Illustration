@@ -1,5 +1,5 @@
 var NB_CONFIG = {
-    api: "", // 等之後部署完 Cloudflare Worker 後，再把產生的 Worker 網址填在這裡
+    api: "https://math-illustration-api.suuuuuhaooooo.workers.dev",
     firebase: {
         apiKey: "AIzaSyAw8FAsZkFl4bQFQCMCj7HY1bjeOS7XOmw",
         authDomain: "math-illustration.firebaseapp.com",
