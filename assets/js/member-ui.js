@@ -13,7 +13,7 @@ function stkSvg(s,i,on){var c="var(--p"+(i%5+1)+")";return'<svg viewBox="0 0 64 
 /* ---- 外框與路由 ---- */
 function shell(){
  app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="index.html">← 回到目錄</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));
- app.appendChild(h('<h1 class="title"><mark>班級專區</mark></h1>'));
+ app.appendChild(h('<h1 class="title"><mark>學員專區</mark></h1>'));
  var u=M.cur();if(!u){login();return false}
  who=h('<div class="who"><b></b><span></span><button class="pen">登出</button></div>');who.querySelector("b").textContent=u.cls.name+"　"+u.st.no+" 號　"+u.st.n;
  who.querySelector("button").onclick=function(){M.logout();location.hash="#login";route()};app.appendChild(who);updWho();
