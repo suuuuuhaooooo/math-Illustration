@@ -62,7 +62,7 @@ var CN="一二三四五六七八九十".split(""),FLAT=[],BYID={};
 NB.cat=(window.CATALOG||[]).map(function(S){return{sem:S.sem,id:S.id,grade:S.grade,chs:S.ch.map(function(row,i){var a=row.split("|"),c={no:i+1,name:a[0],secs:[]};a.slice(1).forEach(function(t,j){var o={id:S.id+"-"+(i+1)+"."+(j+1),num:(i+1)+"."+(j+1),title:t,sem:S.sem,ch:c};c.secs.push(o);FLAT.push(o);BYID[o.id]=o});return c})}});
 NB.flat=FLAT;
 NB.link=function(o){return root+"unit.html?u="+o.id};
-NB.info=function(id){var o=BYID[id];if(!o)return null;var i=FLAT.indexOf(o);return{title:o.num+" "+o.title,ref:"康軒 "+o.sem+"・第"+CN[o.ch.no-1]+"章 "+o.ch.name+"・"+o.num+" "+o.title,prev:FLAT[i-1]&&{id:FLAT[i-1].id,title:FLAT[i-1].num+" "+FLAT[i-1].title},next:FLAT[i+1]&&{id:FLAT[i+1].id,title:FLAT[i+1].num+" "+FLAT[i+1].title}}};
+NB.info=function(id){var o=BYID[id];if(!o)return null;var i=FLAT.indexOf(o);return{title:o.num+" "+o.title,ref:"通用 "+o.sem+"・第"+CN[o.ch.no-1]+"章 "+o.ch.name+"・"+o.num+" "+o.title,prev:FLAT[i-1]&&{id:FLAT[i-1].id,title:FLAT[i-1].num+" "+FLAT[i-1].title},next:FLAT[i+1]&&{id:FLAT[i+1].id,title:FLAT[i+1].num+" "+FLAT[i+1].title}}};
 NB.page=document.body.getAttribute("data-page")||"unit";NB.cur=null;NB.built={};
 /* 單元檔只要呼叫 NB.unit({...})：在首頁只登記「已完成」，在單元頁才真正畫出來 */
 NB.unit=function(c){var sc=document.currentScript,id=sc&&sc.dataset.id;if(NB.page==="home"){NB.built[id]=true;if(NB.onProbe)NB.onProbe(id);return}mount(c)};
