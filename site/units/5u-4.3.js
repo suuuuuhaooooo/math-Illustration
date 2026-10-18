@@ -56,7 +56,7 @@ NB.unit({
       
       st.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; font-weight:bold;">' +
                      frac(n, d) + ' &nbsp;=&nbsp; ' + reducedHTML + ' &nbsp;=&nbsp; ' + frac(newN, newD) +
-                     (isSimplest ? '<span style="margin-left:15px; background:var(--p1); color:white; font-size:16px; padding:4px 8px; border-radius:4px;">✨ 最簡分數</span>' : '') +
+                     (isSimplest ? '<span style="margin-left:15px; background:var(--p1); color:white; font-size:16px; padding:4px 8px; border-radius:4px;">最簡分數</span>' : '') +
                      '</div>';
                      
       eq.innerHTML = isSimplest ? '同除以最大公因數 <b>6</b>，得到的 2/3 不能再約分了，稱為<b>最簡分數</b>！' : '約分成功！但是 ' + newN + ' 和 ' + newD + ' 還能繼續約分，所以還不是最簡分數喔。';
