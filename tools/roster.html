@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>班級名單產生器（老師用）</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=LXGW+WenKai+TC:wght@400;700&family=Iansui&display=swap">
+<link rel="stylesheet" href="../assets/css/notebook.css">
+</head><body data-root="../" data-page="tool">
+<main class="wrap">
+<h1 class="title"><mark>班級名單產生器</mark></h1>
+<p class="meta">老師用。名單只在你的瀏覽器裡處理，不會上傳。</p>
+<section class="sheet"><h2><span class="tag">步驟 1</span>輸入班級與學生</h2>
+<div class="ctl lg"><input class="num" id="code" placeholder="班級代碼"><input class="num" id="cname" placeholder="班級名稱"><input class="num" id="grade" type="number" min="3" max="6" placeholder="年級"></div>
+<p>學生名單：每行一位，格式「座號 姓名」；只寫姓名就依序自動編座號。</p>
+<textarea id="names" rows="8" style="width:100%;font:inherit;padding:8px;border:1.6px solid var(--ink);border-radius:10px;background:var(--paper);color:var(--ink);user-select:text" placeholder="1 王小明&#10;2 李小華"></textarea>
+<div class="ctl"><button class="pen go" id="go">產生</button></div></section>
+<section class="sheet" id="o1" hidden><h2><span class="tag">步驟 2</span>貼到 assets/data/config.js 的 CLASSES 裡</h2><textarea id="out" rows="8" style="width:100%;font:.85rem ui-monospace,monospace;padding:8px;border:1.6px solid var(--ink);border-radius:10px;background:var(--paper);color:var(--ink);user-select:text" readonly></textarea></section>
+<section class="sheet" id="o2" hidden><h2><span class="tag">步驟 3</span>密碼表（列印後剪開發給學生，不要留檔）</h2><div id="pins"></div><div class="ctl"><button class="pen" onclick="print()">列印</button></div></section>
+</main>
+<script>
+function hex(b){return Array.from(new Uint8Array(b)).map(function(x){return("0"+x.toString(16)).slice(-2)}).join("")}
+function pin(){var a=new Uint32Array(1);crypto.getRandomValues(a);return String(1000+a[0]%9000)}
+function esc(s){return s.replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+document.getElementById("go").onclick=async function(){
+ var code=document.getElementById("code").value.trim(),nm=document.getElementById("cname").value.trim()||code,gr=+document.getElementById("grade").value||6,n=0,rows=[];
+ if(!code){alert("請輸入班級代碼");return}
+ var lines=document.getElementById("names").value.split("\n").map(function(x){return x.trim()}).filter(Boolean);
+ for(var i=0;i<lines.length;i++){var m=lines[i].match(/^(\d+)\s+(.+)$/),no=m?+m[1]:++n,name=m?m[2]:lines[i];n=no;var p=pin(),h=hex(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(code+"|"+no+"|"+p)));rows.push({no:no,n:name,p:p,h:h})}
+ document.getElementById("out").value='{code:"'+code+'",name:"'+nm+'",grade:'+gr+',s:[\n'+rows.map(function(r){return' {no:'+r.no+',n:"'+r.n+'",h:"'+r.h+'"}'}).join(",\n")+'\n]},';
+ document.getElementById("pins").innerHTML='<table class="tb"><tr><th>班級代碼</th><th>座號</th><th>姓名</th><th>密碼</th></tr>'+rows.map(function(r){return"<tr><td>"+esc(code)+"</td><td>"+r.no+"</td><td>"+esc(r.n)+"</td><td><b>"+r.p+"</b></td></tr>"}).join("")+"</table>";
+ document.getElementById("o1").hidden=document.getElementById("o2").hidden=false};
+</script></body></html>
