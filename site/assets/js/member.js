@@ -1,4 +1,4 @@
-/* 班級專區（資料層）：登入狀態與 API 呼叫。
+/* 學員專區（資料層）：登入狀態與 API 呼叫。
    所有「算分、判分、記錄」都在伺服器（Cloudflare Worker）；這裡只負責把畫面需要的資料拿回來。
    安全性：瀏覽器端的任何資料（含 localStorage）都不被信任，改了也不會影響成績。 */
 (function(){
@@ -43,10 +43,10 @@ M.logout=function(){ls(CK,null);M.U=null;M.D=null;return M.auth?M.auth.signOut()
 
 /* ---- 與首頁、單元頁的接點（這兩頁不載入 Firebase，只讀本機的「顯示用」資訊） ---- */
 M.cur=function(){try{return JSON.parse(ls(CK)||"null")}catch(e){return null}};
-M.chip=function(){var u=M.cur(),a=NB.h('<a class="chip" href="'+NB.root+'member.html"></a>');a.textContent=u?u.n+"・Lv."+u.lv+"・"+u.pts+" 分":"班級專區・登入";return a};
+M.chip=function(){var u=M.cur(),a=NB.h('<a class="chip" href="'+NB.root+'member.html"></a>');a.textContent=u?u.n+"・Lv."+u.lv+"・"+u.pts+" 分":"學員專區・登入";return a};
 M.onUnit=function(app,id){var u=M.cur(),el,R=NB.root;
  if(u){var s=[];try{s=JSON.parse(ls(SN)||"[]")}catch(e){}if(s.indexOf(id)<0){s.push(id);ls(SN,JSON.stringify(s.slice(-60)))}
-  el=NB.h('<section class="sheet"><h2><span class="tag">班級專區</span>學完了，來考考自己</h2><div class="ctl"><a class="pen go" href="'+R+'member.html#quiz/'+id+'">這一節的小測驗</a><a class="pen" href="'+R+'member.html#wrong">錯題本</a><a class="pen" href="'+R+'member.html#daily">每日一題</a></div></section>')}
- else el=NB.h('<section class="sheet"><h2><span class="tag">班級專區</span>小測驗・錯題本・貼紙・排行榜</h2><p>這些功能只開放給班上同學使用。</p><a class="pen go" href="'+R+'member.html#login">同學登入</a></section>');
+  el=NB.h('<section class="sheet"><h2><span class="tag">學員專區</span>學完了，來考考自己</h2><div class="ctl"><a class="pen go" href="'+R+'member.html#quiz/'+id+'">這一節的小測驗</a><a class="pen" href="'+R+'member.html#wrong">錯題本</a><a class="pen" href="'+R+'member.html#daily">每日一題</a></div></section>')}
+ else el=NB.h('<section class="sheet"><h2><span class="tag">學員專區</span>小測驗・錯題本・貼紙・排行榜</h2><p>這些功能只開放給班內學員使用。</p><a class="pen go" href="'+R+'member.html#login">同學登入</a></section>');
  app.insertBefore(el,app.lastElementChild)};
 })();
