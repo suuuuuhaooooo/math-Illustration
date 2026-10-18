@@ -1,5 +1,3 @@
-/* Firebase 登入（只用 Google 登入，只取得「你是誰」的證明）。
-   真正判斷「你能不能用」是在 Cloudflare Worker：驗證這個證明，再對照老師的名單。 */
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 var CFG=window.NB_CONFIG||{},R=window.__nbAuthResolve||function(){};
