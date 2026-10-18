@@ -1,5 +1,6 @@
 /* 首頁：依年級列出目錄。打開某個學期時，才去偵測哪些單元檔存在。 */
 (function(){
+var savedGrade = parseInt(sessionStorage.getItem("currentGrade")) || 3;
 var app=document.getElementById("app"),grade=3,probed={},rows={};
 function probe(S,sum){
  if(!probed[S.id]){probed[S.id]=1;var n=0,tot=0;
@@ -15,7 +16,7 @@ function render(){
  app.appendChild(NB.h('<h1 class="title">看懂數學，<mark>動手玩一玩</mark></h1>'));
  app.appendChild(NB.h('<p class="lead">國小三到六年級・手繪圖解、立體互動、練習挑戰</p>'));
  var tabs=NB.h('<div class="tabs"></div>');
- [3,4,5,6].forEach(function(g){var b=NB.h('<button class="pen'+(grade===g?" on":"")+'">'+"三四五六"[g-3]+'年級</button>');b.onclick=function(){grade=g;render()};tabs.appendChild(b)});
+ [3,4,5,6].forEach(function(g){var b=NB.h('<button class="pen'+(grade===g?" on":"")+'">'+"三四五六"[g-3]+'年級</button>');b.onclick=function(){grade=g;sessionStorage.setItem("currentGrade", g);render()};tabs.appendChild(b)});
  app.appendChild(tabs);
  NB.cat.filter(function(S){return S.grade===grade}).forEach(function(S,k){
   var d=NB.h('<details class="sheet"><summary><span class="tag">'+S.sem+'</span><small></small></summary></details>');
