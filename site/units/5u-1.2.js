@@ -19,7 +19,8 @@ NB.unit({
     
     var nA = NB.slider(b, "數字甲", 31000, 31999, 1, 31415, "", function(){ draw() });
     var nB = NB.slider(b, "數字乙", 31000, 31999, 1, 31451, "", function(){ draw() });
-    var st = NB.h('<div class="stage" style="padding:15px; background:var(--paper); border-radius:8px; margin-top:10px; font-family:monospace; font-size:24px; text-align:center;"></div>');
+    
+    var st = NB.h('<div class="stage" style="padding:15px; background:var(--paper); border-radius:8px; margin-top:10px; font-family:monospace; font-size:28px;"></div>');
     b.appendChild(st);
 
     function draw() {
@@ -42,9 +43,12 @@ NB.unit({
       }
       
       var sign = strA === strB ? "=" : (parseFloat(strA) > parseFloat(strB) ? "&gt;" : "&lt;");
-      st.innerHTML = '<div>' + renderNum(strA) + '</div>' + 
-                     '<div style="color:var(--p2); font-weight:bold; margin:5px 0;">' + sign + '</div>' + 
-                     '<div>' + renderNum(strB) + '</div>';
+      
+      st.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; gap:20px;">' + 
+                     '<div>' + renderNum(strA) + '</div>' + 
+                     '<div style="color:var(--p2); font-weight:bold; font-size:1.2em;">' + sign + '</div>' + 
+                     '<div>' + renderNum(strB) + '</div>' + 
+                     '</div>';
                      
       if (diffIdx !== -1) {
           eq.innerHTML = '從左邊數來，第一個不同的數字在小數點後第 <b>' + (diffIdx - 1) + '</b> 位。<br>' + strA[diffIdx] + ' 和 ' + strB[diffIdx] + ' 相比，決定了大小！';
