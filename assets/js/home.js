@@ -1,4 +1,4 @@
-/* 首頁：依年級列出康軒目錄。打開某個學期時，才去偵測哪些單元檔存在。 */
+/* 首頁：依年級列出目錄。打開某個學期時，才去偵測哪些單元檔存在。 */
 (function(){
 var app=document.getElementById("app"),grade=3,probed={},rows={};
 function probe(S,sum){
