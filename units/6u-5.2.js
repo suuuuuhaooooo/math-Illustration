@@ -29,28 +29,31 @@ NB.unit({
    var base_a = 2, base_b = 3;
    var total_a = base_a * mul, total_b = base_b * mul;
    
-   // 【修改】縮小單個方塊尺寸與間距，避免放大 4 倍時超出右側邊界
-   var cx = 70, cy = 40, gap = 32, size = 22;
-   var group_offsetX = Math.max(base_a, base_b) * gap + 15; // 每一組 2:3 之間的水平距離
+   /* 改用 2x2 雙欄矩陣，避免橫向擠壓超出邊界 */
+   var cx = 110, cy = 35;
+   
+   NB.t(v, cx-55, cy+10, "前項(藍)", {z:13});
+   NB.t(v, cx-55, cy+38, "後項(綠)", {z:13});
 
-   NB.t(v, cx-35, cy, "前項", {z:14});
-   NB.t(v, cx-35, cy+55, "後項", {z:14});
-
-   for(var row=0; row<mul; row++){
-       var dx = row * group_offsetX;
-       var dy = row * 10; // 稍微帶一點階梯層次感
+   for(var k=0; k<mul; k++){
+       var col = k % 2;            // 第 0 或 1 欄
+       var row = Math.floor(k / 2);  // 第 0 或 1 列
        
-       // 畫前項(藍方塊)
+       var gx = cx + col * 180;    // 水平間距 180px
+       var gy = cy + row * 75;     // 垂直間距 75px
+
+       // 畫前項 (藍方塊)
        for(var i=0; i<base_a; i++){
-           NB.mk("rect",{x:cx+i*gap+dx, y:cy-12+dy, width:size, height:size, fill:"var(--p2)", stroke:"var(--ink)"},v);
+           NB.mk("rect",{x:gx+i*26, y:gy, width:20, height:20, fill:"var(--p2)", stroke:"var(--ink)"},v);
        }
-       // 畫後項(綠圓角方塊)
+       // 畫後項 (綠圓角)
        for(var j=0; j<base_b; j++){
-           NB.mk("rect",{x:cx+j*gap+dx, y:cy+40+dy, width:size, height:size, fill:"var(--p3)", stroke:"var(--ink)", rx:10},v); 
+           NB.mk("rect",{x:gx+j*26, y:gy+28, width:20, height:20, fill:"var(--p3)", stroke:"var(--ink)", rx:8},v); 
        }
 
-       // 用虛線框出每一組 2:3
-       NB.mk("rect",{x:cx-5+dx, y:cy-20+dy, width:Math.max(base_a, base_b)*gap+5, height:90, fill:"none", stroke:"var(--soft)", 'stroke-dasharray':"4 2"},v);
+       // 用虛線框精準包覆每一組 2:3
+       NB.mk("rect",{x:gx-6, y:gy-6, width:88, height:58, fill:"none", stroke:"var(--soft)", 'stroke-dasharray':"3 2"},v);
+       NB.t(v, gx+38, gy-12, "第 "+(k+1)+" 組 (2:3)", {z:11, fill:"var(--soft)"});
    }
 
    eq.innerHTML="放大 <b>"+mul+"</b> 倍：<br>前項 ＝ 2 × "+mul+" ＝ <b>"+total_a+"</b> ｜ 後項 ＝ 3 × "+mul+" ＝ <b>"+total_b+"</b><br>所以 <b class='ok'>2 : 3 ＝ "+total_a+" : "+total_b+"</b>";
