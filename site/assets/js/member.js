@@ -47,6 +47,6 @@ M.chip=function(){var u=M.cur(),a=NB.h('<a class="chip" href="'+NB.root+'member.
 M.onUnit=function(app,id){var u=M.cur(),el,R=NB.root;
  if(u){var s=[];try{s=JSON.parse(ls(SN)||"[]")}catch(e){}if(s.indexOf(id)<0){s.push(id);ls(SN,JSON.stringify(s.slice(-60)))}
   el=NB.h('<section class="sheet"><h2><span class="tag">學員專區</span>學完了，來考考自己</h2><div class="ctl"><a class="pen go" href="'+R+'member.html#quiz/'+id+'">這一節的小測驗</a><a class="pen" href="'+R+'member.html#wrong">錯題本</a><a class="pen" href="'+R+'member.html#daily">每日一題</a></div></section>')}
- else el=NB.h('<section class="sheet"><h2><span class="tag">學員專區</span>小測驗・錯題本・貼紙・排行榜</h2><p>這些功能只開放給班內學員使用。</p><a class="pen go" href="'+R+'member.html#login">同學登入</a></section>');
+ else el=NB.h('<section class="sheet"><h2><span class="tag">學員專區</span>小測驗・錯題本・貼紙・排行榜</h2><p>此功能僅開放給班內學員使用。</p><a class="pen go" href="'+R+'member.html#login">同學登入</a></section>');
  app.insertBefore(el,app.lastElementChild)};
 })();
