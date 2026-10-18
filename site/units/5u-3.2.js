@@ -39,9 +39,9 @@ NB.unit({
                     '</div>';
                     
       var tagsHtml = '<div style="display:flex; justify-content:center; gap:15px;">';
-      tagsHtml += '<div style="padding:8px 16px; border-radius:20px; font-size:18px; color:white; font-weight:bold; background:' + (is2 ? 'var(--p1)' : '#ccc') + ';">2 的倍數 ' + (is2?'':'') + '</div>';
-      tagsHtml += '<div style="padding:8px 16px; border-radius:20px; font-size:18px; color:white; font-weight:bold; background:' + (is5 ? '#ff9800' : '#ccc') + ';">5 的倍數 ' + (is5?'':'') + '</div>';
-      tagsHtml += '<div style="padding:8px 16px; border-radius:20px; font-size:18px; color:white; font-weight:bold; background:' + (is10 ? '#e91e63' : '#ccc') + ';">10 的倍數 ' + (is10?'':'') + '</div>';
+      tagsHtml += '<div style="padding:8px 16px; border-radius:20px; font-size:18px; color:white; font-weight:bold; background:' + (is2 ? 'var(--p1)' : '#ccc') + ';">2 的倍數 ' + '</div>';
+      tagsHtml += '<div style="padding:8px 16px; border-radius:20px; font-size:18px; color:white; font-weight:bold; background:' + (is5 ? '#ff9800' : '#ccc') + ';">5 的倍數 ' + '</div>';
+      tagsHtml += '<div style="padding:8px 16px; border-radius:20px; font-size:18px; color:white; font-weight:bold; background:' + (is10 ? '#e91e63' : '#ccc') + ';">10 的倍數 ' + '</div>';
       tagsHtml += '</div>';
       
       st.innerHTML = numHtml + tagsHtml;
