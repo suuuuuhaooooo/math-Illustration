@@ -30,7 +30,7 @@ NB.unit({
    
    /* 畫地圖背景 */
    NB.mk("rect",{x:40, y:30, width:260, height:140, fill:"var(--paper2)", stroke:"var(--soft)", 'stroke-width':2, rx:8},v);
-   NB.t(v, 80, 55, "📍 某某公園地圖", {z:16, b:1});
+   NB.t(v, 80, 55, "※ 某某公園地圖", {z:16, b:1});
 
    /* 畫右邊的放大解說框 */
    NB.mk("rect",{x:340, y:50, width:180, height:100, fill:"#fff", stroke:"var(--p4)", 'stroke-width':3, 'stroke-dasharray':"4 2", rx:8},v);
