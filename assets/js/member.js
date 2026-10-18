@@ -1,4 +1,4 @@
-/* 班級專區（核心）：登入、個人紀錄、題庫產生器、積分／貼紙。畫面在 member-ui.js
+/* 學員專區（核心）：登入、個人紀錄、題庫產生器、積分／貼紙。畫面在 member-ui.js
    注意：登入與資料都在瀏覽器端，只能擋「不是這個班的人」，不是銀行等級的安全。 */
 (function(){
 "use strict";
@@ -91,10 +91,10 @@ M.mix=function(g,n,r){var p=M.pool(g).slice(),out=[],seen={},i=0,q,j,t;r=r||Math
  while(out.length<n&&i<n*10){q=M.gen(p[i++%p.length].id,r);if(!seen[q.q]){seen[q.q]=1;out.push(q)}}return out};
 
 /* ---- 與單元頁、首頁的接點 ---- */
-M.chip=function(){var u=M.cur(),a=NB.h('<a class="chip" href="'+NB.root+'member.html"></a>');if(u){var D=M.data();a.textContent=u.st.n+"・Lv."+M.lv(D)+"・"+D.pts+" 分"}else a.textContent="班級專區・登入";return a};
+M.chip=function(){var u=M.cur(),a=NB.h('<a class="chip" href="'+NB.root+'member.html"></a>');if(u){var D=M.data();a.textContent=u.st.n+"・Lv."+M.lv(D)+"・"+D.pts+" 分"}else a.textContent="學員專區・登入";return a};
 M.onUnit=function(app,id){var u=M.cur(),el,R=NB.root;
  if(u){var D=M.data(),x=D.u[id]=D.u[id]||{n:0,c:0};if(!x.seen){x.seen=1;M.save()}
-  el=NB.h('<section class="sheet"><h2><span class="tag">班級專區</span>學完了，來考考自己</h2><div class="ctl"><a class="pen go" href="'+R+'member.html#quiz/'+id+'">這一節的小測驗</a><a class="pen" href="'+R+'member.html#wrong">錯題本</a><a class="pen" href="'+R+'member.html#daily">每日一題</a></div></section>')}
- else el=NB.h('<section class="sheet"><h2><span class="tag">班級專區</span>小測驗・錯題本・貼紙・排行榜</h2><p>這些功能只開放給班上同學使用。</p><a class="pen go" href="'+R+'member.html#login">同學登入</a></section>');
+  el=NB.h('<section class="sheet"><h2><span class="tag">學員專區</span>學完了，來考考自己</h2><div class="ctl"><a class="pen go" href="'+R+'member.html#quiz/'+id+'">這一節的小測驗</a><a class="pen" href="'+R+'member.html#wrong">錯題本</a><a class="pen" href="'+R+'member.html#daily">每日一題</a></div></section>')}
+ else el=NB.h('<section class="sheet"><h2><span class="tag">學員專區</span>小測驗・錯題本・貼紙・排行榜</h2><p>這些功能只開放給班內學員使用。</p><a class="pen go" href="'+R+'member.html#login">同學登入</a></section>');
  app.insertBefore(el,app.lastElementChild)};
 })();
