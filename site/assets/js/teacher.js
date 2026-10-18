@@ -1,4 +1,4 @@
-/* 老師後台：全班進度、各單元答對率、最常錯的題、最常見的迷思。資料由伺服器彙整，只有名單裡的 teacher 看得到。 */
+/* 老師後台：全班進度、各單元答對率、最常錯的題、最常見的迷思。資料由伺服器彙整，只有名單裡的 teacher 看得到。 */ 
 (function(){
 "use strict";
 var M=NB.member,app=document.getElementById("app"),h=NB.h;
