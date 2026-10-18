@@ -1,0 +1,21 @@
+name = "math-class-api"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# 1) npx wrangler d1 create math-class   → 把輸出的 database_id 貼在下面
+# 2) npx wrangler kv namespace create DATA → 把輸出的 id 貼在下面
+[[d1_databases]]
+binding = "DB"
+database_name = "math-class"
+database_id = "貼上-D1-database_id"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "貼上-KV-namespace-id"
+
+[vars]
+FIREBASE_PROJECT_ID = "你的-firebase-專案-id"
+# 允許呼叫 API 的網站（GitHub Pages 網址，不含路徑）。多個用逗號分隔
+ALLOWED_ORIGINS = "https://你的帳號.github.io"
+ALLOW_LOCALHOST = "0"
+ALLOWED_PROVIDERS = "google.com"
