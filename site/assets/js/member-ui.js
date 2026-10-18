@@ -1,4 +1,4 @@
-/* 班級專區（畫面）：登入、首頁、每日一題、單元小測驗、模擬卷、錯題本、學習進度、貼紙、排行榜、列印練習卷
+/* 學員專區（畫面）：登入、首頁、每日一題、單元小測驗、模擬卷、錯題本、學習進度、貼紙、排行榜、列印練習卷
    題目、判分、積分都由伺服器處理（見 member.js）；這裡只負責顯示與收集答案。 */
 (function(){
 "use strict";
@@ -16,7 +16,7 @@ function ymdT(){return M.T||M.today()}
 /* ---- 外框與路由 ---- */
 function shell(){
  app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="index.html">← 回到目錄</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));
- app.appendChild(h('<h1 class="title"><mark>班級專區</mark></h1>'));
+ app.appendChild(h('<h1 class="title"><mark>學員專區</mark></h1>'));
  var u=user();if(!u){login();return false}
  who=h('<div class="who"><b></b><span></span><button class="pen">登出</button></div>');
  who.querySelector("b").textContent=u.role==="teacher"?"老師　"+u.name:u.cls+" 班　"+u.no+" 號　"+u.name;
