@@ -34,9 +34,9 @@ NB.unit({
                  '</div>';
                  
       if (isDivisible) {
-        html += '<div style="margin-top:15px; display:inline-block; padding:5px 15px; background:var(--p1); color:white; border-radius:20px; font-size:20px; font-weight:bold;">✅ 可以整除</div>';
+        html += '<div style="margin-top:15px; display:inline-block; padding:5px 15px; background:var(--p1); color:white; border-radius:20px; font-size:20px; font-weight:bold;">可以整除</div>';
       } else {
-        html += '<div style="margin-top:15px; display:inline-block; padding:5px 15px; background:#ff4d4d; color:white; border-radius:20px; font-size:20px; font-weight:bold;">❌ 不能整除</div>';
+        html += '<div style="margin-top:15px; display:inline-block; padding:5px 15px; background:#ff4d4d; color:white; border-radius:20px; font-size:20px; font-weight:bold;">不能整除</div>';
       }
       st.innerHTML = html;
       
