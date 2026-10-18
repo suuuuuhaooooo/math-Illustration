@@ -13,7 +13,7 @@ function render(){
  app.innerHTML="";rows={};
  var bar=NB.h('<nav class="bar"><span class="brand">數學筆記本</span></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);
  app.appendChild(NB.h('<h1 class="title">看懂數學，<mark>動手玩一玩</mark></h1>'));
- app.appendChild(NB.h('<p class="lead">康軒版國小三到六年級・手繪圖解、立體互動、練習挑戰</p>'));
+ app.appendChild(NB.h('<p class="lead">國小三到六年級・手繪圖解、立體互動、練習挑戰</p>'));
  var tabs=NB.h('<div class="tabs"></div>');
  [3,4,5,6].forEach(function(g){var b=NB.h('<button class="pen'+(grade===g?" on":"")+'">'+"三四五六"[g-3]+'年級</button>');b.onclick=function(){grade=g;render()};tabs.appendChild(b)});
  app.appendChild(tabs);
