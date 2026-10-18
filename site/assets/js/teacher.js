@@ -4,7 +4,7 @@
 var M=NB.member,app=document.getElementById("app"),h=NB.h;
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function title(id){var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
-function shell(){app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="member.html">← 回到班級專區</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));app.appendChild(h('<h1 class="title"><mark>老師後台</mark></h1>'))}
+function shell(){app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="member.html">← 回到學員專區</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));app.appendChild(h('<h1 class="title"><mark>老師後台</mark></h1>'))}
 function sheet(tag,sub){var s=h('<section class="sheet"><h2><span class="tag">'+tag+'</span>'+(sub||"")+'</h2></section>');app.appendChild(s);return s}
 function msg(t){shell();var s=sheet("提示","");s.appendChild(h("<p>"+t+'</p><a class="pen go" href="member.html">前往登入</a>'))}
 function load(cls){
@@ -36,5 +36,5 @@ function render(r){
  if(!r.missed.length)q.appendChild(h("<p>還沒有錯題紀錄。</p>"));
  else q.appendChild(h('<table class="tb"><tr><th>單元</th><th>題目</th><th class="pc">答錯</th><th class="pc">作答</th></tr>'+r.missed.map(function(x){return"<tr><td>"+esc(title(x.unit))+"</td><td>"+(x.qid.indexOf("gen:")===0?"產生器":esc(x.qid))+'</td><td class="pc">'+x.w+'</td><td class="pc">'+x.n+"</td></tr>"}).join("")+"</table>"))}
 shell();app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
-M.boot().then(function(){if(!M.U)return msg("請先用老師的 Google 帳號登入班級專區。");if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");load()});
+M.boot().then(function(){if(!M.U)return msg("請先用老師的 Google 帳號登入學員專區。");if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");load()});
 })();
