@@ -12,7 +12,7 @@ NB.unit({
   var st=NB.h('<div class="stage"></div>');b.appendChild(st);var v=NB.svg(st,560,260);
   
   var ctl = NB.h('<div class="ctl" style="justify-content:center; margin-bottom:10px;"></div>');
-  var btnDeal = NB.h('<button class="pen on" style="background:var(--p4); color:#333; margin-right:10px;">💰 按 3:2 分發一次</button>');
+  var btnDeal = NB.h('<button class="pen on" style="background:var(--p4); color:#333; margin-right:10px;">按 3:2 分發一次</button>');
   var btnReset = NB.h('<button class="pen">重新分發</button>');
   ctl.appendChild(btnDeal); ctl.appendChild(btnReset);
   b.insertBefore(ctl, st);
