@@ -19,11 +19,6 @@ NB.unit({
     var stepsText = ["1. 原本的半邊", "2. 算格子找對稱點", "3. 連線完成圖形"];
     var currentStep = 0;
     
-    var st = NB.h('<div class="stage" style="background:var(--paper); border-radius:8px; margin-top:10px; text-align:center;"></div>');
-    b.appendChild(st);
-    var v = NB.svg(st, 500, 260);
-    v.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-
     var stepBtns = [];
     stepsText.forEach(function(txt, i) {
       var btn = NB.h('<button class="pen ' + (i === 0 ? 'on' : '') + '" style="background:' + (i===0?'#e2e8f0':'') + '">' + txt + '</button>');
@@ -31,6 +26,8 @@ NB.unit({
       stepBtns.push(btn);
       stepRow.appendChild(btn);
     });
+    b.appendChild(stepRow); // <--- 補上這行，步驟按鈕才會顯示！
+
     function updateStepBtns() {
       stepBtns.forEach(function(btn, i) {
         btn.classList.toggle('on', i === currentStep);
@@ -38,67 +35,47 @@ NB.unit({
         btn.style.color = (i === currentStep) ? "white" : "";
       });
     }
+    
+    var st = NB.h('<div class="stage" style="background:var(--paper); border-radius:8px; margin-top:10px; text-align:center;"></div>');
+    b.appendChild(st);
+    var v = NB.svg(st, 500, 260);
+    v.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
     function draw() {
       v.innerHTML = ""; 
       var gridSize = 25;
       var cols = 20, rows = 10;
       
-      // 繪製背景網格
-      for(var i=0; i<=cols; i++) {
-         NB.mk("line", { x1: i*gridSize, y1: 0, x2: i*gridSize, y2: rows*gridSize, stroke: "#e2e8f0", "stroke-width": 1 }, v, 1);
-      }
-      for(var j=0; j<=rows; j++) {
-         NB.mk("line", { x1: 0, y1: j*gridSize, x2: cols*gridSize, y2: j*gridSize, stroke: "#e2e8f0", "stroke-width": 1 }, v, 1);
-      }
+      for(var i=0; i<=cols; i++) NB.mk("line", { x1: i*gridSize, y1: 0, x2: i*gridSize, y2: rows*gridSize, stroke: "#e2e8f0", "stroke-width": 1 }, v, 1);
+      for(var j=0; j<=rows; j++) NB.mk("line", { x1: 0, y1: j*gridSize, x2: cols*gridSize, y2: j*gridSize, stroke: "#e2e8f0", "stroke-width": 1 }, v, 1);
       
-      var cx = 10 * gridSize; // 對稱軸在正中央 x=250
-      // 繪製對稱軸
+      var cx = 10 * gridSize; 
       NB.mk("line", { x1: cx, y1: 0, x2: cx, y2: rows*gridSize, stroke: "#ff7675", "stroke-width": 3, "stroke-dasharray": "8,6" }, v, 2);
 
-      // 定義左半邊的頂點 (相對於 cx 的格數：x格數, y格數)
-      var ptsData = [
-          {x: 0, y: 2},   // 上頂點
-          {x: -4, y: 4},  // 左臂
-          {x: -2, y: 5},  // 腋下
-          {x: -5, y: 8},  // 左腳
-          {x: 0, y: 8}    // 褲襠
-      ];
-      
+      var ptsData = [{x: 0, y: 2}, {x: -4, y: 4}, {x: -2, y: 5}, {x: -5, y: 8}, {x: 0, y: 8}];
       var leftPtsStr = ptsData.map(function(p){ return (cx + p.x*gridSize) + "," + (p.y*gridSize); }).join(" ");
       var rightPtsStr = ptsData.map(function(p){ return (cx - p.x*gridSize) + "," + (p.y*gridSize); }).join(" ");
 
-      // 步驟 1: 畫出左半邊
       NB.mk("polyline", { points: leftPtsStr, fill: "none", stroke: "var(--p2)", "stroke-width": 4, "stroke-linejoin": "round" }, v, 3);
-      // 畫出左邊的頂點標示
-      ptsData.forEach(function(p) {
-          NB.mk("circle", { cx: cx + p.x*gridSize, cy: p.y*gridSize, r: 5, fill: "var(--p2)" }, v, 4);
-      });
+      ptsData.forEach(function(p) { NB.mk("circle", { cx: cx + p.x*gridSize, cy: p.y*gridSize, r: 5, fill: "var(--p2)" }, v, 4); });
 
       if (currentStep === 0) {
           eq.innerHTML = '這是一個只有一半的圖形，請觀察左邊的頂點，準備找出右邊的對稱點。';
       } else if (currentStep === 1) {
-          // 步驟 2: 畫出算格子的軌跡和右邊的對稱點
           ptsData.forEach(function(p) {
               if (p.x !== 0) {
                   var lx = cx + p.x*gridSize, rx = cx - p.x*gridSize, py = p.y*gridSize;
-                  // 輔助線
                   NB.mk("line", { x1: lx, y1: py, x2: rx, y2: py, stroke: "var(--p1)", "stroke-width": 2, "stroke-dasharray": "4,4" }, v, 5);
-                  // 標示格數
                   NB.t(v, cx + (p.x*gridSize)/2, py - 6, Math.abs(p.x)+"格", { z: 12, c: "var(--p1)", b: 1 });
                   NB.t(v, cx - (p.x*gridSize)/2, py - 6, Math.abs(p.x)+"格", { z: 12, c: "var(--p1)", b: 1 });
-                  // 右邊對稱點
                   NB.mk("circle", { cx: rx, cy: py, r: 6, fill: "var(--p1)" }, v, 6);
               }
           });
           eq.innerHTML = '從頂點往紅色對稱軸數，看距離幾格；<br>就在另一邊數出一樣的格數，點上<b style="color:var(--p1)">對稱點</b>。';
       } else if (currentStep === 2) {
-          // 步驟 3: 連線完成
           NB.mk("polyline", { points: rightPtsStr, fill: "none", stroke: "var(--p1)", "stroke-width": 4, "stroke-linejoin": "round" }, v, 3);
-          // 把中間的面積塗滿，看起來像一個完整的火箭/星星
           var fullPoly = leftPtsStr + " " + ptsData.slice().reverse().map(function(p){ return (cx - p.x*gridSize) + "," + (p.y*gridSize); }).join(" ");
           NB.mk("polygon", { points: fullPoly, fill: "var(--p1)", "fill-opacity": "0.1", stroke: "none" }, v, 2);
-          
           eq.innerHTML = '按照順序把剛才找出來的對稱點連起來，<br>一個完整的線對稱圖形就大功告成了！';
       }
     }
