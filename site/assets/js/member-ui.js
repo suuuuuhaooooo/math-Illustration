@@ -11,6 +11,8 @@ function title(id){var o=NB.flat.filter(function(x){return x.id===id})[0];return
 var TC=["#b87333","#9aa5b1","#d9a93c","#5fb6c9","#8e6bd6"],TN=["銅","銀","金","白金","鑽石"];
 function stkSvg(s,i,on){var t=(s.t||1)-1,c=TC[t],pips="",k;for(k=0;k<=t;k++)pips+='<circle cx="'+(32-t*4+k*8)+'" cy="58" r="2" fill="'+(on?c:"var(--soft)")+'"/>';
  return'<svg viewBox="0 0 64 64" class="stk" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="'+(on?c:"var(--paper2)")+'" fill-opacity="'+(on?.28:1)+'" stroke="'+(on?c:"var(--ink)")+'" stroke-width="'+(on?3.4:2.4)+'"'+(on?"":' stroke-dasharray="4 4"')+'/><circle cx="32" cy="32" r="23" fill="none" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 4" opacity=".5"/><g transform="translate(17 14) scale(1.2)" fill="none" stroke="var(--ink)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"'+(on?"":' opacity=".28"')+'><path d="'+s.g+'"/></g>'+pips+'</svg>'}
+/* Firebase 登入錯誤 → 看得懂的說明（一定把代碼附上，方便回報） */
+function authMsg(c){var m={"auth/popup-closed-by-user":"登入視窗被關閉了，再按一次登入。","auth/network-request-failed":"網路不穩，連不上 Google 登入服務，請檢查網路後再試。","auth/unauthorized-domain":"這個網址還沒加進 Firebase 的「授權網域」，請老師到 Firebase 設定。","auth/popup-blocked":"瀏覽器擋掉了登入視窗，請允許這個網站的彈出視窗後再試。","auth/operation-not-supported-in-this-environment":"這個瀏覽器不支援 Google 登入，請改用 Chrome 或 Safari 開啟。","auth/web-storage-unsupported":"瀏覽器關閉了網站儲存功能（或無痕模式限制），請改用一般視窗，並允許 Cookie。","auth/internal-error":"登入服務發生內部錯誤，請稍後再試。","auth/user-disabled":"這個 Google 帳號已被停用。"}[c];return(m||"登入沒有成功，請再試一次。")+(c?"（"+c+"）":"")}
 function errMsg(e){var c=e&&e.code;return{net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請老師完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",expired:"你的正式學員授權已到期，請找老師延期。",forbidden:"沒有權限。",no_questions:"這個範圍沒有可以出的題目。",server:"伺服器忙碌中，請稍後再試。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
 function qimg(p,c){return p?'<img class="qimg'+(c?" "+c:"")+'" alt="附圖" src="'+esc(M.img(p))+'">':""}
 
@@ -45,7 +47,7 @@ var booting=false;
 function boot(){
  if(booting)return;booting=true;
  app.innerHTML="";app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
- M.boot().then(function(){booted=true;booting=false;route()})}
+ M.boot().catch(function(e){M.U=null;M.err=(e&&e.code)||"net"}).then(function(){booted=true;booting=false;route()})}
 function route(){clearInterval(TM);if(!booted){boot();return}if(!shell())return;var p=(location.hash||"#home").slice(1).split("/");if(M.acct&&M.acct.expired&&["home","progress","stickers"].indexOf(p[0])<0)p=["expired"];(V[p[0]]||V.home)(p[1]);window.scrollTo(0,0)}
 
 function login(){
@@ -53,12 +55,16 @@ function login(){
  var s=sheet("登入","僅供班內學員使用"),fb=h('<div class="fb"></div>'),em=M.auth&&M.auth.user()?M.auth.user().email:"";
  s.appendChild(h("<p>請使用老師登記的 Google 帳號登入平台。登入後，即可使用小測驗、模擬卷、錯題本、學習進度、貼紙獎勵、每日一題、列印練習卷及排行榜等功能。上述功能皆須登入後方可使用。</p>"));
  var msg={noconfig:"網站還沒設定好登入功能，請老師完成設定。",noauth:"登入服務載入失敗，請檢查網路後重新整理頁面。",net:"連不上伺服器，請稍後再試。",noapi:"網站還沒設定好伺服器網址，請老師完成設定。",bad_token:"登入已失效，請重新登入。",not_in_roster:"「"+esc(em)+"」不在班級名單裡。請改用老師登記的帳號，或請老師把這個帳號加進名單。"}[M.err];
+ if(!msg&&M.err)msg=(M.auth&&M.auth.user()?"Google 登入成功了，但載入學員資料時出了問題":"登入沒有完成")+"（錯誤代碼："+esc(M.err)+"）。請按「重新載入」再試一次；還是不行，請把這個代碼告訴老師。";
+ if(!msg&&window.__nbAuthErr)msg=authMsg(window.__nbAuthErr);
  if(msg){fb.className="fb no";fb.innerHTML=msg}
  if(/Line\/|FBAN|FBAV|Instagram|MicroMessenger|; wv\)/i.test(navigator.userAgent)){var w=h('<div class="fb no">你正在 App 內建瀏覽器裡，Google 登入常會被擋住。請點右上角「⋯」選「用瀏覽器開啟」（Chrome／Safari），或 <button class="pen">複製網址</button> 貼到瀏覽器。</div>');w.querySelector("button").onclick=function(){var u=location.href.split("#")[0];(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){w.querySelector("button").textContent="已複製"},function(){prompt("請複製這個網址：",u)})};s.appendChild(w)}
  var bar=h('<div class="ctl"></div>');
  if(M.err==="not_in_roster"||M.err==="bad_token"){var o=h('<button class="pen go">換一個帳號登入</button>');o.onclick=function(){M.logout().then(function(){M.err=null;booted=false;route()})};bar.appendChild(o)}
+ else if(M.err&&M.auth&&M.auth.user()){var rt=h('<button class="pen go">重新載入</button>'),o2=h('<button class="pen">換一個帳號登入</button>');
+  rt.onclick=function(){M.err=null;booted=false;booting=false;route()};o2.onclick=function(){M.logout().then(function(){M.err=null;booted=false;route()})};bar.appendChild(rt);bar.appendChild(o2)}
  else if(M.auth){var b=h('<button class="pen go gbtn"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M22 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.6a4.8 4.8 0 0 1-2.1 3.1v2.6h3.400c2-1.800 3.100-4.500 3.100-7.600z"/><path fill="#34A853" d="M12 22c2.800 0 5.100-.9 6.800-2.500l-3.300-2.600c-.9.600-2.100 1-3.500 1-2.700 0-5-1.800-5.800-4.300H2.800v2.700A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.200 13.600a6 6 0 0 1 0-3.800V7.100H2.800a10 10 0 0 0 0 9.200z"/><path fill="#EA4335" d="M12 5.900c1.500 0 2.900.5 4 1.600l3-3A10 10 0 0 0 2.800 7.100l3.400 2.700C7 7.700 9.300 5.900 12 5.900z"/></svg> 使用 Google 登入</button>');
-  b.onclick=function(){b.disabled=true;fb.className="fb";fb.textContent="登入中…";M.signIn().then(function(){booted=false;location.hash="#home";route()}).catch(function(e){b.disabled=false;fb.className="fb no";fb.textContent=e&&e.code==="auth/popup-closed-by-user"?"登入視窗被關閉了，再按一次登入。":"登入沒有成功，請再試一次。"})};bar.appendChild(b)}
+  b.onclick=function(){b.disabled=true;fb.className="fb";fb.textContent="登入中…";window.__nbAuthErr=null;M.signIn().then(function(){M.err=null;booted=false;booting=false;if(location.hash==="#home"||location.hash==="")route();else location.hash="#home"}).catch(function(e){b.disabled=false;var c=e&&e.code;if(c==="auth/cancelled-popup-request"){fb.className="fb";fb.textContent="";return}fb.className="fb no";fb.textContent=authMsg(c)})};bar.appendChild(b)}
  s.appendChild(bar);s.appendChild(fb);app.appendChild(s)}
 
 /* ---- 作答引擎：題目與判分都來自伺服器 ----
@@ -72,6 +78,7 @@ function run(o){
  function show(){
   var q=qs[i],sel=null,done=false,ob=[],inp,hb,d=h('<div><div class="prog">第 '+(i+1)+" / "+qs.length+' 題</div><div class="q">'+tx(q.q)+"</div>"+qimg(q.img)+"</div>");body.innerHTML="";
   if(q.o){var w=h('<div class="opts"></div>');q.o.forEach(function(t,ti){var b=h('<button class="pen opt"></button>');b.innerHTML="<b>"+L(ti)+"．</b>"+tx(esc(t));b.dataset.v=t;b.onclick=function(){if(done)return;sel=t;ob.forEach(function(x){x.classList.toggle("sel",x===b)})};ob.push(b);w.appendChild(b)});d.appendChild(w)}
+  else if(q.t==="text"){var c=h('<div class="ctl"><input class="num txt" type="text" maxlength="60" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="輸入答案"></div>');inp=c.firstChild;d.appendChild(c)}
   else{var c=h('<div class="ctl"><input class="num" type="number" step="any" inputmode="decimal" placeholder="答案"></div>');inp=c.firstChild;d.appendChild(c)}
   var bar=h('<div class="ctl"><button class="pen go">'+(exam?(i+1<qs.length?"下一題":"交卷"):"檢查")+"</button></div>"),go=bar.firstChild,fb=h('<div class="fb"></div>');
   if(!exam){var hc=(M.cfg&&M.cfg.hint)||0;hb=h('<button class="pen">提示'+(hc?"（－"+hc+" 分）":"")+"</button>");bar.appendChild(hb);hb.onclick=function(){
@@ -84,7 +91,7 @@ function run(o){
   go.onclick=function(){
    if(busy)return;
    if(done){next();return}
-   var v=q.o?sel:inp.value;
+   var v=q.o?sel:q.t==="text"?inp.value.trim():inp.value;
    if(exam){ans[i]=v===""?null:v;next();return}
    if(v===null||v==="")return;
    busy=true;go.disabled=true;
