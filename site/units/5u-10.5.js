@@ -22,11 +22,15 @@ NB.unit({
   tool: function(b, eq) {
 
     /* 互動說明 */
-    var desc = NB.h(
-      '<div style="margin-bottom:6px; color:var(--text-gray); text-align:center;">' +
-      '拖曳滑桿，改變切割平面與球心的距離，觀察剖面大小。' +
-      '</div>'
-    );
+    var desc = document.createElement("div");
+
+    desc.style.marginBottom = "6px";
+    desc.style.color = "var(--text-gray)";
+    desc.style.textAlign = "center";
+    
+    desc.textContent =
+      "拖曳滑桿，改變切割平面與球心的距離，觀察剖面大小。";
+    
     b.appendChild(desc);
 
     /* 切割距離：0 到半徑 */
