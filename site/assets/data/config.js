@@ -4,7 +4,9 @@ var NB_CONFIG = {
         apiKey: "AIzaSyAw8FAsZkFl4bQFQCMCj7HY1bjeOS7XOmw",
         authDomain: "math-illustration.firebaseapp.com",
         projectId: "math-illustration",
-        appId: "1:189482002176:web:6c76c566eda2eea787b5e5"
+        appId: "1:189482002176:web:6c76c566eda2eea787b5e5",
+        idleMinutes: 20,
+        copyright: {owner:"suuuuuhaooooo", year:2026}
     },
     hd: ""
 };
