@@ -2,76 +2,269 @@
 NB.unit({
   title: "柱體和錐體的分類與命名",
   ref: "五上・第十章 柱體、錐體和球・10.1 柱體和錐體的分類與命名",
+
   q: "立體圖形是怎麼命名的呢？",
+
   steps: [
-    "立體圖形的命名規則是：【底面形狀】 + 【柱體或錐體】",
-    "先看側面：上下直直的一樣粗，是「柱體」；往上尖尖的，是「錐體」。",
-    "再看底面：底面是三角形叫「三角」，是四邊形叫「四角」，是圓形叫「圓」。",
-    "組合起來：例如底面是圓形，又是尖的，就叫作「圓錐」。"
+    "立體圖形可以依照底面形狀，以及柱體或錐體來命名。",
+    "柱體有上下兩個形狀、大小相同的底面；錐體有一個底面，側面會聚集到同一個頂點。",
+    "底面是三角形，稱為三角；底面是四邊形，稱為四角；底面是圓形，稱為圓。",
+    "例如，底面是圓形且有一個尖頂的立體圖形，稱為圓錐。"
   ],
-  ch: { 
-    q: "底面是五邊形，且有上下兩個底面的圖形叫什麼？", 
-    a: "五角柱", 
-    h: "五邊形 -> 五角，兩個底面 -> 柱體。" 
+
+  ch: {
+    q: "底面是五邊形，且有上下兩個底面的圖形叫什麼？",
+    a: "五角柱",
+    h: "五邊形稱為五角形，有上下兩個底面的這種立體圖形是柱體。"
   },
+
   tool: function(b, eq) {
-    var dragHint = NB.h('<div style="margin-bottom:10px; color:#e91e63; font-weight:bold; font-size:16px;">已啟動 3D 引擎！請用滑鼠按住下方圖形，自由拖曳旋轉</div>');
+
+    /* =====================================
+       1. 操作說明
+    ===================================== */
+    var dragHint = NB.h(
+      '<div style="' +
+        'margin-bottom:10px;' +
+        'color:var(--p1);' +
+        'font-weight:bold;' +
+        'font-size:14px;' +
+        'text-align:center;' +
+      '">' +
+        '按住圖形拖曳，即可旋轉觀察立體形狀。' +
+      '</div>'
+    );
+
     b.appendChild(dragHint);
 
-    var row1 = NB.h('<div style="margin-bottom:10px; display:flex; gap:10px; justify-content:center;"></div>');
-    var row2 = NB.h('<div style="margin-bottom:10px; display:flex; gap:10px; justify-content:center; border-top:1px dashed #ccc; padding-top:10px;"></div>');
-    
-    var typeMode = 0; // 0: 柱, 1: 錐
-    var baseMode = 0; // 0: 三角, 1: 四角, 2: 圓
-    
-    var tBtns = [NB.h('<button class="pen on">柱體 (上下兩底面)</button>'), NB.h('<button class="pen">錐體 (尖尖一頂點)</button>')];
-    var bBtns = [NB.h('<button class="pen on">三角形底面</button>'), NB.h('<button class="pen">四邊形底面</button>'), NB.h('<button class="pen">圓形底面</button>')];
-    
+    /* =====================================
+       2. 分類按鈕
+    ===================================== */
+    var row1 = NB.h(
+      '<div style="' +
+        'margin-bottom:10px;' +
+        'display:flex;' +
+        'flex-wrap:wrap;' +
+        'gap:8px;' +
+        'justify-content:center;' +
+      '"></div>'
+    );
+
+    var row2 = NB.h(
+      '<div style="' +
+        'margin-bottom:10px;' +
+        'display:flex;' +
+        'flex-wrap:wrap;' +
+        'gap:8px;' +
+        'justify-content:center;' +
+        'border-top:1px dashed var(--soft);' +
+        'padding-top:10px;' +
+      '"></div>'
+    );
+
+    var typeMode = 0;
+    var baseMode = 0;
+
+    var tBtns = [
+      NB.h('<button type="button" class="pen on">柱體</button>'),
+      NB.h('<button type="button" class="pen">錐體</button>')
+    ];
+
+    var bBtns = [
+      NB.h('<button type="button" class="pen on">三角形底面</button>'),
+      NB.h('<button type="button" class="pen">四邊形底面</button>'),
+      NB.h('<button type="button" class="pen">圓形底面</button>')
+    ];
+
+    function updateButtons(buttons, activeIndex) {
+      buttons.forEach(function(btn, i) {
+        btn.classList.toggle("on", i === activeIndex);
+      });
+    }
+
     tBtns.forEach(function(btn, i) {
-      btn.onclick = function() { tBtns.forEach(function(el){ el.classList.remove('on'); }); btn.classList.add('on'); typeMode = i; draw(); };
+      btn.addEventListener("click", function() {
+        typeMode = i;
+        updateButtons(tBtns, typeMode);
+        scheduleDraw();
+      });
+
       row1.appendChild(btn);
     });
+
     bBtns.forEach(function(btn, i) {
-      btn.onclick = function() { bBtns.forEach(function(el){ el.classList.remove('on'); }); btn.classList.add('on'); baseMode = i; draw(); };
+      btn.addEventListener("click", function() {
+        baseMode = i;
+        updateButtons(bBtns, baseMode);
+        scheduleDraw();
+      });
+
       row2.appendChild(btn);
     });
-    b.appendChild(row1); b.appendChild(row2);
-    
-    var st = NB.h('<div class="stage" style="background:var(--paper); border-radius:8px; margin-top:10px; text-align:center; touch-action:none;"></div>');
+
+    b.appendChild(row1);
+    b.appendChild(row2);
+
+    /* =====================================
+       3. SVG 畫布
+    ===================================== */
+    var st = NB.h(
+      '<div class="stage" style="' +
+        'background:var(--paper);' +
+        'border:1px solid var(--soft);' +
+        'border-radius:8px;' +
+        'margin-top:10px;' +
+        'width:100%;' +
+        'overflow:hidden;' +
+      '"></div>'
+    );
+
     b.appendChild(st);
-    var v = NB.svg(st, 500, 260);
-    v.style.fontFamily = "system-ui, -apple-system, sans-serif";
+
+    var v = NB.svg(st, 500, 280);
+
+    v.style.display = "block";
+    v.style.width = "100%";
+    v.style.height = "auto";
+    v.style.aspectRatio = "500 / 280";
     v.style.cursor = "grab";
+    v.style.touchAction = "none";
+    v.style.userSelect = "none";
+    v.style.webkitUserSelect = "none";
 
-    // 核心 3D 引擎變數
-    var theta = Math.PI / 6; // 水平旋轉 (Yaw)
-    var phi = -Math.PI / 8;  // 垂直旋轉 (Pitch)
-    var isDragging = false, lastX = 0, lastY = 0;
+    v.setAttribute("viewBox", "0 0 500 280");
+    v.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-    function handleDown(x, y) { isDragging = true; lastX = x; lastY = y; v.style.cursor = "grabbing"; }
-    function handleMove(x, y) {
-        if(!isDragging || !v.isConnected) return;
-        theta -= (x - lastX) * 0.015;
-        phi -= (y - lastY) * 0.015;
-        // 限制垂直翻轉角度，避免頭下腳上錯亂
-        if(phi > Math.PI/2) phi = Math.PI/2;
-        if(phi < -Math.PI/2) phi = -Math.PI/2;
-        lastX = x; lastY = y;
+    /* =====================================
+       4. 旋轉參數
+    ===================================== */
+    var theta = Math.PI / 6;
+    var phi = -Math.PI / 8;
+
+    var isDragging = false;
+    var lastX = 0;
+    var lastY = 0;
+    var activePointerId = null;
+
+    /* 限制每個畫面更新週期最多重繪一次 */
+    var drawPending = false;
+    var destroyed = false;
+
+    function scheduleDraw() {
+      if (drawPending || destroyed) return;
+
+      drawPending = true;
+
+      requestAnimationFrame(function() {
+        drawPending = false;
+
+        if (destroyed || !v.isConnected) return;
+
         draw();
+      });
     }
-    function handleUp() { isDragging = false; v.style.cursor = "grab"; }
 
-    v.onmousedown = function(e) { handleDown(e.clientX, e.clientY); };
-    window.addEventListener('mousemove', function(e) { handleMove(e.clientX, e.clientY); });
-    window.addEventListener('mouseup', handleUp);
-    v.addEventListener('touchstart', function(e) { handleDown(e.touches[0].clientX, e.touches[0].clientY); });
-    window.addEventListener('touchmove', function(e) { handleMove(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, {passive: false});
-    window.addEventListener('touchend', handleUp);
+    function handleDown(x, y) {
+      isDragging = true;
+      lastX = x;
+      lastY = y;
+      v.style.cursor = "grabbing";
+    }
 
+    function handleMove(x, y) {
+      if (!isDragging || destroyed || !v.isConnected) {
+        return;
+      }
+
+      theta -= (x - lastX) * 0.012;
+      phi -= (y - lastY) * 0.012;
+
+      /* 限制垂直旋轉角度 */
+      phi = Math.max(
+        -Math.PI / 2,
+        Math.min(Math.PI / 2, phi)
+      );
+
+      lastX = x;
+      lastY = y;
+
+      scheduleDraw();
+    }
+
+    function handleUp() {
+      isDragging = false;
+      activePointerId = null;
+      v.style.cursor = "grab";
+    }
+
+    /* =====================================
+       5. 統一使用 Pointer Events
+       適用滑鼠、觸控螢幕及觸控筆
+    ===================================== */
+    v.addEventListener("pointerdown", function(e) {
+      if (e.pointerType === "mouse" && e.button !== 0) {
+        return;
+      }
+
+      e.preventDefault();
+
+      activePointerId = e.pointerId;
+
+      handleDown(e.clientX, e.clientY);
+
+      try {
+        v.setPointerCapture(e.pointerId);
+      } catch (err) {}
+    });
+
+    v.addEventListener("pointermove", function(e) {
+      if (!isDragging || e.pointerId !== activePointerId) {
+        return;
+      }
+
+      e.preventDefault();
+
+      handleMove(e.clientX, e.clientY);
+    });
+
+    v.addEventListener("pointerup", function(e) {
+      if (e.pointerId === activePointerId) {
+        handleUp();
+      }
+    });
+
+    v.addEventListener("pointercancel", function(e) {
+      if (e.pointerId === activePointerId) {
+        handleUp();
+      }
+    });
+
+    v.addEventListener("lostpointercapture", function() {
+      handleUp();
+    });
+
+    /* =====================================
+       6. 產生立體圖形
+    ===================================== */
     function draw() {
-      v.innerHTML = ""; 
-      var cx = 250, cy = 130, h = 60, r = 70;
-      var sides = (baseMode === 0) ? 3 : (baseMode === 1 ? 4 : 24); // 圓形用24邊形模擬
+      if (destroyed || !v.isConnected) return;
+
+      /* 清除上一幀的 SVG 元素 */
+      while (v.firstChild) {
+        v.removeChild(v.firstChild);
+      }
+
+      var cx = 250;
+      var cy = 130;
+      var h = 60;
+      var r = 70;
+
+      var sides = baseMode === 0
+        ? 3
+        : baseMode === 1
+          ? 4
+          : 48;
+
       var baseName = ["三角", "四角", "圓"][baseMode];
       var typeName = ["柱", "錐"][typeMode];
       var fullName = baseName + typeName;
@@ -79,66 +272,246 @@ NB.unit({
       var nodes = [];
       var faces = [];
       var baseAngles = [];
-      for(var i=0; i<sides; i++){ baseAngles.push(i * 2 * Math.PI / sides + (sides===4 ? Math.PI/4 : 0)); }
 
-      // 建立 3D 幾何節點
-      if (typeMode === 0) { // 柱體
-          for(var i=0; i<sides; i++) nodes.push({x: r*Math.cos(baseAngles[i]), y: h, z: r*Math.sin(baseAngles[i])});
-          for(var i=0; i<sides; i++) nodes.push({x: r*Math.cos(baseAngles[i]), y: -h, z: r*Math.sin(baseAngles[i])});
-          faces.push({ id: Array.from({length:sides}, (_,i)=>i).reverse(), isBase: true }); // 上底面
-          faces.push({ id: Array.from({length:sides}, (_,i)=>sides+i), isBase: true }); // 下底面
-          for(var i=0; i<sides; i++) faces.push({ id: [i, (i+1)%sides, sides+(i+1)%sides, sides+i], isBase: false }); // 側面
-      } else { // 錐體
-          nodes.push({x: 0, y: h, z: 0}); // 頂點
-          for(var i=0; i<sides; i++) nodes.push({x: r*Math.cos(baseAngles[i]), y: -h, z: r*Math.sin(baseAngles[i])});
-          faces.push({ id: Array.from({length:sides}, (_,i)=>i+1), isBase: true }); // 底面
-          for(var i=0; i<sides; i++) faces.push({ id: [0, i+1, (i+1)%sides + 1], isBase: false }); // 側面
+      for (var i = 0; i < sides; i++) {
+        baseAngles.push(
+          i * 2 * Math.PI / sides +
+          (sides === 4 ? Math.PI / 4 : 0)
+        );
       }
 
-      // 3D 矩陣投影計算
+      /* -----------------------------
+         建立柱體或錐體的頂點與面
+      ----------------------------- */
+      if (typeMode === 0) {
+
+        /* 柱體：上下兩個底面 */
+        for (var i = 0; i < sides; i++) {
+          nodes.push({
+            x: r * Math.cos(baseAngles[i]),
+            y: h,
+            z: r * Math.sin(baseAngles[i])
+          });
+        }
+
+        for (var i = 0; i < sides; i++) {
+          nodes.push({
+            x: r * Math.cos(baseAngles[i]),
+            y: -h,
+            z: r * Math.sin(baseAngles[i])
+          });
+        }
+
+        faces.push({
+          id: Array.from(
+            { length: sides },
+            function(_, i) { return i; }
+          ).reverse(),
+          isBase: true
+        });
+
+        faces.push({
+          id: Array.from(
+            { length: sides },
+            function(_, i) { return sides + i; }
+          ),
+          isBase: true
+        });
+
+        for (var i = 0; i < sides; i++) {
+          faces.push({
+            id: [
+              i,
+              (i + 1) % sides,
+              sides + (i + 1) % sides,
+              sides + i
+            ],
+            isBase: false
+          });
+        }
+
+      } else {
+
+        /* 錐體：一個頂點與一個底面 */
+        nodes.push({
+          x: 0,
+          y: h,
+          z: 0
+        });
+
+        for (var i = 0; i < sides; i++) {
+          nodes.push({
+            x: r * Math.cos(baseAngles[i]),
+            y: -h,
+            z: r * Math.sin(baseAngles[i])
+          });
+        }
+
+        faces.push({
+          id: Array.from(
+            { length: sides },
+            function(_, i) { return i + 1; }
+          ),
+          isBase: true
+        });
+
+        for (var i = 0; i < sides; i++) {
+          faces.push({
+            id: [
+              0,
+              i + 1,
+              (i + 1) % sides + 1
+            ],
+            isBase: false
+          });
+        }
+      }
+
+      /* -----------------------------
+         3D 旋轉與投影
+      ----------------------------- */
+      var cosPhi = Math.cos(phi);
+      var sinPhi = Math.sin(phi);
+      var cosTheta = Math.cos(theta);
+      var sinTheta = Math.sin(theta);
+
       var pNodes = nodes.map(function(n) {
-          var y1 = n.y * Math.cos(phi) - n.z * Math.sin(phi);
-          var z1 = n.y * Math.sin(phi) + n.z * Math.cos(phi);
-          var x2 = n.x * Math.cos(theta) + z1 * Math.sin(theta);
-          var z2 = -n.x * Math.sin(theta) + z1 * Math.cos(theta);
-          return { x: cx + x2, y: cy - y1, z: z2 };
+        var y1 = n.y * cosPhi - n.z * sinPhi;
+        var z1 = n.y * sinPhi + n.z * cosPhi;
+
+        var x2 = n.x * cosTheta + z1 * sinTheta;
+        var z2 = -n.x * sinTheta + z1 * cosTheta;
+
+        return {
+          x: cx + x2,
+          y: cy - y1,
+          z: z2
+        };
       });
 
-      // 判斷面相對於鏡頭的方向 (法向量計算)
+      /* -----------------------------
+         判斷各面的朝向
+      ----------------------------- */
       var faceData = faces.map(function(f) {
-          var p = f.id.map(function(idx){ return pNodes[idx]; });
-          var avgZ = p.reduce(function(s, pt){ return s + pt.z; }, 0) / p.length;
-          var orig = f.id.map(function(idx){ return nodes[idx]; });
-          var u = {x: orig[1].x-orig[0].x, y: orig[1].y-orig[0].y, z: orig[1].z-orig[0].z};
-          var vecV = {x: orig[2].x-orig[1].x, y: orig[2].y-orig[1].y, z: orig[2].z-orig[1].z};
-          var nx = u.y*vecV.z - u.z*vecV.y, ny = u.z*vecV.x - u.x*vecV.z, nz = u.x*vecV.y - u.y*vecV.x;
-          var y1 = ny * Math.cos(phi) - nz * Math.sin(phi);
-          var z1 = ny * Math.sin(phi) + nz * Math.cos(phi);
-          var projNZ = -nx * Math.sin(theta) + z1 * Math.cos(theta);
-          return { pts: p, z: avgZ, isFront: projNZ > 0, isBase: f.isBase };
+        var p = f.id.map(function(idx) {
+          return pNodes[idx];
+        });
+
+        var avgZ = p.reduce(function(sum, pt) {
+          return sum + pt.z;
+        }, 0) / p.length;
+
+        var orig = f.id.map(function(idx) {
+          return nodes[idx];
+        });
+
+        var u = {
+          x: orig[1].x - orig[0].x,
+          y: orig[1].y - orig[0].y,
+          z: orig[1].z - orig[0].z
+        };
+
+        var vecV = {
+          x: orig[2].x - orig[1].x,
+          y: orig[2].y - orig[1].y,
+          z: orig[2].z - orig[1].z
+        };
+
+        var nx = u.y * vecV.z - u.z * vecV.y;
+        var ny = u.z * vecV.x - u.x * vecV.z;
+        var nz = u.x * vecV.y - u.y * vecV.x;
+
+        var rotatedY = ny * cosPhi - nz * sinPhi;
+        var rotatedZ = ny * sinPhi + nz * cosPhi;
+
+        var projectedNZ =
+          -nx * sinTheta + rotatedZ * cosTheta;
+
+        return {
+          pts: p,
+          z: avgZ,
+          isFront: projectedNZ > 0,
+          isBase: f.isBase
+        };
       });
 
-      // 畫家演算法 (遠的先畫，近的後畫)
-      faceData.sort(function(a, b){ return a.z - b.z; });
-      var zOrder = 1;
-      
+      /* 遠的面先畫，近的面後畫 */
+      faceData.sort(function(a, b) {
+        return a.z - b.z;
+      });
+
+      /* -----------------------------
+         繪製各個面
+      ----------------------------- */
       faceData.forEach(function(f) {
-          var ptsStr = f.pts.map(function(pt){ return pt.x+","+pt.y; }).join(" ");
-          var isCylinder = (sides === 24);
-          var isSide = !f.isBase;
-          var fillC = f.isBase ? "var(--p1)" : "#e0f2fe";
-          var fillOp = f.isFront ? (f.isBase ? "0.85" : "0.9") : (f.isBase ? "0.3" : "0.1");
-          if (isCylinder && isSide) fillOp = f.isFront ? "0.8" : "0.1";
-          var strC = f.isBase ? "var(--p1)" : "var(--p2)";
-          var strW = (isCylinder && isSide) ? 0.3 : (f.isFront ? 2 : 1.5);
-          var dash = f.isFront ? "" : "4,4";
+        var ptsStr = f.pts.map(function(pt) {
+          return pt.x + "," + pt.y;
+        }).join(" ");
 
-          NB.mk("polygon", { points: ptsStr, fill: fillC, "fill-opacity": fillOp, stroke: strC, "stroke-width": strW, "stroke-dasharray": dash, "stroke-linejoin": "round" }, v, zOrder++);
+        var isRound = sides > 4;
+        var isSide = !f.isBase;
+
+        var fillC = f.isBase
+          ? "var(--p1)"
+          : "#e0f2fe";
+
+        var fillOp = f.isFront
+          ? (f.isBase ? "0.85" : "0.9")
+          : (f.isBase ? "0.3" : "0.1");
+
+        if (isRound && isSide) {
+          fillOp = f.isFront ? "0.8" : "0.1";
+        }
+
+        var strC = f.isBase
+          ? "var(--p1)"
+          : "var(--p2)";
+
+        var strW = isRound && isSide
+          ? 0.5
+          : (f.isFront ? 2 : 1.5);
+
+        var dash = f.isFront ? "" : "4,4";
+
+        NB.mk("polygon", {
+          points: ptsStr,
+          fill: fillC,
+          "fill-opacity": fillOp,
+          stroke: strC,
+          "stroke-width": strW,
+          "stroke-dasharray": dash,
+          "stroke-linejoin": "round"
+        }, v);
       });
 
-      NB.t(v, 250, 245, fullName, { z: zOrder++, c: "var(--p1)", b: 1 });
-      eq.innerHTML = '底面形狀是 <b style="color:var(--p1)">' + baseName + '形</b>，側面特徵是 <b style="color:var(--p2)">' + typeName + '體</b>。<br>組合起來就是：<b>' + fullName + '</b>！';
+      /* -----------------------------
+         名稱標籤
+      ----------------------------- */
+      NB.t(
+        v,
+        250,
+        245,
+        fullName,
+        {
+          c: "var(--p1)",
+          b: 1
+        }
+      );
+
+      eq.innerHTML =
+        '底面形狀是 <b style="color:var(--p1)">' +
+        baseName +
+        '形</b>，立體類型是 <b style="color:var(--p2)">' +
+        typeName +
+        '體</b>。<br>' +
+        '組合起來就是：<b>' +
+        fullName +
+        '</b>！';
     }
+
+    /* =====================================
+       7. 初次繪圖
+    ===================================== */
     draw();
   }
 });
