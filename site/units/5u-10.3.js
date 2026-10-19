@@ -14,7 +14,7 @@ NB.unit({
     h: "它們相鄰並交於一條邊，夾角是 90 度直角。" 
   },
   tool: function(b, eq) {
-    var dragHint = NB.h('<div style="margin-bottom:10px; color:#e91e63; font-weight:bold; font-size:16px;">✨ 3D 透視模式：你可以拖曳旋轉長方體，從各個角度觀察面與面的關係 ✨</div>');
+    var dragHint = NB.h('<div style="margin-bottom:10px; color:#e91e63; font-weight:bold; font-size:16px;">3D 透視模式：你可以拖曳旋轉長方體，從各個角度觀察面與面的關係</div>');
     b.appendChild(dragHint);
 
     var btnRow = NB.h('<div style="margin-bottom:10px; display:flex; gap:10px; justify-content:center;"></div>');
