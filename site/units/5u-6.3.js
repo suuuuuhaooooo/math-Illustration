@@ -46,7 +46,7 @@ NB.unit({
       var cx = 250, bottomY = 240, w = 120, h = 180;
       var leftX = cx - w/2;
       
-      // 畫水槽背板與刻度 (通分後的 10 等分)
+      // 畫水槽背板與刻度
       NB.mk("rect", { x: leftX, y: bottomY - h, width: w, height: h, fill: "rgba(255,255,255,0.1)" }, v, 1);
       for(var i = 1; i <= 10; i++) {
           var yPos = bottomY - (h/10)*i;
@@ -55,7 +55,7 @@ NB.unit({
           if (i === 10) NB.t(v, leftX - 25, yPos + 5, "1L", { z: 14, c: "#aaa", b: 1 });
       }
 
-      // 畫出原來的水位 (1/2 = 5/10)
+      // 畫出原來的水位
       var waterH1 = (h / 10) * 5;
       NB.mk("rect", { x: leftX, y: bottomY - waterH1, width: w, height: waterH1, fill: "var(--p2)", "fill-opacity": "0.7" }, v, 3);
       
@@ -63,7 +63,7 @@ NB.unit({
           NB.t(v, cx, bottomY - waterH1/2 + 5, "原來的水 1/2 公升", { z: 16, c: "#fff", b: 1 });
           eq.innerHTML = '水槽裡現在有 ' + frac(1, 2) + ' 公升的水。';
       } else {
-          // 畫出新加入的水位 (1/5 = 2/10)
+          // 畫出新加入的水位
           var waterH2 = (h / 10) * 2;
           NB.mk("rect", { x: leftX, y: bottomY - waterH1 - waterH2, width: w, height: waterH2, fill: "var(--p1)", "fill-opacity": "0.85" }, v, 4);
           
@@ -74,7 +74,9 @@ NB.unit({
           var rightX = leftX + w + 10;
           var topY = bottomY - waterH1 - waterH2;
           NB.mk("path", { d: "M" + rightX + " " + topY + " Q" + (rightX+15) + " " + topY + " " + (rightX+15) + " " + (topY + (waterH1+waterH2)/2 - 10) + " T" + (rightX+30) + " " + (topY + (waterH1+waterH2)/2) + " T" + (rightX+15) + " " + (topY + (waterH1+waterH2)/2 + 10) + " T" + rightX + " " + bottomY, fill: "none", stroke: "var(--p1)", "stroke-width": 2 }, v, 5);
-          NB.t(v, rightX + 45, topY + (waterH1+waterH2)/2 + 6, "7/10", { z: 20, c: "var(--p1)", b: 1 });
+          
+          // 將文字往右推，避免和括弧重疊
+          NB.t(v, rightX + 65, topY + (waterH1+waterH2)/2 + 6, "7/10", { z: 20, c: "var(--p1)", b: 1 });
           
           eq.innerHTML = '應用題就是要找出算式！<br>倒入代表相加：' + frac(1, 2) + ' + ' + frac(1, 5) + ' = ' + frac(5, 10) + ' + ' + frac(2, 10) + ' = ' + frac(7, 10);
       }
