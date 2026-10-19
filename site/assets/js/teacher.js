@@ -16,12 +16,16 @@ function render(r){
  var tl=h('<div class="tiles"></div>');tl.innerHTML='<div class="tile"><small>已登入同學</small><strong>'+rows.length+'</strong></div><div class="tile"><small>近 7 天有練習</small><strong>'+act+'</strong></div><div class="tile"><small>全班答對率</small><strong>'+(n?Math.round(c/n*100):0)+'%</strong></div><div class="tile"><small>還沒登入過</small><strong>'+r.never.length+"</strong></div>";s.appendChild(tl);
 
  var t=sheet("全班進度","紅底＝答對率偏低或超過 7 天沒練習");
- var tb='<table class="tb"><tr><th>座號</th><th>姓名</th><th class="pc">積分</th><th class="pc">答題</th><th class="pc">答對率</th><th class="pc">連續天</th><th>最近練習</th><th class="pc">模擬卷平均</th><th class="pc">錯題</th></tr>';
- rows.forEach(function(x){var p=x.n?Math.round(x.c/x.n*100):null,low=(p!==null&&x.n>=10&&p<60)||!x.last||x.last<limit;tb+='<tr class="'+(low?"low":"")+'"><td>'+x.no+"</td><td>"+esc(x.name)+'</td><td class="pc">'+x.pts+'</td><td class="pc">'+x.n+'</td><td class="pc">'+(p===null?"—":p+"%")+'</td><td class="pc">'+x.streak+"</td><td>"+(x.last||"—")+'</td><td class="pc">'+(x.mock===null?"—":x.mock)+'</td><td class="pc">'+x.wrong+"</td></tr>"});
- t.appendChild(h(tb+"</table>"));
+ var tb='<table class="tb"><tr><th>座號</th><th>姓名</th><th class="pc">積分</th><th class="pc">答題</th><th class="pc">答對率</th><th class="pc">連續天</th><th>最近練習</th><th class="pc">模擬卷平均</th><th class="pc">錯題</th><th>管理</th></tr>';
+ rows.forEach(function(x){var p=x.n?Math.round(x.c/x.n*100):null,low=(p!==null&&x.n>=10&&p<60)||!x.last||x.last<limit;tb+='<tr class="'+(low?"low":"")+'"><td>'+x.no+"</td><td>"+esc(x.name)+'</td><td class="pc">'+x.pts+'</td><td class="pc">'+x.n+'</td><td class="pc">'+(p===null?"—":p+"%")+'</td><td class="pc">'+x.streak+"</td><td>"+(x.last||"—")+'</td><td class="pc">'+(x.mock===null?"—":x.mock)+'</td><td class="pc">'+x.wrong+'</td><td><button class="pen" data-m="reset" data-no="'+x.no+'">重設</button> <button class="pen" data-m="delete" data-no="'+x.no+'">刪除</button></td></tr>'});
+ var tbl=h(tb+"</table>");t.appendChild(tbl);
+ tbl.onclick=function(e){var b=e.target.closest("button[data-m]");if(!b)return;var no=b.dataset.no,m=b.dataset.m,row=rows.filter(function(x){return String(x.no)===no})[0];
+  var tip=m==="reset"?"重設 "+no+" 號"+row.name+"：積分、貼紙、錯題、作答紀錄全部歸零（帳號保留）。確定嗎？":"刪除 "+no+" 號"+row.name+" 的所有資料（成績、作答紀錄），無法復原。\n提醒：也要到試算表把這位同學刪除或 active 改成 0，否則下次登入會重新建立空白資料。確定嗎？";
+  if(!confirm(tip))return;b.disabled=true;M.api("POST","/api/admin/delete",{cls:r.cls,no:+no,mode:m}).then(function(){load(r.cls)},function(er){alert("失敗："+(er.code||"未知"));b.disabled=false})};
  var ex=h('<div class="ctl"><button class="pen">下載成績 CSV</button></div>');ex.firstChild.onclick=function(){
   var csv="座號,姓名,積分,答題,答對,連續天數,最近練習,模擬卷平均,錯題數\n"+rows.map(function(x){return[x.no,'"'+x.name.replace(/"/g,'""')+'"',x.pts,x.n,x.c,x.streak,x.last||"",x.mock===null?"":x.mock,x.wrong].join(",")}).join("\n");
   var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv"}));a.download="班級成績-"+r.cls+"-"+today+".csv";a.click()};t.appendChild(ex);
+ var cl=h('<div class="ctl"><button class="pen">刪除整班資料（學期結束）</button></div>');cl.firstChild.onclick=function(){if(!confirm("刪除 "+r.cls+" 班所有學生的成績與作答紀錄，無法復原。確定嗎？"))return;var v=prompt("請輸入班級代碼 "+r.cls+" 確認：");if(v!==r.cls)return;M.api("POST","/api/admin/delete",{cls:r.cls,mode:"class"}).then(function(x){alert("已刪除 "+x.deleted+" 位同學的資料");load(r.cls)},function(er){alert("失敗："+(er.code||"未知"))})};t.appendChild(cl);
  if(r.never.length)t.appendChild(h('<p class="meta">還沒登入過：'+r.never.map(function(x){return x.no+" 號"+esc(x.name)}).join("、")+"</p>"));
 
  var u=sheet("各單元答對率","近 30 天，數字小的先複習");

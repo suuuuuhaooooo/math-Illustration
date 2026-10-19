@@ -10,7 +10,10 @@ function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null
 /* 本機日期（只用在圖表顯示；積分與每日一題用伺服器日期 M.T） */
 M.today=function(d){d=d||new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())};
 M.prev=function(t){var d=new Date(t+"T00:00:00Z");d.setUTCDate(d.getUTCDate()-1);return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate())};
-M.lv=function(D){return Math.floor(D.pts/150)+1};
+M.step=150;
+M.lv=function(D){return Math.floor(D.pts/M.step)+1};
+/* 題目附圖：只寫檔名就放在 assets/q/，也可以是 https 網址 */
+M.img=function(p){return/^https:/.test(p)?p:NB.root+"assets/q/"+p};
 M.tot=function(D){var n=0,c=0,k;for(k in D.u){n+=D.u[k].n;c+=D.u[k].c}return{n:n,c:c}};
 M.seen=function(D){return Object.keys(D.u).filter(function(k){return D.u[k].seen}).length};
 M.has=function(id){return(M.units||[]).indexOf(id)>=0};
@@ -28,7 +31,7 @@ M.api=function(method,path,body){
    if(!r.ok){var e=new Error(j.err||"http");e.code=j.err||"http";e.status=r.status;throw e}return j},function(){var e=new Error("bad");e.code="net";throw e})},function(e){if(e.code)throw e;var x=new Error("net");x.code="net";throw x})};
 
 M.load=function(){return M.api("GET","/api/me").then(function(r){
- M.U=r.user;M.D=r.data;M.STK=r.stk;M.units=r.units;M.gens=r.gens;M.T=r.today;
+ M.U=r.user;M.D=r.data;M.STK=r.stk;M.units=r.units;M.gens=r.gens;M.T=r.today;M.cfg=r.cfg;M.step=r.cfg.step;
  ls(CK,JSON.stringify({n:r.user.name,lv:M.lv(r.data),pts:r.data.pts}));
  var seen=[];try{seen=JSON.parse(ls(SN)||"[]")}catch(e){}
  if(seen.length&&r.user.role==="student")M.api("POST","/api/seen",{ids:seen}).then(function(){ls(SN,null)},function(){});

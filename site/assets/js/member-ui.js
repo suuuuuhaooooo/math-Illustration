@@ -10,6 +10,7 @@ function sheet(tag,sub){return h('<section class="sheet"><h2><span class="tag">'
 function title(id){var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
 function stkSvg(s,i,on){var c="var(--p"+(i%5+1)+")";return'<svg viewBox="0 0 64 64" class="stk" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="'+(on?c:"var(--paper2)")+'" fill-opacity="'+(on?.3:1)+'" stroke="var(--ink)" stroke-width="2.4"'+(on?"":' stroke-dasharray="4 4"')+'/><circle cx="32" cy="32" r="23" fill="none" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 4" opacity=".5"/><g transform="translate(16 16) scale(1.33)" fill="none" stroke="var(--ink)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"'+(on?"":' opacity=".28"')+'><path d="'+s.g+'"/></g></svg>'}
 function errMsg(e){var c=e&&e.code;return{net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請老師完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",server:"伺服器忙碌中，請稍後再試。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
+function qimg(p,c){return p?'<img class="qimg'+(c?" "+c:"")+'" alt="附圖" src="'+esc(M.img(p))+'">':""}
 function user(){return M.U}
 function ymdT(){return M.T||M.today()}
 
@@ -38,6 +39,7 @@ function login(){
  s.appendChild(h("<p>請使用老師登記的 Google 帳號登入平台。登入後，即可使用小測驗、模擬卷、錯題本、學習進度、貼紙獎勵、每日一題、列印練習卷及排行榜等功能。上述功能皆須登入後方可使用。</p>"));
  var msg={noconfig:"網站還沒設定好登入功能，請老師完成設定。",noauth:"登入服務載入失敗，請檢查網路後重新整理頁面。",net:"連不上伺服器，請稍後再試。",noapi:"網站還沒設定好伺服器網址，請老師完成設定。",bad_token:"登入已失效，請重新登入。",not_in_roster:"「"+esc(em)+"」不在班級名單裡。請改用老師登記的帳號，或請老師把這個帳號加進名單。"}[M.err];
  if(msg){fb.className="fb no";fb.innerHTML=msg}
+ if(/Line\/|FBAN|FBAV|Instagram|MicroMessenger|; wv\)/i.test(navigator.userAgent)){var w=h('<div class="fb no">你正在 App 內建瀏覽器裡，Google 登入常會被擋住。請點右上角「⋯」選「用瀏覽器開啟」（Chrome／Safari），或 <button class="pen">複製網址</button> 貼到瀏覽器。</div>');w.querySelector("button").onclick=function(){var u=location.href.split("#")[0];(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){w.querySelector("button").textContent="已複製"},function(){prompt("請複製這個網址：",u)})};s.appendChild(w)}
  var bar=h('<div class="ctl"></div>');
  if(M.err==="not_in_roster"||M.err==="bad_token"){var o=h('<button class="pen go">換一個帳號登入</button>');o.onclick=function(){M.logout().then(function(){M.err=null;booted=false;route()})};bar.appendChild(o)}
  else if(M.auth){var b=h('<button class="pen go gbtn"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M22 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.6a4.8 4.8 0 0 1-2.1 3.1v2.6h3.400c2-1.800 3.100-4.500 3.100-7.600z"/><path fill="#34A853" d="M12 22c2.800 0 5.100-.9 6.800-2.500l-3.300-2.600c-.9.600-2.100 1-3.500 1-2.700 0-5-1.800-5.800-4.300H2.800v2.700A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.200 13.600a6 6 0 0 1 0-3.800V7.100H2.800a10 10 0 0 0 0 9.200z"/><path fill="#EA4335" d="M12 5.900c1.500 0 2.900.5 4 1.600l3-3A10 10 0 0 0 2.800 7.100l3.400 2.700C7 7.700 9.300 5.900 12 5.900z"/></svg> 使用 Google 登入</button>');
@@ -53,7 +55,7 @@ function run(o){
  if(exam){var clock=h('<span class="clock"></span>');box.querySelector("h2").appendChild(clock);var t0=Date.now();TM=setInterval(tick,1000);tick()}
  function tick(){left=S.seconds-Math.floor((Date.now()-t0)/1000);if(left<0)left=0;clock.textContent="剩 "+pad(Math.floor(left/60))+":"+pad(left%60);if(left<=0)finish()}
  function show(){
-  var q=qs[i],sel=null,done=false,ob=[],inp,hb,d=h('<div><div class="prog">第 '+(i+1)+" / "+qs.length+' 題</div><div class="q">'+tx(q.q)+"</div></div>");body.innerHTML="";
+  var q=qs[i],sel=null,done=false,ob=[],inp,hb,d=h('<div><div class="prog">第 '+(i+1)+" / "+qs.length+' 題</div><div class="q">'+tx(q.q)+"</div>"+qimg(q.img)+"</div>");body.innerHTML="";
   if(q.o){var w=h('<div class="opts"></div>');q.o.forEach(function(t){var b=h('<button class="pen"></button>');b.innerHTML=tx(esc(t));b.dataset.v=t;b.onclick=function(){if(done)return;sel=t;ob.forEach(function(x){x.classList.toggle("sel",x===b)})};ob.push(b);w.appendChild(b)});d.appendChild(w)}
   else{var c=h('<div class="ctl"><input class="num" type="number" step="any" inputmode="decimal" placeholder="答案"></div>');inp=c.firstChild;d.appendChild(c)}
   var bar=h('<div class="ctl"><button class="pen go">'+(exam?(i+1<qs.length?"下一題":"交卷"):"檢查")+"</button></div>"),go=bar.firstChild,fb=h('<div class="fb"></div>');
@@ -73,7 +75,7 @@ function run(o){
     busy=false;go.disabled=false;res.push({q:q,ok:r.ok});done=true;go.textContent=i+1<qs.length?"下一題":"看結果";if(hb)hb.disabled=true;
     if(q.o)ob.forEach(function(b){b.disabled=true;if(b.dataset.v===String(r.a))b.classList.add("right");else if(b.classList.contains("sel"))b.classList.add("wrong")});else inp.disabled=true;
     fb.className="fb "+(r.ok?"ok":"no");
-    fb.innerHTML=r.ok?"答對了！":tx("答案是 "+r.a+"。"+r.h)+(r.diag?'<br><b class="diag">'+tx(r.diag)+"</b>":"")+"<br><small>"+(S.kind==="fix"?"還沒訂正成功，會留在錯題本。":"這題已放進錯題本。")+"</small>"
+    fb.innerHTML=r.ok?"答對了！":tx("答案是 "+r.a+"。"+r.h)+(r.diag?'<br><b class="diag">'+tx(r.diag)+"</b>":"")+qimg(r.himg)+"<br><small>"+(S.kind==="fix"?"還沒訂正成功，會留在錯題本。":"這題已放進錯題本。")+"</small>"
    }).catch(function(e){busy=false;go.disabled=false;fb.className="fb no";fb.textContent=errMsg(e)})}}
  function next(){if(i+1<qs.length){i++;show()}else finish()}
  function finish(){
@@ -84,7 +86,7 @@ function run(o){
   var D=M.D,n=exam?r.n:r.n,c=r.c;
   var s=h('<div><div class="q">'+(exam?r.sc+" 分（"+c+" / "+n+"）":c+" / "+n+" 題答對")+"</div>"+(r.late?'<p class="fb no">已超過作答時間，伺服器只接受時限內的答案，這份卷子沒有計分。</p>':"")+"<p>這次獲得 <b>"+r.gain+"</b> 積分，目前 Lv."+M.lv(D)+"。</p></div>");
   if(r.got&&r.got.length){s.appendChild(h('<p class="hl">解鎖新貼紙！</p>'));var g=h('<div class="stkgrid"></div>');r.got.forEach(function(id){var k=M.STK.filter(function(x){return x.id===id})[0],ix=M.STK.indexOf(k);g.appendChild(h('<div class="stkc">'+stkSvg(k,ix,1)+"<b>"+k.n+"</b>"+k.d+"</div>"))});s.appendChild(g)}
-  if(exam&&r.review&&r.review.length){var l=h('<div><p class="meta">答錯或沒寫的題目（已放進錯題本）</p></div>');r.review.forEach(function(x){l.appendChild(h('<div class="wi"><div>'+tx(x.q)+"</div><small>"+(x.v===null||x.v===""?"你沒有作答。":tx("你的答案："+x.v+"。"))+" "+tx("答案："+x.a+"。"+x.h)+(x.diag?'<br><b class="diag">'+tx(x.diag)+"</b>":"")+"</small></div>"))});s.appendChild(l)}
+  if(exam&&r.review&&r.review.length){var l=h('<div><p class="meta">答錯或沒寫的題目（已放進錯題本）</p></div>');r.review.forEach(function(x){l.appendChild(h('<div class="wi"><div>'+tx(x.q)+"</div>"+qimg(x.img)+"<small>"+(x.v===null||x.v===""?"你沒有作答。":tx("你的答案："+x.v+"。"))+" "+tx("答案："+x.a+"。"+x.h)+(x.diag?'<br><b class="diag">'+tx(x.diag)+"</b>":"")+qimg(x.himg)+"</small></div>"))});s.appendChild(l)}
   var bt=h('<div class="ctl"></div>');
   if(o.again){var a=h('<button class="pen go">再來一次</button>');a.onclick=o.again;bt.appendChild(a)}
   bt.appendChild(h('<a class="pen" href="#wrong">錯題本</a>'));bt.appendChild(h('<a class="pen" href="#home">回首頁</a>'));s.appendChild(bt);body.innerHTML="";body.appendChild(s)}
@@ -95,20 +97,20 @@ function begin(payload,fn){view.innerHTML="";view.appendChild(h('<p class="meta"
 var V={};
 V.home=function(){
  var D=M.D,t=ymdT(),y=M.prev(t),tot=M.tot(D),tiles=h('<div class="tiles"></div>');
- tiles.innerHTML='<div class="tile"><small>積分</small><strong>'+D.pts+'</strong><div class="meter"><i style="width:'+(D.pts%150)/1.5+'%"></i></div><small>再 '+(150-D.pts%150)+" 分升 Lv."+(M.lv(D)+1)+"</small></div>"+
+ tiles.innerHTML='<div class="tile"><small>積分</small><strong>'+D.pts+'</strong><div class="meter"><i style="width:'+(D.pts%M.step)/M.step*100+'%"></i></div><small>再 '+(M.step-D.pts%M.step)+" 分升 Lv."+(M.lv(D)+1)+"</small></div>"+
   '<div class="tile"><small>連續練習</small><strong>'+(D.sk.last===t||D.sk.last===y?D.sk.n:0)+" 天</strong></div>"+
   '<a class="tile" href="#daily"><small>每日一題</small><strong>'+(D.dq[t]?"已完成":"還沒寫")+"</strong></a>"+
   '<a class="tile" href="#wrong"><small>錯題本</small><strong>'+D.wr.length+" 題</strong></a>"+
   '<a class="tile" href="#stickers"><small>貼紙</small><strong>'+Object.keys(D.stk).length+" / "+M.STK.length+"</strong></a>"+
   '<a class="tile" href="#progress"><small>答題正確率</small><strong>'+(tot.n?Math.round(tot.c/tot.n*100):0)+"%</strong></a>";
  view.appendChild(tiles);
- var s=sheet("獎勵","怎麼賺積分和貼紙");s.appendChild(h("<ol class=\"steps\"><li>每答對 1 題：+10 分（每天最多計 100 題）</li><li>完成一份小測驗（3 題以上）：+20 分</li><li>每日一題：答對 +30 分，答錯也有 +5 分</li><li>連續練習：第 2 天起每天加分，最多每天 +14 分</li><li>模擬卷：完成 +20 分，80 分以上再 +50 分（每天前 3 份）</li><li>錯題訂正：同一題訂正答對 2 次畢業，+15 分</li><li>解鎖貼紙：每張 +20 分。每 150 分升一級</li></ol>"));view.appendChild(s)};
+ var c=M.cfg,s=sheet("獎勵","怎麼賺積分和貼紙");s.appendChild(h("<ol class=\"steps\"><li>答對 1 題：依題目難度 +"+c.pts[0]+"／+"+c.pts[1]+"／+"+c.pts[2]+" 分（基礎／應用／挑戰，每天最多計 "+c.capQ+" 題）</li><li>完成一份小測驗（3 題以上）：+20 分</li><li>每日一題：答對 +30 分，答錯也有 +5 分</li><li>連續練習：第 2 天起每天加分，最多每天 +14 分</li><li>模擬卷：完成 +20 分，80 分以上再 +50 分（每天前 "+c.capMock+" 份）</li><li>錯題複習：同一題在 "+c.review.join("、")+" 天後各答對一次就畢業，+15 分</li><li>解鎖貼紙：每張 +20 分（共 "+M.STK.length+" 張）。每 "+c.step+" 分升一級</li></ol>"));view.appendChild(s)};
 
 V.daily=function(){
  begin({kind:"daily"},function(r){
   if(r.done){var s=sheet("每日一題","今天已經完成了"),days=[],i,D=M.D,t=ymdT();for(i=6;i>=0;i--)days.push(M.today(new Date(Date.now()-i*864e5)));
-   s.appendChild(h('<div class="q">'+tx(r.q)+"</div>"));s.appendChild(h('<p class="'+(r.ok?"ok":"no")+'">'+(r.ok?"你答對了！":"這題答錯了，記得到錯題本訂正。")+"</p>"));
-   s.appendChild(h("<p>答案：<b>"+tx(String(r.a))+"</b>　"+tx(r.h)+"</p>"));
+   s.appendChild(h('<div class="q">'+tx(r.q)+"</div>"));if(r.img)s.appendChild(h(qimg(r.img)));s.appendChild(h('<p class="'+(r.ok?"ok":"no")+'">'+(r.ok?"你答對了！":"這題答錯了，記得到錯題本訂正。")+"</p>"));
+   s.appendChild(h("<p>答案：<b>"+tx(String(r.a))+"</b>　"+tx(r.h)+"</p>"));if(r.himg)s.appendChild(h(qimg(r.himg)));
    s.appendChild(h('<p class="meta">最近 7 天：'+days.map(function(d){return D.dq[d]?"●":"○"}).join(" ")+"　連續練習 "+D.sk.n+" 天・明天再來！</p>"));view.innerHTML="";view.appendChild(s);return}
   run({tag:"每日一題",title:"全班今天同一題",sess:r})})};
 
@@ -137,9 +139,9 @@ V.mock=function(){
 V.wrong=function(){
  var D=M.D,s=sheet("錯題本",D.wr.length+" 題");view.appendChild(s);
  if(!D.wr.length){s.appendChild(h("<p>目前沒有錯題，真棒！</p>"));return}
- s.appendChild(h("<p>同一題訂正答對 2 次就會畢業，還能拿積分。</p>"));
- var b=h('<div class="ctl"><button class="pen go">開始訂正（最多 10 題）</button></div>');b.firstChild.onclick=function(){fix()};s.appendChild(b);
- D.wr.slice().reverse().forEach(function(w){var d=h('<div class="wi"><div>'+tx(w.q)+"</div><small>"+esc(title(w.id))+"・錯 "+w.n+" 次・已訂正對 "+(w.ok||0)+"/2　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));d.appendChild(dt);s.appendChild(d)});
+ var due=D.wr.filter(function(w){return!w.due||w.due<=ymdT()}).length;s.appendChild(h("<p>每一題要在 "+M.cfg.review.join("、")+" 天後各答對一次才會畢業（間隔複習，記得最牢），還能拿積分。今天該複習 <b>"+due+"</b> 題。</p>"));
+ var b=h('<div class="ctl"><button class="pen go">開始訂正（最多 10 題）</button></div>');b.firstChild.onclick=function(){fix()};if(!due)b.firstChild.textContent="今天沒有要複習的題目";s.appendChild(b);
+ D.wr.slice().reverse().forEach(function(w){var d=h('<div class="wi"><div>'+tx(w.q)+"</div>"+qimg(w.img)+"<small>"+esc(title(w.id))+"・錯 "+w.n+" 次・已通過 "+(w.ok||0)+"/"+M.cfg.review.length+"・"+(!w.due||w.due<=ymdT()?"今天可複習":w.due.slice(5)+" 再複習")+"　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));d.appendChild(dt);s.appendChild(d)});
  function fix(){begin({kind:"fix"},function(r){if(r.empty){view.innerHTML="";V.wrong();return}run({tag:"錯題訂正",title:"把錯的題目弄懂",sess:r,again:function(){view.innerHTML="";V.wrong()}})})}};
 
 V.progress=function(){
@@ -170,16 +172,16 @@ V.board=function(){
 V.print=function(){
  var u=user(),D=M.D,s=sheet("列印練習卷","選好題目就可以印出來寫");s.classList.add("noprint");
  var src='<select id="ps"><option value="mix">本年級綜合</option>'+(D.wr.length?'<option value="wrong">我的錯題（'+D.wr.length+" 題）</option>":"")+(M.gens||[]).slice().sort().map(function(g){return'<option value="'+g+'">'+esc(title(g))+"</option>"}).join("")+"</select>";
- var ctl=h('<div class="ctl"><label>題目來源</label>'+src+'<label>題數</label><select id="pn"><option>10</option><option>15</option><option>20</option></select><button class="pen go">出題</button><button class="pen">列印</button></div>');
+ var ctl=h('<div class="ctl"><label>題目來源</label>'+src+'<label>題數</label><select id="pn"><option>10</option><option>15</option><option>20</option><option>30</option></select>'+(u.role==="teacher"?'<label>年級</label><select id="pg"><option value="3">三年級</option><option value="4">四年級</option><option value="5">五年級</option><option value="6" selected>六年級</option></select>':"")+'<button class="pen go">出題</button><button class="pen">列印</button></div>');
  var out=h("<div></div>");s.appendChild(ctl);view.appendChild(s);view.appendChild(out);
  var bs=ctl.querySelectorAll("button");bs[0].onclick=make;bs[1].onclick=function(){window.print()};make();
  function make(){
   var v=ctl.querySelector("#ps").value,n=+ctl.querySelector("#pn").value;out.innerHTML='<p class="meta">出題中…</p>';
-  M.api("GET","/api/print?src="+encodeURIComponent(v)+"&n="+n).then(function(r){
+  M.api("GET","/api/print?src="+encodeURIComponent(v)+"&n="+n+(ctl.querySelector("#pg")?"&g="+ctl.querySelector("#pg").value:"")).then(function(r){
    var nm=v==="wrong"?"錯題重練":v==="mix"?"綜合練習":title(v),qs=r.qs;
    out.innerHTML='<div class="psheet"><h3>數學練習卷｜'+esc(nm)+'</h3><div class="pinfo"><span>班級：'+esc(u.cls)+"</span><span>座號："+u.no+"</span><span>姓名：<b>"+esc(u.name)+"</b></span><span>日期："+M.today()+"</span><span>分數：＿＿＿</span></div><ol>"+
-    qs.map(function(q){return"<li>"+tx(q.q)+(q.o?'<br><span>選項：'+q.o.map(function(t){return"（　）"+tx(esc(t))}).join("　　")+"</span>":"")+'<span class="ln">答：＿＿＿＿＿＿＿＿＿</span></li>'}).join("")+"</ol></div>"+
-    '<div class="psheet key"><h3>解答｜'+esc(nm)+"</h3><ol>"+qs.map(function(q){return"<li>"+tx(String(q.a))+"<br><small>"+tx(q.h||"")+"</small></li>"}).join("")+"</ol></div>"},
+    qs.map(function(q){return"<li>"+tx(q.q)+qimg(q.img)+(q.o?'<br><span>選項：'+q.o.map(function(t){return"（　）"+tx(esc(t))}).join("　　")+"</span>":"")+'<span class="ln">答：＿＿＿＿＿＿＿＿＿</span></li>'}).join("")+"</ol></div>"+
+    '<div class="psheet key"><h3>解答｜'+esc(nm)+"</h3><ol>"+qs.map(function(q){return"<li>"+tx(String(q.a))+"<br><small>"+tx(q.h||"")+"</small>"+qimg(q.himg)+"</li>"}).join("")+"</ol></div>"},
    function(e){out.innerHTML='<div class="fb no">'+esc(errMsg(e))+"</div>"})}};
 
 window.addEventListener("hashchange",route);route();
