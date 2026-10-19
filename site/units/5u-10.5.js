@@ -9,7 +9,7 @@ NB.unit({
   steps: [
     "球體的表面沒有平平的面，整個表面都是曲面。",
     "球的中心點叫作「球心」，從球心到球面任意一點的距離都一樣長，稱為「半徑」。",
-    "用平面切開球體，切面會是圓形（特殊情況下，切面與球相切，只有一個點）。",
+    "用平面切開球體，切面會是圓形；如果切割平面與球面相切，則切面退化成一個點。",
     "當切割平面通過球心時，切出的圓最大，這個圓的半徑就是球的半徑。"
   ],
 
@@ -20,20 +20,24 @@ NB.unit({
   },
 
   tool: function(b, eq) {
-
-    /* 互動說明 */
+    /* ==============================
+       1. 互動說明
+    ============================== */
     var desc = document.createElement("div");
 
     desc.style.marginBottom = "6px";
     desc.style.color = "var(--text-gray)";
     desc.style.textAlign = "center";
-    
     desc.textContent =
       "拖曳滑桿，改變切割平面與球心的距離，觀察剖面大小。";
-    
+
     b.appendChild(desc);
 
-    /* 切割距離：0 到半徑 */
+    /* ==============================
+       2. 建立滑桿
+       注意：NB.slider 會自動將滑桿加入 b
+       回傳值是 { el, v }，不是 { container, v }
+    ============================== */
     var R = 85;
 
     var slider = NB.slider(
@@ -49,34 +53,45 @@ NB.unit({
       }
     );
 
-    b.appendChild(slider.container);
+    /* 不要再寫 b.appendChild(slider.container) */
 
-    /* 繪圖區 */
+    /* ==============================
+       3. 建立繪圖區
+    ============================== */
     var st = NB.h(
       '<div class="stage" style="' +
-      'background:var(--paper);' +
-      'border-radius:8px;' +
-      'margin-top:8px;' +
-      'text-align:center;' +
-      'overflow:hidden;' +
+        'background:var(--paper);' +
+        'border-radius:8px;' +
+        'margin-top:8px;' +
+        'text-align:center;' +
+        'overflow:hidden;' +
+        'width:100%;' +
+        'box-sizing:border-box;' +
       '"></div>'
     );
 
     b.appendChild(st);
 
-    var v = NB.svg(st, 500, 260);
-    v.style.fontFamily = "system-ui, -apple-system, sans-serif";
+    var v = NB.svg(st, 500, 280);
+
+    v.style.fontFamily =
+      "system-ui, -apple-system, sans-serif";
+    v.style.display = "block";
+    v.style.width = "100%";
     v.style.maxWidth = "100%";
     v.style.height = "auto";
+    v.style.boxSizing = "border-box";
 
+    /* ==============================
+       4. 繪圖函式
+    ============================== */
     function draw() {
-
       v.innerHTML = "";
 
       var cx = 250;
-      var cy = 125;
+      var cy = 135;
 
-      /* 確保讀取到有效的滑桿數值 */
+      /* 讀取滑桿數值 */
       var d = Number(slider.v);
 
       if (!Number.isFinite(d)) {
@@ -85,20 +100,17 @@ NB.unit({
 
       d = Math.max(0, Math.min(R, d));
 
-      /* 球心到切割平面的距離 */
+      /* 剖面圓半徑：r = √(R² - d²) */
       var cutRadius = Math.sqrt(
         Math.max(0, R * R - d * d)
       );
 
-      /*
-       * 示意圖採用球的正面投影。
-       * 切割平面平行於畫面，距球心 d。
-       * 因此切面圓心位於球心上方 d 的位置。
-       */
-
+      /* 切割平面位置 */
       var cutCy = cy - d;
 
-      /* 球體輪廓 */
+      /* ------------------------------
+         球體外框
+      ------------------------------ */
       NB.mk("circle", {
         cx: cx,
         cy: cy,
@@ -108,7 +120,7 @@ NB.unit({
         "stroke-width": 3
       }, v, 1);
 
-      /* 球體赤道：虛線表示球面上的參考線 */
+      /* 球體赤道參考線 */
       NB.mk("ellipse", {
         cx: cx,
         cy: cy,
@@ -130,8 +142,8 @@ NB.unit({
 
       NB.t(
         v,
-        cx + 9,
-        cy + 17,
+        cx + 12,
+        cy + 18,
         "球心",
         {
           z: 13,
@@ -140,9 +152,10 @@ NB.unit({
         }
       );
 
-      /* 球心至切割平面的距離 d */
+      /* ------------------------------
+         球心至切割平面的距離
+      ------------------------------ */
       if (d > 0) {
-
         NB.mk("line", {
           x1: cx,
           y1: cy,
@@ -155,7 +168,7 @@ NB.unit({
 
         NB.t(
           v,
-          cx + 10,
+          cx + 36,
           (cy + cutCy) / 2,
           "距離 d",
           {
@@ -165,13 +178,11 @@ NB.unit({
         );
       }
 
-      /*
-       * 剖面圓的透視示意。
-       * 正面觀看時，圓形以橢圓呈現立體感。
-       * rx 是實際剖面半徑，ry 為視覺透視縮短。
-       */
+      /* ------------------------------
+         剖面圓
+         使用橢圓呈現立體透視效果
+      ------------------------------ */
       if (cutRadius > 0.01) {
-
         NB.mk("ellipse", {
           cx: cx,
           cy: cutCy,
@@ -200,10 +211,17 @@ NB.unit({
           fill: "#ffffff"
         }, v, 6);
 
+        /* 半徑標籤：依剖面大小調整位置 */
+        var labelX = cx + cutRadius / 2;
+        var labelY = cutCy - Math.max(
+          8,
+          cutRadius * 0.3 + 8
+        );
+
         NB.t(
           v,
-          cx + cutRadius / 2,
-          cutCy - 8,
+          labelX,
+          labelY,
           "剖面半徑",
           {
             z: 11,
@@ -211,10 +229,8 @@ NB.unit({
             b: 1
           }
         );
-
       } else {
-
-        /* 切割面與球相切時，剖面縮小為一個點 */
+        /* 相切時，剖面縮小成一個點 */
         NB.mk("circle", {
           cx: cx,
           cy: cutCy,
@@ -223,44 +239,56 @@ NB.unit({
         }, v, 4);
       }
 
-      /* 顯示切割平面位置 */
+      /* ------------------------------
+         切割平面示意線
+      ------------------------------ */
+      var planeLeft = cx - R - 12;
+      var planeRight = cx + R + 12;
+
       NB.mk("line", {
-        x1: cx - R - 12,
+        x1: planeLeft,
         y1: cutCy,
-        x2: cx - cutRadius,
+        x2: planeRight,
         y2: cutCy,
         stroke: "var(--p1)",
-        "stroke-width": 2,
-        "stroke-dasharray": "4,4"
-      }, v, 5);
+        "stroke-width": 1.5,
+        "stroke-dasharray": "5,5",
+        opacity: 0.8
+      }, v, 1);
 
-      /* 更新下方文字 */
+      /* ------------------------------
+         下方文字說明
+      ------------------------------ */
       if (d === 0) {
-
         eq.innerHTML =
           '切割平面通過「<b>球心</b>」！<br>' +
-          '切出的剖面圓最大，半徑等於球的半徑 ' +
-          '<b style="color:var(--p1)">R = ' + R + '</b>。';
+          '切出的剖面圓最大，半徑等於球的半徑。<br>' +
+          '<b style="color:var(--p1)">剖面半徑 = R = ' +
+          R +
+          '</b>';
 
       } else if (d === R) {
-
         eq.innerHTML =
-          '切割平面剛好與球面相切。<br>' +
-          '剖面縮小成一個點，圓的半徑為 <b>0</b>。';
+          '切割平面與球面相切。<br>' +
+          '剖面縮小成一個點，半徑為 ' +
+          '<b style="color:var(--p1)">0</b>。';
 
       } else {
-
         eq.innerHTML =
           '切割平面離球心 ' +
-          '<b style="color:var(--p1)">d = ' + d + '</b>。<br>' +
-          '剖面仍是圓形，半徑為 ' +
-          '<b style="color:var(--p1)">' +
-          '√(R² − d²) = ' + cutRadius.toFixed(1) +
+          '<b style="color:var(--p1)">d = ' +
+          d +
           '</b>。<br>' +
+          '剖面仍是圓形，半徑為：<br>' +
+          '<b style="color:var(--p1)">' +
+          'r = √(R² − d²) = ' +
+          cutRadius.toFixed(1) +
+          '</b><br>' +
           '離球心越遠，剖面圓越小。';
       }
     }
 
+    /* 初次載入立即繪圖 */
     draw();
   }
 });
