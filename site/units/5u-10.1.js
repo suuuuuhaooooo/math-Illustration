@@ -15,7 +15,7 @@ NB.unit({
     h: "五邊形 -> 五角，兩個底面 -> 柱體。" 
   },
   tool: function(b, eq) {
-    var dragHint = NB.h('<div style="margin-bottom:10px; color:#e91e63; font-weight:bold; font-size:16px;">✨ 已啟動 3D 引擎！請用滑鼠按住下方圖形，自由拖曳旋轉 ✨</div>');
+    var dragHint = NB.h('<div style="margin-bottom:10px; color:#e91e63; font-weight:bold; font-size:16px;">已啟動 3D 引擎！請用滑鼠按住下方圖形，自由拖曳旋轉</div>');
     b.appendChild(dragHint);
 
     var row1 = NB.h('<div style="margin-bottom:10px; display:flex; gap:10px; justify-content:center;"></div>');
