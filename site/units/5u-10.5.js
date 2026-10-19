@@ -4,10 +4,10 @@ NB.unit({
   ref: "五上・第十章 柱體、錐體和球・10.5 球",
   q: "把一顆球切開，它的「<span class='hl'>剖面</span>」會是什麼形狀？",
   steps: [
-    "1. 球體的表面沒有任何平平的面，全部都是圓滑的。",
-    "2. 球的中心點叫作「球心」，從球心到表面任意一點的距離都一樣長，稱為「半徑」。",
-    "3. 不管從哪個方向、哪個高度切開球體，剖面「一定都是圓形」。",
-    "4. 當切割面剛好「通過球心」時，切出來的圓會是最大的！"
+    "球體的表面沒有任何平平的面，全部都是圓滑的。",
+    "球的中心點叫作「球心」，從球心到表面任意一點的距離都一樣長，稱為「半徑」。",
+    "不管從哪個方向、哪個高度切開球體，剖面「一定都是圓形」。",
+    "當切割面剛好「通過球心」時，切出來的圓會是最大的！"
   ],
   ch: { 
     q: "把一顆西瓜（當作完美的球體）切一刀，切面會是正方形嗎？", 
@@ -15,25 +15,25 @@ NB.unit({
     h: "球體的任何平切面都是圓形。" 
   },
   tool: function(b, eq) {
-    var desc = NB.h('<div style="margin-bottom:10px; color:var(--text-gray)">拖曳滑桿改變「切割刀」的高度，觀察藍色剖面的大小變化：</div>');
+    var desc = NB.h('<div style="margin-bottom:6px; color:var(--text-gray); text-align:center;">拖曳滑桿改變「切割刀」的高度，觀察藍色剖面的大小變化：</div>');
     b.appendChild(desc);
     
-    var slider = NB.slider(b, "切割高度", 0, 75, 1, 0, "", function(){ draw() });
-    b.appendChild(slider.container); // 確保滑桿正確掛載
+    var slider = NB.slider(b, "切割高度", 0, 70, 1, 0, "", function(){ draw() });
+    b.appendChild(slider.container);
     
-    var st = NB.h('<div class="stage" style="background:var(--paper); border-radius:8px; margin-top:10px; text-align:center;"></div>');
+    var st = NB.h('<div class="stage" style="background:var(--paper); border-radius:8px; margin-top:5px; text-align:center;"></div>');
     b.appendChild(st);
-    var v = NB.svg(st, 500, 260);
+    var v = NB.svg(st, 500, 240);
     v.style.fontFamily = "system-ui, -apple-system, sans-serif";
 
     function draw() {
       v.innerHTML = ""; 
-      var cx = 250, cy = 130, R = 90; 
+      var cx = 250, cy = 120, R = 85; 
       var cutY = slider.v; 
       
       NB.mk("circle", { cx: cx, cy: cy, r: R, fill: "#f8fafc", stroke: "#cbd5e1", "stroke-width": 3 }, v, 1);
       NB.mk("circle", { cx: cx, cy: cy, r: 4, fill: "#e91e63" }, v, 3);
-      NB.t(v, cx-30, cy+6, "球心", { z: 14, c: "#e91e63", b: 1 });
+      NB.t(v, cx-28, cy+5, "球心", { z: 14, c: "#e91e63", b: 1 });
       
       NB.mk("ellipse", { cx: cx, cy: cy, rx: R, ry: R*0.3, fill: "none", stroke: "#cbd5e1", "stroke-width": 2, "stroke-dasharray": "4,4" }, v, 2);
 
