@@ -19,15 +19,10 @@ NB.unit({
     var cases = [
       { name: "正三角形", sides: 3, isRegular: true },
       { name: "正方形", sides: 4, isRegular: true },
-      { name: "長方形", sides: 4, isRegular: false } // 作為對比組
+      { name: "長方形", sides: 4, isRegular: false } 
     ];
-    var currentCase = 1; // 預設正方形
+    var currentCase = 1; 
     
-    var st = NB.h('<div class="stage" style="background:var(--paper); border-radius:8px; margin-top:10px; text-align:center;"></div>');
-    b.appendChild(st);
-    var v = NB.svg(st, 500, 260);
-    v.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-
     cases.forEach(function(c, i) {
       var btn = NB.h('<button class="pen ' + (i === 1 ? 'on' : '') + '">' + c.name + '</button>');
       btn.onclick = function() {
@@ -37,22 +32,25 @@ NB.unit({
       };
       btnRow.appendChild(btn);
     });
+    b.appendChild(btnRow); // <--- 補上這行，切換按鈕才會顯示！
+    
+    var st = NB.h('<div class="stage" style="background:var(--paper); border-radius:8px; margin-top:10px; text-align:center;"></div>');
+    b.appendChild(st);
+    var v = NB.svg(st, 500, 260);
+    v.style.fontFamily = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
     function draw() {
       v.innerHTML = ""; 
       var c = cases[currentCase];
       var cx = 250, cy = 130, r = 80;
-      
       var pathD = "";
-      var axesLines = []; // 儲存對稱軸的座標
+      var axesLines = []; 
       
       if (c.name === "長方形") {
          NB.mk("rect", { x: cx-90, y: cy-60, width: 180, height: 120, fill: "#f0f8ff", stroke: "var(--p2)", "stroke-width": 4, "stroke-linejoin": "round" }, v, 1);
-         // 長方形只有兩條 (十字)
          axesLines.push({x1: cx, y1: cy-90, x2: cx, y2: cy+90});
          axesLines.push({x1: cx-120, y1: cy, x2: cx+120, y2: cy});
       } else {
-         // 正多邊形
          var pts = [];
          for(var i=0; i<c.sides; i++){ 
             var angle = -Math.PI/2 + (i*2*Math.PI/c.sides);
@@ -61,42 +59,25 @@ NB.unit({
          pathD = "M" + pts.map(function(p){ return p.x+","+p.y; }).join("L") + "Z";
          NB.mk("path", { d: pathD, fill: "#f0f8ff", stroke: "var(--p2)", "stroke-width": 4, "stroke-linejoin": "round" }, v, 1);
          
-         // 畫正多邊形的對稱軸
          if (c.sides % 2 !== 0) {
-             // 奇數邊：從頂點到對邊中點
              for(var j=0; j<c.sides; j++){
                  var oppX = cx - (pts[j].x - cx);
                  var oppY = cy - (pts[j].y - cy);
-                 // 稍微延伸出去
-                 var extX1 = cx + (pts[j].x - cx)*1.3;
-                 var extY1 = cy + (pts[j].y - cy)*1.3;
-                 var extX2 = cx + (oppX - cx)*1.3;
-                 var extY2 = cy + (oppY - cy)*1.3;
-                 axesLines.push({x1: extX1, y1: extY1, x2: extX2, y2: extY2});
+                 axesLines.push({x1: cx + (pts[j].x - cx)*1.3, y1: cy + (pts[j].y - cy)*1.3, x2: cx + (oppX - cx)*1.3, y2: cy + (oppY - cy)*1.3});
              }
          } else {
-             // 偶數邊 (如正方形)：頂點對頂點，以及邊中點對邊中點
              for(var k=0; k<c.sides/2; k++){
-                 var extX1 = cx + (pts[k].x - cx)*1.3;
-                 var extY1 = cy + (pts[k].y - cy)*1.3;
                  var oppIdx = k + c.sides/2;
-                 var extX2 = cx + (pts[oppIdx].x - cx)*1.3;
-                 var extY2 = cy + (pts[oppIdx].y - cy)*1.3;
-                 axesLines.push({x1: extX1, y1: extY1, x2: extX2, y2: extY2});
+                 axesLines.push({x1: cx + (pts[k].x - cx)*1.3, y1: cy + (pts[k].y - cy)*1.3, x2: cx + (pts[oppIdx].x - cx)*1.3, y2: cy + (pts[oppIdx].y - cy)*1.3});
              }
              for(var l=0; l<c.sides/2; l++){
                  var midX = (pts[l].x + pts[(l+1)%c.sides].x)/2;
                  var midY = (pts[l].y + pts[(l+1)%c.sides].y)/2;
-                 var extX1 = cx + (midX - cx)*1.5;
-                 var extY1 = cy + (midY - cy)*1.5;
-                 var extX2 = cx - (midX - cx)*1.5;
-                 var extY2 = cy - (midY - cy)*1.5;
-                 axesLines.push({x1: extX1, y1: extY1, x2: extX2, y2: extY2});
+                 axesLines.push({x1: cx + (midX - cx)*1.5, y1: cy + (midY - cy)*1.5, x2: cx - (midX - cx)*1.5, y2: cy - (midY - cy)*1.5});
              }
          }
       }
 
-      // 畫出計算出來的所有對稱軸
       axesLines.forEach(function(line) {
           NB.mk("line", { x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2, stroke: "#ff7675", "stroke-width": 3, "stroke-dasharray": "6,4" }, v, 2);
       });
