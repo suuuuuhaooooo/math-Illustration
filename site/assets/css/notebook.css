@@ -59,6 +59,7 @@ h1.title mark{background:linear-gradient(transparent 68%,color-mix(in srgb,var(-
 ol.steps{margin:6px 0 0;padding:0;list-style:none;counter-reset:s}
 ol.steps li{counter-increment:s;position:relative;padding-left:38px;margin:8px 0}
 ol.steps li::before{content:counter(s);position:absolute;left:0;top:4px;width:25px;height:25px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-size:.8rem;line-height:1}
+input.num.txt{width:min(18em,100%);text-align:left}
 input.num{font:inherit;width:6.5em;padding:3px 10px;border:1px solid var(--ink);border-radius:8px;background:var(--paper);color:var(--ink);text-align:center}
 .fb{min-height:32px;font-weight:700}.ok{color:var(--p3)}.no{color:var(--p1)}
 /* 目錄（首頁） */
