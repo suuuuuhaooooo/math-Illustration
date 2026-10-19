@@ -39,16 +39,16 @@ NB.unit({
       btnRow.appendChild(btn);
     });
 
+    // 移除 <g> 標籤，直接在主畫布 v 上使用絕對座標，避免繼承到異常的邊框樣式
     function drawVerdict(isOK, text, cx, cy) {
-        var g = NB.mk("g", { transform: "translate(" + cx + "," + cy + ")" }, v, 5);
         if (isOK) {
-            NB.mk("circle", { cx: -60, cy: 0, r: 12, fill: "var(--p1)" }, g, 6);
-            NB.mk("path", { d: "M -65 0 L -62 4 L -55 -4", stroke: "white", "stroke-width": 3, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, g, 7);
-            NB.t(g, -40, 6, text, { z: 18, c: "var(--p1)", b: 1 });
+            NB.mk("circle", { cx: cx - 60, cy: cy, r: 12, fill: "var(--p1)" }, v, 3);
+            NB.mk("path", { d: "M " + (cx - 65) + " " + cy + " L " + (cx - 62) + " " + (cy + 4) + " L " + (cx - 55) + " " + (cy - 4), stroke: "white", "stroke-width": 3, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, v, 4);
+            NB.t(v, cx - 40, cy + 6, text, { z: 18, c: "var(--p1)", b: 1 });
         } else {
-            NB.mk("circle", { cx: -70, cy: 0, r: 12, fill: "#e91e63" }, g, 6);
-            NB.mk("path", { d: "M -76 -4 L -64 4 M -64 -4 L -76 4", stroke: "white", "stroke-width": 3, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, g, 7);
-            NB.t(g, -50, 6, text, { z: 18, c: "#e91e63", b: 1 });
+            NB.mk("circle", { cx: cx - 70, cy: cy, r: 12, fill: "#e91e63" }, v, 3);
+            NB.mk("path", { d: "M " + (cx - 76) + " " + (cy - 4) + " L " + (cx - 64) + " " + (cy + 4) + " M " + (cx - 64) + " " + (cy - 4) + " L " + (cx - 76) + " " + (cy + 4), stroke: "white", "stroke-width": 3, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, v, 4);
+            NB.t(v, cx - 50, cy + 6, text, { z: 18, c: "#e91e63", b: 1 });
         }
     }
 
@@ -66,7 +66,6 @@ NB.unit({
          NB.mk("line", { x1: cx-95, y1: cy, x2: cx+95, y2: cy, stroke: "#ff7675", "stroke-width": 3, "stroke-dasharray": "8,6" }, v, 2);
       } else if (c.type === "para") {
          NB.mk("polygon", { points: (cx-50)+","+(cy-50)+" "+(cx+80)+","+(cy-50)+" "+(cx+50)+","+(cy+50)+" "+(cx-80)+","+(cy+50), fill: "#f0f8ff", stroke: "var(--p2)", "stroke-width": 4, "stroke-linejoin": "round" }, v, 1);
-         // 平行四邊形畫一條錯誤的對角線表示摺不起來
          NB.mk("line", { x1: cx-90, y1: cy+60, x2: cx+90, y2: cy-60, stroke: "#ccc", "stroke-width": 2, "stroke-dasharray": "4,4" }, v, 2);
          NB.t(v, cx, cy+10, "對角摺疊無法重合！", { z: 14, c: "#999", b: 1 });
       }
