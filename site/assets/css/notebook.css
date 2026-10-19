@@ -1,6 +1,6 @@
 /* 數學筆記本｜象牙製圖紙風：細線、襯線標題、方格紙、原創幾何點綴 */
 :root{--bg:#f2ede1;--paper:#fffdf7;--paper2:#f6f0e2;--ink:#1c2635;--soft:#677184;--line:#d8cfbb;--rule:#e3dac6;--margin:#bf5b43;--p1:#bf5b43;--p2:#35639a;--p3:#4f8c6e;--p4:#d9a93c;--p4b:#9a6b3c;--p5:#7a68a6;--shadow:rgba(28,38,53,.16);--grid:rgba(28,38,53,.05);--glow:rgba(217,169,60,.16);
- --serif:"LXGW WenKai TC","Kaiti TC","BiauKai","DFKai-SB","標楷體",serif;--sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei","Noto Sans CJK TC",sans-serif;--hand:"Iansui","LXGW WenKai TC","Kaiti TC","DFKai-SB","標楷體",cursive;color-scheme:light;box-sizing:border-box}
+ --serif:"LXGW WenKai TC","Kaiti TC","BiauKai","DFKai-SB","標楷體",serif;--sans:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei","Noto Sans CJK TC",sans-serif;--hand:"Iansui","LXGW WenKai TC","Kaiti TC","DFKai-SB","標楷體",cursive;color-scheme:light;box-sizing:border-box}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1520;--paper:#172030;--paper2:#1e2a3d;--ink:#e9e4d6;--soft:#93a0b5;--line:#2c3a52;--rule:#26344b;--margin:#e58a73;--p1:#e58a73;--p2:#78a9e0;--p3:#7fc3a0;--p4:#ecc566;--p4b:#d0975c;--p5:#b7a5e6;--shadow:rgba(0,0,0,.5);--grid:rgba(233,228,214,.045);--glow:rgba(120,169,224,.12);color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#0f1520;--paper:#172030;--paper2:#1e2a3d;--ink:#e9e4d6;--soft:#93a0b5;--line:#2c3a52;--rule:#26344b;--margin:#e58a73;--p1:#e58a73;--p2:#78a9e0;--p3:#7fc3a0;--p4:#ecc566;--p4b:#d0975c;--p5:#b7a5e6;--shadow:rgba(0,0,0,.5);--grid:rgba(233,228,214,.045);--glow:rgba(120,169,224,.12);color-scheme:dark}
 *{box-sizing:border-box}
@@ -134,3 +134,12 @@ table.tb{width:100%;border-collapse:collapse}.tb th,.tb td{padding:7px 8px;borde
 .qimg{display:block;max-width:100%;max-height:340px;margin:.5em auto;border-radius:10px;background:#fff}
 .qimg.h{max-height:240px}
 @media print{.qimg{max-height:200px;break-inside:avoid}}
+.nextlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:6px 0 14px}.nx small{color:var(--soft)}
+.foot{margin-top:auto;padding:22px 16px 28px;text-align:center;color:var(--soft);font-size:.82rem;line-height:1.7}.foot p{margin:4px 0}.foot a{color:inherit}
+.pcopy{font-size:9pt;color:#444;text-align:center;margin-top:10pt}
+.tabs .pen.go{font-weight:700}
+.upick{margin:8px 0;border:1.5px dashed var(--line);border-radius:10px;padding:8px 12px}.upick summary{cursor:pointer}.ug{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px 18px;margin-top:8px}.ugr b{display:block;margin:6px 0 2px}.uck{display:block;font-size:.88rem;line-height:1.7}
+.opt{text-align:left}.opt b{font-family:var(--serif)}
+.popts{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 16px;margin:4px 0}
+.chart{width:100%;height:auto;max-height:140px;display:block}.flag{display:inline-block;padding:0 8px;margin:1px 2px;border:1px solid var(--margin);color:var(--margin);border-radius:10px;font-size:.78rem}
+.fld{display:block;margin:6px 0}.fld>span{display:block;font-size:.85rem;color:var(--soft)}.fld input,.fld select,.fld textarea{max-width:100%;font:inherit}.wrapctl{flex-wrap:wrap}

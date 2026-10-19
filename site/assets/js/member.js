@@ -13,7 +13,7 @@ M.prev=function(t){var d=new Date(t+"T00:00:00Z");d.setUTCDate(d.getUTCDate()-1)
 M.step=150;
 M.lv=function(D){return Math.floor(D.pts/M.step)+1};
 /* 題目附圖：只寫檔名就放在 assets/q/，也可以是 https 網址 */
-M.img=function(p){return/^https:/.test(p)?p:NB.root+"assets/q/"+p};
+M.img=function(p){var m=/^d:([0-9a-f]{16})$/.exec(p);return m?CFG.api+"/api/img/"+m[1]:/^https:/.test(p)?p:NB.root+"assets/q/"+p};
 M.tot=function(D){var n=0,c=0,k;for(k in D.u){n+=D.u[k].n;c+=D.u[k].c}return{n:n,c:c}};
 M.seen=function(D){return Object.keys(D.u).filter(function(k){return D.u[k].seen}).length};
 M.has=function(id){return(M.units||[]).indexOf(id)>=0};
@@ -31,7 +31,7 @@ M.api=function(method,path,body){
    if(!r.ok){var e=new Error(j.err||"http");e.code=j.err||"http";e.status=r.status;throw e}return j},function(){var e=new Error("bad");e.code="net";throw e})},function(e){if(e.code)throw e;var x=new Error("net");x.code="net";throw x})};
 
 M.load=function(){return M.api("GET","/api/me").then(function(r){
- M.U=r.user;M.D=r.data;M.STK=r.stk;M.units=r.units;M.gens=r.gens;M.T=r.today;M.cfg=r.cfg;M.step=r.cfg.step;
+ M.U=r.user;M.D=r.data;M.STK=r.stk;M.prog=r.prog||{};M.acct=r.acct||{};M.units=r.units;M.gens=r.gens;M.T=r.today;M.cfg=r.cfg;M.step=r.cfg.step;
  ls(CK,JSON.stringify({n:r.user.name,lv:M.lv(r.data),pts:r.data.pts}));
  var seen=[];try{seen=JSON.parse(ls(SN)||"[]")}catch(e){}
  if(seen.length&&r.user.role==="student")M.api("POST","/api/seen",{ids:seen}).then(function(){ls(SN,null)},function(){});
@@ -40,7 +40,7 @@ M.boot=function(){M.err=null;return M.ready.then(function(A){
  M.auth=A;if(!A){M.U=null;M.err=CFG.firebase&&CFG.firebase.apiKey?"noauth":"noconfig";return}
  if(!A.user()){M.U=null;return}
  return M.load().catch(function(e){M.U=null;M.err=e.code||"net"})})};
-M.setData=function(D){M.D=D;ls(CK,JSON.stringify({n:M.U.name,lv:M.lv(D),pts:D.pts}))};
+M.setData=function(D,pg){M.D=D;if(pg)M.prog=pg;ls(CK,JSON.stringify({n:M.U.name,lv:M.lv(D),pts:D.pts}))};
 M.signIn=function(){return M.auth.signIn()};
 M.logout=function(){ls(CK,null);M.U=null;M.D=null;return M.auth?M.auth.signOut():Promise.resolve()};
 
@@ -50,6 +50,6 @@ M.chip=function(){var u=M.cur(),a=NB.h('<a class="chip" href="'+NB.root+'member.
 M.onUnit=function(app,id){var u=M.cur(),el,R=NB.root;
  if(u){var s=[];try{s=JSON.parse(ls(SN)||"[]")}catch(e){}if(s.indexOf(id)<0){s.push(id);ls(SN,JSON.stringify(s.slice(-60)))}
   el=NB.h('<section class="sheet"><h2><span class="tag">學員專區</span>學完了，來考考自己</h2><div class="ctl"><a class="pen go" href="'+R+'member.html#quiz/'+id+'">這一節的小測驗</a><a class="pen" href="'+R+'member.html#wrong">錯題本</a><a class="pen" href="'+R+'member.html#daily">每日一題</a></div></section>')}
- else el=NB.h('<section class="sheet"><h2><span class="tag">學員專區</span>小測驗・錯題本・貼紙・排行榜</h2><p>此功能僅開放給班內學員使用。</p><a class="pen go" href="'+R+'member.html#login">同學登入</a></section>');
+ else el=NB.h('<section class="sheet"><h2><span class="tag">學員專區</span>小測驗・錯題本・勳章・排行榜</h2><p>此功能僅開放給班內學員使用。</p><a class="pen go" href="'+R+'member.html#login">同學登入</a></section>');
  app.insertBefore(el,app.lastElementChild)};
 })();

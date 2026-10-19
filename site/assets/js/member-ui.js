@@ -3,14 +3,28 @@
 (function(){
 "use strict";
 var M=NB.member,app=document.getElementById("app"),h=NB.h,tx=NB.tx,view,who,TM=null,qg=null,booted=false;
-var TABS=[["home","首頁"],["daily","每日一題"],["quiz","單元小測驗"],["mock","模擬卷"],["wrong","錯題本"],["progress","學習進度"],["stickers","貼紙"],["board","排行榜"],["print","列印練習卷"]];
+var TABS=[["home","首頁"],["daily","每日一題"],["quiz","單元小測驗"],["mock","模擬卷"],["wrong","錯題本"],["progress","學習進度"],["stickers","勳章"],["board","排行榜"],["print","列印練習卷"]];
 function pad(n){return("0"+n).slice(-2)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function sheet(tag,sub){return h('<section class="sheet"><h2><span class="tag">'+tag+'</span>'+(sub||"")+'</h2></section>')}
 function title(id){var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
-function stkSvg(s,i,on){var c="var(--p"+(i%5+1)+")";return'<svg viewBox="0 0 64 64" class="stk" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="'+(on?c:"var(--paper2)")+'" fill-opacity="'+(on?.3:1)+'" stroke="var(--ink)" stroke-width="2.4"'+(on?"":' stroke-dasharray="4 4"')+'/><circle cx="32" cy="32" r="23" fill="none" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 4" opacity=".5"/><g transform="translate(16 16) scale(1.33)" fill="none" stroke="var(--ink)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"'+(on?"":' opacity=".28"')+'><path d="'+s.g+'"/></g></svg>'}
-function errMsg(e){var c=e&&e.code;return{net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請老師完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",server:"伺服器忙碌中，請稍後再試。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
+var TC=["#b87333","#9aa5b1","#d9a93c","#5fb6c9","#8e6bd6"],TN=["銅","銀","金","白金","鑽石"];
+function stkSvg(s,i,on){var t=(s.t||1)-1,c=TC[t],pips="",k;for(k=0;k<=t;k++)pips+='<circle cx="'+(32-t*4+k*8)+'" cy="58" r="2" fill="'+(on?c:"var(--soft)")+'"/>';
+ return'<svg viewBox="0 0 64 64" class="stk" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="'+(on?c:"var(--paper2)")+'" fill-opacity="'+(on?.28:1)+'" stroke="'+(on?c:"var(--ink)")+'" stroke-width="'+(on?3.4:2.4)+'"'+(on?"":' stroke-dasharray="4 4"')+'/><circle cx="32" cy="32" r="23" fill="none" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 4" opacity=".5"/><g transform="translate(17 14) scale(1.2)" fill="none" stroke="var(--ink)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"'+(on?"":' opacity=".28"')+'><path d="'+s.g+'"/></g>'+pips+'</svg>'}
+function errMsg(e){var c=e&&e.code;return{net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請老師完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",expired:"你的正式學員授權已到期，請找老師延期。",forbidden:"沒有權限。",no_questions:"這個範圍沒有可以出的題目。",server:"伺服器忙碌中，請稍後再試。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
 function qimg(p,c){return p?'<img class="qimg'+(c?" "+c:"")+'" alt="附圖" src="'+esc(M.img(p))+'">':""}
+
+function L(i){return String.fromCharCode(65+i)}
+function labOf(o,v){var k=o?o.indexOf(String(v)):-1;return k>=0?L(k)+"．"+v:v}
+/* 單元多選器：不選＝由系統依年級自動配；可依年級展開勾選 */
+function picker(ids,mine){
+ var el=h('<details class="upick"><summary>自選單元（<b class="cnt">0</b> 個）</summary><div class="ctl"><button class="pen" data-a="all">全選</button><button class="pen" data-a="none">全不選</button><button class="pen" data-a="mine">只選我的年級</button></div><div class="ug"></div></details>'),g=el.querySelector(".ug"),boxes=[];
+ var by={};ids.forEach(function(id){var o=NB.flat.filter(function(x){return x.id===id})[0];if(!o)return;(by[id[0]]=by[id[0]]||[]).push(o)});
+ Object.keys(by).sort().forEach(function(gr){var d=h('<div class="ugr"><b>'+"三四五六"[gr-3]+"年級</b></div>");by[gr].forEach(function(o){var l=h('<label class="uck"><input type="checkbox"> <span></span></label>');l.querySelector("input").value=o.id;l.querySelector("span").textContent=o.sem+" "+o.num+" "+o.title;boxes.push(l.querySelector("input"));d.appendChild(l)});g.appendChild(d)});
+ function cnt(){el.querySelector(".cnt").textContent=boxes.filter(function(b){return b.checked}).length}
+ el.addEventListener("change",cnt);
+ el.querySelector(".ctl").onclick=function(e){var b=e.target.closest("button");if(!b)return;boxes.forEach(function(x){x.checked=b.dataset.a==="all"||(b.dataset.a==="mine"&&x.value[0]==String(mine))});cnt()};
+ return{el:el,get:function(){return boxes.filter(function(b){return b.checked}).map(function(b){return b.value})}}}
 function user(){return M.U}
 function ymdT(){return M.T||M.today()}
 
@@ -32,9 +46,10 @@ function boot(){
  if(booting)return;booting=true;
  app.innerHTML="";app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
  M.boot().then(function(){booted=true;booting=false;route()})}
-function route(){clearInterval(TM);if(!booted){boot();return}if(!shell())return;var p=(location.hash||"#home").slice(1).split("/");(V[p[0]]||V.home)(p[1]);window.scrollTo(0,0)}
+function route(){clearInterval(TM);if(!booted){boot();return}if(!shell())return;var p=(location.hash||"#home").slice(1).split("/");if(M.acct&&M.acct.expired&&["home","progress","stickers"].indexOf(p[0])<0)p=["expired"];(V[p[0]]||V.home)(p[1]);window.scrollTo(0,0)}
 
 function login(){
+ try{if(sessionStorage.getItem("nb-idle")){sessionStorage.removeItem("nb-idle");setTimeout(function(){var f=document.querySelector(".fb");if(f){f.className="fb no";f.textContent="因為閒置太久，已為了帳號安全自動登出，請重新登入。"}},0)}}catch(e){}
  var s=sheet("登入","僅供班內學員使用"),fb=h('<div class="fb"></div>'),em=M.auth&&M.auth.user()?M.auth.user().email:"";
  s.appendChild(h("<p>請使用老師登記的 Google 帳號登入平台。登入後，即可使用小測驗、模擬卷、錯題本、學習進度、貼紙獎勵、每日一題、列印練習卷及排行榜等功能。上述功能皆須登入後方可使用。</p>"));
  var msg={noconfig:"網站還沒設定好登入功能，請老師完成設定。",noauth:"登入服務載入失敗，請檢查網路後重新整理頁面。",net:"連不上伺服器，請稍後再試。",noapi:"網站還沒設定好伺服器網址，請老師完成設定。",bad_token:"登入已失效，請重新登入。",not_in_roster:"「"+esc(em)+"」不在班級名單裡。請改用老師登記的帳號，或請老師把這個帳號加進名單。"}[M.err];
@@ -50,16 +65,18 @@ function login(){
    練習（小測驗、每日一題、錯題訂正）：每題送出就由伺服器判分並回傳解答
    模擬卷：全部寫完交卷才一次判分；時間由伺服器管，逾時視為未作答 */
 function run(o){
- var S=o.sess,qs=S.qs,exam=S.kind==="mock",i=0,ans=[],res=[],left=S.seconds||0,box=sheet(o.tag,o.title),body=h("<div></div>"),busy=false,fin=false;
- box.appendChild(body);view.innerHTML="";view.appendChild(box);
+ var S=o.sess,qs=S.qs,exam=S.kind==="mock",i=0,ans=[],res=[],left=S.seconds||0,box=sheet(o.tag,o.title),body=h("<div></div>"),busy=false,fin=false,dres=null,hinted={};
+ box.appendChild(body);view.innerHTML="";view.appendChild(box);if(o.note)box.insertBefore(h('<p class="meta"></p>'),body).textContent=o.note;
  if(exam){var clock=h('<span class="clock"></span>');box.querySelector("h2").appendChild(clock);var t0=Date.now();TM=setInterval(tick,1000);tick()}
  function tick(){left=S.seconds-Math.floor((Date.now()-t0)/1000);if(left<0)left=0;clock.textContent="剩 "+pad(Math.floor(left/60))+":"+pad(left%60);if(left<=0)finish()}
  function show(){
   var q=qs[i],sel=null,done=false,ob=[],inp,hb,d=h('<div><div class="prog">第 '+(i+1)+" / "+qs.length+' 題</div><div class="q">'+tx(q.q)+"</div>"+qimg(q.img)+"</div>");body.innerHTML="";
-  if(q.o){var w=h('<div class="opts"></div>');q.o.forEach(function(t){var b=h('<button class="pen"></button>');b.innerHTML=tx(esc(t));b.dataset.v=t;b.onclick=function(){if(done)return;sel=t;ob.forEach(function(x){x.classList.toggle("sel",x===b)})};ob.push(b);w.appendChild(b)});d.appendChild(w)}
+  if(q.o){var w=h('<div class="opts"></div>');q.o.forEach(function(t,ti){var b=h('<button class="pen opt"></button>');b.innerHTML="<b>"+L(ti)+"．</b>"+tx(esc(t));b.dataset.v=t;b.onclick=function(){if(done)return;sel=t;ob.forEach(function(x){x.classList.toggle("sel",x===b)})};ob.push(b);w.appendChild(b)});d.appendChild(w)}
   else{var c=h('<div class="ctl"><input class="num" type="number" step="any" inputmode="decimal" placeholder="答案"></div>');inp=c.firstChild;d.appendChild(c)}
   var bar=h('<div class="ctl"><button class="pen go">'+(exam?(i+1<qs.length?"下一題":"交卷"):"檢查")+"</button></div>"),go=bar.firstChild,fb=h('<div class="fb"></div>');
-  if(!exam){hb=h('<button class="pen">提示</button>');bar.appendChild(hb);hb.onclick=function(){M.api("POST","/api/hint",{sid:S.sid,i:i}).then(function(r){fb.className="fb";fb.innerHTML=tx("提示："+r.h)},function(e){fb.className="fb no";fb.textContent=errMsg(e)})}}
+  if(!exam){var hc=(M.cfg&&M.cfg.hint)||0;hb=h('<button class="pen">提示'+(hc?"（－"+hc+" 分）":"")+"</button>");bar.appendChild(hb);hb.onclick=function(){
+   if(!hinted[i]&&hc&&!confirm("看提示會扣 "+hc+" 分，而且這題答對只能拿一半的積分。\n確定要看嗎？"))return;
+   M.api("POST","/api/hint",{sid:S.sid,i:i}).then(function(r){hinted[i]=1;if(r.data){M.setData(r.data);updWho()}fb.className="fb";fb.innerHTML=tx("提示："+r.h)+qimg(r.himg)+(r.cost?"<br><small>已扣 "+r.cost+" 分，這題答對只拿一半積分。</small>":"")},function(e){fb.className="fb no";fb.textContent=errMsg(e)})}}
   if(exam&&i>0){var pv=h('<button class="pen">上一題</button>');pv.onclick=function(){i--;show()};bar.insertBefore(pv,go)}
   d.appendChild(bar);d.appendChild(fb);body.appendChild(d);
   if(exam&&ans[i]!==undefined&&ans[i]!==null){if(q.o)ob.forEach(function(b){if(b.dataset.v===String(ans[i])){sel=ans[i];b.classList.add("sel")}});else inp.value=ans[i]}
@@ -72,21 +89,21 @@ function run(o){
    if(v===null||v==="")return;
    busy=true;go.disabled=true;
    M.api("POST","/api/check",{sid:S.sid,i:i,v:v}).then(function(r){
-    busy=false;go.disabled=false;res.push({q:q,ok:r.ok});done=true;go.textContent=i+1<qs.length?"下一題":"看結果";if(hb)hb.disabled=true;
+    busy=false;go.disabled=false;res.push({q:q,ok:r.ok});if(S.kind==="daily"&&r.data){M.setData(r.data,r.prog);dres={gain:r.gain,got:r.got||[]};updWho()}done=true;go.textContent=i+1<qs.length?"下一題":"看結果";if(hb)hb.disabled=true;
     if(q.o)ob.forEach(function(b){b.disabled=true;if(b.dataset.v===String(r.a))b.classList.add("right");else if(b.classList.contains("sel"))b.classList.add("wrong")});else inp.disabled=true;
     fb.className="fb "+(r.ok?"ok":"no");
-    fb.innerHTML=r.ok?"答對了！":tx("答案是 "+r.a+"。"+r.h)+(r.diag?'<br><b class="diag">'+tx(r.diag)+"</b>":"")+qimg(r.himg)+"<br><small>"+(S.kind==="fix"?"還沒訂正成功，會留在錯題本。":"這題已放進錯題本。")+"</small>"
+    fb.innerHTML=r.ok?"答對了！":tx("答案是 "+(r.al?r.al+"．":"")+r.a+"。"+r.h)+(r.diag?'<br><b class="diag">'+tx(r.diag)+"</b>":"")+qimg(r.himg)+"<br><small>"+(S.kind==="fix"?"還沒訂正成功，會留在錯題本。":"這題已放進錯題本。")+"</small>"
    }).catch(function(e){busy=false;go.disabled=false;fb.className="fb no";fb.textContent=errMsg(e)})}}
  function next(){if(i+1<qs.length){i++;show()}else finish()}
  function finish(){
   if(fin||busy)return;fin=true;clearInterval(TM);body.innerHTML="";body.appendChild(h('<p class="meta">'+(exam?"交卷中，伺服器判分…":"結算中…")+"</p>"));
-  var p=exam?M.api("POST","/api/submit",{sid:S.sid,ans:qs.map(function(_,k){return ans[k]===undefined?null:ans[k]})}):M.api("POST","/api/finish",{sid:S.sid});
-  p.then(function(r){M.setData(r.data);updWho();result(r)},function(e){fin=false;body.innerHTML="";var s=h('<div><div class="fb no">'+esc(errMsg(e))+"</div></div>"),b=h('<div class="ctl"><button class="pen go">再試一次</button></div>');b.firstChild.onclick=function(){finish()};s.appendChild(b);body.appendChild(s);if(exam&&e.code==="no_session"){s.appendChild(h('<a class="pen" href="#home">回首頁</a>'))}})}
+  var p=S.kind==="daily"&&dres?Promise.resolve({n:1,c:res[0]&&res[0].ok?1:0,gain:dres.gain,got:dres.got,data:M.D}):exam?M.api("POST","/api/submit",{sid:S.sid,ans:qs.map(function(_,k){return ans[k]===undefined?null:ans[k]})}):M.api("POST","/api/finish",{sid:S.sid});
+  p.then(function(r){M.setData(r.data,r.prog);updWho();result(r)},function(e){fin=false;body.innerHTML="";var s=h('<div><div class="fb no">'+esc(errMsg(e))+"</div></div>"),b=h('<div class="ctl"><button class="pen go">再試一次</button></div>');b.firstChild.onclick=function(){finish()};s.appendChild(b);body.appendChild(s);if(exam&&e.code==="no_session"){s.appendChild(h('<a class="pen" href="#home">回首頁</a>'))}})}
  function result(r){
   var D=M.D,n=exam?r.n:r.n,c=r.c;
   var s=h('<div><div class="q">'+(exam?r.sc+" 分（"+c+" / "+n+"）":c+" / "+n+" 題答對")+"</div>"+(r.late?'<p class="fb no">已超過作答時間，伺服器只接受時限內的答案，這份卷子沒有計分。</p>':"")+"<p>這次獲得 <b>"+r.gain+"</b> 積分，目前 Lv."+M.lv(D)+"。</p></div>");
-  if(r.got&&r.got.length){s.appendChild(h('<p class="hl">解鎖新貼紙！</p>'));var g=h('<div class="stkgrid"></div>');r.got.forEach(function(id){var k=M.STK.filter(function(x){return x.id===id})[0],ix=M.STK.indexOf(k);g.appendChild(h('<div class="stkc">'+stkSvg(k,ix,1)+"<b>"+k.n+"</b>"+k.d+"</div>"))});s.appendChild(g)}
-  if(exam&&r.review&&r.review.length){var l=h('<div><p class="meta">答錯或沒寫的題目（已放進錯題本）</p></div>');r.review.forEach(function(x){l.appendChild(h('<div class="wi"><div>'+tx(x.q)+"</div>"+qimg(x.img)+"<small>"+(x.v===null||x.v===""?"你沒有作答。":tx("你的答案："+x.v+"。"))+" "+tx("答案："+x.a+"。"+x.h)+(x.diag?'<br><b class="diag">'+tx(x.diag)+"</b>":"")+qimg(x.himg)+"</small></div>"))});s.appendChild(l)}
+  if(r.got&&r.got.length){s.appendChild(h('<p class="hl">解鎖新勳章！</p>'));var g=h('<div class="stkgrid"></div>');r.got.forEach(function(id){var k=M.STK.filter(function(x){return x.id===id})[0],ix=M.STK.indexOf(k);g.appendChild(h('<div class="stkc">'+stkSvg(k,ix,1)+"<b>"+k.n+"</b>"+k.d+"</div>"))});s.appendChild(g)}
+  if(exam&&r.review&&r.review.length){var l=h('<div><p class="meta">答錯或沒寫的題目（已放進錯題本）</p></div>');r.review.forEach(function(x){l.appendChild(h('<div class="wi"><div>'+tx(x.q)+"</div>"+qimg(x.img)+"<small>"+(x.v===null||x.v===""?"你沒有作答。":tx("你的答案："+labOf(x.o,x.v)+"。"))+" "+tx("答案："+labOf(x.o,x.a)+"。"+x.h)+(x.diag?'<br><b class="diag">'+tx(x.diag)+"</b>":"")+qimg(x.himg)+"</small></div>"))});s.appendChild(l)}
   var bt=h('<div class="ctl"></div>');
   if(o.again){var a=h('<button class="pen go">再來一次</button>');a.onclick=o.again;bt.appendChild(a)}
   bt.appendChild(h('<a class="pen" href="#wrong">錯題本</a>'));bt.appendChild(h('<a class="pen" href="#home">回首頁</a>'));s.appendChild(bt);body.innerHTML="";body.appendChild(s)}
@@ -99,12 +116,13 @@ V.home=function(){
  var D=M.D,t=ymdT(),y=M.prev(t),tot=M.tot(D),tiles=h('<div class="tiles"></div>');
  tiles.innerHTML='<div class="tile"><small>積分</small><strong>'+D.pts+'</strong><div class="meter"><i style="width:'+(D.pts%M.step)/M.step*100+'%"></i></div><small>再 '+(M.step-D.pts%M.step)+" 分升 Lv."+(M.lv(D)+1)+"</small></div>"+
   '<div class="tile"><small>連續練習</small><strong>'+(D.sk.last===t||D.sk.last===y?D.sk.n:0)+" 天</strong></div>"+
-  '<a class="tile" href="#daily"><small>每日一題</small><strong>'+(D.dq[t]?"已完成":"還沒寫")+"</strong></a>"+
+  '<a class="tile" href="#daily"><small>每日一題</small><strong>'+(D.dq[t]?(D.dq[t].ok?"已完成 ✓":"已完成"):"還沒寫")+"</strong></a>"+
   '<a class="tile" href="#wrong"><small>錯題本</small><strong>'+D.wr.length+" 題</strong></a>"+
-  '<a class="tile" href="#stickers"><small>貼紙</small><strong>'+Object.keys(D.stk).length+" / "+M.STK.length+"</strong></a>"+
+  '<a class="tile" href="#stickers"><small>勳章</small><strong>'+Object.keys(D.stk).length+" / "+M.STK.length+"</strong></a>"+
   '<a class="tile" href="#progress"><small>答題正確率</small><strong>'+(tot.n?Math.round(tot.c/tot.n*100):0)+"%</strong></a>";
+ var a=M.acct||{};if(a.expired)view.appendChild(h('<div class="fb no">你的正式學員授權已到期（'+esc(a.expires)+'），目前只能查看資料。請找老師延長授權。</div>'));else if(a.daysLeft!==null&&a.daysLeft!==undefined&&a.daysLeft<=14)view.appendChild(h('<div class="fb">提醒：你的授權將在 '+(a.daysLeft+1)+' 天內到期（'+esc(a.expires)+'），要續用請告訴老師。</div>'));
  view.appendChild(tiles);
- var c=M.cfg,s=sheet("獎勵","怎麼賺積分和貼紙");s.appendChild(h("<ol class=\"steps\"><li>答對 1 題：依題目難度 +"+c.pts[0]+"／+"+c.pts[1]+"／+"+c.pts[2]+" 分（基礎／應用／挑戰，每天最多計 "+c.capQ+" 題）</li><li>完成一份小測驗（3 題以上）：+20 分</li><li>每日一題：答對 +30 分，答錯也有 +5 分</li><li>連續練習：第 2 天起每天加分，最多每天 +14 分</li><li>模擬卷：完成 +20 分，80 分以上再 +50 分（每天前 "+c.capMock+" 份）</li><li>錯題複習：同一題在 "+c.review.join("、")+" 天後各答對一次就畢業，+15 分</li><li>解鎖貼紙：每張 +20 分（共 "+M.STK.length+" 張）。每 "+c.step+" 分升一級</li></ol>"));view.appendChild(s)};
+ var c=M.cfg,s=sheet("獎勵","怎麼賺積分和勳章");s.appendChild(h("<ol class=\"steps\"><li>答對 1 題：依題目難度 +"+c.pts[0]+"／+"+c.pts[1]+"／+"+c.pts[2]+" 分（基礎／應用／挑戰，每天最多計 "+c.capQ+" 題）</li><li>完成一份小測驗（3 題以上）：+20 分</li><li>每日一題：每天只有一次機會，答對 +30 分，答錯 +5 分；做完就不用再做了</li><li>看提示：每題第一次看扣 "+(c.hint||0)+" 分，而且這題答對只拿一半積分</li><li>連續練習：第 2 天起每天加分，最多每天 +14 分</li><li>模擬卷：完成 +20 分，80 分以上再 +50 分（每天前 "+c.capMock+" 份）</li><li>錯題複習：同一題在 "+c.review.join("、")+" 天後各答對一次就畢業，+15 分</li><li>解鎖勳章：銅 +10、銀 +20、金 +30、白金 +50、鑽石 +80 分（共 "+M.STK.length+" 枚）。每 "+c.step+" 分升一級</li></ol>"));view.appendChild(s)};
 
 V.daily=function(){
  begin({kind:"daily"},function(r){
@@ -130,11 +148,17 @@ function startQuiz(id){
   run({tag:"小測驗",title:esc(title(id)),sess:r,again:function(){startQuiz(id)}})})}
 
 V.mock=function(){
- var u=user(),D=M.D,s=sheet("模擬卷","10 題・20 分鐘・交卷才公布答案");
- s.appendChild(h("<p>依照「由易到難、題型分配」的細目表，從"+"三四五六"[Math.min(6,Math.max(3,u.grade))-3]+"年級和前一年級的題庫出題。每個人的題目和選項順序都不同。時間由伺服器計算，時間到會自動交卷，沒寫的算錯，答錯的題目會進錯題本。</p>"));
+ var u=user(),D=M.D,s=sheet("模擬卷","自選單元與題數・每題 2 分鐘・交卷才公布答案"),gr="三四五六"[Math.min(6,Math.max(3,u.grade))-3];
+ s.appendChild(h("<p>不選單元時，依照「由易到難、題型分配」的細目表，從"+gr+"年級和前一年級的題庫出題；也可以自己挑想考的單元（可多可少）。每個人的題目和選項順序都不同。時間由伺服器計算，時間到會自動交卷，沒寫的算錯，答錯的題目會進錯題本。</p>"));
+ var n=h('<div class="ctl"><label>題數</label><select id="mn"><option>5</option><option selected>10</option><option>15</option><option>20</option><option>30</option></select><span class="meta" id="mt"></span></div>'),pk=picker(M.units||[],u.grade);
+ s.appendChild(n);s.appendChild(pk.el);
+ var nn=n.querySelector("#mn");function tm(){n.querySelector("#mt").textContent="限時 "+(+nn.value*2)+" 分鐘"}nn.onchange=tm;tm();
  var b=h('<div class="ctl"><button class="pen go">開始作答</button></div>');b.firstChild.onclick=function(){start()};s.appendChild(b);
  if(D.mk.length)s.appendChild(h('<p class="meta">最近成績：'+D.mk.slice(-5).map(function(m){return m.sc+" 分"}).join("、")+"</p>"));view.appendChild(s);
- function start(){begin({kind:"mock"},function(r){run({tag:"模擬卷",title:"請在時間內完成",sess:r,again:start})})}};
+ function start(){begin({kind:"mock",n:+nn.value,units:pk.get()},function(r){
+  if(r.empty){view.innerHTML="";var e=sheet("沒有題目","");e.appendChild(h('<p>這個範圍目前沒有題目。</p><a class="pen go" href="#mock">重新選擇</a>'));view.appendChild(e);return}
+  var note=[];if(r.filled)note.push("你選的單元題目不夠多，已用同年級其他單元補了 "+r.filled+" 題。");if(r.short)note.push("可出的題目不足，這份只有 "+r.qs.length+" 題。");if(r.small)note.push("題數少於 8 題的練習不計入模擬卷獎勵與勳章。");
+  run({tag:"模擬卷",title:"請在時間內完成",sess:r,note:note.join(" "),again:start})})}};
 
 V.wrong=function(){
  var D=M.D,s=sheet("錯題本",D.wr.length+" 題");view.appendChild(s);
@@ -158,31 +182,45 @@ V.progress=function(){
  view.appendChild(s)};
 
 V.stickers=function(){
- var D=M.D,s=sheet("貼紙","已收集 "+Object.keys(D.stk).length+" / "+M.STK.length),g=h('<div class="stkgrid"></div>');
- M.STK.forEach(function(k,i){var on=!!D.stk[k.id];g.appendChild(h('<div class="stkc'+(on?"":" off")+'">'+stkSvg(k,i,on)+"<b>"+(on?k.n:"？？？")+"</b>"+k.d+(on?"<br><small>"+D.stk[k.id]+"</small>":"")+"</div>"))});
+ var D=M.D,P=M.prog||{},cats=[],cur=sessionStorage.getItem("nb-cat")||"全部",s=sheet("勳章","已收集 "+Object.keys(D.stk).length+" / "+M.STK.length+" 枚");
+ M.STK.forEach(function(k){if(cats.indexOf(k.cat)<0)cats.push(k.cat)});
+ var tb=h('<div class="tabs"></div>'),nx=h('<div class="nextlist"></div>'),g=h('<div class="stkgrid"></div>');
+ ["全部"].concat(cats).forEach(function(c){var b=h('<button class="pen'+(c===cur?" go":"")+'">'+c+"</button>");b.onclick=function(){try{sessionStorage.setItem("nb-cat",c)}catch(e){}view.innerHTML="";V.stickers()};tb.appendChild(b)});
+ s.appendChild(tb);
+ var fam={};M.STK.forEach(function(k){(fam[k.f]=fam[k.f]||[]).push(k)});
+ Object.keys(P).forEach(function(f){var p=P[f],k=M.STK.filter(function(x){return x.id===p.id})[0];if(!k||(cur!=="全部"&&k.cat!==cur)||D.stk[k.id])return;var pc=Math.min(100,Math.round(p.cur/p.target*100));nx.appendChild(h('<div class="nx"><b>'+k.n+"</b> <small>"+k.d+"（"+Math.min(p.cur,p.target)+" / "+p.target+'）</small><div class="meter"><i style="width:'+pc+'%"></i></div></div>'))});
+ if(nx.children.length){s.appendChild(h('<p class="meta">快要解鎖</p>'));s.appendChild(nx)}
+ M.STK.forEach(function(k,i){if(cur!=="全部"&&k.cat!==cur)return;var on=!!D.stk[k.id];g.appendChild(h('<div class="stkc'+(on?"":" off")+'">'+stkSvg(k,i,on)+"<b>"+(on?k.n:"？？？")+"</b><small>"+TN[k.t-1]+"</small><br>"+k.d+(on?"<br><small>"+D.stk[k.id]+"</small>":"")+"</div>"))});
  s.appendChild(g);view.appendChild(s)};
 
 V.board=function(){
  var u=user(),s=sheet("排行榜",esc(u.cls+" 班")),box=h("<div>載入中…</div>");s.appendChild(box);view.appendChild(s);
  M.api("GET","/api/board").then(function(r){var rows=r.rows.slice().sort(function(a,b){return b.pts-a.pts});
   if(!rows.length){box.textContent="還沒有人上榜，先去做一份小測驗吧。";return}
-  box.innerHTML='<table class="tb"><tr><th>名次</th><th>同學</th><th>等級</th><th>積分</th><th>答對</th><th>貼紙</th></tr>'+rows.map(function(x,i){return'<tr class="'+(x.no===u.no?"me":"")+'"><td><span class="rk r'+(i+1)+'">'+(i+1)+"</span></td><td>"+esc(x.n)+"</td><td>Lv."+x.lv+"</td><td>"+x.pts+"</td><td>"+x.ok+"</td><td>"+x.stk+"</td></tr>"}).join("")+"</table>"})
+  box.innerHTML='<table class="tb"><tr><th>名次</th><th>同學</th><th>等級</th><th>積分</th><th>答對</th><th>勳章</th></tr>'+rows.map(function(x,i){return'<tr class="'+(x.no===u.no?"me":"")+'"><td><span class="rk r'+(i+1)+'">'+(i+1)+"</span></td><td>"+esc(x.n)+"</td><td>Lv."+x.lv+"</td><td>"+x.pts+"</td><td>"+x.ok+"</td><td>"+x.stk+"</td></tr>"}).join("")+"</table>"})
  .catch(function(e){box.textContent=errMsg(e)})};
 
 V.print=function(){
- var u=user(),D=M.D,s=sheet("列印練習卷","選好題目就可以印出來寫");s.classList.add("noprint");
- var src='<select id="ps"><option value="mix">本年級綜合</option>'+(D.wr.length?'<option value="wrong">我的錯題（'+D.wr.length+" 題）</option>":"")+(M.gens||[]).slice().sort().map(function(g){return'<option value="'+g+'">'+esc(title(g))+"</option>"}).join("")+"</select>";
- var ctl=h('<div class="ctl"><label>題目來源</label>'+src+'<label>題數</label><select id="pn"><option>10</option><option>15</option><option>20</option><option>30</option></select>'+(u.role==="teacher"?'<label>年級</label><select id="pg"><option value="3">三年級</option><option value="4">四年級</option><option value="5">五年級</option><option value="6" selected>六年級</option></select>':"")+'<button class="pen go">出題</button><button class="pen">列印</button></div>');
- var out=h("<div></div>");s.appendChild(ctl);view.appendChild(s);view.appendChild(out);
- var bs=ctl.querySelectorAll("button");bs[0].onclick=make;bs[1].onclick=function(){window.print()};make();
+ var u=user(),D=M.D,s=sheet("列印練習卷","選好單元與題數就可以印出來寫");s.classList.add("noprint");
+ var src='<select id="ps"><option value="mix">本年級綜合</option>'+(D.wr.length?'<option value="wrong">我的錯題（'+D.wr.length+" 題）</option>":"")+'<option value="pick">自選單元（下方勾選）</option></select>';
+ var ctl=h('<div class="ctl"><label>題目來源</label>'+src+'<label>題數</label><select id="pn"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>30</option><option>40</option></select>'+(u.role==="teacher"?'<label>年級</label><select id="pg"><option value="3">三年級</option><option value="4">四年級</option><option value="5">五年級</option><option value="6" selected>六年級</option></select>':"")+'<button class="pen go">出題</button><button class="pen">列印</button></div>');
+ var pk=picker((M.gens||[]).slice().sort(),u.grade),out=h("<div></div>"),note=h('<p class="meta noprint"></p>');s.appendChild(ctl);s.appendChild(pk.el);view.appendChild(s);view.appendChild(note);view.appendChild(out);
+ var bs=ctl.querySelectorAll("button");bs[0].onclick=make;bs[1].onclick=function(){window.print()};
+ pk.el.addEventListener("change",function(){if(pk.get().length)ctl.querySelector("#ps").value="pick"});make();
  function make(){
-  var v=ctl.querySelector("#ps").value,n=+ctl.querySelector("#pn").value;out.innerHTML='<p class="meta">出題中…</p>';
-  M.api("GET","/api/print?src="+encodeURIComponent(v)+"&n="+n+(ctl.querySelector("#pg")?"&g="+ctl.querySelector("#pg").value:"")).then(function(r){
-   var nm=v==="wrong"?"錯題重練":v==="mix"?"綜合練習":title(v),qs=r.qs;
+  var v=ctl.querySelector("#ps").value,n=+ctl.querySelector("#pn").value,us=pk.get();if(v==="pick"&&!us.length){out.innerHTML='<div class="fb no">請先在下面勾選至少一個單元。</div>';return}
+  out.innerHTML='<p class="meta">出題中…</p>';note.textContent="";
+  M.api("GET","/api/print?src="+(v==="pick"?"mix&units="+encodeURIComponent(us.join(",")):encodeURIComponent(v))+"&n="+n+(ctl.querySelector("#pg")?"&g="+ctl.querySelector("#pg").value:"")).then(function(r){
+   var nm=v==="wrong"?"錯題重練":v==="mix"?"綜合練習":"自選 "+us.length+" 個單元",qs=r.qs;
+   if(r.filled)note.textContent="你選的單元不重複的題目不夠，已用同年級其他單元補了 "+r.filled+" 題。";if(r.short)note.textContent+=" 可出的題目只有 "+qs.length+" 題。";
    out.innerHTML='<div class="psheet"><h3>數學練習卷｜'+esc(nm)+'</h3><div class="pinfo"><span>班級：'+esc(u.cls)+"</span><span>座號："+u.no+"</span><span>姓名：<b>"+esc(u.name)+"</b></span><span>日期："+M.today()+"</span><span>分數：＿＿＿</span></div><ol>"+
-    qs.map(function(q){return"<li>"+tx(q.q)+qimg(q.img)+(q.o?'<br><span>選項：'+q.o.map(function(t){return"（　）"+tx(esc(t))}).join("　　")+"</span>":"")+'<span class="ln">答：＿＿＿＿＿＿＿＿＿</span></li>'}).join("")+"</ol></div>"+
-    '<div class="psheet key"><h3>解答｜'+esc(nm)+"</h3><ol>"+qs.map(function(q){return"<li>"+tx(String(q.a))+"<br><small>"+tx(q.h||"")+"</small>"+qimg(q.himg)+"</li>"}).join("")+"</ol></div>"},
+    qs.map(function(q){return"<li>"+tx(q.q)+qimg(q.img)+(q.o?'<div class="popts">'+q.o.map(function(t,k){return"<span>"+L(k)+"．"+tx(esc(t))+"</span>"}).join("")+"</div>":"")+'<span class="ln">答：＿＿＿＿＿＿＿＿＿</span></li>'}).join("")+'</ol><p class="pcopy">© '+new Date().getFullYear()+' suuuuuhaooooo・CC BY-NC-ND 4.0・僅供班級教學使用，請勿轉載</p></div>'+
+    '<div class="psheet key"><h3>解答｜'+esc(nm)+"</h3><ol>"+qs.map(function(q){return"<li>"+(q.al?q.al+"．":"")+tx(String(q.a))+"<br><small>"+tx(q.h||"")+"</small>"+qimg(q.himg)+"</li>"}).join("")+"</ol></div>"},
    function(e){out.innerHTML='<div class="fb no">'+esc(errMsg(e))+"</div>"})}};
+
+V.expired=function(){
+ var a=M.acct||{},s=sheet("授權已到期","正式學員功能暫停");s.appendChild(h("<p>你的正式學員授權已於 <b>"+esc(a.expires||"")+"</b> 到期。目前只能查看自己的首頁、學習進度與勳章；小測驗、模擬卷、錯題本、列印與排行榜需要老師延長授權後才能使用。</p>"));
+ s.appendChild(h('<div class="ctl"><a class="pen go" href="#home">回首頁</a><a class="pen" href="#progress">學習進度</a></div>'));view.appendChild(s)};
 
 window.addEventListener("hashchange",route);route();
 })();

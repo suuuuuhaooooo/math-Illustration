@@ -2,7 +2,7 @@
 (function(){
 var NS="http://www.w3.org/2000/svg",KEY="nb-theme",root=document.body.getAttribute("data-root")||"./";
 var NB=window.NB={root:root},INK="var(--ink)";
-function h(html){var d=document.createElement("div");d.innerHTML=html.trim();return d.firstChild}
+function h(html){var d=document.createElement("div");d.innerHTML=html.trim();if(d.childNodes.length>1){d.style.display="contents";return d}return d.firstChild}
 function s(tag,a,p){var e=document.createElementNS(NS,tag);for(var k in a){if(k==="fill"||k==="stroke")e.style.setProperty(k,a[k]);else e.setAttribute(k,a[k])}if(p)p.appendChild(e);return e}
 function t(p,x,y,str,o){o=o||{};var e=s("text",{x:x,y:y,"text-anchor":o.a||"middle","font-size":o.z||16},p);if(o.c)e.style.fill=o.c;if(o.b)e.style.fontWeight=700;e.textContent=str;return e}
 function svg(p,w,hh){return s("svg",{viewBox:"0 0 "+w+" "+hh,class:"sk",role:"img"},p)}
