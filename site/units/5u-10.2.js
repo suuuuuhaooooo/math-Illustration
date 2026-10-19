@@ -19,7 +19,7 @@ NB.unit({
     h: "面數=8+1=9。邊數=8×2=16。" 
   },
   tool: function(b, eq) {
-    var dragHint = NB.h('<div style="margin-bottom:10px; color:#e91e63; font-weight:bold; font-size:16px;">✨ 3D 透視模式：你可以拖曳旋轉左方的立體圖形，親自數數看頂點喔！</div>');
+    var dragHint = NB.h('<div style="margin-bottom:10px; color:#e91e63; font-weight:bold; font-size:16px;">3D 透視模式：你可以拖曳旋轉左方的立體圖形，親自數數看頂點喔！</div>');
     b.appendChild(dragHint);
 
     var topRow = NB.h('<div style="margin-bottom:10px; display:flex; gap:10px; justify-content:center;"></div>');
