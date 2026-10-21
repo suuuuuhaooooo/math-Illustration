@@ -25,14 +25,14 @@ function roster(ctx){
  var s=ctx.sheet("學生名單","新增、修改、停用、刪除；改完立即生效"),fb=h('<div class="fb"></div>');
  M.api("GET","/api/admin/roster").then(function(r){
   ctx.box=s;migrateBanner(ctx,r.legacy);
-  var today=M.today(),rows=r.rows,form=h('<div class="ctl wrapctl"></div>'),f={email:inp("","Google 帳號 Email","email"),cls:inp("","班級 例 601"),no:inp("","座號","number"),name:inp("","姓名"),grade:sel([[3,"三年級"],[4,"四年級"],[5,"五年級"],[6,"六年級"]],6),role:sel([["student","學生"],["teacher","老師"]],"student"),act:sel([["1","啟用"],["0","停用"]],"1"),exp:inp("","授權到期日","date")};f.exp.title="授權到期日（含當天）；留空＝不限期";
+  var today=M.today(),rows=r.rows,form=h('<div class="ctl wrapctl"></div>'),f={email:inp("","Google 帳號 Email","email"),cls:inp("","班級 例 601"),no:inp("","座號","number"),name:inp("","姓名"),grade:sel([[3,"三年級"],[4,"四年級"],[5,"五年級"],[6,"六年級"]],6),role:sel(M.U.admin?[["student","學生"],["teacher","老師"],["admin","管理員"]]:[["student","學生"]],"student"),act:sel([["1","啟用"],["0","停用"]],"1"),exp:inp("","授權到期日","date")};f.exp.title="授權到期日（含當天）；留空＝不限期";
   Object.keys(f).forEach(function(k){form.appendChild(k==="exp"?field("授權到期日（空白＝不限期）",f[k]):f[k])});
   var save=h('<button class="pen go">儲存這位</button>');form.appendChild(save);s.appendChild(form);
   function send(list,done){M.api("POST","/api/admin/roster",{rows:list}).then(function(x){if(!x.ok)return msg(fb,"<b>有地方要修正，完全沒有儲存：</b><br>"+x.errs.map(esc).join("<br>"),0);msg(fb,"已儲存 "+x.n+" 筆",1);if(done)done()},function(e){msg(fb,errs(e),0)})}
   save.onclick=function(){send([{email:f.email.value,class:f.cls.value,no:f.no.value,name:f.name.value,role:f.role.value,grade:f.grade.value,active:f.act.value,expires:f.exp.value}],ctx.go)};
   s.appendChild(fb);
   var t='<table class="tb"><tr><th>班</th><th>號</th><th>姓名</th><th>Email</th><th>身分</th><th>年級</th><th>狀態</th><th>授權到期</th><th></th></tr>';
-  rows.forEach(function(x,i){t+='<tr class="'+(x.active==="0"||x.active===0?"low":"")+'"><td>'+esc(x.class)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+esc(x.email)+"</td><td>"+(x.role==="student"?"學生":"老師")+"</td><td>"+x.grade+"</td><td>"+(x.active==="0"||x.active===0?"停用":"啟用")+"</td><td>"+(x.role==="student"?(x.expires?(x.expires<today?"<b class=\"flag\">已到期 "+x.expires+"</b>":x.expires):"不限期"):"—")+'</td><td><button class="pen" data-e="'+i+'">編輯</button> <button class="pen" data-d="'+i+'">刪除</button></td></tr>'});
+  rows.forEach(function(x,i){t+='<tr class="'+(x.active==="0"||x.active===0?"low":"")+'"><td>'+esc(x.class)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+esc(x.email)+"</td><td>"+(x.role==="student"?"學生":x.role==="admin"?"管理員":"老師")+"</td><td>"+x.grade+"</td><td>"+(x.active==="0"||x.active===0?"停用":"啟用")+"</td><td>"+(x.role==="admin"?"—":(x.expires?(x.expires<today?"<b class=\"flag\">已到期 "+x.expires+"</b>":x.expires):"不限期"))+'</td><td><button class="pen" data-e="'+i+'">編輯</button> <button class="pen" data-d="'+i+'">刪除</button></td></tr>'});
   var tb=h(t+"</table>");s.appendChild(tb);
   tb.onclick=function(e){var b=e.target.closest("button");if(!b)return;
    if(b.dataset.e!==undefined){var x=rows[+b.dataset.e];f.email.value=x.email;f.cls.value=x.class;f.no.value=x.no;f.name.value=x.name;f.grade.value=x.grade;f.role.value=x.role;f.act.value=x.active==="0"?"0":"1";f.exp.value=x.expires||"";scrollTo(0,0)}
@@ -46,13 +46,16 @@ function roster(ctx){
   b1.onclick=function(){if(!ed.value)return msg(exf,"請先選日期",0);setExp(ed.value)};b2.onclick=function(){setExp("")};
   b3.onclick=function(){var d=new Date(Math.max(Date.now(),0));d.setMonth(d.getMonth()+6);setExp(M.today(d))};
   var bulk=ctx.sheet("批次匯入／匯出","從 Excel、Google 試算表複製貼上；欄位：email, 班級, 座號, 姓名, 身分, 年級, 啟用(1/0), 到期日(2027-01-31，可省略)");
-  var ta=area("",5);ta.placeholder="a@gmail.com,601,1,王小明,student,6";bulk.appendChild(ta);
+  var ta=area("",5),rn=h('<p class="meta"></p>');ta.placeholder="a@gmail.com,601,1,王小明,student,6";bulk.appendChild(pickCsv(ta,rn));bulk.appendChild(rn);bulk.appendChild(ta);
   var bt=h('<div class="ctl"><button class="pen go">匯入（相同 Email 會更新）</button><button class="pen">匯出名單 CSV</button></div>'),bf=h('<div class="fb"></div>');bulk.appendChild(bt);bulk.appendChild(bf);
   bt.children[0].onclick=function(){var p=parseCSV(ta.value);if(!p.length)return;var list=toObjs(p,["email","class","no","name","role","grade","active","expires"]);
    M.api("POST","/api/admin/roster",{rows:list}).then(function(x){if(!x.ok)return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+x.errs.map(esc).join("<br>"),0);msg(bf,"已匯入 "+x.n+" 筆",1);setTimeout(ctx.go,600)},function(e){msg(bf,errs(e),0)})};
   bt.children[1].onclick=function(){download("名單.csv","email,class,no,name,role,grade,active,expires\n"+rows.map(function(x){return[x.email,x.class,x.no,x.name,x.role,x.grade,x.active==="0"?0:1,x.expires||""].map(csvEsc).join(",")}).join("\n"))};
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 
+function pickCsv(ta,note){var w=h('<div class="ctl"></div>'),b=h('<button class="pen">選擇 CSV 檔</button>'),f=document.createElement("input");f.type="file";f.accept=".csv,.txt,text/csv,text/plain";f.hidden=true;
+ b.onclick=function(){f.click()};f.onchange=function(){var x=f.files[0];if(!x)return;var r=new FileReader();r.onload=function(){ta.value=String(r.result||"");note.textContent="已讀入 "+x.name+"，確認內容後按「匯入」。";f.value=""};r.readAsText(x,"utf-8")};
+ w.appendChild(b);w.appendChild(f);return w}
 /* ---------- 題庫 ---------- */
 var COLS=["id","unit","type","lv","q","options","answer","hint","diag","img","himg","print","daily","mock","active"];
 function resize(file,cb){var img=new Image(),u=URL.createObjectURL(file);img.onload=function(){var m=1000,k=Math.min(1,m/Math.max(img.width,img.height)),q=.88,c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);
@@ -90,7 +93,7 @@ function bank(ctx){
     M.api("POST","/api/admin/bank",{rows:[o],mode:"merge"}).then(function(r){if(!r.ok)return msg(ef,r.errs.map(esc).join("<br>"),0);msg(ef,"已儲存",1);setTimeout(ctx.go,500)},function(e){msg(ef,errs(e),0)})};
    ed.scrollIntoView()}
   var bk=ctx.sheet("批次匯入／匯出","用試算表整理大量題目，再貼進來（欄位同範例 bank.csv）");
-  var ta=area("",5);bk.appendChild(ta);var mode=sel([["merge","合併（id 相同就更新，其他保留）"],["replace","全部取代（整個題庫會被換掉）"]],"merge"),bt=h('<div class="ctl"></div>'),bf=h('<div class="fb"></div>');
+  var ta=area("",5),bn=h('<p class="meta"></p>');bk.appendChild(pickCsv(ta,bn));bk.appendChild(bn);bk.appendChild(ta);var mode=sel([["merge","合併（id 相同就更新，其他保留）"],["replace","全部取代（整個題庫會被換掉）"]],"merge"),bt=h('<div class="ctl"></div>'),bf=h('<div class="fb"></div>');
   var b1=h('<button class="pen go">匯入</button>'),b2=h('<button class="pen">匯出題庫 CSV</button>');bt.appendChild(mode);bt.appendChild(b1);bt.appendChild(b2);bk.appendChild(bt);bk.appendChild(bf);
   b1.onclick=function(){var p=parseCSV(ta.value);if(!p.length)return;if(mode.value==="replace"&&!confirm("這會刪除現有全部題目，改成貼上的內容。確定？"))return;
    M.api("POST","/api/admin/bank",{rows:toObjs(p,COLS),mode:mode.value}).then(function(x){if(!x.ok)return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+x.errs.slice(0,30).map(esc).join("<br>"),0);msg(bf,"已匯入 "+x.n+" 題",1);setTimeout(ctx.go,600)},function(e){msg(bf,errs(e),0)})};
