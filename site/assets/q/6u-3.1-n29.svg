@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="290" height="110" viewBox="0 0 290 110">
+<rect x="0" y="0" width="290" height="110" fill="#ffffff"/>
+<rect x="1" y="1" width="120.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="61.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">小朋友</text>
+<rect x="121.0" y="1" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="149.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">小剛</text>
+<rect x="177.0" y="1" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="205.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">小美</text>
+<rect x="233.0" y="1" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="261.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">小安</text>
+<rect x="1" y="37" width="120.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="61.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">投進（次）</text>
+<rect x="121.0" y="37" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="149.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">8</text>
+<rect x="177.0" y="37" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="205.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">11</text>
+<rect x="233.0" y="37" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="261.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">6</text>
+<rect x="1" y="73" width="120.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="61.0" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">沒投進（次）</text>
+<rect x="121.0" y="73" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="149.0" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">？</text>
+<rect x="177.0" y="73" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="205.0" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<rect x="233.0" y="73" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="261.0" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">9</text>
+</svg>
