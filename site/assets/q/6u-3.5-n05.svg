@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="92" viewBox="0 0 240 92">
+<rect x="0" y="0" width="240" height="92" fill="#ffffff"/>
+<rect x="10.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<text x="17.0" y="72.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">圖①</text>
+<rect x="50.0" y="24.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="64.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="64.0" y="24.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="50.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<text x="64.0" y="72.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">圖②</text>
+<rect x="104.0" y="24.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="118.0" y="10.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="132.0" y="24.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="104.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="118.0" y="24.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="132.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="104.0" y="10.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="132.0" y="10.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="118.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<text x="125.0" y="72.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">圖③</text>
+<text x="187.0" y="47.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">……</text>
+</svg>

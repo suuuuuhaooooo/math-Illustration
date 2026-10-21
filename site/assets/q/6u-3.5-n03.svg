@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="276" height="124" viewBox="0 0 276 124">
+<rect x="0" y="0" width="276" height="124" fill="#ffffff"/>
+<circle cx="17.0" cy="77.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="17.0" y="104.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">圖①</text>
+<circle cx="57.0" cy="62.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="72.0" cy="77.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="72.0" cy="62.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="72.0" cy="47.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="87.0" cy="62.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="72.0" y="104.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">圖②</text>
+<circle cx="127.0" cy="47.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="142.0" cy="47.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="157.0" cy="77.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="157.0" cy="62.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="157.0" cy="47.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="157.0" cy="32.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="157.0" cy="17.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="172.0" cy="47.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="187.0" cy="47.0" r="6" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="157.0" y="104.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">圖③</text>
+<text x="235.0" y="79.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">……</text>
+</svg>
