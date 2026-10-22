@@ -220,3 +220,17 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 .lwm-b{position:absolute;font-size:13px;line-height:1.5;font-weight:500;color:rgba(0,0,0,.3);white-space:nowrap;transition:opacity .4s;padding:4px 6px;-webkit-font-smoothing:antialiased}
 @media print{.lwm{display:none}}
 .xgnote{margin:8px 0}
+
+/* 首頁公告與特色 */
+.notice{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:16px 0 0;padding:11px 16px;border:1px solid var(--line);border-left:5px solid var(--p1);border-radius:4px 10px 10px 4px;background:var(--paper)}
+.notice[hidden]{display:none}.notice b{font-family:var(--serif)}.notice small{color:var(--soft);margin-left:auto}
+.notice.warn{border-left-color:#c0392b;background:color-mix(in srgb,#c0392b 7%,var(--paper))}
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0 4px}
+.feat{padding:14px 16px;border-top:2px solid var(--ink);background:color-mix(in srgb,var(--paper) 70%,transparent)}
+.feat b{font-family:var(--serif);color:var(--p1);letter-spacing:.12em;font-size:.82rem}
+.feat h3{font-family:var(--serif);margin:2px 0 4px;font-size:1.15rem}.feat p{margin:0;color:var(--soft);font-size:.92rem;line-height:1.7}
+@media (max-width:640px){.feats{grid-template-columns:1fr}}
+/* 條款頁：條文格式 */
+.legal .art{margin:.9em 0 0}.legal .art>b{font-family:var(--serif)}
+.legal ol.cl{margin:.3em 0 0;padding-left:1.6em}.legal ol.cl>li{margin:.35em 0}
+.legal ol.cl ol{list-style:none;padding-left:1.4em;counter-reset:sub}.legal ol.cl ol>li{counter-increment:sub}.legal ol.cl ol>li::before{content:"（" counter(sub,cjk-ideographic) "）";margin-left:-1.8em;display:inline-block;width:1.8em}

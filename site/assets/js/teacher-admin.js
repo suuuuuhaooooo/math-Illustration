@@ -195,7 +195,14 @@ function bank(ctx){
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 
 /* ---------- 設定 ---------- */
+function ann(ctx){
+ var s=ctx.sheet("首頁公告","顯示在首頁最上方，所有人（含未登入）都看得到；存檔後立即生效");
+ M.api("GET","/api/admin/announce").then(function(r){var a=r.a||{},F={on:sel([["0","關閉"],["1","顯示"]],a.on?"1":"0"),level:sel([["info","一般公告"],["warn","重要提醒（紅色標示）"]],a.level||"info"),title:inp(a.title||"","標題（40 字內，可留白）"),text:inp(a.text||"","內容（400 字內）"),until:inp(a.until||"","","date")};
+  s.appendChild(field("狀態",F.on));s.appendChild(field("類型",F.level));s.appendChild(field("標題",F.title));s.appendChild(field("內容",F.text));s.appendChild(field("顯示到哪一天（含當天；留空＝不限期）",F.until));
+  var fb=h('<div class="fb"></div>'),b=h('<div class="ctl"><button class="pen go">儲存公告</button></div>');s.appendChild(b);s.appendChild(fb);
+  b.firstChild.onclick=function(){M.api("POST","/api/admin/announce",{on:F.on.value==="1",level:F.level.value,title:F.title.value,text:F.text.value,until:F.until.value}).then(function(){msg(fb,"已儲存",1)},function(er){msg(fb,er&&er.code==="no_text"?"要顯示公告，內容不能空白":"內容不合規定："+errs(er),0)})}},function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 function settings(ctx){
+ ann(ctx);
  var s=ctx.sheet("遊戲設定","改完按儲存，全班立刻套用；空白＝用預設值");
  M.api("GET","/api/admin/settings").then(function(r){var e=r.effective,F={
   POINTS_BY_LEVEL:inp(e.pts.join(",")),LEVEL_STEP:inp(e.step,"","number"),DAILY_Q_CAP:inp(e.capQ,"","number"),DAILY_MOCK_CAP:inp(e.capMock,"","number"),REVIEW_DAYS:inp(e.review.join(",")),HINT_COST:inp(e.hint,"","number")};
