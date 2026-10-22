@@ -9,18 +9,24 @@ function probe(S){if(probed[S.id])return;probed[S.id]=1;S.chs.forEach(function(c
 NB.onProbe=function(id){var r=rows[id];if(!r)return;var o=NB.flat.filter(function(x){return x.id===id})[0],a=NB.h('<a class="lnk" href="'+NB.link(o)+'"></a>');a.textContent=r.t.textContent;r.t.replaceWith(a);r.t=a;r.cnt.textContent=chapText(r.c);r.sum.textContent=semText(r.S)};
 function showNotice(el){
  var api=(window.NB_CONFIG&&NB_CONFIG.api)||"";if(!api||!window.fetch)return;
+ function dstr(ts){if(!ts)return"";var d=new Date(ts+8*36e5);return d.getUTCFullYear()+"-"+("0"+(d.getUTCMonth()+1)).slice(-2)+"-"+("0"+d.getUTCDate()).slice(-2)}
+ function item(a){var n=document.createElement("div");n.className="notice "+(a.level==="warn"?"warn":"info");
+  var t=document.createElement("b");t.textContent=(a.pin?"置頂｜":"")+(a.title||(a.level==="warn"?"注意":"公告"));n.appendChild(t);
+  var p=document.createElement("span");p.textContent=a.text;n.appendChild(p);
+  var m=[];if(a.ts)m.push("發布 "+dstr(a.ts));if(a.until)m.push("公告至 "+a.until);
+  if(m.length){var sm=document.createElement("small");sm.textContent=m.join("・");n.appendChild(sm)}
+  return n}
  fetch(api+"/api/announce").then(function(r){return r.ok?r.json():null}).then(function(j){
-  var a=j&&j.a;if(!a)return;
-  el.className="notice "+(a.level==="warn"?"warn":"info");el.hidden=false;
-  var t=document.createElement("b");t.textContent=a.title||(a.level==="warn"?"注意":"公告");el.appendChild(t);
-  var p=document.createElement("span");p.textContent=a.text;el.appendChild(p);
-  if(a.until){var m=document.createElement("small");m.textContent="公告至 "+a.until;el.appendChild(m)}
+  var L=j&&(j.list||(j.a?[j.a]:[]));if(!L||!L.length)return;
+  el.hidden=false;var SHOW=3;
+  L.slice(0,SHOW).forEach(function(a){el.appendChild(item(a))});
+  if(L.length>SHOW){var lk=document.createElement("a");lk.className="lnk noticemore";lk.href="announcements.html";lk.textContent="查看全部公告（共 "+L.length+" 則）";el.appendChild(lk)}
  }).catch(function(){})}
 function render(){
  app.innerHTML="";rows={};
  var bar=NB.h('<nav class="bar"><span class="brand">'+NB.deco.logo()+'數學筆記本</span></nav>');if(NB.member)bar.appendChild(NB.member.chip());bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(NB.h('<div class="ruler"></div>'));
  var hero=NB.h('<section class="hero"><div><p class="eyebrow">國小數學・圖解與互動</p><h1 class="title">看懂數學，<mark>動手玩一玩</mark></h1><p class="lead">從例題出發，拖拉、旋轉、疊一疊，把算式變成看得見的圖形。適用國小一至六年級。</p></div></section>');hero.appendChild(NB.deco.hero());app.appendChild(hero);
- var nt=NB.h('<div class="notice" hidden></div>');app.appendChild(nt);showNotice(nt);
+ var nt=NB.h('<div class="notices" hidden></div>');app.appendChild(nt);showNotice(nt);
  app.appendChild(NB.h('<section class="feats" aria-label="特色"><div class="feat"><b>01</b><h3>看懂</h3><p>每個單元從一個例題出發，用手繪圖解一步一步拆開算式，先理解，再計算。</p></div><div class="feat"><b>02</b><h3>動手</h3><p>拖拉、旋轉、疊一疊，自己操作圖形，從錯誤中修正想法。</p></div><div class="feat"><b>03</b><h3>練習</h3><p>班級學員可使用小測驗、每日一題、錯題本與模擬卷，累積積分與勳章，並可列印練習卷。</p></div></section>'));
  app.appendChild(NB.deco.rule());
  var tabs=NB.h('<div class="tabs"></div>');

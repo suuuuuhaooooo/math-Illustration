@@ -200,11 +200,29 @@ function bank(ctx){
 
 /* ---------- 設定 ---------- */
 function ann(ctx){
- var s=ctx.sheet("首頁公告","顯示在首頁最上方，所有人（含未登入）都看得到；存檔後立即生效");
- M.api("GET","/api/admin/announce").then(function(r){var a=r.a||{},F={on:sel([["0","關閉"],["1","顯示"]],a.on?"1":"0"),level:sel([["info","一般公告"],["warn","重要提醒（紅色標示）"]],a.level||"info"),title:inp(a.title||"","標題（40 字內，可留白）"),text:inp(a.text||"","內容（400 字內）"),until:inp(a.until||"","","date")};
-  s.appendChild(field("狀態",F.on));s.appendChild(field("類型",F.level));s.appendChild(field("標題",F.title));s.appendChild(field("內容",F.text));s.appendChild(field("顯示到哪一天（含當天；留空＝不限期）",F.until));
-  var fb=h('<div class="fb"></div>'),b=h('<div class="ctl"><button class="pen go">儲存公告</button></div>');s.appendChild(b);s.appendChild(fb);
-  b.firstChild.onclick=function(){M.api("POST","/api/admin/announce",{on:F.on.value==="1",level:F.level.value,title:F.title.value,text:F.text.value,until:F.until.value}).then(function(){msg(fb,"已儲存",1)},function(er){msg(fb,er&&er.code==="no_text"?"要顯示公告，內容不能空白":"內容不合規定："+errs(er),0)})}},function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
+ var s=ctx.sheet("首頁公告","可建立多則；首頁預設顯示 3 則，其餘收在「更多公告」。置頂的在最前面，其餘依發布時間由新到舊；存檔後立即生效");
+ var list=h("<div></div>"),fb=h('<div class="fb"></div>'),form=h("<div></div>");s.appendChild(list);s.appendChild(fb);s.appendChild(form);
+ function dstr(ts){if(!ts)return"（舊版）";var d=new Date(ts+8*36e5);return d.getUTCFullYear()+"-"+("0"+(d.getUTCMonth()+1)).slice(-2)+"-"+("0"+d.getUTCDate()).slice(-2)}
+ function state(a){var t=new Date(Date.now()+8*36e5).toISOString().slice(0,10);if(!a.on)return"已關閉";if(a.from&&t<a.from)return"尚未開始";if(a.until&&t>a.until)return"已過期";return"顯示中"}
+ function load(){M.api("GET","/api/admin/announce").then(function(r){list.innerHTML="";var L=r.list||[];
+  if(!L.length)list.appendChild(h('<p class="soft">目前沒有公告。</p>'));
+  L.forEach(function(a){var row=h('<div class="wi"></div>'),st=state(a);
+   var t=h("<div></div>");t.textContent=(a.pin?"［置頂］":"")+(a.level==="warn"?"［重要］":"")+(a.title?a.title+"：":"")+a.text;row.appendChild(t);
+   var m=h('<small class="soft"></small>');m.textContent=st+"・發布 "+dstr(a.ts)+(a.from?"・自 "+a.from:"")+(a.until?"・至 "+a.until:"");row.appendChild(m);
+   var c=h('<div class="ctl"><button class="pen">編輯</button><button class="pen">刪除</button></div>');
+   c.children[0].onclick=function(){edit(a)};
+   c.children[1].onclick=function(){if(!confirm("確定刪除這則公告？"))return;M.api("POST","/api/admin/announce/delete",{id:a.id}).then(function(){msg(fb,"已刪除",1);form.innerHTML="";load()},function(er){msg(fb,errs(er),0)})};
+   row.appendChild(c);list.appendChild(row)});
+  var add=h('<div class="ctl"><button class="pen go">新增公告</button></div>');add.firstChild.onclick=function(){edit(null)};list.appendChild(add)},function(e){list.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
+ function edit(a){a=a||{};form.innerHTML="";var F={on:sel([["1","顯示"],["0","關閉"]],a.id&&!a.on?"0":"1"),pin:sel([["0","一般"],["1","置頂（排在最前面）"]],a.pin?"1":"0"),level:sel([["info","一般公告"],["warn","重要提醒（紅色標示）"]],a.level||"info"),title:inp(a.title||"","標題（40 字內，可留白）"),text:inp(a.text||"","內容（400 字內）"),from:inp(a.from||"","","date"),until:inp(a.until||"","","date")};
+  if(a.id){F.repost=sel([["0","維持原發布時間"],["1","重新發布（移到最新）"]],"0")}
+  form.appendChild(h("<h3>"+(a.id?"編輯公告":"新增公告")+"</h3>"));
+  [["狀態",F.on],["排序",F.pin],["類型",F.level],["標題",F.title],["內容",F.text],["開始顯示的日期（留空＝立即）",F.from],["顯示到哪一天（含當天；留空＝不限期）",F.until]].forEach(function(x){form.appendChild(field(x[0],x[1]))});
+  if(F.repost)form.appendChild(field("發布時間",F.repost));
+  var b=h('<div class="ctl"><button class="pen go">儲存公告</button><button class="pen">取消</button></div>');form.appendChild(b);
+  b.children[1].onclick=function(){form.innerHTML=""};
+  b.children[0].onclick=function(){M.api("POST","/api/admin/announce",{id:a.id||"",on:F.on.value==="1",pin:F.pin.value==="1",level:F.level.value,title:F.title.value,text:F.text.value,from:F.from.value,until:F.until.value,repost:F.repost?F.repost.value==="1":false}).then(function(){msg(fb,"已儲存",1);form.innerHTML="";load()},function(er){var c=er&&er.code;msg(fb,c==="no_text"?"內容不能空白":c==="bad_range"?"開始日期不能晚於結束日期":c==="too_many"?"公告太多了，請先刪除舊的":"內容不合規定："+errs(er),0)})}}
+ load()}
 function settings(ctx){
  ann(ctx);
  var s=ctx.sheet("遊戲設定","改完按儲存，全班立刻套用；空白＝用預設值");

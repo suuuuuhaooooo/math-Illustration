@@ -222,7 +222,8 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 .xgnote{margin:8px 0}
 
 /* 首頁公告與特色 */
-.notice{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:16px 0 0;padding:11px 16px;border:1px solid var(--line);border-left:5px solid var(--p1);border-radius:4px 10px 10px 4px;background:var(--paper)}
+.notices{margin:16px 0 0}.notices[hidden],.notices div[hidden]{display:none}.notices .notice+.notice{margin-top:8px}.notices>div>.notice{margin-top:8px}.noticemore{display:inline-block;margin-top:8px;font-size:.9em}
+.notice{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:0;padding:11px 16px;border:1px solid var(--line);border-left:5px solid var(--p1);border-radius:4px 10px 10px 4px;background:var(--paper)}
 .notice[hidden]{display:none}.notice b{font-family:var(--serif)}.notice small{color:var(--soft);margin-left:auto}
 .notice.warn{border-left-color:#c0392b;background:color-mix(in srgb,#c0392b 7%,var(--paper))}
 .feats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0 4px}
