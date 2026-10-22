@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="358" height="118" viewBox="0 0 358 118">
+<rect x="0" y="0" width="358" height="118" fill="#ffffff"/>
+<rect x="12.0" y="10" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="34.8" y="35.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">1</text>
+<rect x="69.6" y="10" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="92.4" y="35.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">2</text>
+<rect x="127.2" y="10" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="150.0" y="35.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">3</text>
+<rect x="184.8" y="10" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="207.6" y="35.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<rect x="242.4" y="10" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="265.2" y="35.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">5</text>
+<rect x="300.0" y="10" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="322.8" y="35.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">6</text>
+<rect x="12.0" y="64" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="34.8" y="89.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">7</text>
+<rect x="69.6" y="64" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="92.4" y="89.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">8</text>
+<rect x="127.2" y="64" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="150.0" y="89.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">9</text>
+<rect x="184.8" y="64" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="207.6" y="89.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">10</text>
+<rect x="242.4" y="64" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="265.2" y="89.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">12</text>
+<rect x="300.0" y="64" width="45.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="322.8" y="89.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">18</text>
+</svg>
