@@ -1,7 +1,7 @@
 /* 老師後台：班級分析、學生名單、題庫、設定、資料管理。資料由伺服器彙整，只有名單裡的 teacher 看得到。 */
 (function(){
 "use strict";
-var M=NB.member,app=document.getElementById("app"),h=NB.h,TAB="overview",CLS=null;
+var M=NB.member,app=document.getElementById("app"),h=NB.h,TAB="overview",CLS=null;document.body.classList.add("tpage");
 try{TAB=sessionStorage.getItem("nbt-tab")||TAB}catch(e){}
 var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["bank","題庫"],["settings","設定"],["data","資料管理"]],TABS=TABS_ALL;/* 老師看不到題庫／設定／資料管理，這三項只有管理員能改 */
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -18,9 +18,9 @@ function go(){shell();var ctx={sheet:sheet,go:go,tab:tab};
  NB.tadmin[TAB](ctx)}
 
 /* ---- 小圖表（純 SVG，沒有外部套件） ---- */
-function bars(vals,labels,opt){opt=opt||{};var bw=Math.min(22,Math.max(10,560/vals.length)),w=Math.max(320,vals.length*bw),H=opt.h||90,mx=Math.max.apply(null,vals.concat([1])),i,out='<svg viewBox="0 0 '+w+" "+(H+18)+'" class="chart" role="img" aria-label="'+esc(opt.label||"")+'" preserveAspectRatio="xMinYMid meet"><line x1="0" y1="'+H+'" x2="'+w+'" y2="'+H+'" stroke="var(--line)"/>';
+function bars(vals,labels,opt){opt=opt||{};var bw=Math.min(44,Math.max(12,560/vals.length)),w=Math.max(320,vals.length*bw),H=opt.h||90,mx=Math.max.apply(null,vals.concat([1])),i,out='<svg viewBox="0 0 '+w+" "+(H+18)+'" class="chart" style="min-width:'+Math.min(w,Math.max(320,vals.length*14))+'px" role="img" aria-label="'+esc(opt.label||"")+'" preserveAspectRatio="xMinYMid meet"><line x1="0" y1="'+H+'" x2="'+w+'" y2="'+H+'" stroke="var(--line)"/>';
  vals.forEach(function(v,i){var bh=v/mx*(H-4);out+='<rect x="'+(i*bw+1.5)+'" y="'+(H-bh)+'" width="'+(bw-3)+'" height="'+bh+'" rx="2" fill="'+(opt.color||"var(--p2)")+'"><title>'+esc(labels[i])+" → "+v+(opt.unit||"")+"</title></rect>"});
- var step=Math.ceil(vals.length/8);labels.forEach(function(l,i){if(i%step===0)out+='<text x="'+(i*bw+bw/2)+'" y="'+(H+13)+'" font-size="9" text-anchor="middle" fill="var(--soft)">'+esc(l)+"</text>"});return out+"</svg>"}
+ var ml=0;labels.forEach(function(l){ml=Math.max(ml,String(l).length)});var step=Math.max(1,Math.ceil((ml*6+8)/bw));labels.forEach(function(l,i){if(i%step===0)out+='<text x="'+(i*bw+bw/2)+'" y="'+(H+13)+'" font-size="10" text-anchor="middle" fill="var(--soft)">'+esc(l)+"</text>"});return '<div class="chartw">'+out+"</svg></div>"}
 function meterRow(label,p,right){return'<div class="urow"><span>'+label+'</span><div class="meter"><i style="width:'+(p||0)+'%"></i></div><span>'+right+"</span></div>"}
 
 function load(cls){

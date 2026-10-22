@@ -144,3 +144,17 @@ table.tb{width:100%;border-collapse:collapse}.tb th,.tb td{padding:7px 8px;borde
 .popts{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 16px;margin:4px 0}
 .chart{width:100%;height:auto;max-height:140px;display:block}.flag{display:inline-block;padding:0 8px;margin:1px 2px;border:1px solid var(--margin);color:var(--margin);border-radius:10px;font-size:.78rem}
 .fld{display:block;margin:6px 0}.fld>span{display:block;font-size:.85rem;color:var(--soft)}.fld input,.fld select,.fld textarea{max-width:100%;font:inherit}.wrapctl{flex-wrap:wrap}
+
+/* 注音（一、二年級） */
+ruby{ruby-position:over;ruby-align:center}
+rt{font-size:.5em;line-height:1.05;font-weight:500;letter-spacing:0}
+body.zymode #app,body.zymode #app p,body.zymode #app .q,body.zymode #app label,body.zymode #app a,body.zymode #app button,body.zymode #app li,body.zymode #app td,body.zymode #app summary{line-height:2.15}
+.themes button#zybtn{margin-left:2px}
+/* 長清單在自己的框裡捲動，不要整頁一起動 */
+.ug{max-height:46vh;overflow-y:auto;overscroll-behavior:contain;padding-right:6px}
+.sbox{max-height:60vh;overflow-y:auto;overscroll-behavior:contain;border:1.5px solid var(--line);border-radius:10px;padding:6px 10px;margin:8px 0}
+/* 圖表：窄螢幕可以左右滑，文字不擠在一起 */
+.chartw{overflow-x:auto;overscroll-behavior-x:contain}.chartw .chart{max-height:none;height:auto}
+/* 老師後台的資料表：欄位標題不要一個字一行；太寬就在表格內左右滑 */
+.tpage :not(.bkwrap)>table.tb{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tpage :not(.bkwrap)>table.tb th,.tpage :not(.bkwrap)>table.tb td{white-space:nowrap}

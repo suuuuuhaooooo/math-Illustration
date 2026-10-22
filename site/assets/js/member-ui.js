@@ -172,7 +172,7 @@ V.wrong=function(){
  if(!D.wr.length){s.appendChild(h("<p>目前沒有錯題，真棒！</p>"));return}
  var due=D.wr.filter(function(w){return!w.due||w.due<=ymdT()}).length;s.appendChild(h("<p>每一題要在 "+M.cfg.review.join("、")+" 天後各答對一次才會畢業（間隔複習，記得最牢），還能拿積分。今天該複習 <b>"+due+"</b> 題。</p>"));
  var b=h('<div class="ctl"><button class="pen go">開始訂正（最多 10 題）</button></div>');b.firstChild.onclick=function(){fix()};if(!due)b.firstChild.textContent="今天沒有要複習的題目";s.appendChild(b);
- D.wr.slice().reverse().forEach(function(w){var d=h('<div class="wi"><div>'+tx(w.q)+"</div>"+qimg(w.img)+"<small>"+esc(title(w.id))+"・錯 "+w.n+" 次・已通過 "+(w.ok||0)+"/"+M.cfg.review.length+"・"+(!w.due||w.due<=ymdT()?"今天可複習":w.due.slice(5)+" 再複習")+"　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));d.appendChild(dt);s.appendChild(d)});
+ var sbx=h('<div class="sbox"></div>');s.appendChild(sbx);D.wr.slice().reverse().forEach(function(w){var d=h('<div class="wi"><div>'+tx(w.q)+"</div>"+qimg(w.img)+"<small>"+esc(title(w.id))+"・錯 "+w.n+" 次・已通過 "+(w.ok||0)+"/"+M.cfg.review.length+"・"+(!w.due||w.due<=ymdT()?"今天可複習":w.due.slice(5)+" 再複習")+"　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));d.appendChild(dt);sbx.appendChild(d)});
  function fix(){begin({kind:"fix"},function(r){if(r.empty){view.innerHTML="";V.wrong();return}run({tag:"錯題訂正",title:"把錯的題目弄懂",sess:r,again:function(){view.innerHTML="";V.wrong()}})})}};
 
 V.progress=function(){
@@ -184,7 +184,7 @@ V.progress=function(){
  days.forEach(function(d,j){var X=30+j*56,H=d.n/mx*100,C=d.c/mx*100;NB.mk("rect",{x:X,y:120-H,width:34,height:H,fill:"var(--p2)",opacity:.28},sv,1.6);NB.mk("rect",{x:X,y:120-C,width:34,height:C,fill:"var(--p3)"},sv,1.6);NB.t(sv,X+17,142,d.l,{z:12,c:"var(--soft)"})});
  s.appendChild(h('<p class="meta">各單元答對率</p>'));var ks=Object.keys(D.u).filter(function(k){return D.u[k].n}).sort();
  if(!ks.length)s.appendChild(h("<p>還沒有作答紀錄，去做一份小測驗吧。</p>"));
- ks.forEach(function(k){var u=D.u[k],p=Math.round(u.c/u.n*100);s.appendChild(h('<div class="urow"><span>'+esc(title(k))+'</span><div class="meter"><i style="width:'+p+'%"></i></div><span>'+u.c+"/"+u.n+"（"+p+"%）</span></div>"))});
+ var ubx=h('<div class="sbox"></div>');if(ks.length)s.appendChild(ubx);ks.forEach(function(k){var u=D.u[k],p=Math.round(u.c/u.n*100);ubx.appendChild(h('<div class="urow"><span>'+esc(title(k))+'</span><div class="meter"><i style="width:'+p+'%"></i></div><span>'+u.c+"/"+u.n+"（"+p+"%）</span></div>"))});
  if(D.mk.length){s.appendChild(h('<p class="meta">模擬卷成績</p>'));s.appendChild(h("<p>"+D.mk.slice(-8).map(function(m){return m.d.slice(5)+"　"+m.sc+" 分"}).join("<br>")+"</p>"))}
  view.appendChild(s)};
 
