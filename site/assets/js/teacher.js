@@ -12,7 +12,8 @@ function shell(){app.innerHTML="";var bar=h('<nav class="bar"><a class="back" hr
 function sheet(tag,sub){var s=h('<section class="sheet"><h2><span class="tag">'+tag+'</span>'+(sub||"")+'</h2></section>');app.appendChild(s);return s}
 function msg(t){shell();var s=sheet("提示","");s.appendChild(h("<p>"+t+'</p><a class="pen go" href="member.html">前往登入</a>'))}
 function tab(t){TAB=t;try{sessionStorage.setItem("nbt-tab",t)}catch(e){}go()}
-function go(){shell();var ctx={sheet:sheet,go:go,tab:tab};
+function go(){if(!TABS.some(function(t){return t[0]===TAB}))TAB="overview"; /* 記在瀏覽器裡的分頁已不存在、或老師沒有權限時，回到班級分析 */
+ shell();var ctx={sheet:sheet,go:go,tab:tab};
  if(TAB==="overview")return load(CLS);
  if(TAB==="data")return NB.tadmin.data(ctx);
  NB.tadmin[TAB](ctx)}

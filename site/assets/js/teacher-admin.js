@@ -141,7 +141,7 @@ function bank(ctx){
      if(!has&&!had){msg(ef,"已儲存",1);return setTimeout(ctx.go,500)}
      at.id=(r.ids&&r.ids[0])||o.id;return M.api("POST","/api/admin/meta",{rows:[at],mode:"merge"}).then(function(m){if(!m.ok)return msg(ef,"題目已儲存，但屬性有問題："+m.errs.map(esc).join("<br>"),0);msg(ef,"已儲存",1);setTimeout(ctx.go,500)})},function(e){msg(ef,errs(e),0)})};
    ed.scrollIntoView()}
-  var bk=ctx.sheet("批次匯入／匯出","用試算表整理大量題目，再貼進來（欄位同範例 bank.csv）");
+  var bk=ctx.sheet("批次匯入／匯出","用試算表整理大量題目，再貼進來（欄位同範例 bank.csv）；表格後面可以多加五欄「學習表現、學習內容、難易度、認知層次、知識類型」，題目和屬性會一起存");
   var ta=area("",5),bn=h('<p class="meta"></p>');bk.appendChild(pickCsv(ta,bn,true));bk.appendChild(bn);bk.appendChild(ta);var mode=sel([["merge","合併（id 相同就更新，其他保留）"],["replace","全部取代（整個題庫會被換掉）"]],"merge"),bt=h('<div class="ctl"></div>'),bf=h('<div class="fb"></div>');
   var b1=h('<button class="pen go">匯入</button>'),b2=h('<button class="pen">匯出題庫 CSV</button>');bt.appendChild(mode);bt.appendChild(b1);bt.appendChild(b2);bk.appendChild(bt);bk.appendChild(bf);
   b1.onclick=function(){
@@ -159,7 +159,8 @@ function bank(ctx){
     return post(j,dry,!dry&&k===0&&mode.value==="replace").then(function(x){if(!x.ok){bad=bad.concat(x.errs.map(function(e){return"【"+j.file+"】"+e}));return pass(dry,k+1)}return pass(dry,k+1)})}
    pass(true,0).then(function(){if(bad.length){done();return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+bad.slice(0,30).map(esc).join("<br>")+(bad.length>30?"<br>…還有 "+(bad.length-30)+" 項":""),0)}
     return pass(false,0).then(function(){done();msg(bf,"已匯入 "+total+" 題（"+src.length+" 個來源）",1);setTimeout(ctx.go,700)})}).catch(function(e){done();msg(bf,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
-  b2.onclick=function(){download("題庫.csv",COLS.join(",")+"\n"+rows.map(function(x){return COLS.map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
+  var AK=["perf","content","diff","cog","know"],AH=["學習表現","學習內容","難易度","認知層次","知識類型"];
+  b2.onclick=function(){download("題庫.csv",COLS.concat(AH).join(",")+"\n"+rows.map(function(x){return COLS.concat(AK).map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
   /* 題目屬性表：學習表現、學習內容、難易度、認知層次、知識類型。用題目 id 對應題庫，和題庫分開匯入，不會動到題目本身 */
   var MC=["id","學習表現","學習內容","難易度","認知層次","知識類型"],mk=ctx.sheet("題目屬性表","列印練習卷可以依這些屬性篩選題目、在每題旁顯示、做雙向細目表"),mi=h('<p class="meta">讀取中…</p>');
   mk.appendChild(mi);M.api("GET","/api/admin/meta").then(function(r){mi.innerHTML="目前題庫 <b>"+r.bank+"</b> 題，其中 <b>"+r.covered+"</b> 題已有屬性"+(r.bank-r.covered?"，還有 <b>"+(r.bank-r.covered)+"</b> 題沒有（這些題在篩選時不會被選到）":"，全部都有了")+(r.orphans?"；屬性表裡有 "+r.orphans+" 列的 id 在題庫找不到（不影響使用）":"")+"。"},function(){mi.textContent=""});
@@ -195,8 +196,8 @@ function settings(ctx){
 /* ---------- 資料管理 ---------- */
 function data(ctx){
  var s=ctx.sheet("資料管理","重設、刪除學生或整班的成績資料");
- s.appendChild(h("<p>學生個別的「重設／刪除」按鈕在「全班進度」表格最右側；整班刪除在該表格下方。</p><p>學期結束建議流程：① 下載成績 CSV → ② 刪除整班資料 → ③ 在「學生名單」把學生刪除或停用。</p>"));
- var b=h('<div class="ctl"><a class="pen go" href="#progress">前往全班進度</a></div>');b.firstChild.onclick=function(e){e.preventDefault();ctx.tab("progress")};s.appendChild(b);
+ s.appendChild(h("<p>學生個別的「重設／刪除」按鈕在「班級分析」頁的「全班進度」表格最右側；整班刪除在該表格下方。</p><p>學期結束建議流程：① 下載成績 CSV → ② 刪除整班資料 → ③ 在「學生名單」把學生刪除或停用。</p>"));
+ var b=h('<div class="ctl"><a class="pen go" href="#overview">前往班級分析（全班進度）</a></div>');b.firstChild.onclick=function(e){e.preventDefault();ctx.tab("overview")};s.appendChild(b);
  var m=h('<div class="ctl"><button class="pen">檢查是否有舊資料可搬移</button></div>'),mf=h('<div class="fb"></div>');s.appendChild(m);s.appendChild(mf);
  m.firstChild.onclick=function(){M.api("GET","/api/admin/roster").then(function(r){if(!r.legacy)return msg(mf,"沒有需要搬移的舊資料。",1);ctx.box=s;ctx.go2=ctx.go;migrateBanner(ctx,true)},function(e){msg(mf,errs(e),0)})}}
 
