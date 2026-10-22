@@ -154,7 +154,10 @@ body.zymode #app,body.zymode #app p,body.zymode #app .q,body.zymode #app label,b
 .ug{max-height:46vh;overflow-y:auto;overscroll-behavior:contain;padding-right:6px}
 .sbox{max-height:60vh;overflow-y:auto;overscroll-behavior:contain;border:1.5px solid var(--line);border-radius:10px;padding:6px 10px;margin:8px 0}
 /* 圖表：窄螢幕可以左右滑，文字不擠在一起 */
-.chartw{overflow-x:auto;overscroll-behavior-x:contain}.chartw .chart{max-height:none;height:auto}
+.chartw{overflow-x:auto;overscroll-behavior-x:contain}.chartw .chart{max-height:none}
 /* 老師後台的資料表：欄位標題不要一個字一行；太寬就在表格內左右滑 */
 .tpage :not(.bkwrap)>table.tb{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tpage :not(.bkwrap)>table.tb th,.tpage :not(.bkwrap)>table.tb td{white-space:nowrap}
+.fbar{display:flex;flex-wrap:wrap;gap:8px 12px;margin:8px 0;font-size:.9rem}.fbar label{display:inline-flex;align-items:center;gap:4px;color:var(--soft)}
+.fbar select{max-width:100%;padding:4px 6px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg,#fff);color:inherit;font:inherit}
+@media(max-width:560px){.fbar label{flex:1 1 45%}.fbar select{flex:1;min-width:0}.urow{grid-template-columns:1fr 5.5em;}.urow .meter{grid-column:1/-1;order:3}}

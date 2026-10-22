@@ -18,9 +18,9 @@ function go(){shell();var ctx={sheet:sheet,go:go,tab:tab};
  NB.tadmin[TAB](ctx)}
 
 /* ---- 小圖表（純 SVG，沒有外部套件） ---- */
-function bars(vals,labels,opt){opt=opt||{};var bw=Math.min(44,Math.max(12,560/vals.length)),w=Math.max(320,vals.length*bw),H=opt.h||90,mx=Math.max.apply(null,vals.concat([1])),i,out='<svg viewBox="0 0 '+w+" "+(H+18)+'" class="chart" style="min-width:'+Math.min(w,Math.max(320,vals.length*14))+'px" role="img" aria-label="'+esc(opt.label||"")+'" preserveAspectRatio="xMinYMid meet"><line x1="0" y1="'+H+'" x2="'+w+'" y2="'+H+'" stroke="var(--line)"/>';
+function bars(vals,labels,opt){opt=opt||{};var bw=Math.min(44,Math.max(12,560/vals.length)),w=Math.max(320,vals.length*bw),H=opt.h||90,mx=Math.max.apply(null,vals.concat([1])),i,out='<svg viewBox="0 0 '+w+" "+(H+18)+'" class="chart" width="'+w+'" height="'+(H+18)+'" style="width:'+w+'px;max-width:none" role="img" aria-label="'+esc(opt.label||"")+'" preserveAspectRatio="xMinYMid meet"><line x1="0" y1="'+H+'" x2="'+w+'" y2="'+H+'" stroke="var(--line)"/>';
  vals.forEach(function(v,i){var bh=v/mx*(H-4);out+='<rect x="'+(i*bw+1.5)+'" y="'+(H-bh)+'" width="'+(bw-3)+'" height="'+bh+'" rx="2" fill="'+(opt.color||"var(--p2)")+'"><title>'+esc(labels[i])+" → "+v+(opt.unit||"")+"</title></rect>"});
- var ml=0;labels.forEach(function(l){ml=Math.max(ml,String(l).length)});var step=Math.max(1,Math.ceil((ml*6+8)/bw));labels.forEach(function(l,i){if(i%step===0)out+='<text x="'+(i*bw+bw/2)+'" y="'+(H+13)+'" font-size="10" text-anchor="middle" fill="var(--soft)">'+esc(l)+"</text>"});return '<div class="chartw">'+out+"</svg></div>"}
+ var ml=0;labels.forEach(function(l){ml=Math.max(ml,String(l).split("・")[0].length)});var step=Math.max(1,Math.ceil((ml*6+8)/bw));labels.forEach(function(l,i){if(i%step===0)out+='<text x="'+(i*bw+bw/2)+'" y="'+(H+13)+'" font-size="10" text-anchor="middle" fill="var(--soft)">'+esc(String(l).split("・")[0])+"</text>"});return '<div class="chartw">'+out+"</svg></div>"}
 function meterRow(label,p,right){return'<div class="urow"><span>'+label+'</span><div class="meter"><i style="width:'+(p||0)+'%"></i></div><span>'+right+"</span></div>"}
 
 function load(cls){

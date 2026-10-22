@@ -167,12 +167,30 @@ V.mock=function(){
   var note=[];if(r.filled)note.push("你選的單元題目不夠多，已用同年級其他單元補了 "+r.filled+" 題。");if(r.short)note.push("可出的題目不足，這份只有 "+r.qs.length+" 題。");if(r.small)note.push("題數少於 8 題的練習不計入模擬卷獎勵與勳章。");
   run({tag:"模擬卷",title:"請在時間內完成",sess:r,note:note.join(" "),again:start})})}};
 
+
+/* 篩選列：年級、學期，以及各頁自己的選項；回傳 {el, val()} */
+function fbar(parts,onchg){var el=h('<div class="fbar"></div>'),sel={};parts.forEach(function(p){var lb=h("<label>"+p.l+" </label>"),se=h("<select></select>");p.o.forEach(function(o){var op=document.createElement("option");op.value=o[0];op.textContent=o[1];se.appendChild(op)});se.onchange=function(){onchg()};lb.appendChild(se);el.appendChild(lb);sel[p.k]=se});return{el:el,val:function(k){return sel[k].value},set:function(k,v){sel[k].value=v}}}
+var GRADE_OPT=[["","全部年級"],["1","一年級"],["2","二年級"],["3","三年級"],["4","四年級"],["5","五年級"],["6","六年級"]],SEM_OPT=[["","上下學期"],["u","上學期"],["d","下學期"]];
+function gsOk(id,g,m){id=String(id);return(!g||id.charAt(0)===g)&&(!m||id.charAt(1)===m)}
 V.wrong=function(){
  var D=M.D,s=sheet("錯題本",D.wr.length+" 題");view.appendChild(s);
  if(!D.wr.length){s.appendChild(h("<p>目前沒有錯題，真棒！</p>"));return}
  var due=D.wr.filter(function(w){return!w.due||w.due<=ymdT()}).length;s.appendChild(h("<p>每一題要在 "+M.cfg.review.join("、")+" 天後各答對一次才會畢業（間隔複習，記得最牢），還能拿積分。今天該複習 <b>"+due+"</b> 題。</p>"));
  var b=h('<div class="ctl"><button class="pen go">開始訂正（最多 10 題）</button></div>');b.firstChild.onclick=function(){fix()};if(!due)b.firstChild.textContent="今天沒有要複習的題目";s.appendChild(b);
- var sbx=h('<div class="sbox"></div>');s.appendChild(sbx);D.wr.slice().reverse().forEach(function(w){var d=h('<div class="wi"><div>'+tx(w.q)+"</div>"+qimg(w.img)+"<small>"+esc(title(w.id))+"・錯 "+w.n+" 次・已通過 "+(w.ok||0)+"/"+M.cfg.review.length+"・"+(!w.due||w.due<=ymdT()?"今天可複習":w.due.slice(5)+" 再複習")+"　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));d.appendChild(dt);sbx.appendChild(d)});
+ var units=[],seen={};D.wr.forEach(function(w){if(!seen[w.id]){seen[w.id]=1;units.push(w.id)}});units.sort();
+ var F=fbar([{k:"g",l:"年級",o:GRADE_OPT},{k:"m",l:"學期",o:SEM_OPT},{k:"u",l:"單元",o:[["","全部單元"]]},{k:"st",l:"狀態",o:[["","全部"],["due","今天可複習"],["wait","還沒到複習日"],["hard","錯 2 次以上"]]}],draw);
+ s.appendChild(F.el);var cnt=h('<p class="meta"></p>');s.appendChild(cnt);
+ var sbx=h('<div class="sbox"></div>');s.appendChild(sbx);
+ function unitOpts(){var se=F.el.querySelectorAll("select")[2],cur=se.value;se.innerHTML="";var o0=document.createElement("option");o0.value="";o0.textContent="全部單元";se.appendChild(o0);units.filter(function(id){return gsOk(id,F.val("g"),F.val("m"))}).forEach(function(id){var o=document.createElement("option");o.value=id;o.textContent=title(id);se.appendChild(o)});se.value=cur;if(se.value!==cur)se.value=""}
+ F.el.querySelectorAll("select")[0].onchange=F.el.querySelectorAll("select")[1].onchange=function(){unitOpts();draw()};
+ function draw(){sbx.innerHTML="";var t=ymdT(),n=0;
+  D.wr.slice().reverse().forEach(function(w){var isDue=!w.due||w.due<=t;
+   if(!gsOk(w.id,F.val("g"),F.val("m")))return;if(F.val("u")&&w.id!==F.val("u"))return;
+   var st=F.val("st");if(st==="due"&&!isDue)return;if(st==="wait"&&isDue)return;if(st==="hard"&&!(w.n>=2))return;n++;
+   var d=h('<div class="wi"><div>'+tx(w.q)+"</div>"+qimg(w.img)+"<small>"+esc(title(w.id))+"・錯 "+w.n+" 次・已通過 "+(w.ok||0)+"/"+M.cfg.review.length+"・"+(isDue?"今天可複習":w.due.slice(5)+" 再複習")+"　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));d.appendChild(dt);sbx.appendChild(d)});
+  if(!n)sbx.appendChild(h("<p>這個篩選條件下沒有錯題。</p>"));cnt.textContent="符合條件 "+n+" 題（共 "+D.wr.length+" 題）";
+  if(window.Zhuyin&&Zhuyin.refresh)try{Zhuyin.refresh()}catch(e){}}
+ unitOpts();draw();
  function fix(){begin({kind:"fix"},function(r){if(r.empty){view.innerHTML="";V.wrong();return}run({tag:"錯題訂正",title:"把錯的題目弄懂",sess:r,again:function(){view.innerHTML="";V.wrong()}})})}};
 
 V.progress=function(){
@@ -184,7 +202,14 @@ V.progress=function(){
  days.forEach(function(d,j){var X=30+j*56,H=d.n/mx*100,C=d.c/mx*100;NB.mk("rect",{x:X,y:120-H,width:34,height:H,fill:"var(--p2)",opacity:.28},sv,1.6);NB.mk("rect",{x:X,y:120-C,width:34,height:C,fill:"var(--p3)"},sv,1.6);NB.t(sv,X+17,142,d.l,{z:12,c:"var(--soft)"})});
  s.appendChild(h('<p class="meta">各單元答對率</p>'));var ks=Object.keys(D.u).filter(function(k){return D.u[k].n}).sort();
  if(!ks.length)s.appendChild(h("<p>還沒有作答紀錄，去做一份小測驗吧。</p>"));
- var ubx=h('<div class="sbox"></div>');if(ks.length)s.appendChild(ubx);ks.forEach(function(k){var u=D.u[k],p=Math.round(u.c/u.n*100);ubx.appendChild(h('<div class="urow"><span>'+esc(title(k))+'</span><div class="meter"><i style="width:'+p+'%"></i></div><span>'+u.c+"/"+u.n+"（"+p+"%）</span></div>"))});
+ var ubx=h('<div class="sbox"></div>'),PF=null;
+ if(ks.length){PF=fbar([{k:"g",l:"年級",o:GRADE_OPT},{k:"m",l:"學期",o:SEM_OPT},{k:"o",l:"排序",o:[["id","單元順序"],["low","答對率由低到高"],["many","答題數由多到少"]]},{k:"w",l:"顯示",o:[["","全部"],["weak","待加強（低於 70%）"],["good","很穩（90% 以上）"]]}],drawU);s.appendChild(PF.el);s.appendChild(ubx)}
+ function drawU(){ubx.innerHTML="";var L=ks.filter(function(k){var u=D.u[k],p=u.c/u.n*100;if(!gsOk(k,PF.val("g"),PF.val("m")))return false;if(PF.val("w")==="weak"&&!(p<70))return false;if(PF.val("w")==="good"&&!(p>=90))return false;return true});
+  var o=PF.val("o");if(o==="low")L.sort(function(x,y){return D.u[x].c/D.u[x].n-D.u[y].c/D.u[y].n});else if(o==="many")L.sort(function(x,y){return D.u[y].n-D.u[x].n});
+  if(!L.length)ubx.appendChild(h("<p>這個篩選條件下沒有單元。</p>"));
+  L.forEach(function(k){var u=D.u[k],p=Math.round(u.c/u.n*100);ubx.appendChild(h('<div class="urow"><span>'+esc(title(k))+'</span><div class="meter"><i style="width:'+p+'%"></i></div><span>'+u.c+"/"+u.n+"（"+p+"%）</span></div>"))});
+  if(window.Zhuyin&&Zhuyin.refresh)try{Zhuyin.refresh()}catch(e){}}
+ if(ks.length)drawU();
  if(D.mk.length){s.appendChild(h('<p class="meta">模擬卷成績</p>'));s.appendChild(h("<p>"+D.mk.slice(-8).map(function(m){return m.d.slice(5)+"　"+m.sc+" 分"}).join("<br>")+"</p>"))}
  view.appendChild(s)};
 
