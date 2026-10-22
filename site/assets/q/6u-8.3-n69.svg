@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="74" viewBox="0 0 480 74">
+<rect x="0" y="0" width="480" height="74" fill="#ffffff"/>
+<rect x="10.0" y="10" width="146.7" height="54" rx="8" fill="#eeeeee" stroke="#555555" stroke-width="1.5"/>
+<text x="83.3" y="32.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">A</text>
+<text x="83.3" y="54.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">秒速 30 公尺</text>
+<rect x="166.7" y="10" width="146.7" height="54" rx="8" fill="#eeeeee" stroke="#555555" stroke-width="1.5"/>
+<text x="240.0" y="32.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">B</text>
+<text x="240.0" y="54.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">時速 100 公里</text>
+<rect x="323.3" y="10" width="146.7" height="54" rx="8" fill="#eeeeee" stroke="#555555" stroke-width="1.5"/>
+<text x="396.7" y="32.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">C</text>
+<text x="396.7" y="54.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">分速 2 公里</text>
+</svg>
