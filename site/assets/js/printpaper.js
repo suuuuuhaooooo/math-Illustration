@@ -81,7 +81,8 @@
   function shuf(a, r) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function variant(qs, v) {
     if (!v) return qs; var r = seeded(v + 1);
-    return shuf(qs, r).map(function (q) { if (!q.o) return q; var o = shuf(q.o, r), i = o.indexOf(String(q.a)); return Object.assign({}, q, { o: o, al: i >= 0 ? L(i) : q.al }); });
+    var blocks = []; qs.forEach(function (q) { var l = blocks[blocks.length - 1]; if (q.gid && l && l[0].gid === q.gid) l.push(q); else blocks.push([q]); }); /* 題組整組一起換位置，組內維持原順序 */
+    return shuf(blocks, r).reduce(function (a, b) { return a.concat(b); }, []).map(function (q) { if (!q.o) return q; var o = shuf(q.o, r), i = o.indexOf(String(q.a)); return Object.assign({}, q, { o: o, al: i >= 0 ? L(i) : q.al }); });
   }
 
   /* 浮水印：整張卷斜著鋪滿重複的文字。是真正的文字，所以不管瀏覽器有沒有開「列印背景圖形」都印得出來 */
@@ -136,8 +137,19 @@
     }
     function opts(q) { return q.o ? '<div class="popts ' + P.optMode + '">' + q.o.map(function (t, k) { return "<div>" + L(k) + "．" + D.tx(esc(t)) + "</div>"; }).join("") + "</div>" : ""; }
     function ans(q) { return (q.al ? q.al + "．" : "") + D.tx(esc(String(q.a))); }
+    /* 題組：共用題幹只在這組的第一小題前印一次，後面的小題標「承第 N 題」；題幹要完整放在第一小題的框裡，不拆頁 */
+    function gHead(arr, i) {
+      var q = arr[i]; if (!q.gid || !q.gs) return "";
+      var p = arr[i - 1];
+      if (p && p.gid === q.gid) {
+        var st = i; while (st > 0 && arr[st - 1].gid === q.gid) st--;
+        return '<div class="gcont">（題組，承第 ' + (st + 1) + " 題的敘述）</div>";
+      }
+      var n = 1; while (arr[i + n] && arr[i + n].gid === q.gid) n++;
+      return '<div class="gstem"><small class="gtag">題組・第 ' + (i + 1) + (n > 1 ? "～" + (i + n) : "") + " 題</small><div>" + D.tx(q.gs) + "</div>" + D.qimg(q.gi) + "</div>";
+    }
     function qList(arr, withAns) {
-      return "<ol>" + arr.map(function (q) { return "<li>" + meta(q, withAns ? "qa" : "q") + D.tx(q.q) + D.qimg(q.img) + opts(q) +
+      return "<ol>" + arr.map(function (q, qi) { return "<li" + (q.gid ? ' class="gsub"' : "") + ">" + gHead(arr, qi) + meta(q, withAns ? "qa" : "q") + D.tx(q.q) + D.qimg(q.img) + opts(q) +
         (withAns ? '<div class="pans"><b>答案：</b>' + ans(q) + (q.h ? "<br><small>詳解：" + D.tx(q.h) + "</small>" : "") + D.qimg(q.himg) + "</div>" : '<span class="ln">答：' + (q.o ? "（　　）" : "＿＿＿＿＿＿＿＿＿") + "</span>") + "</li>"; }).join("") + "</ol>";
     }
     function sheet(k, arr, tag) {
@@ -186,8 +198,8 @@
   }
   function csv(qs, D) {
     function c(v) { v = String(v == null ? "" : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
-    var rows = [["題號", "單元", "學習表現", "學習內容", "難易度", "認知層次", "知識類型", "題型", "題目", "選項A", "選項B", "選項C", "選項D", "答案", "詳解", "有附圖"]];
-    qs.forEach(function (q, i) { var o = q.o || []; var a = q.m || {}; rows.push([i + 1, D.title(q.unit), a.p || "", a.c || "", a.d || LV[q.lv] || "", a.g || "", a.k || "", q.o ? "選擇題" : "填充題", q.q, o[0] || "", o[1] || "", o[2] || "", o[3] || "", (q.al ? q.al + "．" : "") + q.a, q.h || "", q.img ? "是" : ""]); });
+    var rows = [["題號", "單元", "學習表現", "學習內容", "難易度", "認知層次", "知識類型", "題型", "題目", "選項A", "選項B", "選項C", "選項D", "答案", "詳解", "有附圖", "題組ID", "題組題幹"]];
+    qs.forEach(function (q, i) { var o = q.o || []; var a = q.m || {}; rows.push([i + 1, D.title(q.unit), a.p || "", a.c || "", a.d || LV[q.lv] || "", a.g || "", a.k || "", q.o ? "選擇題" : "填充題", q.q, o[0] || "", o[1] || "", o[2] || "", o[3] || "", (q.al ? q.al + "．" : "") + q.a, q.h || "", q.img ? "是" : "", q.gid || "", q.gid && (i === 0 || qs[i - 1].gid !== q.gid) ? q.gs || "" : ""]); });
     var blob = new Blob(["﻿" + rows.map(function (r) { return r.map(c).join(","); }).join("\r\n")], { type: "text/csv;charset=utf-8" }), a = document.createElement("a");
     a.href = URL.createObjectURL(blob); a.download = "練習卷題目.csv"; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }

@@ -246,3 +246,12 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
  .ppr input[type=text],.ppr input:not([type]),.ppr select{max-width:100%;min-width:0}
 }
 .wi .qid{font-size:.72rem;color:var(--soft);border:1px solid var(--line);border-radius:4px;padding:0 4px;font-family:monospace}
+
+/* 題組：共用題幹 */
+.gstem{margin:6px 0 10px;padding:9px 12px;border-left:4px solid var(--p1);background:color-mix(in srgb,var(--paper2) 70%,transparent);border-radius:2px 8px 8px 2px;line-height:1.8}
+.gstem .gtag{display:inline-block;margin-bottom:2px;color:var(--p1);font-weight:700;letter-spacing:.06em}
+.gstem img.qimg{margin-top:6px}
+.psheet .gstem{border-left:3px solid #000;background:#f3f3f3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:4px 8px;margin:0 0 6px;font-size:.96em;break-inside:avoid}
+.psheet .gstem .gtag{color:#000}
+.psheet li.gsub{list-style-position:outside}
+.psheet .gcont{font-size:.78em;color:#444;margin:0 0 2px}

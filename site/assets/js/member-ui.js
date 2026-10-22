@@ -14,6 +14,8 @@ function stkSvg(s,i,on){var t=(s.t||1)-1,c=TC[t],pips="",k;for(k=0;k<=t;k++)pips
 /* Firebase 登入錯誤 → 看得懂的說明（一定把代碼附上，方便回報） */
 function authMsg(c){var m={"auth/popup-closed-by-user":"登入視窗被關閉了，再按一次登入。","auth/network-request-failed":"網路不穩，連不上 Google 登入服務，請檢查網路後再試。","auth/unauthorized-domain":"這個網址還沒加進 Firebase 的「授權網域」，請老師到 Firebase 設定。","auth/popup-blocked":"瀏覽器擋掉了登入視窗，請允許這個網站的彈出視窗後再試。","auth/operation-not-supported-in-this-environment":"這個瀏覽器不支援 Google 登入，請改用 Chrome 或 Safari 開啟。","auth/web-storage-unsupported":"瀏覽器關閉了網站儲存功能（或無痕模式限制），請改用一般視窗，並允許 Cookie。","auth/internal-error":"登入服務發生內部錯誤，請稍後再試。","auth/user-disabled":"這個 Google 帳號已被停用。"}[c];return(m||"登入沒有成功，請再試一次。")+(c?"（"+c+"）":"")}
 function errMsg(e){var c=e&&e.code;return{print_limit:"今天出的練習卷已經到上限了，明天再來，或請老師調整。",net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請老師完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",expired:"你的正式學員授權已到期，請找老師延期。",forbidden:"沒有權限。",no_questions:"這個範圍（或篩選條件）沒有可以出的題目。",closed:"這份卷子已經截止了。",not_found:"找不到這份卷子，可能已被老師刪除。",server:"伺服器忙碌中，請稍後再試。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
+/* 題組的共用題幹：每一小題上方都顯示一次（學生一題一題作答，不用往上翻）；只有一小題（例如錯題本單獨練習）就不寫「第幾小題」 */
+function gstem(g,s,im,k,n){return s?'<div class="gstem">'+(n>1?'<small class="gtag">題組・第 '+k+"／"+n+" 小題</small>":'<small class="gtag">題組</small>')+"<div>"+tx(s)+"</div>"+qimg(im)+"</div>":""}
 function qimg(p,c){return p?'<img class="qimg'+(c?" "+c:"")+'" alt="附圖" src="'+esc(M.img(p))+'">':""}
 
 function L(i){return String.fromCharCode(65+i)}
@@ -77,7 +79,7 @@ function run(o){
  if(exam){var clock=h('<span class="clock"></span>');box.querySelector("h2").appendChild(clock);var t0=Date.now();TM=setInterval(tick,1000);tick();if(XG)XG();XG=NB.xg?NB.xg.start({sid:S.sid,lw:S.lw,user:user(),api:M.api,box:box}):null}
  function tick(){left=S.seconds-Math.floor((Date.now()-t0)/1000);if(left<0)left=0;clock.textContent="剩 "+pad(Math.floor(left/60))+":"+pad(left%60);if(left<=0)finish()}
  function show(){
-  var q=qs[i],sel=null,done=false,ob=[],inp,hb,d=h('<div><div class="prog">第 '+(i+1)+" / "+qs.length+' 題</div><div class="q">'+tx(q.q)+"</div>"+qimg(q.img)+"</div>");body.innerHTML="";
+  var q=qs[i],sel=null,done=false,ob=[],inp,hb,d=h('<div><div class="prog">第 '+(i+1)+" / "+qs.length+' 題</div>'+(q.g?gstem(0,q.g.s,q.g.i,q.g.k,q.g.n):"")+'<div class="q">'+tx(q.q)+"</div>"+qimg(q.img)+"</div>");body.innerHTML="";
   if(q.o){var w=h('<div class="opts"></div>');q.o.forEach(function(t,ti){var b=h('<button class="pen opt"></button>');b.innerHTML="<b>"+L(ti)+"．</b>"+tx(esc(t));b.dataset.v=t;b.onclick=function(){if(done)return;sel=t;ob.forEach(function(x){x.classList.toggle("sel",x===b)})};ob.push(b);w.appendChild(b)});d.appendChild(w)}
   else if(q.t==="text"){var c=h('<div class="ctl"><input class="num txt" type="text" maxlength="60" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="輸入答案"></div>');inp=c.firstChild;d.appendChild(c)}
   else{var c=h('<div class="ctl"><input class="num" type="number" step="any" inputmode="decimal" placeholder="答案"></div>');inp=c.firstChild;d.appendChild(c)}
@@ -111,7 +113,7 @@ function run(o){
   var D=M.D,n=exam?r.n:r.n,c=r.c;
   var s=h('<div><div class="q">'+(exam?r.sc+" 分（"+c+" / "+n+"）":c+" / "+n+" 題答對")+"</div>"+(r.late?'<p class="fb no">已超過作答時間，伺服器只接受時限內的答案，這份卷子沒有計分。</p>':"")+"<p>這次獲得 <b>"+r.gain+"</b> 積分，目前 Lv."+M.lv(D)+"。</p></div>");
   if(r.got&&r.got.length){s.appendChild(h('<p class="hl">解鎖新勳章！</p>'));var g=h('<div class="stkgrid"></div>');r.got.forEach(function(id){var k=M.STK.filter(function(x){return x.id===id})[0],ix=M.STK.indexOf(k);g.appendChild(h('<div class="stkc">'+stkSvg(k,ix,1)+"<b>"+k.n+"</b>"+k.d+"</div>"))});s.appendChild(g)}
-  if(exam&&r.review&&r.review.length){var l=h('<div><p class="meta">答錯或沒寫的題目（已放進錯題本）</p></div>');r.review.forEach(function(x){l.appendChild(h('<div class="wi"><div>'+tx(x.q)+"</div>"+qimg(x.img)+"<small>"+(x.v===null||x.v===""?"你沒有作答。":tx("你的答案："+labOf(x.o,x.v)+"。"))+" "+tx("答案："+labOf(x.o,x.a)+"。"+x.h)+(x.diag?'<br><b class="diag">'+tx(x.diag)+"</b>":"")+qimg(x.himg)+"</small></div>"))});s.appendChild(l)}
+  if(exam&&r.review&&r.review.length){var l=h('<div><p class="meta">答錯或沒寫的題目（已放進錯題本）</p></div>');r.review.forEach(function(x){l.appendChild(h('<div class="wi">'+gstem(0,x.gs,x.gi,1,1)+"<div>"+tx(x.q)+"</div>"+qimg(x.img)+"<small>"+(x.v===null||x.v===""?"你沒有作答。":tx("你的答案："+labOf(x.o,x.v)+"。"))+" "+tx("答案："+labOf(x.o,x.a)+"。"+x.h)+(x.diag?'<br><b class="diag">'+tx(x.diag)+"</b>":"")+qimg(x.himg)+"</small></div>"))});s.appendChild(l)}
   var bt=h('<div class="ctl"></div>');
   if(o.again){var a=h('<button class="pen go">再來一次</button>');a.onclick=o.again;bt.appendChild(a)}
   bt.appendChild(h('<a class="pen" href="#wrong">錯題本</a>'));bt.appendChild(h('<a class="pen" href="#home">回首頁</a>'));s.appendChild(bt);body.innerHTML="";body.appendChild(s)}
@@ -203,7 +205,7 @@ V.wrong=function(){
   D.wr.slice().reverse().forEach(function(w){var isDue=!w.due||w.due<=t;
    if(!gsOk(w.id,F.val("g"),F.val("m")))return;if(F.val("u")&&w.id!==F.val("u"))return;
    var st=F.val("st");if(st==="due"&&!isDue)return;if(st==="wait"&&isDue)return;if(st==="hard"&&!(w.n>=2))return;n++;
-   var d=h('<div class="wi"><div>'+tx(w.q)+"</div>"+qimg(w.img)+"<small>"+(w.qid?"<span class=\"qid\">"+esc(w.qid)+"</span>　":"")+esc(title(w.id))+"・錯 "+w.n+" 次・已通過 "+(w.ok||0)+"/"+M.cfg.review.length+"・"+(isDue?"今天可複習":w.due.slice(5)+" 再複習")+"　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));d.appendChild(dt);sbx.appendChild(d)});
+   var d=h('<div class="wi">'+gstem(0,w.gs,w.gi,1,1)+"<div>"+tx(w.q)+"</div>"+qimg(w.img)+"<small>"+(w.qid?"<span class=\"qid\">"+esc(w.qid)+"</span>　":"")+esc(title(w.id))+"・錯 "+w.n+" 次・已通過 "+(w.ok||0)+"/"+M.cfg.review.length+"・"+(isDue?"今天可複習":w.due.slice(5)+" 再複習")+"　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));d.appendChild(dt);sbx.appendChild(d)});
   if(!n)sbx.appendChild(h("<p>這個篩選條件下沒有錯題。</p>"));cnt.textContent="符合條件 "+n+" 題（共 "+D.wr.length+" 題）";
   if(window.Zhuyin&&Zhuyin.refresh)try{Zhuyin.refresh()}catch(e){}}
  unitOpts();draw();
