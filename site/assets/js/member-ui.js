@@ -54,6 +54,7 @@ function login(){
  try{if(sessionStorage.getItem("nb-idle")){sessionStorage.removeItem("nb-idle");setTimeout(function(){var f=document.querySelector(".fb");if(f){f.className="fb no";f.textContent="因為閒置太久，已為了帳號安全自動登出，請重新登入。"}},0)}}catch(e){}
  var s=sheet("登入","僅供班內學員使用"),fb=h('<div class="fb"></div>'),em=M.auth&&M.auth.user()?M.auth.user().email:"";
  s.appendChild(h("<p>請使用老師登記的 Google 帳號登入平台。登入後，即可使用小測驗、模擬卷、錯題本、學習進度、貼紙獎勵、每日一題、列印練習卷及排行榜等功能。上述功能皆須登入後方可使用。</p>"));
+ s.appendChild(h('<p class="meta">登入即表示你已閱讀並同意<a href="terms.html" target="_blank" rel="noopener">使用者條款</a>與<a href="privacy.html" target="_blank" rel="noopener">隱私權政策</a>。未滿 18 歲請家長或監護人一起閱讀。</p>'));
  var msg={noconfig:"網站還沒設定好登入功能，請老師完成設定。",noauth:"登入服務載入失敗，請檢查網路後重新整理頁面。",net:"連不上伺服器，請稍後再試。",noapi:"網站還沒設定好伺服器網址，請老師完成設定。",bad_token:"登入已失效，請重新登入。",not_in_roster:"「"+esc(em)+"」不在班級名單裡。請改用老師登記的帳號，或請老師把這個帳號加進名單。"}[M.err];
  if(!msg&&M.err)msg=(M.auth&&M.auth.user()?"Google 登入成功了，但載入學員資料時出了問題":"登入沒有完成")+"（錯誤代碼："+esc(M.err)+"）。請按「重新載入」再試一次；還是不行，請把這個代碼告訴老師。";
  if(!msg&&window.__nbAuthErr)msg=authMsg(window.__nbAuthErr);
