@@ -1,7 +1,7 @@
 /* 首頁：依年級列出目錄（章名……共 N 小節）。打開某個學期時，才去偵測哪些單元檔存在。 */
 (function(){
 var app=document.getElementById("app"),CN="一二三四五六七八九十",probed={},rows={},grade=3;
-try{var sg=parseInt(localStorage.getItem("currentGrade"));if([3,4,5,6].indexOf(sg)>=0)grade=sg}catch(e){}
+try{var sg=parseInt(localStorage.getItem("currentGrade"));if([1,2,3,4,5,6].indexOf(sg)>=0)grade=sg}catch(e){}
 function done(c){return c.secs.filter(function(o){return NB.built[o.id]}).length}
 function chapText(c){var k=done(c);return"共 "+c.secs.length+" 小節"+(k?"・已完成 "+k:"")}
 function semText(S){var t=0,n=0;S.chs.forEach(function(c){t+=c.secs.length;n+=done(c)});return"共 "+t+" 小節"+(n?"・已完成 "+n:"")}
@@ -12,7 +12,7 @@ function render(){
  var bar=NB.h('<nav class="bar"><span class="brand">'+NB.deco.logo()+'數學筆記本</span></nav>');if(NB.member)bar.appendChild(NB.member.chip());bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(NB.h('<div class="ruler"></div>'));
  var hero=NB.h('<section class="hero"><div><p class="eyebrow">國小數學・圖解與互動</p><h1 class="title">看懂數學，<mark>動手玩一玩</mark></h1><p class="lead">從例題出發，拖拉、旋轉、疊一疊，把算式變成看得見的圖形。</p></div></section>');hero.appendChild(NB.deco.hero());app.appendChild(hero);app.appendChild(NB.deco.rule());
  var tabs=NB.h('<div class="tabs"></div>');
- [3,4,5,6].forEach(function(g){var b=NB.h('<button class="pen'+(grade===g?" on":"")+'">'+"三四五六"[g-3]+'年級</button>');b.onclick=function(){grade=g;try{localStorage.setItem("currentGrade",g)}catch(e){}render()};tabs.appendChild(b)});
+ [1,2,3,4,5,6].forEach(function(g){var b=NB.h('<button class="pen'+(grade===g?" on":"")+'">'+"一二三四五六"[g-1]+'年級</button>');b.onclick=function(){grade=g;try{localStorage.setItem("currentGrade",g)}catch(e){}render()};tabs.appendChild(b)});
  app.appendChild(tabs);
  var list=NB.cat.filter(function(S){return S.grade===grade});
  list.forEach(function(S,k){

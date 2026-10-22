@@ -22,7 +22,7 @@ function labOf(o,v){var k=o?o.indexOf(String(v)):-1;return k>=0?L(k)+"．"+v:v}
 function picker(ids,mine){
  var el=h('<details class="upick"><summary>自選單元（<b class="cnt">0</b> 個）</summary><div class="ctl"><button class="pen" data-a="all">全選</button><button class="pen" data-a="none">全不選</button><button class="pen" data-a="mine">只選我的年級</button></div><div class="ug"></div></details>'),g=el.querySelector(".ug"),boxes=[];
  var by={};ids.forEach(function(id){var o=NB.flat.filter(function(x){return x.id===id})[0];if(!o)return;(by[id[0]]=by[id[0]]||[]).push(o)});
- Object.keys(by).sort().forEach(function(gr){var d=h('<div class="ugr"><b>'+"三四五六"[gr-3]+"年級</b></div>");by[gr].forEach(function(o){var l=h('<label class="uck"><input type="checkbox"> <span></span></label>');l.querySelector("input").value=o.id;l.querySelector("span").textContent=o.sem+" "+o.num+" "+o.title;boxes.push(l.querySelector("input"));d.appendChild(l)});g.appendChild(d)});
+ Object.keys(by).sort().forEach(function(gr){var d=h('<div class="ugr"><b>'+"一二三四五六"[gr-1]+"年級</b></div>");by[gr].forEach(function(o){var l=h('<label class="uck"><input type="checkbox"> <span></span></label>');l.querySelector("input").value=o.id;l.querySelector("span").textContent=o.sem+" "+o.num+" "+o.title;boxes.push(l.querySelector("input"));d.appendChild(l)});g.appendChild(d)});
  function cnt(){el.querySelector(".cnt").textContent=boxes.filter(function(b){return b.checked}).length}
  el.addEventListener("change",cnt);
  el.querySelector(".ctl").onclick=function(e){var b=e.target.closest("button");if(!b)return;boxes.forEach(function(x){x.checked=b.dataset.a==="all"||(b.dataset.a==="mine"&&x.value[0]==String(mine))});cnt()};
@@ -141,8 +141,8 @@ V.daily=function(){
 
 V.quiz=function(id){
  if(id)return startQuiz(id);
- var u=user(),CN="一二三四五六七八九十";if(qg===null)qg=Math.min(6,Math.max(3,u.grade));
- var tabs=h('<div class="tabs"></div>');[3,4,5,6].forEach(function(g){var b=h('<button class="pen'+(qg===g?" on":"")+'">'+"三四五六"[g-3]+"年級</button>");b.onclick=function(){qg=g;view.innerHTML="";V.quiz()};tabs.appendChild(b)});view.appendChild(tabs);
+ var u=user(),CN="一二三四五六七八九十";if(qg===null)qg=Math.min(6,Math.max(1,u.grade));
+ var tabs=h('<div class="tabs"></div>');[1,2,3,4,5,6].forEach(function(g){var b=h('<button class="pen'+(qg===g?" on":"")+'">'+"一二三四五六"[g-1]+"年級</button>");b.onclick=function(){qg=g;view.innerHTML="";V.quiz()};tabs.appendChild(b)});view.appendChild(tabs);
  NB.cat.filter(function(S){return S.grade===qg}).forEach(function(S,k){
   var d=h('<details class="sheet"><summary><span class="tag">'+S.sem+"</span></summary></details>");
   S.chs.forEach(function(c){d.appendChild(h('<div class="chap"><span class="no">第'+CN[c.no-1]+'章</span><b>'+esc(c.name)+'</b><span class="dots"></span></div>'));var ul=h('<div class="secs"></div>');
@@ -155,7 +155,7 @@ function startQuiz(id){
   run({tag:"小測驗",title:esc(title(id)),sess:r,again:function(){startQuiz(id)}})})}
 
 V.mock=function(){
- var u=user(),D=M.D,s=sheet("模擬卷","自選單元與題數・每題 2 分鐘・交卷才公布答案"),gr="三四五六"[Math.min(6,Math.max(3,u.grade))-3];
+ var u=user(),D=M.D,s=sheet("模擬卷","自選單元與題數・每題 2 分鐘・交卷才公布答案"),gr="一二三四五六"[Math.min(6,Math.max(1,u.grade))-1];
  s.appendChild(h("<p>不選單元時，依照「由易到難、題型分配」的細目表，從"+gr+"年級和前一年級的題庫出題；也可以自己挑想考的單元（可多可少）。每個人的題目和選項順序都不同。時間由伺服器計算，時間到會自動交卷，沒寫的算錯，答錯的題目會進錯題本。</p>"));
  var n=h('<div class="ctl"><label>題數</label><select id="mn"><option>5</option><option selected>10</option><option>15</option><option>20</option><option>30</option></select><span class="meta" id="mt"></span></div>'),pk=picker(M.units||[],u.grade);
  s.appendChild(n);s.appendChild(pk.el);
