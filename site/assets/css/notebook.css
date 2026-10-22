@@ -196,3 +196,17 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 .pp-ak li,.pp-short li{margin:0 0 10px}.pshort li{margin:0 0 6px}.pblank li{margin:0 0 12px;line-height:2}.bub{display:inline-block;width:1.7em;height:1.7em;line-height:1.6em;text-align:center;border:1.2px solid #000;border-radius:50%;margin-right:.7em;font-size:.9rem}
 @media print{.psheet.pp{width:auto;margin:0}.psheet.pp.key{page-break-before:auto}.psheet.pp + .psheet.pp{page-break-before:always}.pans{background:#fff}}
 .psheet.pp.key{page-break-before:auto}
+
+/* 浮水印 */
+.psheet.pp{position:relative}.pwm{position:absolute;inset:0;overflow:hidden;pointer-events:none;user-select:none;z-index:6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pwm>div{position:absolute;left:-60%;top:-60%;width:220%;height:220%;transform:rotate(-28deg);transform-origin:center;text-align:center;font-size:11pt;line-height:var(--lh,11em);color:rgba(0,0,0,var(--wa,.11));word-break:keep-all;white-space:normal}
+.pwm span{display:inline-block;margin:0 var(--mg,6em);white-space:nowrap}
+.psheet.pp .pwm,.psheet.pp .pwm *{color:rgba(0,0,0,var(--wa,.13))}
+
+/* 螢幕：浮水印鋪在每張卷子上；列印：改用 position:fixed，瀏覽器會在「每一頁」都重複一次，換頁也不會缺 */
+.pwm-fix{display:none}
+@media print{.pwm-abs{display:none}.pwm-fix{display:block;position:fixed;inset:0;z-index:50}}
+
+/* 每頁頁尾（卷號、姓名、時間、裝置）：列印時 position:fixed 會在每一頁都出現 */
+.pfoot{display:none}
+@media print{.pfoot{display:block;position:fixed;left:0;right:0;bottom:-9mm;text-align:center;font-size:8pt;color:rgba(0,0,0,.6)}}

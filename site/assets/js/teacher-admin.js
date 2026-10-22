@@ -193,5 +193,20 @@ function reports(ctx){
    if(!n)list.appendChild(h("<p>沒有符合的回報。</p>"));cnt.textContent="共 "+n+" 則（新的 "+r.rows.filter(function(y){return y.status==="new"}).length+" 則）"}
   sel.onchange=draw;draw()},function(e){s.appendChild(h("<p>載入失敗（"+esc(e.code||"net")+"）</p>"))})}
 
-NB.tadmin={roster:roster,bank:bank,settings:settings,data:data,reports:reports};
+/* ---- 列印紀錄：學生每出一份練習卷就記一筆；卷子上印著卷號，外流時在搜尋框輸入卷號就查得到是誰、什麼時候、用什麼裝置 ---- */
+function prints(ctx){
+ var s=ctx.sheet("列印紀錄","最近 500 筆；試卷上印的「卷號」可以直接在搜尋框查（老師只看得到自己班）");
+ M.api("GET","/api/admin/prints").then(function(r){
+  if(!r.rows.length){s.appendChild(h("<p>還沒有列印紀錄。</p>"));return}
+  function when(t){var d=new Date(t+288e5).toISOString();return d.slice(5,10)+" "+d.slice(11,16)}
+  function devOf(x){var c={};try{c=JSON.parse(x.dev||"{}")||{}}catch(e){}return esc(x.brief||"")+(c.model?"（"+esc(c.model)+"）":"")+(c.scr?" "+esc(c.scr):"")}
+  var box=h('<div></div>'),t='<table class="tb"><tr><th>時間</th><th>班</th><th>號</th><th>姓名</th><th>卷號</th><th>題數</th><th>IP</th><th>網路</th><th>裝置</th><th></th></tr>';
+  r.rows.forEach(function(x){t+="<tr><td>"+when(x.ts)+"</td><td>"+esc(x.cls)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td><b>"+esc(x.id)+"</b></td><td>"+x.n+"</td><td>"+esc(x.ip)+"</td><td>"+esc(x.net||"")+"</td><td>"+devOf(x)+'</td><td><button class="pen" data-id="'+esc(x.id)+'">看題目</button></td></tr>'});
+  var tb=h(t+"</table>"),det=h('<div class="sbox" hidden></div>');box.appendChild(tb);box.appendChild(det);s.appendChild(box);
+  box.addEventListener("click",function(e){var b=e.target.closest("button[data-id]");if(!b)return;b.disabled=true;
+   M.api("GET","/api/admin/print?id="+encodeURIComponent(b.dataset.id)).then(function(d){b.disabled=false;det.hidden=false;
+    det.innerHTML="<p><b>卷號 "+esc(d.id)+"</b>　"+esc(d.name)+"（"+esc(d.email)+"）　"+esc(d.cls)+" 班 "+d.no+" 號　"+when(d.ts)+"<br><small>IP "+esc(d.ip)+"　"+esc(d.net||"")+"　"+esc(d.place||"")+"　"+esc(d.brief||"")+"<br>裝置回報："+esc(d.dev||"（無）")+"<br>來源："+esc(d.src||"")+"</small></p><ol>"+d.qs.map(function(q){return"<li>"+esc(q.q)+"　<small>答："+esc(q.a)+"</small></li>"}).join("")+"</ol>";det.scrollIntoView({block:"nearest"})},function(){b.disabled=false})})
+ },function(e){s.appendChild(h("<p>載入失敗（"+esc(e.code||"net")+"）</p>"))})}
+
+NB.tadmin={roster:roster,bank:bank,settings:settings,data:data,reports:reports,prints:prints};
 })();
