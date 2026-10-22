@@ -47,6 +47,13 @@ export function syllables(run, L = lib) {
   for (const [w, z] of Object.entries(fixes)) { let at = run.indexOf(w); const zs = String(z).split(/\s+/).map((x) => x.replace(/^([^˙]+)˙$/, "˙$1")); while (at >= 0) { [...w].forEach((_, k) => { if (zs[k]) out[at + k] = zs[k]; }); at = run.indexOf(w, at + 1); } }
   return out;
 }
+/* 注音排版：符號直排，聲調符號（ˊˇˋ）放在符號欄的右邊，輕聲（˙）放在最上面 */
+function fillRt(t, z) {
+  const neutral = z.startsWith("˙"), tone = /[ˊˇˋ]$/.test(z) ? z.slice(-1) : "", body = z.replace(/^˙/, "").replace(/[ˊˇˋ]$/, "");
+  const b = document.createElement("span"); b.className = "zb"; [...body].forEach((c) => { const x = document.createElement("span"); x.className = "zc" + (c === "ㄧ" ? " zi" : ""); x.textContent = c; b.appendChild(x); });
+  if (neutral) { const n = document.createElement("span"); n.className = "zn"; n.textContent = "˙"; t.classList.add("zneu"); t.append(n, b); }
+  else { t.append(b); if (tone) { const m = document.createElement("span"); m.className = "zt"; m.textContent = tone; t.append(m); } }
+}
 const SKIP = "svg,ruby,rt,.katex,input,textarea,select,script,style,[data-nozy],.nozy,.emo,.zy";
 function annotate(root) {
   if (!on || !lib || !root) return;
@@ -57,7 +64,7 @@ function annotate(root) {
     const frag = document.createElement("span"); frag.className = "zy"; frag.dataset.o = n.nodeValue;
     n.nodeValue.split(RUNZ).forEach((seg, i) => {
       if (i % 2 === 0) { if (seg) frag.appendChild(document.createTextNode(seg)); return; }
-      const z = syllables(seg); [...seg].forEach((c, k) => { if (!z[k]) { frag.appendChild(document.createTextNode(c)); return; } const r = document.createElement("ruby"); r.append(c); const t = document.createElement("rt"); t.textContent = z[k]; r.appendChild(t); frag.appendChild(r); });
+      const z = syllables(seg); [...seg].forEach((c, k) => { if (!z[k]) { frag.appendChild(document.createTextNode(c)); return; } const r = document.createElement("ruby"); r.append(c); const t = document.createElement("rt"); fillRt(t, z[k]); r.appendChild(t); frag.appendChild(r); });
     });
     n.replaceWith(frag);
   }
