@@ -12,7 +12,7 @@
   function defaults(u) {
     var m = /^([1-6])(\d{1,2})$/.exec(String(u.cls || "")), t = u.role === "teacher";
     return { school: "", showSchool: false, exam: "數學練習卷", showExam: true, subject: "數學", showSubject: true, grade: m ? m[1] : "", cls: m ? String(+m[2]) : "", showClass: true,
-      showScore: t, prefill: !t, paper: "A4", layout: "s1", optMode: "col", kinds: { q: true, ak: true }, showFocus: false, showPerf: false, showCont: false, showLv: false, showCog: false, showKnow: false, matrix: false, mxRow: "unit", mxCol: "diff", variants: 1,
+      showScore: t, prefill: !t, paper: "A4", layout: "s1", optMode: "col", kinds: { q: true, ak: true }, showFocus: false, showPerf: false, showCont: false, showLv: false, showCog: false, showKnow: false, metaAt: "q", matrix: false, mxRow: "unit", mxCol: "diff", variants: 1,
       wm: !t, wmName: true, wmCls: true, wmEmail: true, wmIp: true, wmDev: true, wmTime: true, wmText: "", wmDen: "2", wmDens: "1" };
   }
   function load(u) { var d = defaults(u), s = null; try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {} if (s) { Object.keys(d).forEach(function (k) { if (s[k] !== undefined && k !== "grade" && k !== "cls") d[k] = s[k]; }); } return d; }
@@ -47,6 +47,7 @@
       '<div class="ppr"><label>學習表現／學習內容 <input id="pp-fp" maxlength="60" placeholder="例如：n-III-3、S-5（前面符合就算，可放多個）" style="width:18em"></label></div></div></details>' +
       '<details><summary>題目資訊與延伸功能</summary><div class="ppg">' +
       '<div class="ppr"><b>每題顯示</b> ' + chk("pp-showFocus", "單元名稱", P.showFocus) + chk("pp-showPerf", "學習表現", P.showPerf) + chk("pp-showCont", "學習內容", P.showCont) + chk("pp-showLv", "難易度", P.showLv) + chk("pp-showCog", "認知層次", P.showCog) + chk("pp-showKnow", "知識類型", P.showKnow) + "</div>" +
+      '<div class="ppr"><b>印在哪裡</b> ' + rad("pp-metaAt", "q", "題目卷", P.metaAt) + rad("pp-metaAt", "a", "答案卷（簡答與詳解、簡答卷）", P.metaAt) + rad("pp-metaAt", "both", "兩個都印", P.metaAt) + "</div>" +
       '<div class="ppr">' + chk("pp-matrix", "附上雙向細目表", P.matrix) + ' <label>縱軸 <select id="pp-mxRow">' + MXR.map(function (r) { return '<option value="' + r[0] + '"' + (P.mxRow === r[0] ? " selected" : "") + ">" + r[1] + "</option>"; }).join("") + '</select></label> <label>橫軸 <select id="pp-mxCol">' + MXC.map(function (r) { return '<option value="' + r[0] + '"' + (P.mxCol === r[0] ? " selected" : "") + ">" + r[1] + "</option>"; }).join("") + "</select></label></div>" +
       '<div class="ppr"><label>同題目不同題序 <select id="pp-variants">' + [1, 2, 3, 4].map(function (n) { return '<option value="' + n + '"' + (P.variants === n ? " selected" : "") + ">" + (n === 1 ? "只印一份" : n + " 份（" + ZH.slice(0, n).split("").join("、") + "卷，題序與選項順序都不同）") + "</option>"; }).join("") + "</select></label></div>" +
       '<div class="ppr"><button type="button" class="pen" id="pp-csv">匯出題目 CSV</button> <span class="meta">不含詳解以外的版面設定；可用 Excel 開啟</span></div></div></details>';
@@ -56,7 +57,7 @@
       var r = function (n) { var x = el.querySelector('input[name="' + n + '"]:checked'); return x ? x.value : ""; };
       return { school: q("pp-school").value.trim(), showSchool: q("pp-showSchool").checked, exam: q("pp-exam").value.trim(), showExam: q("pp-showExam").checked, subject: q("pp-subject").value.trim(), showSubject: q("pp-showSubject").checked,
         grade: q("pp-grade").value.trim(), cls: q("pp-cls").value.trim(), showClass: q("pp-showClass").checked, showScore: q("pp-showScore").checked, prefill: q("pp-prefill").checked,
-        paper: r("pp-paper") || "A4", layout: r("pp-layout") || "s1", optMode: r("pp-opt") || "col", kinds: kinds, showFocus: q("pp-showFocus").checked, showPerf: q("pp-showPerf").checked, showCont: q("pp-showCont").checked, showLv: q("pp-showLv").checked, showCog: q("pp-showCog").checked, showKnow: q("pp-showKnow").checked, matrix: q("pp-matrix").checked, mxRow: q("pp-mxRow").value, mxCol: q("pp-mxCol").value,
+        paper: r("pp-paper") || "A4", layout: r("pp-layout") || "s1", optMode: r("pp-opt") || "col", kinds: kinds, showFocus: q("pp-showFocus").checked, showPerf: q("pp-showPerf").checked, showCont: q("pp-showCont").checked, showLv: q("pp-showLv").checked, showCog: q("pp-showCog").checked, showKnow: q("pp-showKnow").checked, metaAt: r("pp-metaAt") || "q", matrix: q("pp-matrix").checked, mxRow: q("pp-mxRow").value, mxCol: q("pp-mxCol").value,
         fd: checked("pp-fd"), fg: checked("pp-fg"), fk: q("pp-fk").value.trim(), fp: q("pp-fp").value.trim(), variants: +q("pp-variants").value || 1,
         wm: q("pp-wm").checked, wmName: q("pp-wmName").checked, wmCls: q("pp-wmCls").checked, wmEmail: q("pp-wmEmail").checked, wmIp: q("pp-wmIp").checked, wmDev: q("pp-wmDev").checked, wmTime: q("pp-wmTime").checked, wmText: q("pp-wmText").value.trim(), wmDen: q("pp-wmDen").value, wmDens: q("pp-wmDens").value };
     }
@@ -121,8 +122,9 @@
       if (P.showScore) h += '<table class="pscore"><tr><th>級距</th><td>100</td><td>99~90</td><td>89~80</td><td>79~70</td><td>69~60</td><td>未滿60</td><th>分數</th><th>家長簽章</th></tr><tr><th>得分</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>';
       return h + "</div>";
     }
-    function meta(q) {
-      var m = [], a = q.m || {};
+    function meta(q, where) { /* where：q 題目卷、a 答案卷、qa 題目與詳解（題目和答案在同一張，選哪個都印一次） */
+      var m = [], a = q.m || {}, at = P.metaAt || "q";
+      if (!(at === "both" || where === "qa" || at === where)) return "";
       if (P.showFocus) m.push("單元：" + esc(D.title(q.unit)));
       if (P.showPerf && a.p) m.push("學習表現：" + esc(a.p));
       if (P.showCont && a.c) m.push("學習內容：" + esc(a.c));
@@ -134,15 +136,15 @@
     function opts(q) { return q.o ? '<div class="popts ' + P.optMode + '">' + q.o.map(function (t, k) { return "<div>" + L(k) + "．" + D.tx(esc(t)) + "</div>"; }).join("") + "</div>" : ""; }
     function ans(q) { return (q.al ? q.al + "．" : "") + D.tx(esc(String(q.a))); }
     function qList(arr, withAns) {
-      return "<ol>" + arr.map(function (q) { return "<li>" + meta(q) + D.tx(q.q) + D.qimg(q.img) + opts(q) +
+      return "<ol>" + arr.map(function (q) { return "<li>" + meta(q, withAns ? "qa" : "q") + D.tx(q.q) + D.qimg(q.img) + opts(q) +
         (withAns ? '<div class="pans"><b>答案：</b>' + ans(q) + (q.h ? "<br><small>詳解：" + D.tx(q.h) + "</small>" : "") + D.qimg(q.himg) + "</div>" : '<span class="ln">答：' + (q.o ? "（　　）" : "＿＿＿＿＿＿＿＿＿") + "</span>") + "</li>"; }).join("") + "</ol>";
     }
     function sheet(k, arr, tag) {
       var cls = "psheet pp pp-" + k, h;
       if (k === "q") h = head("題目卷", tag) + qList(arr, false);
       else if (k === "qa") h = head("題目與詳解", tag) + qList(arr, true);
-      else if (k === "ak") { cls += " key"; h = head("簡答與詳解", tag) + "<ol>" + arr.map(function (q) { return "<li>" + ans(q) + (q.h ? "<br><small>" + D.tx(q.h) + "</small>" : "") + D.qimg(q.himg) + "</li>"; }).join("") + "</ol>"; }
-      else if (k === "short") { cls += " key"; h = head("簡答卷", tag) + '<ol class="pshort">' + arr.map(function (q) { return "<li>" + ans(q) + "</li>"; }).join("") + "</ol>"; }
+      else if (k === "ak") { cls += " key"; h = head("簡答與詳解", tag) + "<ol>" + arr.map(function (q) { return "<li>" + meta(q, "a") + ans(q) + (q.h ? "<br><small>" + D.tx(q.h) + "</small>" : "") + D.qimg(q.himg) + "</li>"; }).join("") + "</ol>"; }
+      else if (k === "short") { cls += " key"; h = head("簡答卷", tag) + '<ol class="pshort">' + arr.map(function (q) { return "<li>" + meta(q, "a") + ans(q) + "</li>"; }).join("") + "</ol>"; }
       else h = head("答案卷", tag) + '<ol class="pblank">' + arr.map(function (q) { return "<li>" + (q.o ? q.o.map(function (_, i) { return "<span class=\"bub\">" + L(i) + "</span>"; }).join("") : '<span class="ln0">＿＿＿＿＿＿＿＿</span>') + "</li>"; }).join("") + "</ol>";
       return '<div class="' + cls + '" style="--pw:' + pw + 'mm" data-cols="' + (k === "short" ? Math.max(cols, 3) : cols) + '">' + (WM ? WM.scr : "") + h + '<p class="pcopy">© ' + new Date().getFullYear() + " suuuuuhaooooo・CC BY-NC-ND 4.0・僅供班級教學使用，請勿轉載</p></div>";
     }

@@ -1,9 +1,9 @@
 /* 模擬考的防弊輔助：
    1. 偵測離開作答頁面（切到別的分頁、別的視窗、縮小）：只記錄次數和秒數回報給伺服器，不扣分、不交卷
-   2. 畫面上的動態浮水印：姓名、班級座號、Email、IP、裝置、時間、卷號，每隔一段時間換到隨機位置，截圖或拍照外流時可追查 */
+   2. 畫面上的動態浮水印：姓名、班級座號、Email、IP、裝置、時間、卷號，每 10 秒換到隨機位置，截圖或拍照外流時可追查 */
 (function () {
   "use strict";
-  var MOVE_MS = 20000, MIN_AWAY = 2; /* 每 20 秒換一次位置；離開不到 2 秒不算（例如系統通知一閃而過） */
+  var MOVE_MS = 10000, MIN_AWAY = 2; /* 每 10 秒換一次位置；離開不到 2 秒不算（例如系統通知一閃而過） */
   function pad(n) { return (n < 10 ? "0" : "") + n; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
@@ -33,12 +33,18 @@
       l.push(esc((lw && lw.brief) || "") + "　" + pad(d.getHours()) + ":" + pad(d.getMinutes()) + "　卷 " + esc(String(o.sid || "").slice(0, 6).toUpperCase()));
       return l;
     }
+    /* 文字顏色跟著頁面文字色走（深色模式用白字、淺色模式用黑字），只調透明度；不加陰影，不然會糊 */
+    function tint() {
+      if (!blk) return;
+      var m = /rgba?\((\d+)[ ,]+(\d+)[ ,]+(\d+)/.exec(getComputedStyle(document.body).color || ""), c = m ? [+m[1], +m[2], +m[3]] : [0, 0, 0];
+      blk.style.color = "rgba(" + c.join(",") + ",.3)";
+    }
     function place() {
       if (!blk) return;
       blk.style.opacity = "0";
       setTimeout(function () {
         if (!blk) return;
-        blk.innerHTML = lines().map(function (t) { return "<div>" + t + "</div>"; }).join("");
+        blk.innerHTML = lines().map(function (t) { return "<div>" + t + "</div>"; }).join(""); tint();
         var vw = window.innerWidth, vh = window.innerHeight, w = blk.offsetWidth, h = blk.offsetHeight;
         blk.style.left = Math.max(4, Math.floor(Math.random() * Math.max(1, vw - w - 8))) + "px";
         blk.style.top = Math.max(4, Math.floor(Math.random() * Math.max(1, vh - h - 8))) + "px";
@@ -50,7 +56,7 @@
       wm = document.createElement("div"); wm.className = "lwm"; wm.setAttribute("aria-hidden", "true");
       blk = document.createElement("div"); blk.className = "lwm-b"; wm.appendChild(blk); document.body.appendChild(wm);
       blk.innerHTML = lines().map(function (t) { return "<div>" + t + "</div>"; }).join("");
-      blk.style.left = "12px"; blk.style.top = "70px"; blk.style.opacity = "1"; place();
+      blk.style.left = "12px"; blk.style.top = "70px"; blk.style.opacity = "1"; tint(); place();
     }
     function alive() { if (!wm || !document.body.contains(wm) || !blk || !wm.contains(blk)) return false; var c = getComputedStyle(wm), b = getComputedStyle(blk); return c.display !== "none" && c.visibility !== "hidden" && +c.opacity > 0.5 && b.display !== "none" && b.visibility !== "hidden"; }
     if (lw) {

@@ -3,7 +3,7 @@
 (function(){
 "use strict";
 var M=NB.member,app=document.getElementById("app"),h=NB.h,tx=NB.tx,view,who,TM=null,XG=null,qg=null,booted=false;
-var TABS=[["home","首頁"],["daily","每日一題"],["quiz","單元小測驗"],["mock","模擬卷"],["wrong","錯題本"],["progress","學習進度"],["stickers","勳章"],["board","排行榜"],["print","列印練習卷"]];
+var TABS=[["home","首頁"],["daily","每日一題"],["quiz","單元小測驗"],["assign","待測清單"],["mock","模擬卷"],["wrong","錯題本"],["progress","學習進度"],["stickers","勳章"],["board","排行榜"],["print","列印練習卷"]];
 function pad(n){return("0"+n).slice(-2)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function sheet(tag,sub){return h('<section class="sheet"><h2><span class="tag">'+tag+'</span>'+(sub||"")+'</h2></section>')}
@@ -13,7 +13,7 @@ function stkSvg(s,i,on){var t=(s.t||1)-1,c=TC[t],pips="",k;for(k=0;k<=t;k++)pips
  return'<svg viewBox="0 0 64 64" class="stk" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="'+(on?c:"var(--paper2)")+'" fill-opacity="'+(on?.28:1)+'" stroke="'+(on?c:"var(--ink)")+'" stroke-width="'+(on?3.4:2.4)+'"'+(on?"":' stroke-dasharray="4 4"')+'/><circle cx="32" cy="32" r="23" fill="none" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 4" opacity=".5"/><g transform="translate(17 14) scale(1.2)" fill="none" stroke="var(--ink)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"'+(on?"":' opacity=".28"')+'><path d="'+s.g+'"/></g>'+pips+'</svg>'}
 /* Firebase 登入錯誤 → 看得懂的說明（一定把代碼附上，方便回報） */
 function authMsg(c){var m={"auth/popup-closed-by-user":"登入視窗被關閉了，再按一次登入。","auth/network-request-failed":"網路不穩，連不上 Google 登入服務，請檢查網路後再試。","auth/unauthorized-domain":"這個網址還沒加進 Firebase 的「授權網域」，請老師到 Firebase 設定。","auth/popup-blocked":"瀏覽器擋掉了登入視窗，請允許這個網站的彈出視窗後再試。","auth/operation-not-supported-in-this-environment":"這個瀏覽器不支援 Google 登入，請改用 Chrome 或 Safari 開啟。","auth/web-storage-unsupported":"瀏覽器關閉了網站儲存功能（或無痕模式限制），請改用一般視窗，並允許 Cookie。","auth/internal-error":"登入服務發生內部錯誤，請稍後再試。","auth/user-disabled":"這個 Google 帳號已被停用。"}[c];return(m||"登入沒有成功，請再試一次。")+(c?"（"+c+"）":"")}
-function errMsg(e){var c=e&&e.code;return{print_limit:"今天出的練習卷已經到上限了，明天再來，或請老師調整。",net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請老師完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",expired:"你的正式學員授權已到期，請找老師延期。",forbidden:"沒有權限。",no_questions:"這個範圍（或篩選條件）沒有可以出的題目。",server:"伺服器忙碌中，請稍後再試。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
+function errMsg(e){var c=e&&e.code;return{print_limit:"今天出的練習卷已經到上限了，明天再來，或請老師調整。",net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請老師完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",expired:"你的正式學員授權已到期，請找老師延期。",forbidden:"沒有權限。",no_questions:"這個範圍（或篩選條件）沒有可以出的題目。",closed:"這份卷子已經截止了。",not_found:"找不到這份卷子，可能已被老師刪除。",server:"伺服器忙碌中，請稍後再試。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
 function qimg(p,c){return p?'<img class="qimg'+(c?" "+c:"")+'" alt="附圖" src="'+esc(M.img(p))+'">':""}
 
 function L(i){return String.fromCharCode(65+i)}
@@ -128,7 +128,8 @@ V.home=function(){
   '<a class="tile" href="#stickers"><small>勳章</small><strong>'+Object.keys(D.stk).length+" / "+M.STK.length+"</strong></a>"+
   '<a class="tile" href="#progress"><small>答題正確率</small><strong>'+(tot.n?Math.round(tot.c/tot.n*100):0)+"%</strong></a>";
  var a=M.acct||{};if(a.expired)view.appendChild(h('<div class="fb no">你的正式學員授權已到期（'+esc(a.expires)+'），目前只能查看資料。請找老師延長授權。</div>'));else if(a.daysLeft!==null&&a.daysLeft!==undefined&&a.daysLeft<=14)view.appendChild(h('<div class="fb">提醒：你的授權將在 '+(a.daysLeft+1)+' 天內到期（'+esc(a.expires)+'），要續用請告訴老師。</div>'));
- view.appendChild(tiles);
+ var bnr=h("<div></div>");view.appendChild(bnr);view.appendChild(tiles);
+ M.api("GET","/api/assigns").then(function(r){var n=(r.rows||[]).filter(function(x){return x.st==="new"||x.st==="open"}).length;if(n)bnr.appendChild(h('<a class="fb" style="display:block;text-decoration:none;color:inherit" href="#assign"><b>你有 '+n+' 份待測的卷子</b>，點這裡查看。</a>'))},function(){});
  var c=M.cfg,s=sheet("獎勵","怎麼賺積分和勳章");s.appendChild(h("<ol class=\"steps\"><li>答對 1 題：依題目難度 +"+c.pts[0]+"／+"+c.pts[1]+"／+"+c.pts[2]+" 分（基礎／應用／挑戰，每天最多計 "+c.capQ+" 題）</li><li>完成一份小測驗（3 題以上）：+20 分</li><li>每日一題：每天只有一次機會，答對 +30 分，答錯 +5 分；做完就不用再做了</li><li>看提示：每題第一次看扣 "+(c.hint||0)+" 分，而且這題答對只拿一半積分</li><li>連續練習：第 2 天起每天加分，最多每天 +14 分</li><li>模擬卷：完成 +20 分，80 分以上再 +50 分（每天前 "+c.capMock+" 份）</li><li>錯題複習：同一題在 "+c.review.join("、")+" 天後各答對一次就畢業，+15 分</li><li>解鎖勳章：銅 +10、銀 +20、金 +30、白金 +50、鑽石 +80 分（共 "+M.STK.length+" 枚）。每 "+c.step+" 分升一級</li></ol>"));view.appendChild(s)};
 
 V.daily=function(){
@@ -153,6 +154,20 @@ function startQuiz(id){
  begin({kind:"quiz",unit:id},function(r){
   if(r.empty){view.innerHTML="";var s=sheet("小測驗",esc(title(id)));s.appendChild(h("<p>這一節的題目還在準備中，先看看其他單元吧。</p>"));s.appendChild(h('<a class="pen go" href="#quiz">回單元列表</a>'));view.appendChild(s);return}
   run({tag:"小測驗",title:esc(title(id)),sess:r,again:function(){startQuiz(id)}})})}
+
+V.assign=function(){
+ var s=sheet("待測清單","老師派給你的卷子。開始後就會計時，而且只能作答一次");view.appendChild(s);
+ var box=h('<p class="meta">讀取中…</p>');s.appendChild(box);
+ function ymd(t){var d=new Date(t+288e5).toISOString();return d.slice(0,10)}
+ function load(){M.api("GET","/api/assigns").then(function(r){box.remove();box=h("<div></div>");s.appendChild(box);
+  if(!r.rows.length){box.appendChild(h("<p>目前沒有老師派的卷子。</p>"));return}
+  r.rows.forEach(function(a){
+   var info=a.n+" 題・限時 "+a.mins+" 分鐘"+(a.due?"・截止 "+ymd(a.due):""),st={new:"還沒寫",open:"作答中（可以繼續）",done:a.late?"已交（逾時，沒有計分）":"已完成："+a.sc+" 分（答對 "+a.c+" / "+a.n+"）",closed:"已截止"}[a.st],
+   row=h('<div class="wi"><div><b>'+esc(a.title)+"</b></div><small>"+esc(info)+"</small><div class=\"meta\">"+esc(st)+"</div></div>");
+   if(a.st==="new"||a.st==="open"){var b=h('<button class="pen go">'+(a.st==="open"?"繼續作答":"開始作答")+"</button>");b.onclick=function(){if(a.st==="new"&&!confirm("開始後就會計時（"+a.mins+" 分鐘），而且只能作答一次。確定開始？"))return;
+    begin({kind:"assign",id:a.id},function(r){var note=[];if(r.resumed)note.push("接續上次還沒交的卷子。");if(r.short)note.push("可出的題目不足，這份只有 "+r.qs.length+" 題。");run({tag:"派卷",title:r.title||a.title,sess:r,note:note.join(" ")})})};row.appendChild(h('<div class="ctl"></div>')).appendChild(b)}
+   box.appendChild(row)})},function(e){box.textContent=errMsg(e)})}
+ load()};
 
 V.mock=function(){
  var u=user(),D=M.D,s=sheet("模擬卷","自選單元與題數・每題 2 分鐘・交卷才公布答案"),gr="一二三四五六"[Math.min(6,Math.max(1,u.grade))-1];

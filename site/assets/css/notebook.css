@@ -217,6 +217,6 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 
 /* 模擬考：畫面動態浮水印、離開提醒 */
 .lwm{position:fixed;inset:0;pointer-events:none;user-select:none;-webkit-user-select:none;z-index:60}
-.lwm-b{position:absolute;font-size:12px;line-height:1.45;color:rgba(0,0,0,.2);text-shadow:0 0 2px rgba(255,255,255,.7);white-space:nowrap;transition:opacity .4s;padding:4px 6px}
+.lwm-b{position:absolute;font-size:13px;line-height:1.5;font-weight:500;color:rgba(0,0,0,.3);white-space:nowrap;transition:opacity .4s;padding:4px 6px;-webkit-font-smoothing:antialiased}
 @media print{.lwm{display:none}}
 .xgnote{margin:8px 0}
