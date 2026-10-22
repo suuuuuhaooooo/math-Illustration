@@ -263,7 +263,7 @@ V.print=function(){
  function v0(){return ctl.querySelector("#ps").value}
  function deps(){return{u:u,today:M.today(),title:title,tx:tx,qimg:qimg,wm:last&&last.wm}}
  function redraw(){if(!last)return;var P=panel.get();PP.applyPage(P);out.innerHTML=PP.build(P,last.qs,last.nm,deps())}
- make();
+ out.innerHTML='<p class="meta">先選好題目來源、題數與下方的設定，再按「出題」。</p>';
  function make(){
   var v=ctl.querySelector("#ps").value,n=+ctl.querySelector("#pn").value,us=pk.get();if(v==="pick"&&!us.length){out.innerHTML='<div class="fb no">請先在下面勾選至少一個單元。</div>';return}
   out.innerHTML='<p class="meta">出題中…</p>';note.textContent="";
