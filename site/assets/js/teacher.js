@@ -3,7 +3,7 @@
 "use strict";
 var M=NB.member,app=document.getElementById("app"),h=NB.h,TAB="overview",CLS=null;document.body.classList.add("tpage");
 try{TAB=sessionStorage.getItem("nbt-tab")||TAB}catch(e){}
-var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["bank","題庫"],["settings","設定"],["data","資料管理"]],TABS=TABS_ALL;/* 老師看不到題庫／設定／資料管理，這三項只有管理員能改 */
+var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["bank","題庫"],["settings","設定"],["data","資料管理"],["reports","問題回報"]],TABS=TABS_ALL;/* 老師看不到題庫／設定／資料管理，這三項只有管理員能改 */
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function title(id){var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
 function pct(c,n){return n?Math.round(c/n*100):null}
@@ -84,5 +84,5 @@ function detail(cls,no){
   s.appendChild(close);close.firstChild.onclick=function(){s.remove()};var old=app.querySelector(".sheet.prof");if(old)old.remove();s.classList.add("prof");app.insertBefore(s,app.querySelector(".sheet:nth-of-type(1)"));s.scrollIntoView()},function(e){alert("載入失敗："+(e.code||"未知"))})}
 
 shell();app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
-M.boot().then(function(){if(M.U&&!M.U.admin){TABS=TABS_ALL.filter(function(t){return t[0]!=="bank"&&t[0]!=="settings"&&t[0]!=="data"});if(TAB==="bank"||TAB==="settings"||TAB==="data")TAB="overview"}if(!M.U)return msg("請先用老師的 Google 帳號登入學員專區。");if(M.U.expired)return msg("你的老師帳號使用期限已到，請聯絡管理員延長。");if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");go()});
+M.boot().then(function(){if(M.U&&!M.U.admin){TABS=TABS_ALL.filter(function(t){return t[0]!=="bank"&&t[0]!=="settings"&&t[0]!=="data"&&t[0]!=="reports"});if(TAB==="bank"||TAB==="settings"||TAB==="data"||TAB==="reports")TAB="overview"}if(!M.U)return msg("請先用老師的 Google 帳號登入學員專區。");if(M.U.expired)return msg("你的老師帳號使用期限已到，請聯絡管理員延長。");if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");go()});
 })();

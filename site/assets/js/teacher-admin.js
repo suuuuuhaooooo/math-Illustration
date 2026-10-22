@@ -152,5 +152,24 @@ function data(ctx){
  var m=h('<div class="ctl"><button class="pen">檢查是否有舊資料可搬移</button></div>'),mf=h('<div class="fb"></div>');s.appendChild(m);s.appendChild(mf);
  m.firstChild.onclick=function(){M.api("GET","/api/admin/roster").then(function(r){if(!r.legacy)return msg(mf,"沒有需要搬移的舊資料。",1);ctx.box=s;ctx.go2=ctx.go;migrateBanner(ctx,true)},function(e){msg(mf,errs(e),0)})}}
 
-NB.tadmin={roster:roster,bank:bank,settings:settings,data:data};
+/* ---- 問題回報（只有管理員）---- */
+function reports(ctx){
+ var s=ctx.sheet("問題回報","學生按「回報問題」送來的內容，最新的在最上面");
+ var ST={new:"新的",doing:"處理中",done:"已處理"};
+ M.api("GET","/api/admin/reports").then(function(r){
+  if(!r.mail)s.appendChild(h('<p class="fb no">目前還沒設定寄信（RESEND_API_KEY），回報只會存在這裡，不會寄到信箱。設定方式見更新說明。</p>'));
+  var bar=h('<div class="fbar"></div>'),sel=h('<select><option value="">全部狀態</option><option value="new">新的</option><option value="doing">處理中</option><option value="done">已處理</option></select>'),cnt=h('<span class="meta"></span>');bar.appendChild(sel);bar.appendChild(cnt);s.appendChild(bar);
+  var list=h('<div class="sbox"></div>');s.appendChild(list);
+  function when(t){var d=new Date(t+288e5).toISOString();return d.slice(5,10)+" "+d.slice(11,16)}
+  function draw(){list.innerHTML="";var n=0;r.rows.forEach(function(x){if(sel.value&&x.status!==sel.value)return;n++;
+   var c=h('<div class="rcard'+(x.status==="done"?" done":"")+'"><div><b>#'+x.id+"　"+esc(x.cat)+'</b>　<span class="rst '+x.status+'">'+ST[x.status]+"</span>"+(x.mailed?"":'　<small>未寄信</small>')+'</div><div class="rmsg">'+esc(x.msg)+"</div><small>"+when(x.ts)+"　"+esc(x.cls||"")+" 班 "+(x.no||"")+" 號 "+esc(x.name||"")+"（"+esc(x.email)+"）　頁面 "+esc((x.ctx||{}).page||"")+"　"+esc((x.ctx||{}).screen||"")+"</small>"+((x.ctx&&x.ctx.errs&&x.ctx.errs.length)?'<br><small>程式錯誤：'+x.ctx.errs.map(esc).join("；")+"</small>":"")+'<div class="rimgs"></div><div class="ctl"></div></div>'),act=c.lastChild,im=c.querySelector(".rimgs");
+   [["new","設為新的"],["doing","處理中"],["done","已處理"]].forEach(function(p){if(p[0]===x.status)return;var b=h('<button class="pen">'+p[1]+"</button>");b.onclick=function(){M.api("POST","/api/admin/report/status",{id:x.id,status:p[0]}).then(function(){x.status=p[0];draw()},function(){})};act.appendChild(b)});
+   if(x.hasFiles){var fb=h('<button class="pen">看附件</button>');fb.onclick=function(){fb.disabled=true;M.api("GET","/api/admin/report?id="+x.id).then(function(d){im.innerHTML="";d.files.forEach(function(f){var i=document.createElement("img");i.alt=f.name;i.src="data:"+f.mime+";base64,"+f.data;im.appendChild(i)});fb.remove()},function(){fb.disabled=false})};act.appendChild(fb)}
+   var mb=h('<a class="pen" href="mailto:'+esc(x.email)+"?subject="+encodeURIComponent("回覆你的問題回報 #"+x.id)+'">寫信給他</a>');act.appendChild(mb);
+   var db=h('<button class="pen">刪除</button>');db.onclick=function(){if(!confirm("刪除回報 #"+x.id+"？"))return;M.api("POST","/api/admin/report/status",{id:x.id,delete:1}).then(function(){r.rows=r.rows.filter(function(y){return y!==x});draw()},function(){})};act.appendChild(db);
+   list.appendChild(c)});
+   if(!n)list.appendChild(h("<p>沒有符合的回報。</p>"));cnt.textContent="共 "+n+" 則（新的 "+r.rows.filter(function(y){return y.status==="new"}).length+" 則）"}
+  sel.onchange=draw;draw()},function(e){s.appendChild(h("<p>載入失敗（"+esc(e.code||"net")+"）</p>"))})}
+
+NB.tadmin={roster:roster,bank:bank,settings:settings,data:data,reports:reports};
 })();
