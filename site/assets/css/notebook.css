@@ -149,7 +149,7 @@ table.tb{width:100%;border-collapse:collapse}.tb th,.tb td{padding:7px 8px;borde
 /* 注音放在字的右邊、直排（跟台灣課本一樣）。不用瀏覽器內建的 ruby 排法，因為各瀏覽器對「右側注音」支援不一 */
 ruby{display:inline-flex;align-items:center;ruby-position:initial}
 rt{display:inline-flex;flex-direction:row;align-items:center;font-size:.52em;line-height:1;font-weight:500;letter-spacing:0;margin-left:.03em;margin-right:.12em;white-space:nowrap}
-rt .zb{display:flex;flex-direction:column;align-items:center}rt .zc{display:block;line-height:.98}rt .zi{transform:rotate(90deg)}
+rt .zb{display:flex;flex-direction:column;align-items:center}rt .zc{display:block;line-height:.98}
 rt .zt{align-self:flex-end;display:block;height:1em;line-height:1;margin-left:.03em;font-size:1.1em;font-weight:700}
 rt.zneu{flex-direction:column;align-items:center}rt .zn{line-height:.7;margin-bottom:.02em}
 body.zymode #app,body.zymode #app p,body.zymode #app .q,body.zymode #app label,body.zymode #app a,body.zymode #app button,body.zymode #app li,body.zymode #app td,body.zymode #app summary{line-height:1.8}

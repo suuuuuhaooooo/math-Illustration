@@ -50,7 +50,7 @@ export function syllables(run, L = lib) {
 /* 注音排版：符號直排，聲調符號（ˊˇˋ）放在符號欄的右邊，輕聲（˙）放在最上面 */
 function fillRt(t, z) {
   const neutral = z.startsWith("˙"), tone = /[ˊˇˋ]$/.test(z) ? z.slice(-1) : "", body = z.replace(/^˙/, "").replace(/[ˊˇˋ]$/, "");
-  const b = document.createElement("span"); b.className = "zb"; [...body].forEach((c) => { const x = document.createElement("span"); x.className = "zc" + (c === "ㄧ" ? " zi" : ""); x.textContent = c; b.appendChild(x); });
+  const b = document.createElement("span"); b.className = "zb"; [...body].forEach((c) => { const x = document.createElement("span"); x.className = "zc"; x.textContent = c; b.appendChild(x); });
   if (neutral) { const n = document.createElement("span"); n.className = "zn"; n.textContent = "˙"; t.classList.add("zneu"); t.append(n, b); }
   else { t.append(b); if (tone) { const m = document.createElement("span"); m.className = "zt"; m.textContent = tone; t.append(m); } }
 }
