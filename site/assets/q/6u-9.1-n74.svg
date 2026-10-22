@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="452" height="153" viewBox="0 0 452 153">
+<rect x="0" y="0" width="452" height="153" fill="#ffffff"/>
+<path d="M34.4,123.1 L143.9,123.1 L116.5,77.5 L61.8,77.5 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path d="M198.6,123.1 L417.6,123.1 L362.8,31.8 L253.4,31.8 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<text x="26.0" y="132.2" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">A</text>
+<text x="152.3" y="132.2" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">B</text>
+<text x="123.5" y="77.2" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">C</text>
+<text x="54.8" y="77.2" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">D</text>
+<text x="190.2" y="132.2" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">E</text>
+<text x="426.0" y="132.2" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">F</text>
+<text x="369.9" y="31.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">G</text>
+<text x="246.4" y="31.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">H</text>
+<text x="109.3" y="95.1" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">65°</text>
+<text x="89.2" y="105.9" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">甲</text>
+<text x="308.1" y="83.1" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">乙</text>
+</svg>

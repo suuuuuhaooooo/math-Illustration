@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="452" height="254" viewBox="0 0 452 254">
+<rect x="0" y="0" width="452" height="254" fill="#ffffff"/>
+<path d="M26.0,203.8 L26.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M48.2,203.8 L48.2,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M70.4,203.8 L70.4,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M92.7,203.8 L92.7,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M114.9,203.8 L114.9,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M137.1,203.8 L137.1,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M159.3,203.8 L159.3,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M181.6,203.8 L181.6,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M203.8,203.8 L203.8,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M226.0,203.8 L226.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M248.2,203.8 L248.2,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M270.4,203.8 L270.4,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M292.7,203.8 L292.7,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M314.9,203.8 L314.9,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M337.1,203.8 L337.1,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M359.3,203.8 L359.3,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M381.6,203.8 L381.6,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M403.8,203.8 L403.8,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M426.0,203.8 L426.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,203.8 L426.0,203.8" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,181.6 L426.0,181.6" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,159.3 L426.0,159.3" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,137.1 L426.0,137.1" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,114.9 L426.0,114.9" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,92.7 L426.0,92.7" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,70.4 L426.0,70.4" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,48.2 L426.0,48.2" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,26.0 L426.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M70.4,181.6 L92.7,181.6 L70.4,148.2 L92.7,114.9 L70.4,114.9 L48.2,148.2 Z" fill="#cfe8f7" stroke="#000000" stroke-width="1.8"/>
+<text x="74.1" y="153.5" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">甲</text>
+<path d="M126.0,181.6 L137.1,181.6 L126.0,164.9 L137.1,148.2 L126.0,148.2 L114.9,164.9 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.8"/>
+<text x="127.9" y="170.1" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">乙</text>
+<path d="M192.7,181.6 L214.9,181.6 L192.7,148.2 L214.9,114.9 L192.7,114.9 L170.4,148.2 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.8"/>
+<text x="196.4" y="153.5" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">丙</text>
+<path d="M259.3,192.7 L281.6,192.7 L259.3,126.0 L281.6,59.3 L259.3,59.3 L237.1,126.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.8"/>
+<text x="263.0" y="131.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">丁</text>
+<path d="M359.3,181.6 L403.8,181.6 L359.3,114.9 L403.8,48.2 L359.3,48.2 L314.9,114.9 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.8"/>
+<text x="366.7" y="120.1" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">戊</text>
+<text x="226.0" y="241.8" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（每一小格的邊長都一樣）</text>
+</svg>
