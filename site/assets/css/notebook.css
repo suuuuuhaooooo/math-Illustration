@@ -234,3 +234,15 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 .legal .art{margin:.9em 0 0}.legal .art>b{font-family:var(--serif)}
 .legal ol.cl{margin:.3em 0 0;padding-left:1.6em}.legal ol.cl>li{margin:.35em 0}
 .legal ol.cl ol{list-style:none;margin:.3em 0 0;padding-left:0;counter-reset:sub}.legal ol.cl ol>li{counter-increment:sub;position:relative;padding-left:2.7em;margin:.3em 0}.legal ol.cl ol>li::before{content:"（" counter(sub,cjk-ideographic) "）";position:absolute;left:0;top:0;width:2.7em;white-space:nowrap}
+/* 手機：列印設定與試卷預覽不要超出區塊 */
+.ppc{white-space:normal;max-width:100%}.ppr>label,.ppr>span{max-width:100%}.ppanel,.ppanel *{box-sizing:border-box}
+.psheet.pp{max-width:100%;overflow-x:hidden}
+@media screen and (max-width:640px){
+ .psheet.pp{padding:14px 12px}
+ table.pscore{table-layout:fixed;font-size:.68rem}.pscore th,.pscore td{padding:2px 1px;word-break:keep-all;overflow-wrap:anywhere;line-height:1.25}.pscore tr:nth-child(2) td,.pscore tr:nth-child(2) th{height:2.2em}
+ .psheet.pp .ptitle,.psheet.pp .pinfo{gap:2px 10px;font-size:.95rem}
+ .psheet.pp h3,.pschool{overflow-wrap:anywhere}
+ .psheet.pp img,.psheet.pp svg,.psheet.pp table{max-width:100%}
+ .ppr input[type=text],.ppr input:not([type]),.ppr select{max-width:100%;min-width:0}
+}
+.wi .qid{font-size:.72rem;color:var(--soft);border:1px solid var(--line);border-radius:4px;padding:0 4px;font-family:monospace}

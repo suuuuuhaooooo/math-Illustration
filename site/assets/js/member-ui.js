@@ -203,7 +203,7 @@ V.wrong=function(){
   D.wr.slice().reverse().forEach(function(w){var isDue=!w.due||w.due<=t;
    if(!gsOk(w.id,F.val("g"),F.val("m")))return;if(F.val("u")&&w.id!==F.val("u"))return;
    var st=F.val("st");if(st==="due"&&!isDue)return;if(st==="wait"&&isDue)return;if(st==="hard"&&!(w.n>=2))return;n++;
-   var d=h('<div class="wi"><div>'+tx(w.q)+"</div>"+qimg(w.img)+"<small>"+esc(title(w.id))+"・錯 "+w.n+" 次・已通過 "+(w.ok||0)+"/"+M.cfg.review.length+"・"+(isDue?"今天可複習":w.due.slice(5)+" 再複習")+"　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));d.appendChild(dt);sbx.appendChild(d)});
+   var d=h('<div class="wi"><div>'+tx(w.q)+"</div>"+qimg(w.img)+"<small>"+(w.qid?"<span class=\"qid\">"+esc(w.qid)+"</span>　":"")+esc(title(w.id))+"・錯 "+w.n+" 次・已通過 "+(w.ok||0)+"/"+M.cfg.review.length+"・"+(isDue?"今天可複習":w.due.slice(5)+" 再複習")+"　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));d.appendChild(dt);sbx.appendChild(d)});
   if(!n)sbx.appendChild(h("<p>這個篩選條件下沒有錯題。</p>"));cnt.textContent="符合條件 "+n+" 題（共 "+D.wr.length+" 題）";
   if(window.Zhuyin&&Zhuyin.refresh)try{Zhuyin.refresh()}catch(e){}}
  unitOpts();draw();

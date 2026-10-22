@@ -28,6 +28,7 @@
     var ov = el("div", "rpov"), box = el("div", "rpbox"); ov.id = "rpov"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", "回報問題");
     box.innerHTML = '<h3>回報問題</h3><p class="meta">遇到錯誤、題目怪怪的、或有想法，都可以告訴老師。系統會自動附上你目前看的頁面和裝置資訊，方便查原因。</p>' +
       '<label>類型<select id="rp-cat">' + CATS.map(function (c) { return "<option>" + c + "</option>"; }).join("") + "</select></label>" +
+      '<label>題目ID（選填；錯題本或列印卷上的小字，多題用逗號分隔）<input id="rp-qid" type="text" maxlength="80" placeholder="例如 5u-9.2-003"></label>' +
       '<label>發生了什麼事？（請寫是哪個單元、哪一題、你按了什麼）<textarea id="rp-msg" rows="5" maxlength="2000" placeholder="例如：三上 2-1 的第 3 題，我選的答案是對的但顯示錯"></textarea></label>' +
       '<div class="rpfiles"><label class="pen rpadd">附上截圖（最多 3 張）<input type="file" accept="image/*" multiple hidden id="rp-file"></label><span id="rp-names" class="meta"></span></div>' +
       '<div class="fb" id="rp-fb" role="status"></div><div class="ctl"><button class="pen go" id="rp-send">送出</button><button class="pen" id="rp-x">取消</button></div>';
@@ -50,7 +51,7 @@
       if (msg.length < 5) return say("請至少寫幾個字說明問題。", 0);
       if (!M || !M.api) return say("請先登入再回報。", 0);
       busy = true; $("rp-send").disabled = true; say("送出中…", 1);
-      M.api("POST", "/api/report", { cat: $("rp-cat").value, msg: msg, files: files, ctx: { page: location.pathname.split("/").pop() + location.hash, ua: navigator.userAgent, screen: innerWidth + "x" + innerHeight, errs: errs } }).then(function (r) {
+      M.api("POST", "/api/report", { cat: $("rp-cat").value, msg: msg, qid: $("rp-qid").value.trim(), files: files, ctx: { page: location.pathname.split("/").pop() + location.hash, ua: navigator.userAgent, screen: innerWidth + "x" + innerHeight, errs: errs } }).then(function (r) {
         box.innerHTML = '<h3>已送出</h3><p>謝謝你的回報（編號 ' + esc(r.id) + '）。老師看到後會處理。</p><div class="ctl"><button class="pen go" id="rp-ok">關閉</button></div>'; box.querySelector("#rp-ok").onclick = close;
       }, function (e) {
         busy = false; $("rp-send").disabled = false;
