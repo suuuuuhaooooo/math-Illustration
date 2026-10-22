@@ -212,5 +212,5 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 @media print{.pfoot{display:block;position:fixed;left:0;right:0;bottom:-9mm;text-align:center;font-size:8pt;color:rgba(0,0,0,.6)}}
 
 /* 沒勾浮水印時：每頁正中間一條細字 */
-.pwm-one{display:block}.pwm.pwm-one>.pwm-line{position:absolute;left:0;right:0;top:50%;width:auto;height:auto;transform:translateY(-50%);text-align:center;font-size:8.5pt;line-height:1.2;color:rgba(0,0,0,.3);white-space:nowrap;overflow:hidden}
+.pwm.pwm-one>.pwm-line{position:absolute;left:50%;right:auto;top:50%;width:max-content;max-width:none;height:auto;transform:translate(-50%,-50%) rotate(-35deg);text-align:center;font-size:8.5pt;line-height:1.2;color:rgba(0,0,0,.3);white-space:nowrap;overflow:visible}
 .psheet.pp .pwm-line{color:rgba(0,0,0,.3)}
