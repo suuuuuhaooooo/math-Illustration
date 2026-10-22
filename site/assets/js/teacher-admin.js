@@ -53,8 +53,17 @@ function roster(ctx){
   bt.children[1].onclick=function(){download("名單.csv","email,class,no,name,role,grade,active,expires\n"+rows.map(function(x){return[x.email,x.class,x.no,x.name,x.role,x.grade,x.active==="0"?0:1,x.expires||""].map(csvEsc).join(",")}).join("\n"))};
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 
-function pickCsv(ta,note){var w=h('<div class="ctl"></div>'),b=h('<button class="pen">選擇 CSV 檔</button>'),f=document.createElement("input");f.type="file";f.accept=".csv,.txt,text/csv,text/plain";f.hidden=true;
- b.onclick=function(){f.click()};f.onchange=function(){var x=f.files[0];if(!x)return;var r=new FileReader();r.onload=function(){ta.value=String(r.result||"");note.textContent="已讀入 "+x.name+"，確認內容後按「匯入」。";f.value=""};r.readAsText(x,"utf-8")};
+/* 選 CSV：可一次選很多個檔。keep=true（題庫）：檔案分開保存、逐檔檢查匯入；否則（名單）合併成一份文字貼進框裡 */
+var HEADS="id,unit,type,lv,q,options,answer,hint,diag,img,himg,print,daily,mock,active,email,class,no,name,role,grade,expires".split(",");
+function isHead(line){var c=parseCSV(line)[0]||[];return c.filter(function(x){return HEADS.indexOf(x.trim().toLowerCase())>=0}).length>=2}
+function pickCsv(ta,note,keep){var w=h('<div class="ctl"></div>'),b=h('<button class="pen">選擇 CSV 檔（可多選）</button>'),f=document.createElement("input");f.type="file";f.multiple=true;f.accept=".csv,.txt,text/csv,text/plain";f.hidden=true;
+ ta.addEventListener("input",function(){ta.__files=null});
+ b.onclick=function(){f.click()};f.onchange=function(){var list=Array.prototype.slice.call(f.files);f.value="";if(!list.length)return;
+  Promise.all(list.map(function(x){return new Promise(function(ok){var r=new FileReader();r.onload=function(){ok({name:x.name,text:String(r.result||"").replace(/^\uFEFF/,"")})};r.onerror=function(){ok({name:x.name,text:""})};r.readAsText(x,"utf-8")})})).then(function(fs){
+   fs=fs.filter(function(x){return x.text.trim()});if(!fs.length){note.textContent="讀不到內容。";return}
+   var info=fs.map(function(x){var n=parseCSV(x.text).length-(isHead(x.text.split(/\r?\n/)[0]||"")?1:0);return x.name+"（"+n+" 列）"}).join("、");
+   if(keep){ta.__files=fs;ta.value="";ta.placeholder="已選 "+fs.length+" 個檔案，按「匯入」會逐檔檢查；也可以改成直接貼內容";note.innerHTML="已讀入 "+fs.length+" 個檔案："+esc(info)+"。確認後按「匯入」，全部檢查過才會寫入。"}
+   else{var out=[];fs.forEach(function(x,k){var lines=x.text.replace(/\s+$/,"").split(/\r?\n/);if(k>0&&isHead(lines[0]||""))lines.shift();out.push(lines.join("\n"))});ta.value=out.join("\n");ta.__files=null;note.textContent="已讀入 "+fs.length+" 個檔案："+info+"，確認內容後按「匯入」。"}})};
  w.appendChild(b);w.appendChild(f);return w}
 /* ---------- 題庫 ---------- */
 var COLS=["id","unit","type","lv","q","options","answer","hint","diag","img","himg","print","daily","mock","active"];
@@ -128,10 +137,23 @@ function bank(ctx){
     M.api("POST","/api/admin/bank",{rows:[o],mode:"merge"}).then(function(r){if(!r.ok)return msg(ef,r.errs.map(esc).join("<br>"),0);msg(ef,"已儲存",1);setTimeout(ctx.go,500)},function(e){msg(ef,errs(e),0)})};
    ed.scrollIntoView()}
   var bk=ctx.sheet("批次匯入／匯出","用試算表整理大量題目，再貼進來（欄位同範例 bank.csv）");
-  var ta=area("",5),bn=h('<p class="meta"></p>');bk.appendChild(pickCsv(ta,bn));bk.appendChild(bn);bk.appendChild(ta);var mode=sel([["merge","合併（id 相同就更新，其他保留）"],["replace","全部取代（整個題庫會被換掉）"]],"merge"),bt=h('<div class="ctl"></div>'),bf=h('<div class="fb"></div>');
+  var ta=area("",5),bn=h('<p class="meta"></p>');bk.appendChild(pickCsv(ta,bn,true));bk.appendChild(bn);bk.appendChild(ta);var mode=sel([["merge","合併（id 相同就更新，其他保留）"],["replace","全部取代（整個題庫會被換掉）"]],"merge"),bt=h('<div class="ctl"></div>'),bf=h('<div class="fb"></div>');
   var b1=h('<button class="pen go">匯入</button>'),b2=h('<button class="pen">匯出題庫 CSV</button>');bt.appendChild(mode);bt.appendChild(b1);bt.appendChild(b2);bk.appendChild(bt);bk.appendChild(bf);
-  b1.onclick=function(){var p=parseCSV(ta.value);if(!p.length)return;if(mode.value==="replace"&&!confirm("這會刪除現有全部題目，改成貼上的內容。確定？"))return;
-   M.api("POST","/api/admin/bank",{rows:toObjs(p,COLS),mode:mode.value}).then(function(x){if(!x.ok)return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+x.errs.slice(0,30).map(esc).join("<br>"),0);msg(bf,"已匯入 "+x.n+" 題",1);setTimeout(ctx.go,600)},function(e){msg(bf,errs(e),0)})};
+  b1.onclick=function(){
+   var src=ta.__files&&!ta.value.trim()?ta.__files:[{name:"貼上的內容",text:ta.value}],jobs=[],bad=[];
+   src.forEach(function(x){var p=parseCSV(x.text);if(!p.length)return;var hd=isHead(x.text.split(/\r?\n/)[0]||""),rs=toObjs(p,COLS),base=hd?1:0,cur=[],sz=0;
+    rs.forEach(function(r){var z=JSON.stringify(r).length;if(cur.length&&(cur.length>=1500||sz+z>650000)){jobs.push({file:x.name,rows:cur,base:base});base+=cur.length;cur=[];sz=0}cur.push(r);sz+=z});
+    if(cur.length)jobs.push({file:x.name,rows:cur,base:base})});
+   if(!jobs.length)return msg(bf,"沒有可匯入的內容。",0);
+   if(mode.value==="replace"&&!confirm("這會刪除現有全部題目，改成匯入的內容。確定？"))return;
+   var total=jobs.reduce(function(a,j){return a+j.rows.length},0);b1.disabled=true;
+   function done(){b1.disabled=false}
+   function post(j,dry,rep){return M.api("POST","/api/admin/bank",{rows:j.rows,mode:rep?"replace":"merge",dry:dry?1:0,base:j.base})}
+   function pass(dry,k){ /* dry：只檢查不寫入；全部檢查完才真正寫入 */
+    if(k>=jobs.length)return Promise.resolve(true);var j=jobs[k];msg(bf,(dry?"檢查中 ":"匯入中 ")+(k+1)+" / "+jobs.length+"（"+esc(j.file)+"）…",1);
+    return post(j,dry,!dry&&k===0&&mode.value==="replace").then(function(x){if(!x.ok){bad=bad.concat(x.errs.map(function(e){return"【"+j.file+"】"+e}));return pass(dry,k+1)}return pass(dry,k+1)})}
+   pass(true,0).then(function(){if(bad.length){done();return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+bad.slice(0,30).map(esc).join("<br>")+(bad.length>30?"<br>…還有 "+(bad.length-30)+" 項":""),0)}
+    return pass(false,0).then(function(){done();msg(bf,"已匯入 "+total+" 題（"+src.length+" 個來源）",1);setTimeout(ctx.go,700)})}).catch(function(e){done();msg(bf,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
   b2.onclick=function(){download("題庫.csv",COLS.join(",")+"\n"+rows.map(function(x){return COLS.map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 
