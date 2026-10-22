@@ -199,8 +199,8 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 
 /* 浮水印 */
 .psheet.pp{position:relative}.pwm{position:absolute;inset:0;overflow:hidden;pointer-events:none;user-select:none;z-index:6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.pwm>div{position:absolute;left:-60%;top:-60%;width:220%;height:220%;transform:rotate(-28deg);transform-origin:center;text-align:center;font-size:11pt;line-height:var(--lh,11em);color:rgba(0,0,0,var(--wa,.11));word-break:keep-all;white-space:normal}
-.pwm span{display:inline-block;margin:0 var(--mg,6em);white-space:nowrap}
+.pwm>div{position:absolute;left:-60%;top:-60%;width:220%;height:220%;transform:rotate(-28deg);transform-origin:center;text-align:center;font-size:10.5pt;line-height:var(--lh,15em);color:rgba(0,0,0,var(--wa,.11));word-break:keep-all;white-space:normal}
+.pwm span{display:inline-block;margin:0 var(--mg,5em);white-space:nowrap}
 .psheet.pp .pwm,.psheet.pp .pwm *{color:rgba(0,0,0,var(--wa,.13))}
 
 /* 螢幕：浮水印鋪在每張卷子上；列印：改用 position:fixed，瀏覽器會在「每一頁」都重複一次，換頁也不會缺 */

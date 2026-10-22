@@ -78,12 +78,12 @@
   /* 浮水印：整張卷斜著鋪滿重複的文字。是真正的文字，所以不管瀏覽器有沒有開「列印背景圖形」都印得出來 */
   function wmHtml(P, D) {
     var w = D.wm || {}, force = !!w.force, on = force || P.wm; if (!on) return null;
-    var u = D.u, e = function (k, mine) { return force || P[k] ? mine : ""; }, parts = [];
-    parts.push(e("wmName", u.name)); parts.push(e("wmCls", u.cls && u.cls !== "all" ? u.cls + " 班 " + u.no + " 號" : "")); parts.push(e("wmEmail", w.email || ""));
-    parts.push(e("wmIp", w.ip ? "IP " + w.ip + (w.net ? "（" + w.net + "）" : "") : "")); parts.push(e("wmDev", w.brief || "")); parts.push(e("wmTime", w.ts ? stamp(w.ts) : stamp(Date.now()))); if (w.pid) parts.push("卷號 " + w.pid); if (P.wmText) parts.push(P.wmText);
-    var one = parts.filter(Boolean).map(esc).join("　"); if (!one) return null;
-    var den = force ? "2" : P.wmDen, a = { 1: ".07", 2: ".11", 3: ".2" }[den] || ".11", ds = force ? "1" : P.wmDens, lh = { 1: "11em", 2: "7em", 3: "4.6em" }[ds] || "11em", mg = { 1: "6em", 2: "3em", 3: "1.2em" }[ds] || "6em", rep = { 1: 120, 2: 220, 3: 420 }[ds] || 120;
-    var inner = '<div>' + new Array(rep).join('<span>' + one + "</span>") + "</div>", sv = '--wa:' + a + ';--lh:' + lh + ';--mg:' + mg;
+    var u = D.u, e = function (k, mine) { return force || P[k] ? mine : ""; }, A = [], B = [];
+    A.push(e("wmName", u.name)); A.push(e("wmCls", u.cls && u.cls !== "all" ? u.cls + " 班 " + u.no + " 號" : "")); A.push(e("wmEmail", w.email || "")); if (w.pid) A.push("卷號 " + w.pid);
+    B.push(e("wmIp", w.ip ? "IP " + w.ip + (w.net ? "（" + w.net + "）" : "") : "")); B.push(e("wmDev", w.brief || "")); B.push(e("wmTime", w.ts ? stamp(w.ts) : stamp(Date.now()))); if (P.wmText) B.push(P.wmText);
+    var one = A.filter(Boolean).map(esc).join("　"), two = B.filter(Boolean).map(esc).join("　"); if (!one && !two) return null;
+    var den = force ? "2" : P.wmDen, a = { 1: ".06", 2: ".10", 3: ".18" }[den] || ".10", ds = force ? "1" : P.wmDens, lh = { 1: "15em", 2: "9em", 3: "5em" }[ds] || "15em", mg = { 1: "5em", 2: "3em", 3: "1.5em" }[ds] || "5em", rep = { 1: 90, 2: 160, 3: 320 }[ds] || 90;
+    var inner = '<div>' + Array.apply(null, Array(rep)).map(function (_, i) { var t = i % 2 ? two : one; return t ? '<span>' + t + "</span>" : ""; }).join("") + "</div>", sv = '--wa:' + a + ';--lh:' + lh + ';--mg:' + mg;
     var foot = '<div class="pfoot" aria-hidden="true">' + (w.pid ? "卷號 " + esc(w.pid) + "　" : "") + esc([u.name, u.cls && u.cls !== "all" ? u.cls + "班" + u.no + "號" : "", w.ts ? stamp(w.ts) : "", w.brief || ""].filter(Boolean).join("　")) + "</div>";
     return { scr: '<div class="pwm pwm-abs" aria-hidden="true" style="' + sv + '">' + inner + "</div>", prn: '<div class="pwm pwm-fix" aria-hidden="true" style="' + sv + '">' + inner + "</div>" + foot };
   }
