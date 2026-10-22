@@ -256,3 +256,17 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 .psheet .gstem .gtag{color:#000}
 .psheet li.gsub{list-style-position:outside}
 .psheet .gcont{font-size:.78em;color:#444;margin:0 0 2px}
+
+/* 列印設定的卡片式選項（附 SVG 示意圖） */
+.pcr{align-items:flex-start}.pcr>b{min-width:5.5em;padding-top:8px}
+.pcards{display:flex;flex-wrap:wrap;gap:8px;flex:1;min-width:0}
+.pcard{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:92px;max-width:140px;padding:8px 8px 6px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);cursor:pointer;text-align:center;line-height:1.35}
+.pcard input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.pcard .pci{color:var(--soft);display:block;line-height:0}.pcard .pcl{font-size:.9rem}
+.pcard:hover{border-color:var(--p1)}
+.pcard:has(input:checked){border-color:var(--p1);background:color-mix(in srgb,var(--p1) 13%,var(--paper));box-shadow:inset 0 0 0 1px var(--p1)}
+.pcard:has(input:checked) .pci{color:var(--p1)}.pcard:has(input:checked) .pcl{font-weight:700}
+.pcard:has(input:focus-visible){outline:3px solid color-mix(in srgb,var(--p1) 45%,transparent);outline-offset:2px}
+.pcards.pk .pcard{min-width:104px}
+@media (max-width:560px){.pcr{flex-direction:column;align-items:stretch}.pcr>b{padding-top:0}.pcards{display:grid;grid-template-columns:repeat(3,1fr)}.pcards.p4{grid-template-columns:repeat(4,1fr)}.pcards.p2{grid-template-columns:repeat(2,1fr)}.pcard{min-width:0;max-width:none;padding:8px 4px 6px}.pcard .pcl{font-size:.82rem}.pcard .pci svg{width:44px;height:44px}}
+@media print{.pcards{display:none}}

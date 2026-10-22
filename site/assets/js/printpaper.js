@@ -18,6 +18,36 @@
   function load(u) { var d = defaults(u), s = null; try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {} if (s) { Object.keys(d).forEach(function (k) { if (s[k] !== undefined && k !== "grade" && k !== "cls") d[k] = s[k]; }); } return d; }
   function save(P) { try { var c = Object.assign({}, P); delete c.grade; delete c.cls; delete c.fd; delete c.fg; delete c.fk; delete c.fp; localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {} }
 
+
+  /* ---- 設定面板用的示意圖（SVG，線條用 currentColor，跟著主題變色） ---- */
+  var SV = function (b) { return '<svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + b + "</svg>"; };
+  var pg = function (x, y, w, h) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="2"/>'; };
+  var ln = function (x1, y, x2, o) { return '<path d="M' + x1 + " " + y + "H" + x2 + '"' + (o || "") + "/>"; };
+  var tx = function (x, y, t) { return '<text x="' + x + '" y="' + y + '" font-size="8" font-family="sans-serif" fill="currentColor" stroke="none">' + t + "</text>"; };
+  var TH = ' stroke-width="1" opacity=".55"';
+  function lines(x1, x2, y0, n, st) { var o = ""; for (var i = 0; i < n; i++) o += ln(x1, y0 + i * (st || 6), i % 3 === 2 ? x2 - 5 : x2, TH); return o; }
+  var PG = pg(10, 5, 36, 46);
+  function ico(kind, v) {
+    if (kind === "paper") { var d = PAPER[v], w = d[0] * 0.105, h = d[1] * 0.105, x = (56 - w) / 2, y = (56 - h) / 2; return SV(pg(x.toFixed(1), y.toFixed(1), w.toFixed(1), h.toFixed(1)) + lines((x + 4).toFixed(1), (x + w - 4).toFixed(1), (y + 7).toFixed(1), Math.floor((h - 12) / 6), 6)); }
+    if (kind === "layout") {
+      if (v === "s1") return SV(PG + lines(15, 41, 13, 6, 6));
+      if (v === "d2") return SV(PG + lines(15, 26, 13, 6, 6) + lines(30, 41, 13, 6, 6) + '<path d="M28 11V45" stroke-dasharray="2 2" stroke-width="1"/>');
+      return SV(pg(4, 11, 48, 34) + lines(9, 25, 19, 4, 6) + lines(31, 47, 19, 4, 6) + '<path d="M28 15V41" stroke-dasharray="2 2" stroke-width="1"/>');
+    }
+    if (kind === "opt") {
+      if (v === "col") return SV([0, 1, 2, 3].map(function (i) { return tx(8, 18 + i * 11, "ABCD".charAt(i) + ".") + ln(22, 15.5 + i * 11, 47, TH); }).join(""));
+      return SV(ln(8, 14, 48, TH) + ln(8, 20, 36, TH) + ["A", "B", "C", "D"].map(function (c, i) { return '<text x="' + (5 + i * 12.5) + '" y="37" font-size="10" font-family="sans-serif" fill="currentColor" stroke="none">' + c + ".</text>"; }).join("") + ln(8, 47, 48, ' stroke-dasharray="2 2" stroke-width="1" opacity=".4"'));
+    }
+    var q = function (y) { return ln(15, y, 41, TH) + ln(15, y + 5, 33, TH); };
+    if (v === "q") return SV(PG + ln(15, 12, 31, "") + q(20) + q(31) + q(42));
+    if (v === "blank") { var b = ""; for (var r = 0; r < 5; r++) for (var c = 0; c < 2; c++) b += '<rect x="' + (15 + c * 14) + '" y="' + (11 + r * 7.5) + '" width="11" height="5.5" rx="1" stroke-width="1"/>'; return SV(PG + b); }
+    if (v === "qa") return SV(PG + q(12) + q(22) + ln(15, 33, 41, ' stroke-dasharray="2 2" stroke-width="1"') + tx(14, 42, "A") + ln(22, 40.5, 41, "") + ln(22, 46, 36, TH));
+    if (v === "ak") { var a = ""; for (var k = 0; k < 4; k++) a += tx(13, 16 + k * 9.5, k + 1 + ".") + ln(21, 14.5 + k * 9.5, 31, "") + ln(34, 14.5 + k * 9.5, 42, TH); return SV(PG + a); }
+    if (v === "short") { var m = ""; for (var j = 0; j < 4; j++) m += tx(13, 16 + j * 9.5, j + 1 + ".") + ln(22, 14.5 + j * 9.5, 40, ""); return SV(PG + m); }
+    return SV(pg(16, 4, 34, 42) + pg(6, 10, 34, 42) + ln(11, 20, 35, TH) + ln(11, 27, 35, TH) + ln(11, 34, 29, TH) + ln(11, 41, 35, TH));
+  }
+  function card(type, name, v, label, on, id, icon) { return '<label class="pcard"><input type="' + type + '" ' + (name ? 'name="' + name + '" value="' + v + '"' : "") + (id ? ' id="' + id + '"' : "") + (on ? " checked" : "") + '><span class="pci">' + icon + '</span><span class="pcl">' + label + "</span></label>"; }
+
   /* ---- 設定面板 ---- */
   function panel(u, onchange) {
     var P = load(u), el = document.createElement("div"); el.className = "ppanel noprint";
@@ -31,10 +61,10 @@
       '<div class="ppr"><label>班級 <input id="pp-grade" maxlength="1" value="' + esc(P.grade) + '" style="width:2.5em"> 年 <input id="pp-cls" maxlength="2" value="' + esc(P.cls) + '" style="width:2.5em"> 班</label>' + chk("pp-showClass", "顯示班級", P.showClass) + "</div>" +
       '<div class="ppr">' + chk("pp-showScore", "顯示級距與得分框（100／99~90／…／未滿60、分數、家長簽章）", P.showScore) + chk("pp-prefill", "座號、姓名先填好（不勾＝留空白線）", P.prefill) + "</div></div></details>" +
       '<details open><summary>紙本卷列印設定</summary><div class="ppg">' +
-      '<div class="ppr"><b>紙張</b> ' + ["A3", "A4", "B4", "B5"].map(function (p) { return rad("pp-paper", p, p, P.paper); }).join("") + "</div>" +
-      '<div class="ppr"><b>排版</b> ' + rad("pp-layout", "s1", "橫書單欄", P.layout) + rad("pp-layout", "d2", "橫書雙欄（直版）", P.layout) + rad("pp-layout", "d2l", "橫書雙欄（橫版）", P.layout) + "</div>" +
-      '<div class="ppr"><b>選項排列</b> ' + rad("pp-opt", "col", "換行排列", P.optMode) + rad("pp-opt", "row", "接續排列", P.optMode) + "</div></div></details>" +
-      '<details open><summary>輸出卷別</summary><div class="ppg"><div class="ppr">' + chk("pp-all", "全選", false) + KINDS.map(function (k) { return chk("pp-k-" + k[0], k[1], !!P.kinds[k[0]]); }).join("") + "</div></div></details>" +
+      '<div class="ppr pcr"><b>紙張</b><div class="pcards p4">' + ["A3", "A4", "B4", "B5"].map(function (p) { return card("radio", "pp-paper", p, p, P.paper === p, "", ico("paper", p)); }).join("") + "</div></div>" +
+      '<div class="ppr pcr"><b>排版</b><div class="pcards">' + [["s1", "橫書單欄"], ["d2", "橫書雙欄（直版）"], ["d2l", "橫書雙欄（橫版）"]].map(function (x) { return card("radio", "pp-layout", x[0], x[1], P.layout === x[0], "", ico("layout", x[0])); }).join("") + "</div></div>" +
+      '<div class="ppr pcr"><b>選項排列</b><div class="pcards p2">' + [["col", "換行排列"], ["row", "接續排列"]].map(function (x) { return card("radio", "pp-opt", x[0], x[1], P.optMode === x[0], "", ico("opt", x[0])); }).join("") + "</div></div></div></details>" +
+      '<details open><summary>輸出卷別</summary><div class="ppg"><div class="ppr">' + chk("pp-all", "全選", false) + '</div><div class="pcards pk">' + KINDS.map(function (k) { return card("checkbox", "", "", k[1], !!P.kinds[k[0]], "pp-k-" + k[0], ico("kind", k[0])); }).join("") + "</div></div></details>" +
       '<details open><summary>浮水印（防止試卷外流，可追查是誰印的）</summary><div class="ppg">' +
       (u.role === "teacher" ? "" : '<div class="ppr meta">學生列印一律會加上浮水印（姓名、班級座號、Email、IP、裝置、卷號、時間），也會留下列印紀錄，不能關閉。</div>') +
       '<div class="ppr">' + chk("pp-wm", "加上浮水印", P.wm) + chk("pp-wmName", "姓名", P.wmName) + chk("pp-wmCls", "班級座號", P.wmCls) + chk("pp-wmEmail", "Email", P.wmEmail) + chk("pp-wmIp", "IP 位址", P.wmIp) + chk("pp-wmDev", "裝置", P.wmDev) + chk("pp-wmTime", "列印時間", P.wmTime) + "</div>" +
