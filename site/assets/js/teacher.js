@@ -3,7 +3,7 @@
 "use strict";
 var M=NB.member,app=document.getElementById("app"),h=NB.h,TAB="overview",CLS=null;document.body.classList.add("tpage");
 try{TAB=sessionStorage.getItem("nbt-tab")||TAB}catch(e){}
-var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["bank","題庫"],["settings","設定"],["data","資料管理"],["prints","列印紀錄"],["reports","問題回報"]],TABS=TABS_ALL;/* 老師看不到題庫／設定／資料管理，這三項只有管理員能改 */
+var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["bank","題庫"],["settings","設定"],["data","資料管理"],["prints","列印紀錄"],["mocks","模擬考紀錄"],["reports","問題回報"]],TABS=TABS_ALL;/* 老師看不到題庫／設定／資料管理，這三項只有管理員能改 */
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function title(id){var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
 function pct(c,n){return n?Math.round(c/n*100):null}

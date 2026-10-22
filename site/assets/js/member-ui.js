@@ -2,7 +2,7 @@
    題目、判分、積分都由伺服器處理（見 member.js）；這裡只負責顯示與收集答案。 */
 (function(){
 "use strict";
-var M=NB.member,app=document.getElementById("app"),h=NB.h,tx=NB.tx,view,who,TM=null,qg=null,booted=false;
+var M=NB.member,app=document.getElementById("app"),h=NB.h,tx=NB.tx,view,who,TM=null,XG=null,qg=null,booted=false;
 var TABS=[["home","首頁"],["daily","每日一題"],["quiz","單元小測驗"],["mock","模擬卷"],["wrong","錯題本"],["progress","學習進度"],["stickers","勳章"],["board","排行榜"],["print","列印練習卷"]];
 function pad(n){return("0"+n).slice(-2)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -48,7 +48,7 @@ function boot(){
  if(booting)return;booting=true;
  app.innerHTML="";app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
  M.boot().catch(function(e){M.U=null;M.err=(e&&e.code)||"net"}).then(function(){booted=true;booting=false;route()})}
-function route(){clearInterval(TM);if(!booted){boot();return}if(!shell())return;var p=(location.hash||"#home").slice(1).split("/");if(M.acct&&M.acct.expired&&["home","progress","stickers"].indexOf(p[0])<0)p=["expired"];(V[p[0]]||V.home)(p[1]);window.scrollTo(0,0)}
+function route(){clearInterval(TM);if(XG){XG();XG=null}if(!booted){boot();return}if(!shell())return;var p=(location.hash||"#home").slice(1).split("/");if(M.acct&&M.acct.expired&&["home","progress","stickers"].indexOf(p[0])<0)p=["expired"];(V[p[0]]||V.home)(p[1]);window.scrollTo(0,0)}
 
 function login(){
  try{if(sessionStorage.getItem("nb-idle")){sessionStorage.removeItem("nb-idle");setTimeout(function(){var f=document.querySelector(".fb");if(f){f.className="fb no";f.textContent="因為閒置太久，已為了帳號安全自動登出，請重新登入。"}},0)}}catch(e){}
@@ -73,7 +73,7 @@ function login(){
 function run(o){
  var S=o.sess,qs=S.qs,exam=S.kind==="mock",i=0,ans=[],res=[],left=S.seconds||0,box=sheet(o.tag,o.title),body=h("<div></div>"),busy=false,fin=false,dres=null,hinted={};
  box.appendChild(body);view.innerHTML="";view.appendChild(box);if(o.note)box.insertBefore(h('<p class="meta"></p>'),body).textContent=o.note;
- if(exam){var clock=h('<span class="clock"></span>');box.querySelector("h2").appendChild(clock);var t0=Date.now();TM=setInterval(tick,1000);tick()}
+ if(exam){var clock=h('<span class="clock"></span>');box.querySelector("h2").appendChild(clock);var t0=Date.now();TM=setInterval(tick,1000);tick();if(XG)XG();XG=NB.xg?NB.xg.start({sid:S.sid,lw:S.lw,user:user(),api:M.api,box:box}):null}
  function tick(){left=S.seconds-Math.floor((Date.now()-t0)/1000);if(left<0)left=0;clock.textContent="剩 "+pad(Math.floor(left/60))+":"+pad(left%60);if(left<=0)finish()}
  function show(){
   var q=qs[i],sel=null,done=false,ob=[],inp,hb,d=h('<div><div class="prog">第 '+(i+1)+" / "+qs.length+' 題</div><div class="q">'+tx(q.q)+"</div>"+qimg(q.img)+"</div>");body.innerHTML="";
@@ -105,7 +105,7 @@ function run(o){
  function finish(){
   if(fin||busy)return;fin=true;clearInterval(TM);body.innerHTML="";body.appendChild(h('<p class="meta">'+(exam?"交卷中，伺服器判分…":"結算中…")+"</p>"));
   var p=S.kind==="daily"&&dres?Promise.resolve({n:1,c:res[0]&&res[0].ok?1:0,gain:dres.gain,got:dres.got,data:M.D}):exam?M.api("POST","/api/submit",{sid:S.sid,ans:qs.map(function(_,k){return ans[k]===undefined?null:ans[k]})}):M.api("POST","/api/finish",{sid:S.sid});
-  p.then(function(r){M.setData(r.data,r.prog);updWho();result(r)},function(e){fin=false;body.innerHTML="";var s=h('<div><div class="fb no">'+esc(errMsg(e))+"</div></div>"),b=h('<div class="ctl"><button class="pen go">再試一次</button></div>');b.firstChild.onclick=function(){finish()};s.appendChild(b);body.appendChild(s);if(exam&&e.code==="no_session"){s.appendChild(h('<a class="pen" href="#home">回首頁</a>'))}})}
+  p.then(function(r){if(XG){XG();XG=null}M.setData(r.data,r.prog);updWho();result(r)},function(e){fin=false;body.innerHTML="";var s=h('<div><div class="fb no">'+esc(errMsg(e))+"</div></div>"),b=h('<div class="ctl"><button class="pen go">再試一次</button></div>');b.firstChild.onclick=function(){finish()};s.appendChild(b);body.appendChild(s);if(exam&&e.code==="no_session"){s.appendChild(h('<a class="pen" href="#home">回首頁</a>'))}})}
  function result(r){
   var D=M.D,n=exam?r.n:r.n,c=r.c;
   var s=h('<div><div class="q">'+(exam?r.sc+" 分（"+c+" / "+n+"）":c+" / "+n+" 題答對")+"</div>"+(r.late?'<p class="fb no">已超過作答時間，伺服器只接受時限內的答案，這份卷子沒有計分。</p>':"")+"<p>這次獲得 <b>"+r.gain+"</b> 積分，目前 Lv."+M.lv(D)+"。</p></div>");

@@ -229,5 +229,17 @@ function prints(ctx){
     det.innerHTML="<p><b>卷號 "+esc(d.id)+"</b>　"+esc(d.name)+"（"+esc(d.email)+"）　"+esc(d.cls)+" 班 "+d.no+" 號　"+when(d.ts)+"<br><small>IP "+esc(d.ip)+"　"+esc(d.net||"")+"　"+esc(d.place||"")+"　"+esc(d.brief||"")+"<br>裝置回報："+esc(d.dev||"（無）")+"<br>來源："+esc(d.src||"")+"</small></p><ol>"+d.qs.map(function(q){return"<li>"+esc(q.q)+"　<small>答："+esc(q.a)+"</small></li>"}).join("")+"</ol>";det.scrollIntoView({block:"nearest"})},function(){b.disabled=false})})
  },function(e){s.appendChild(h("<p>載入失敗（"+esc(e.code||"net")+"）</p>"))})}
 
-NB.tadmin={roster:roster,bank:bank,settings:settings,data:data,reports:reports,prints:prints};
+/* ---------- 模擬考紀錄 ---------- */
+function mocks(ctx){
+ var s=ctx.sheet("模擬考紀錄","最近 500 筆（老師只看得到自己班）。離開次數是學生切到別的分頁或視窗的次數，只作參考，系統不會因此扣分");
+ M.api("GET","/api/admin/mocks").then(function(r){
+  if(!r.rows.length){s.appendChild(h("<p>還沒有模擬考紀錄。</p>"));return}
+  function when(t){var d=new Date(t+288e5).toISOString();return d.slice(5,10)+" "+d.slice(11,16)}
+  function mmss(x){return Math.floor(x/60)+":"+("0"+x%60).slice(-2)}
+  var t='<table class="tb"><tr><th>時間</th><th>班</th><th>號</th><th>姓名</th><th>成績</th><th>答對</th><th>用時</th><th>離開次數</th><th>離開秒數</th><th>注意</th></tr>';
+  r.rows.forEach(function(x){var f=[];if(x.late)f.push("逾時");if(x.leaves>=3||x.away>=60)f.push("離開多次");if(x.n>=5&&x.used/x.n<6)f.push("作答過快");
+   t+="<tr><td>"+when(x.ts)+"</td><td>"+esc(x.cls)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+(x.late?"—":x.sc)+"</td><td>"+x.c+" / "+x.n+"</td><td>"+mmss(x.used)+"</td><td>"+x.leaves+"</td><td>"+x.away+"</td><td>"+(f.length?"<b>"+f.join("、")+"</b>":"")+"</td></tr>"});
+  s.appendChild(h(t+"</table>"))},function(e){s.appendChild(h("<p>載入失敗（"+esc(e.code||"net")+"）</p>"))})}
+
+NB.tadmin={roster:roster,bank:bank,settings:settings,data:data,reports:reports,prints:prints,mocks:mocks};
 })();
