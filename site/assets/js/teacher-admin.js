@@ -141,47 +141,57 @@ function bank(ctx){
      if(!has&&!had){msg(ef,"已儲存",1);return setTimeout(ctx.go,500)}
      at.id=(r.ids&&r.ids[0])||o.id;return M.api("POST","/api/admin/meta",{rows:[at],mode:"merge"}).then(function(m){if(!m.ok)return msg(ef,"題目已儲存，但屬性有問題："+m.errs.map(esc).join("<br>"),0);msg(ef,"已儲存",1);setTimeout(ctx.go,500)})},function(e){msg(ef,errs(e),0)})};
    ed.scrollIntoView()}
-  var bk=ctx.sheet("批次匯入／匯出","用試算表整理大量題目，再貼進來（欄位同範例 bank.csv）；表格後面可以多加五欄「學習表現、學習內容、難易度、認知層次、知識類型」，題目和屬性會一起存");
-  var ta=area("",5),bn=h('<p class="meta"></p>');bk.appendChild(pickCsv(ta,bn,true));bk.appendChild(bn);bk.appendChild(ta);var mode=sel([["merge","合併（id 相同就更新，其他保留）"],["replace","全部取代（整個題庫會被換掉）"]],"merge"),bt=h('<div class="ctl"></div>'),bf=h('<div class="fb"></div>');
-  var b1=h('<button class="pen go">匯入</button>'),b2=h('<button class="pen">匯出題庫 CSV</button>');bt.appendChild(mode);bt.appendChild(b1);bt.appendChild(b2);bk.appendChild(bt);bk.appendChild(bf);
+  /* ---- 匯入／匯出（題庫與題目屬性共用同一個區塊）：先選資料類型，欄名不符就整份不匯入 ---- */
+  var bk=ctx.sheet("匯入／匯出","題庫與題目屬性都在這裡匯入。先選資料類型；第一列必須是欄名，欄名不符就整份都不會匯入"),mi=h('<p class="meta">讀取中…</p>');
+  bk.appendChild(mi);M.api("GET","/api/admin/meta").then(function(r){mi.innerHTML="目前題庫 <b>"+r.bank+"</b> 題，其中 <b>"+r.covered+"</b> 題已有屬性"+(r.bank-r.covered?"，還有 <b>"+(r.bank-r.covered)+"</b> 題沒有（這些題在列印篩選時不會被選到）":"，全部都有了")+(r.orphans?"；屬性表裡有 "+r.orphans+" 列的 id 在題庫找不到（不影響使用）":"")+"。"},function(){mi.textContent=""});
+  var AK=["perf","content","diff","cog","know"],AH=["學習表現","學習內容","難易度","認知層次","知識類型"],ATTR=AH.concat(AK);
+  var KINDS={bank:{label:"題庫（題目；後面可以多帶五個屬性欄）",api:"/api/admin/bank",req:["unit","type","q","answer"],allow:COLS.concat(ATTR),
+    guide:"必要欄位：<b>unit、type、q、answer</b>（id 可以空白，系統會自動編）。其他欄位：lv、options、hint、diag、img、himg、print、daily、mock、active。後面可以多加 <b>學習表現、學習內容、難易度、認知層次、知識類型</b>，題目和屬性會一起存。",
+    sample:COLS.concat(AH).join(",")+"\n"+["","6d-5.3","num","2","範例題目：2+3=?","","5","先算 2+3","","","","1","","1","1","","","易","理解","加法"].join(",")},
+   meta:{label:"題目屬性表（只有屬性，用 id 對應已有的題目）",api:"/api/admin/meta",req:["id"],need:ATTR,allow:["id"].concat(ATTR),
+    guide:"必要欄位：<b>id</b>，加上至少一個屬性欄：<b>學習表現、學習內容、難易度、認知層次、知識類型</b>（中英文欄名皆可）。id 要和題庫的 id 一樣；難易度只能填 易／中／難。",
+    sample:"id,學習表現,學習內容,難易度,認知層次,知識類型\n範例id,n-III-3,N-5-3,中,應用,公因數"}};
+  var kind=sel([["bank",KINDS.bank.label],["meta",KINDS.meta.label]],"bank"),gd=h('<p class="meta"></p>');
+  bk.appendChild(field("資料類型",kind));bk.appendChild(gd);
+  var ta=area("",5),bn=h('<p class="meta"></p>');bk.appendChild(pickCsv(ta,bn,true));bk.appendChild(bn);bk.appendChild(ta);
+  var mode=sel([["merge","合併（id 相同就更新，其他保留）"],["replace","全部取代（原有的會被清掉）"]],"merge"),bt=h('<div class="ctl"></div>'),bf=h('<div class="fb"></div>');
+  var b1=h('<button class="pen go">匯入</button>'),bx=h('<button class="pen">下載範本</button>'),b2=h('<button class="pen">匯出題庫 CSV（含屬性）</button>'),c2=h('<button class="pen">匯出屬性表 CSV</button>');
+  [mode,b1,bx,b2,c2].forEach(function(e){bt.appendChild(e)});bk.appendChild(bt);bk.appendChild(bf);
+  function drawGuide(){gd.innerHTML=KINDS[kind.value].guide;mode.options[1].textContent=kind.value==="bank"?"全部取代（整個題庫會被換掉）":"全部取代（原有的屬性會被清掉）"}kind.onchange=drawGuide;drawGuide();
+  /* 檢查一份檔案的格式；回傳 {err} 或 {rows, ignored} */
+  function parseSrc(x,K){
+   var p=parseCSV(x.text).filter(function(r){return r.some(function(c){return String(c).trim()})});
+   if(!p.length)return{err:"沒有內容"};
+   var head=p[0].map(function(c){return String(c).trim().toLowerCase()}),miss=K.req.filter(function(c){return head.indexOf(c)<0});
+   if(miss.length)return{err:"第一列要是欄名，而且必須有："+K.req.join("、")+"（缺少："+miss.join("、")+"）。如果只是欄名不一樣，請改成上面的欄名"};
+   if(K.need&&!K.need.some(function(c){return head.indexOf(c)>=0}))return{err:"至少要有一個屬性欄："+AH.join("、")};
+   if(K.need&&["unit","type","q","answer"].some(function(c){return head.indexOf(c)>=0}))return{err:"這看起來是題庫檔（有 unit、type、q、answer 欄）。請把上面的「資料類型」改成「題庫」再匯入"};
+   var ign=head.filter(function(c){return c&&K.allow.indexOf(c)<0});
+   var rows=[];for(var i=1;i<p.length;i++){var r=p[i];
+    if(r.length>head.length&&r.slice(head.length).some(function(c){return String(c).trim()}))return{err:"第 "+i+" 列的欄位比欄名還多（可能是文字裡有逗號，沒有用引號包起來）"};
+    var o={};head.forEach(function(k,j){if(k&&r[j]!==undefined)o[k]=String(r[j]).trim()});rows.push(o)}
+   if(!rows.length)return{err:"只有欄名，沒有資料"};
+   return{rows:rows,ignored:ign}}
   b1.onclick=function(){
-   var src=ta.__files&&!ta.value.trim()?ta.__files:[{name:"貼上的內容",text:ta.value}],jobs=[],bad=[];
-   src.forEach(function(x){var p=parseCSV(x.text);if(!p.length)return;var hd=isHead(x.text.split(/\r?\n/)[0]||""),rs=toObjs(p,COLS),base=hd?1:0,cur=[],sz=0;
-    rs.forEach(function(r){var z=JSON.stringify(r).length;if(cur.length&&(cur.length>=1500||sz+z>650000)){jobs.push({file:x.name,rows:cur,base:base});base+=cur.length;cur=[];sz=0}cur.push(r);sz+=z});
+   var K=KINDS[kind.value],src=ta.__files&&!ta.value.trim()?ta.__files:[{name:"貼上的內容",text:ta.value}],jobs=[],bad=[],ign={};
+   if(src.length===1&&!src[0].text.trim())return msg(bf,"還沒有內容：請選檔案，或把 CSV 內容貼上來。",0);
+   src.forEach(function(x){var r=parseSrc(x,K);if(r.err){bad.push("【"+x.name+"】"+r.err);return}
+    r.ignored.forEach(function(c){ign[c]=1});var base=1,cur=[],sz=0;
+    r.rows.forEach(function(o){var z=JSON.stringify(o).length;if(cur.length&&(cur.length>=1500||sz+z>650000)){jobs.push({file:x.name,rows:cur,base:base});base+=cur.length;cur=[];sz=0}cur.push(o);sz+=z});
     if(cur.length)jobs.push({file:x.name,rows:cur,base:base})});
-   if(!jobs.length)return msg(bf,"沒有可匯入的內容。",0);
-   if(mode.value==="replace"&&!confirm("這會刪除現有全部題目，改成匯入的內容。確定？"))return;
-   var total=jobs.reduce(function(a,j){return a+j.rows.length},0);b1.disabled=true;
+   if(bad.length)return msg(bf,"<b>格式不符，完全沒有匯入：</b><br>"+bad.map(esc).join("<br>"),0);
+   var ig=Object.keys(ign);if(ig.length&&!confirm("這些欄位不認得，會被忽略：\n"+ig.join("、")+"\n\n如果是欄名打錯（例如多了空白或寫錯字），請先取消、改好再匯入。\n確定要忽略它們繼續嗎？"))return;
+   if(mode.value==="replace"&&!confirm(kind.value==="bank"?"這會刪除現有全部題目，改成匯入的內容。確定？":"這會清掉現有全部屬性，改成匯入的內容。確定？"))return;
+   var total=jobs.reduce(function(a,j){return a+j.rows.length},0),orphan=0;b1.disabled=true;
    function done(){b1.disabled=false}
-   function post(j,dry,rep){return M.api("POST","/api/admin/bank",{rows:j.rows,mode:rep?"replace":"merge",dry:dry?1:0,base:j.base})}
    function pass(dry,k){ /* dry：只檢查不寫入；全部檢查完才真正寫入 */
     if(k>=jobs.length)return Promise.resolve(true);var j=jobs[k];msg(bf,(dry?"檢查中 ":"匯入中 ")+(k+1)+" / "+jobs.length+"（"+esc(j.file)+"）…",1);
-    return post(j,dry,!dry&&k===0&&mode.value==="replace").then(function(x){if(!x.ok){bad=bad.concat(x.errs.map(function(e){return"【"+j.file+"】"+e}));return pass(dry,k+1)}return pass(dry,k+1)})}
+    return M.api("POST",K.api,{rows:j.rows,mode:!dry&&k===0&&mode.value==="replace"?"replace":"merge",dry:dry?1:0,base:j.base}).then(function(x){if(!x.ok)bad=bad.concat(x.errs.map(function(e){return"【"+j.file+"】"+e}));else if(dry)orphan+=x.orphans||0;return pass(dry,k+1)})}
    pass(true,0).then(function(){if(bad.length){done();return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+bad.slice(0,30).map(esc).join("<br>")+(bad.length>30?"<br>…還有 "+(bad.length-30)+" 項":""),0)}
-    return pass(false,0).then(function(){done();msg(bf,"已匯入 "+total+" 題（"+src.length+" 個來源）",1);setTimeout(ctx.go,700)})}).catch(function(e){done();msg(bf,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
-  var AK=["perf","content","diff","cog","know"],AH=["學習表現","學習內容","難易度","認知層次","知識類型"];
+    return pass(false,0).then(function(){done();msg(bf,"已匯入 "+total+(kind.value==="bank"?" 題":" 列屬性")+"（"+src.length+" 個來源）"+(orphan?"。其中 "+orphan+" 列的 id 在題庫找不到，已先存起來，之後題庫有那題就會對上":""),1);setTimeout(ctx.go,900)})}).catch(function(e){done();msg(bf,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
+  bx.onclick=function(){download(kind.value==="bank"?"題庫範本.csv":"題目屬性表範本.csv",KINDS[kind.value].sample)};
   b2.onclick=function(){download("題庫.csv",COLS.concat(AH).join(",")+"\n"+rows.map(function(x){return COLS.concat(AK).map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
-  /* 題目屬性表：學習表現、學習內容、難易度、認知層次、知識類型。用題目 id 對應題庫，和題庫分開匯入，不會動到題目本身 */
-  var MC=["id","學習表現","學習內容","難易度","認知層次","知識類型"],mk=ctx.sheet("題目屬性表","列印練習卷可以依這些屬性篩選題目、在每題旁顯示、做雙向細目表"),mi=h('<p class="meta">讀取中…</p>');
-  mk.appendChild(mi);M.api("GET","/api/admin/meta").then(function(r){mi.innerHTML="目前題庫 <b>"+r.bank+"</b> 題，其中 <b>"+r.covered+"</b> 題已有屬性"+(r.bank-r.covered?"，還有 <b>"+(r.bank-r.covered)+"</b> 題沒有（這些題在篩選時不會被選到）":"，全部都有了")+(r.orphans?"；屬性表裡有 "+r.orphans+" 列的 id 在題庫找不到（不影響使用）":"")+"。"},function(){mi.textContent=""});
-  mk.appendChild(h('<p class="meta">CSV 的第一列是欄名：<b>id、學習表現、學習內容、難易度、認知層次、知識類型</b>。難易度只能填 易／中／難。id 要跟題庫的 id 一樣。可一次選多個檔。</p>'));
-  var ta2=area("",4),bn2=h('<p class="meta"></p>');mk.appendChild(pickCsv(ta2,bn2,true));mk.appendChild(bn2);mk.appendChild(ta2);
-  var mode2=sel([["merge","合併（id 相同就更新，其他保留）"],["replace","全部取代（原有的屬性會被清掉）"]],"merge"),bt2=h('<div class="ctl"></div>'),bf2=h('<div class="fb"></div>'),c1=h('<button class="pen go">匯入屬性表</button>'),c2=h('<button class="pen">匯出屬性表 CSV</button>');
-  bt2.appendChild(mode2);bt2.appendChild(c1);bt2.appendChild(c2);mk.appendChild(bt2);mk.appendChild(bf2);
-  c1.onclick=function(){
-   var src=ta2.__files&&!ta2.value.trim()?ta2.__files:[{name:"貼上的內容",text:ta2.value}],jobs=[],bad=[],orphan=0;
-   src.forEach(function(x){var p=parseCSV(x.text);if(!p.length)return;var hd=isHead(x.text.split(/\r?\n/)[0]||""),rs=toObjs(p,MC),base=hd?1:0,cur=[],sz=0;
-    rs.forEach(function(r){var z=JSON.stringify(r).length;if(cur.length&&(cur.length>=1500||sz+z>650000)){jobs.push({file:x.name,rows:cur,base:base});base+=cur.length;cur=[];sz=0}cur.push(r);sz+=z});
-    if(cur.length)jobs.push({file:x.name,rows:cur,base:base})});
-   if(!jobs.length)return msg(bf2,"沒有可匯入的內容。",0);
-   if(mode2.value==="replace"&&!confirm("這會清掉現有全部屬性，改成匯入的內容。確定？"))return;
-   var total=jobs.reduce(function(a,j){return a+j.rows.length},0);c1.disabled=true;
-   function done(){c1.disabled=false}
-   function pass(dry,k){if(k>=jobs.length)return Promise.resolve(true);var j=jobs[k];msg(bf2,(dry?"檢查中 ":"匯入中 ")+(k+1)+" / "+jobs.length+"（"+esc(j.file)+"）…",1);
-    return M.api("POST","/api/admin/meta",{rows:j.rows,mode:!dry&&k===0&&mode2.value==="replace"?"replace":"merge",dry:dry?1:0,base:j.base}).then(function(x){if(!x.ok)bad=bad.concat(x.errs.map(function(e){return"【"+j.file+"】"+e}));else if(dry)orphan+=x.orphans||0;return pass(dry,k+1)})}
-   pass(true,0).then(function(){if(bad.length){done();return msg(bf2,"<b>有地方要修正，完全沒有匯入：</b><br>"+bad.slice(0,30).map(esc).join("<br>")+(bad.length>30?"<br>…還有 "+(bad.length-30)+" 項":""),0)}
-    return pass(false,0).then(function(){done();msg(bf2,"已匯入 "+total+" 列屬性（"+src.length+" 個來源）"+(orphan?"。其中 "+orphan+" 列的 id 在題庫找不到，已先存起來，之後題庫有那題就會對上":""),1);setTimeout(ctx.go,900)})}).catch(function(e){done();msg(bf2,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
-  c2.onclick=function(){var K=["id","perf","content","diff","cog","know"];download("題目屬性表.csv",MC.join(",")+"\n"+rows.filter(function(x){return x.perf||x.content||x.diff||x.cog||x.know}).map(function(x){return K.map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
+  c2.onclick=function(){var K=["id","perf","content","diff","cog","know"];download("題目屬性表.csv",["id"].concat(AH).join(",")+"\n"+rows.filter(function(x){return x.perf||x.content||x.diff||x.cog||x.know}).map(function(x){return K.map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 
 /* ---------- 設定 ---------- */
