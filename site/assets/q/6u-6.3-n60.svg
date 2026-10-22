@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="259" height="252" viewBox="0 0 259 252">
+<rect x="0" y="0" width="259" height="252" fill="#ffffff"/>
+<path transform="translate(3.2,0)" d="M26.0,226.0 A100.0,100.0 0 0 0 26.0,26.0 L26.0,226.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path transform="translate(3.2,0)" d="M226.0,26.0 A100.0,100.0 0 0 0 226.0,226.0 L226.0,26.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<circle transform="translate(3.2,0)" cx="26.0" cy="126.0" r="3" fill="#000000"/>
+<circle transform="translate(3.2,0)" cx="226.0" cy="126.0" r="3" fill="#000000"/>
+<text transform="translate(3.2,0)" x="20.0" y="131.6" font-family="sans-serif" font-size="16" text-anchor="end" fill="#000000">8m</text>
+<text transform="translate(3.2,0)" x="232.0" y="131.6" font-family="sans-serif" font-size="16" text-anchor="start" fill="#000000">8m</text>
+</svg>
