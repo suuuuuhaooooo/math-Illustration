@@ -233,4 +233,4 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 /* 條款頁：條文格式 */
 .legal .art{margin:.9em 0 0}.legal .art>b{font-family:var(--serif)}
 .legal ol.cl{margin:.3em 0 0;padding-left:1.6em}.legal ol.cl>li{margin:.35em 0}
-.legal ol.cl ol{list-style:none;padding-left:1.4em;counter-reset:sub}.legal ol.cl ol>li{counter-increment:sub}.legal ol.cl ol>li::before{content:"（" counter(sub,cjk-ideographic) "）";margin-left:-1.8em;display:inline-block;width:1.8em}
+.legal ol.cl ol{list-style:none;margin:.3em 0 0;padding-left:0;counter-reset:sub}.legal ol.cl ol>li{counter-increment:sub;position:relative;padding-left:2.7em;margin:.3em 0}.legal ol.cl ol>li::before{content:"（" counter(sub,cjk-ideographic) "）";position:absolute;left:0;top:0;width:2.7em;white-space:nowrap}
