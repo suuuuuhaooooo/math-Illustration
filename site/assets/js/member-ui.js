@@ -236,18 +236,22 @@ V.print=function(){
  var u=user(),D=M.D,s=sheet("列印練習卷","選好單元與題數就可以印出來寫");s.classList.add("noprint");
  var src='<select id="ps"><option value="mix">本年級綜合</option>'+(D.wr.length?'<option value="wrong">我的錯題（'+D.wr.length+" 題）</option>":"")+'<option value="pick">自選單元（下方勾選）</option></select>';
  var ctl=h('<div class="ctl"><label>題目來源</label>'+src+'<label>題數</label><select id="pn"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>30</option><option>40</option></select>'+(u.role==="teacher"?'<label>年級</label><select id="pg"><option value="1">一年級</option><option value="2">二年級</option><option value="3">三年級</option><option value="4">四年級</option><option value="5">五年級</option><option value="6" selected>六年級</option></select>':"")+'<button class="pen go">出題</button><button class="pen">列印</button></div>');
- var pk=picker((M.gens||[]).slice().sort(),u.grade),out=h("<div></div>"),note=h('<p class="meta noprint"></p>');s.appendChild(ctl);s.appendChild(pk.el);view.appendChild(s);view.appendChild(note);view.appendChild(out);
- var bs=ctl.querySelectorAll("button");bs[0].onclick=make;bs[1].onclick=function(){window.print()};
- pk.el.addEventListener("change",function(){if(pk.get().length)ctl.querySelector("#ps").value="pick"});make();
+ var pk=picker((M.gens||[]).slice().sort(),u.grade),out=h("<div></div>"),note=h('<p class="meta noprint"></p>'),last=null,PP=NB.pp;
+ var panel=PP.panel(u,redraw);s.appendChild(ctl);s.appendChild(pk.el);s.appendChild(panel.el);view.appendChild(s);view.appendChild(note);view.appendChild(out);
+ var bs=ctl.querySelectorAll("button");bs[0].onclick=make;bs[1].onclick=function(){if(!last)return make();redraw();window.print()};
+ panel.csvBtn.onclick=function(){if(last)PP.csv(last.qs,deps());else note.textContent="請先按「出題」。"};
+ pk.el.addEventListener("change",function(){if(pk.get().length)ctl.querySelector("#ps").value="pick"});
+ window.addEventListener("hashchange",function f(){if(location.hash!=="#print"){PP.clearPage();window.removeEventListener("hashchange",f)}});
+ function deps(){return{u:u,today:M.today(),title:title,tx:tx,qimg:qimg}}
+ function redraw(){if(!last)return;var P=panel.get();PP.applyPage(P);out.innerHTML=PP.build(P,last.qs,last.nm,deps())}
+ make();
  function make(){
   var v=ctl.querySelector("#ps").value,n=+ctl.querySelector("#pn").value,us=pk.get();if(v==="pick"&&!us.length){out.innerHTML='<div class="fb no">請先在下面勾選至少一個單元。</div>';return}
   out.innerHTML='<p class="meta">出題中…</p>';note.textContent="";
   M.api("GET","/api/print?src="+(v==="pick"?"mix&units="+encodeURIComponent(us.join(",")):encodeURIComponent(v))+"&n="+n+(ctl.querySelector("#pg")?"&g="+ctl.querySelector("#pg").value:"")).then(function(r){
    var nm=v==="wrong"?"錯題重練":v==="mix"?"綜合練習":"自選 "+us.length+" 個單元",qs=r.qs;
    if(r.filled)note.textContent="你選的單元不重複的題目不夠，已用同年級其他單元補了 "+r.filled+" 題。";if(r.short)note.textContent+=" 可出的題目只有 "+qs.length+" 題。";
-   out.innerHTML='<div class="psheet"><h3>數學練習卷｜'+esc(nm)+'</h3><div class="pinfo"><span>班級：'+esc(u.cls)+"</span><span>座號："+u.no+"</span><span>姓名：<b>"+esc(u.name)+"</b></span><span>日期："+M.today()+"</span><span>分數：＿＿＿</span></div><ol>"+
-    qs.map(function(q){return"<li>"+tx(q.q)+qimg(q.img)+(q.o?'<div class="popts">'+q.o.map(function(t,k){return"<span>"+L(k)+"．"+tx(esc(t))+"</span>"}).join("")+"</div>":"")+'<span class="ln">答：＿＿＿＿＿＿＿＿＿</span></li>'}).join("")+'</ol><p class="pcopy">© '+new Date().getFullYear()+' suuuuuhaooooo・CC BY-NC-ND 4.0・僅供班級教學使用，請勿轉載</p></div>'+
-    '<div class="psheet key"><h3>解答｜'+esc(nm)+"</h3><ol>"+qs.map(function(q){return"<li>"+(q.al?q.al+"．":"")+tx(String(q.a))+"<br><small>"+tx(q.h||"")+"</small>"+qimg(q.himg)+"</li>"}).join("")+"</ol></div>"},
+   last={qs:qs,nm:nm};redraw()},
    function(e){out.innerHTML='<div class="fb no">'+esc(errMsg(e))+"</div>"})}};
 
 V.expired=function(){
