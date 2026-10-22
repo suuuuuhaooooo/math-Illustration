@@ -77,7 +77,13 @@
 
   /* 浮水印：整張卷斜著鋪滿重複的文字。是真正的文字，所以不管瀏覽器有沒有開「列印背景圖形」都印得出來 */
   function wmHtml(P, D) {
-    var w = D.wm || {}, force = !!w.force, on = force || P.wm; if (!on) return null;
+    var w = D.wm || {}, force = !!w.force, on = force || P.wm;
+    if (!on) { /* 沒勾浮水印：每頁正中間只放「一條」淡淡的細線字，把所有資訊寫在同一行 */
+      var u0 = D.u, all = [u0.name, u0.cls && u0.cls !== "all" ? u0.cls + " 班 " + u0.no + " 號" : "", w.email || "", w.ip ? "IP " + w.ip + (w.net ? "（" + w.net + "）" : "") : "", w.brief || "", w.ts ? stamp(w.ts) : "", w.pid ? "卷號 " + w.pid : ""].filter(Boolean).map(esc).join("　");
+      if (!all) return null;
+      var ln = '<div class="pwm-line">' + all + "</div>";
+      return { scr: '<div class="pwm pwm-abs pwm-one" aria-hidden="true">' + ln + "</div>", prn: '<div class="pwm pwm-fix pwm-one" aria-hidden="true">' + ln + "</div>" };
+    }
     var u = D.u, e = function (k, mine) { return force || P[k] ? mine : ""; }, A = [], B = [];
     A.push(e("wmName", u.name)); A.push(e("wmCls", u.cls && u.cls !== "all" ? u.cls + " 班 " + u.no + " 號" : "")); A.push(e("wmEmail", w.email || "")); if (w.pid) A.push("卷號 " + w.pid);
     B.push(e("wmIp", w.ip ? "IP " + w.ip + (w.net ? "（" + w.net + "）" : "") : "")); B.push(e("wmDev", w.brief || "")); B.push(e("wmTime", w.ts ? stamp(w.ts) : stamp(Date.now()))); if (P.wmText) B.push(P.wmText);
