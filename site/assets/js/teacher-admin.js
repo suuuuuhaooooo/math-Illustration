@@ -54,7 +54,7 @@ function roster(ctx){
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 
 /* 選 CSV：可一次選很多個檔。keep=true（題庫）：檔案分開保存、逐檔檢查匯入；否則（名單）合併成一份文字貼進框裡 */
-var HEADS="id,unit,type,lv,q,options,answer,hint,diag,img,himg,print,daily,mock,active,email,class,no,name,role,grade,expires".split(",");
+var HEADS="id,unit,type,lv,q,options,answer,hint,diag,img,himg,print,daily,mock,active,email,class,no,name,role,grade,expires,學習表現,學習內容,難易度,認知層次,知識類型,perf,content,diff,cog,know".split(",");
 function isHead(line){var c=parseCSV(line)[0]||[];return c.filter(function(x){return HEADS.indexOf(x.trim().toLowerCase())>=0}).length>=2}
 function pickCsv(ta,note,keep){var w=h('<div class="ctl"></div>'),b=h('<button class="pen">選擇 CSV 檔（可多選）</button>'),f=document.createElement("input");f.type="file";f.multiple=true;f.accept=".csv,.txt,text/csv,text/plain";f.hidden=true;
  ta.addEventListener("input",function(){ta.__files=null});
@@ -155,6 +155,27 @@ function bank(ctx){
    pass(true,0).then(function(){if(bad.length){done();return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+bad.slice(0,30).map(esc).join("<br>")+(bad.length>30?"<br>…還有 "+(bad.length-30)+" 項":""),0)}
     return pass(false,0).then(function(){done();msg(bf,"已匯入 "+total+" 題（"+src.length+" 個來源）",1);setTimeout(ctx.go,700)})}).catch(function(e){done();msg(bf,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
   b2.onclick=function(){download("題庫.csv",COLS.join(",")+"\n"+rows.map(function(x){return COLS.map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
+  /* 題目屬性表：學習表現、學習內容、難易度、認知層次、知識類型。用題目 id 對應題庫，和題庫分開匯入，不會動到題目本身 */
+  var MC=["id","學習表現","學習內容","難易度","認知層次","知識類型"],mk=ctx.sheet("題目屬性表","列印練習卷可以依這些屬性篩選題目、在每題旁顯示、做雙向細目表"),mi=h('<p class="meta">讀取中…</p>');
+  mk.appendChild(mi);M.api("GET","/api/admin/meta").then(function(r){mi.innerHTML="目前題庫 <b>"+r.bank+"</b> 題，其中 <b>"+r.covered+"</b> 題已有屬性"+(r.bank-r.covered?"，還有 <b>"+(r.bank-r.covered)+"</b> 題沒有（這些題在篩選時不會被選到）":"，全部都有了")+(r.orphans?"；屬性表裡有 "+r.orphans+" 列的 id 在題庫找不到（不影響使用）":"")+"。"},function(){mi.textContent=""});
+  mk.appendChild(h('<p class="meta">CSV 的第一列是欄名：<b>id、學習表現、學習內容、難易度、認知層次、知識類型</b>。難易度只能填 易／中／難。id 要跟題庫的 id 一樣。可一次選多個檔。</p>'));
+  var ta2=area("",4),bn2=h('<p class="meta"></p>');mk.appendChild(pickCsv(ta2,bn2,true));mk.appendChild(bn2);mk.appendChild(ta2);
+  var mode2=sel([["merge","合併（id 相同就更新，其他保留）"],["replace","全部取代（原有的屬性會被清掉）"]],"merge"),bt2=h('<div class="ctl"></div>'),bf2=h('<div class="fb"></div>'),c1=h('<button class="pen go">匯入屬性表</button>'),c2=h('<button class="pen">匯出屬性表 CSV</button>');
+  bt2.appendChild(mode2);bt2.appendChild(c1);bt2.appendChild(c2);mk.appendChild(bt2);mk.appendChild(bf2);
+  c1.onclick=function(){
+   var src=ta2.__files&&!ta2.value.trim()?ta2.__files:[{name:"貼上的內容",text:ta2.value}],jobs=[],bad=[],orphan=0;
+   src.forEach(function(x){var p=parseCSV(x.text);if(!p.length)return;var hd=isHead(x.text.split(/\r?\n/)[0]||""),rs=toObjs(p,MC),base=hd?1:0,cur=[],sz=0;
+    rs.forEach(function(r){var z=JSON.stringify(r).length;if(cur.length&&(cur.length>=1500||sz+z>650000)){jobs.push({file:x.name,rows:cur,base:base});base+=cur.length;cur=[];sz=0}cur.push(r);sz+=z});
+    if(cur.length)jobs.push({file:x.name,rows:cur,base:base})});
+   if(!jobs.length)return msg(bf2,"沒有可匯入的內容。",0);
+   if(mode2.value==="replace"&&!confirm("這會清掉現有全部屬性，改成匯入的內容。確定？"))return;
+   var total=jobs.reduce(function(a,j){return a+j.rows.length},0);c1.disabled=true;
+   function done(){c1.disabled=false}
+   function pass(dry,k){if(k>=jobs.length)return Promise.resolve(true);var j=jobs[k];msg(bf2,(dry?"檢查中 ":"匯入中 ")+(k+1)+" / "+jobs.length+"（"+esc(j.file)+"）…",1);
+    return M.api("POST","/api/admin/meta",{rows:j.rows,mode:!dry&&k===0&&mode2.value==="replace"?"replace":"merge",dry:dry?1:0,base:j.base}).then(function(x){if(!x.ok)bad=bad.concat(x.errs.map(function(e){return"【"+j.file+"】"+e}));else if(dry)orphan+=x.orphans||0;return pass(dry,k+1)})}
+   pass(true,0).then(function(){if(bad.length){done();return msg(bf2,"<b>有地方要修正，完全沒有匯入：</b><br>"+bad.slice(0,30).map(esc).join("<br>")+(bad.length>30?"<br>…還有 "+(bad.length-30)+" 項":""),0)}
+    return pass(false,0).then(function(){done();msg(bf2,"已匯入 "+total+" 列屬性（"+src.length+" 個來源）"+(orphan?"。其中 "+orphan+" 列的 id 在題庫找不到，已先存起來，之後題庫有那題就會對上":""),1);setTimeout(ctx.go,900)})}).catch(function(e){done();msg(bf2,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
+  c2.onclick=function(){var K=["id","perf","content","diff","cog","know"];download("題目屬性表.csv",MC.join(",")+"\n"+rows.filter(function(x){return x.perf||x.content||x.diff||x.cog||x.know}).map(function(x){return K.map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 
 /* ---------- 設定 ---------- */

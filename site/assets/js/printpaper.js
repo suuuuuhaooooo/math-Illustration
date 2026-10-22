@@ -5,17 +5,18 @@
   var KEY = "nb-print-v1";
   var PAPER = { A3: [297, 420], A4: [210, 297], B4: [257, 364], B5: [182, 257] };
   var KINDS = [["q", "題目卷"], ["blank", "空白答案卷"], ["qa", "題目與詳解"], ["ak", "簡答與詳解"], ["short", "簡答卷"], ["qpk", "題目卷＋詳解卷"]];
-  var LV = { 1: "基礎", 2: "應用", 3: "挑戰" }, ZH = "甲乙丙丁";
+  var LV = { 1: "易", 2: "中", 3: "難" }, ZH = "甲乙丙丁", DIFFS = ["易", "中", "難"], COGS = ["知識", "理解", "應用", "分析", "評鑑", "創造"];
+  var MXR = [["unit", "單元"], ["content", "學習內容"], ["perf", "學習表現"], ["know", "知識類型"]], MXC = [["diff", "難易度"], ["cog", "認知層次"]];
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function L(i) { return String.fromCharCode(65 + i); }
   function defaults(u) {
     var m = /^([1-6])(\d{1,2})$/.exec(String(u.cls || "")), t = u.role === "teacher";
     return { school: "", showSchool: false, exam: "數學練習卷", showExam: true, subject: "數學", showSubject: true, grade: m ? m[1] : "", cls: m ? String(+m[2]) : "", showClass: true,
-      showScore: t, prefill: !t, paper: "A4", layout: "s1", optMode: "col", kinds: { q: true, ak: true }, showFocus: false, showLv: false, matrix: false, variants: 1,
+      showScore: t, prefill: !t, paper: "A4", layout: "s1", optMode: "col", kinds: { q: true, ak: true }, showFocus: false, showPerf: false, showCont: false, showLv: false, showCog: false, showKnow: false, matrix: false, mxRow: "unit", mxCol: "diff", variants: 1,
       wm: !t, wmName: true, wmCls: true, wmEmail: true, wmIp: true, wmDev: true, wmTime: true, wmText: "", wmDen: "2", wmDens: "1" };
   }
   function load(u) { var d = defaults(u), s = null; try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {} if (s) { Object.keys(d).forEach(function (k) { if (s[k] !== undefined && k !== "grade" && k !== "cls") d[k] = s[k]; }); } return d; }
-  function save(P) { try { var c = Object.assign({}, P); delete c.grade; delete c.cls; localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {} }
+  function save(P) { try { var c = Object.assign({}, P); delete c.grade; delete c.cls; delete c.fd; delete c.fg; delete c.fk; delete c.fp; localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {} }
 
   /* ---- 設定面板 ---- */
   function panel(u, onchange) {
@@ -38,18 +39,25 @@
       (u.role === "teacher" ? "" : '<div class="ppr meta">學生列印一律會加上浮水印（姓名、班級座號、Email、IP、裝置、卷號、時間），也會留下列印紀錄，不能關閉。</div>') +
       '<div class="ppr">' + chk("pp-wm", "加上浮水印", P.wm) + chk("pp-wmName", "姓名", P.wmName) + chk("pp-wmCls", "班級座號", P.wmCls) + chk("pp-wmEmail", "Email", P.wmEmail) + chk("pp-wmIp", "IP 位址", P.wmIp) + chk("pp-wmDev", "裝置", P.wmDev) + chk("pp-wmTime", "列印時間", P.wmTime) + "</div>" +
       '<div class="ppr"><label>自訂文字 <input id="pp-wmText" maxlength="30" value="' + esc(P.wmText) + '" placeholder="例如：校內使用"></label><label>疏密 <select id="pp-wmDens"><option value="1"' + (P.wmDens === "1" ? " selected" : "") + '>疏</option><option value="2"' + (P.wmDens === "2" ? " selected" : "") + '>中</option><option value="3"' + (P.wmDens === "3" ? " selected" : "") + '>密</option></select></label><label>濃度 <select id="pp-wmDen"><option value="1"' + (P.wmDen === "1" ? " selected" : "") + '>淡</option><option value="2"' + (P.wmDen === "2" ? " selected" : "") + '>中</option><option value="3"' + (P.wmDen === "3" ? " selected" : "") + ">深</option></select></label></div></div></details>" +
+      '<details><summary>題目篩選（依題庫屬性表挑題）</summary><div class="ppg">' +
+      '<div class="ppr meta">有勾選或填寫任何一項，就只會從「已有屬性」的固定題裡挑；改完要按上面的「出題」才會套用。全部不選＝不篩選（照原本方式出題）。</div>' +
+      '<div class="ppr"><b>難易度</b> ' + DIFFS.map(function (d) { return '<label class="ppc"><input type="checkbox" name="pp-fd" value="' + d + '"> ' + d + "</label>"; }).join("") + "</div>" +
+      '<div class="ppr"><b>認知層次</b> ' + COGS.map(function (d) { return '<label class="ppc"><input type="checkbox" name="pp-fg" value="' + d + '"> ' + d + "</label>"; }).join("") + "</div>" +
+      '<div class="ppr"><label>知識類型包含 <input id="pp-fk" maxlength="40" placeholder="例如：面積、公因數（可用逗號放多個）" style="width:18em"></label></div>' +
+      '<div class="ppr"><label>學習表現／學習內容 <input id="pp-fp" maxlength="60" placeholder="例如：n-III-3、S-5（前面符合就算，可放多個）" style="width:18em"></label></div></div></details>' +
       '<details><summary>題目資訊與延伸功能</summary><div class="ppg">' +
-      '<div class="ppr"><b>每題顯示</b> ' + chk("pp-showFocus", "學習重點（單元名稱）", P.showFocus) + chk("pp-showLv", "難易度", P.showLv) + "</div>" +
-      '<div class="ppr">' + chk("pp-matrix", "附上雙向細目表（單元 × 難易度）", P.matrix) + "</div>" +
+      '<div class="ppr"><b>每題顯示</b> ' + chk("pp-showFocus", "單元名稱", P.showFocus) + chk("pp-showPerf", "學習表現", P.showPerf) + chk("pp-showCont", "學習內容", P.showCont) + chk("pp-showLv", "難易度", P.showLv) + chk("pp-showCog", "認知層次", P.showCog) + chk("pp-showKnow", "知識類型", P.showKnow) + "</div>" +
+      '<div class="ppr">' + chk("pp-matrix", "附上雙向細目表", P.matrix) + ' <label>縱軸 <select id="pp-mxRow">' + MXR.map(function (r) { return '<option value="' + r[0] + '"' + (P.mxRow === r[0] ? " selected" : "") + ">" + r[1] + "</option>"; }).join("") + '</select></label> <label>橫軸 <select id="pp-mxCol">' + MXC.map(function (r) { return '<option value="' + r[0] + '"' + (P.mxCol === r[0] ? " selected" : "") + ">" + r[1] + "</option>"; }).join("") + "</select></label></div>" +
       '<div class="ppr"><label>同題目不同題序 <select id="pp-variants">' + [1, 2, 3, 4].map(function (n) { return '<option value="' + n + '"' + (P.variants === n ? " selected" : "") + ">" + (n === 1 ? "只印一份" : n + " 份（" + ZH.slice(0, n).split("").join("、") + "卷，題序與選項順序都不同）") + "</option>"; }).join("") + "</select></label></div>" +
       '<div class="ppr"><button type="button" class="pen" id="pp-csv">匯出題目 CSV</button> <span class="meta">不含詳解以外的版面設定；可用 Excel 開啟</span></div></div></details>';
     function get() {
-      var q = function (id) { return el.querySelector("#" + id); }, kinds = {};
+      var q = function (id) { return el.querySelector("#" + id); }, kinds = {}, checked = function (n) { return Array.prototype.map.call(el.querySelectorAll('input[name="' + n + '"]:checked'), function (x) { return x.value; }); };
       KINDS.forEach(function (k) { kinds[k[0]] = q("pp-k-" + k[0]).checked; });
       var r = function (n) { var x = el.querySelector('input[name="' + n + '"]:checked'); return x ? x.value : ""; };
       return { school: q("pp-school").value.trim(), showSchool: q("pp-showSchool").checked, exam: q("pp-exam").value.trim(), showExam: q("pp-showExam").checked, subject: q("pp-subject").value.trim(), showSubject: q("pp-showSubject").checked,
         grade: q("pp-grade").value.trim(), cls: q("pp-cls").value.trim(), showClass: q("pp-showClass").checked, showScore: q("pp-showScore").checked, prefill: q("pp-prefill").checked,
-        paper: r("pp-paper") || "A4", layout: r("pp-layout") || "s1", optMode: r("pp-opt") || "col", kinds: kinds, showFocus: q("pp-showFocus").checked, showLv: q("pp-showLv").checked, matrix: q("pp-matrix").checked, variants: +q("pp-variants").value || 1,
+        paper: r("pp-paper") || "A4", layout: r("pp-layout") || "s1", optMode: r("pp-opt") || "col", kinds: kinds, showFocus: q("pp-showFocus").checked, showPerf: q("pp-showPerf").checked, showCont: q("pp-showCont").checked, showLv: q("pp-showLv").checked, showCog: q("pp-showCog").checked, showKnow: q("pp-showKnow").checked, matrix: q("pp-matrix").checked, mxRow: q("pp-mxRow").value, mxCol: q("pp-mxCol").value,
+        fd: checked("pp-fd"), fg: checked("pp-fg"), fk: q("pp-fk").value.trim(), fp: q("pp-fp").value.trim(), variants: +q("pp-variants").value || 1,
         wm: q("pp-wm").checked, wmName: q("pp-wmName").checked, wmCls: q("pp-wmCls").checked, wmEmail: q("pp-wmEmail").checked, wmIp: q("pp-wmIp").checked, wmDev: q("pp-wmDev").checked, wmTime: q("pp-wmTime").checked, wmText: q("pp-wmText").value.trim(), wmDen: q("pp-wmDen").value, wmDens: q("pp-wmDens").value };
     }
     el.addEventListener("change", function (e) {
@@ -113,7 +121,16 @@
       if (P.showScore) h += '<table class="pscore"><tr><th>級距</th><td>100</td><td>99~90</td><td>89~80</td><td>79~70</td><td>69~60</td><td>未滿60</td><th>分數</th><th>家長簽章</th></tr><tr><th>得分</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>';
       return h + "</div>";
     }
-    function meta(q) { var m = []; if (P.showFocus) m.push("學習重點：" + esc(D.title(q.unit))); if (P.showLv && q.lv) m.push("難易度：" + (LV[q.lv] || q.lv)); return m.length ? '<div class="pmeta">' + m.join("　") + "</div>" : ""; }
+    function meta(q) {
+      var m = [], a = q.m || {};
+      if (P.showFocus) m.push("單元：" + esc(D.title(q.unit)));
+      if (P.showPerf && a.p) m.push("學習表現：" + esc(a.p));
+      if (P.showCont && a.c) m.push("學習內容：" + esc(a.c));
+      if (P.showLv && (a.d || q.lv)) m.push("難易度：" + esc(a.d || LV[q.lv]));
+      if (P.showCog && a.g) m.push("認知層次：" + esc(a.g));
+      if (P.showKnow && a.k) m.push("知識類型：" + esc(a.k));
+      return m.length ? '<div class="pmeta">' + m.join("　") + "</div>" : "";
+    }
     function opts(q) { return q.o ? '<div class="popts ' + P.optMode + '">' + q.o.map(function (t, k) { return "<div>" + L(k) + "．" + D.tx(esc(t)) + "</div>"; }).join("") + "</div>" : ""; }
     function ans(q) { return (q.al ? q.al + "．" : "") + D.tx(esc(String(q.a))); }
     function qList(arr, withAns) {
@@ -133,13 +150,20 @@
     if (P.matrix) out.push(matrix(P, qs, nm, D, head, pw, WM));
     return (WM ? WM.prn : "") + out.join("");
   }
-  /* 雙向細目表：每個單元各難易度出了幾題、是第幾題 */
+  /* 雙向細目表：縱軸（單元／學習內容／學習表現／知識類型）× 橫軸（難易度／認知層次），格子裡是題數與題號 */
   function matrix(P, qs, nm, D, head, pw, WM) {
-    var by = {}, order = [];
-    qs.forEach(function (q, i) { if (!by[q.unit]) { by[q.unit] = { 1: [], 2: [], 3: [] }; order.push(q.unit); } (by[q.unit][q.lv] || (by[q.unit][q.lv] = [])).push(i + 1); });
-    var lvs = [1, 2, 3], tot = { 1: 0, 2: 0, 3: 0 }, rows = order.map(function (u) { var n = 0; lvs.forEach(function (l) { var c = (by[u][l] || []).length; tot[l] += c; n += c; });
-      return "<tr><td>" + esc(D.title(u)) + "</td>" + lvs.map(function (l) { var a = by[u][l] || []; return "<td>" + (a.length ? a.length + '<small>（' + a.join("、") + "）</small>" : "") + "</td>"; }).join("") + "<td>" + n + "</td></tr>"; }).join("");
-    return '<div class="psheet pp pp-matrix" style="--pw:' + pw + 'mm" data-cols="1">' + (WM ? WM.scr : "") + head("雙向細目表", "") + '<table class="pscore pmx"><tr><th>單元</th>' + lvs.map(function (l) { return "<th>" + LV[l] + "</th>"; }).join("") + "<th>合計</th></tr>" + rows + "<tr><th>合計</th>" + lvs.map(function (l) { return "<th>" + tot[l] + "</th>"; }).join("") + "<th>" + qs.length + "</th></tr></table></div>";
+    var rk = P.mxRow || "unit", ck = P.mxCol || "diff", NONE = "（未標示）";
+    function rowOf(q) { var a = q.m || {}; return rk === "unit" ? D.title(q.unit) : (rk === "content" ? a.c : rk === "perf" ? a.p : a.k) || NONE; }
+    function colOf(q) { var a = q.m || {}; return (ck === "diff" ? (a.d || LV[q.lv]) : a.g) || NONE; }
+    var base = ck === "diff" ? DIFFS : COGS, present = {}, by = {}, order = [];
+    qs.forEach(function (q) { present[colOf(q)] = 1; });
+    var cols = base.filter(function (c) { return ck === "diff" || present[c]; }).concat(Object.keys(present).filter(function (c) { return base.indexOf(c) < 0; }));
+    qs.forEach(function (q, i) { var r = rowOf(q), c = colOf(q); if (!by[r]) { by[r] = {}; order.push(r); } (by[r][c] || (by[r][c] = [])).push(i + 1); });
+    var tot = {}; cols.forEach(function (c) { tot[c] = 0; });
+    var rows = order.map(function (r) { var n = 0; cols.forEach(function (c) { var k = (by[r][c] || []).length; tot[c] += k; n += k; });
+      return "<tr><td>" + esc(r) + "</td>" + cols.map(function (c) { var a = by[r][c] || []; return "<td>" + (a.length ? a.length + "<small>（" + a.join("、") + "）</small>" : "") + "</td>"; }).join("") + "<td>" + n + "</td></tr>"; }).join("");
+    var rl = (MXR.filter(function (x) { return x[0] === rk; })[0] || MXR[0])[1];
+    return '<div class="psheet pp pp-matrix" style="--pw:' + pw + 'mm" data-cols="1">' + (WM ? WM.scr : "") + head("雙向細目表", "") + '<table class="pscore pmx"><tr><th>' + rl + "</th>" + cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "<th>合計</th></tr>" + rows + "<tr><th>合計</th>" + cols.map(function (c) { return "<th>" + tot[c] + "</th>"; }).join("") + "<th>" + qs.length + '</th></tr></table><p class="pcopy">格子裡：題數（題號）</p></div>';
   }
   /* 裝置資訊：Chrome 類瀏覽器能問到 Android 手機型號；其他資訊（螢幕、時區、語言）一併附上，伺服器另外也會自己讀 User-Agent */
   function device() {
@@ -159,8 +183,8 @@
   }
   function csv(qs, D) {
     function c(v) { v = String(v == null ? "" : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
-    var rows = [["題號", "單元", "難易度", "題型", "題目", "選項A", "選項B", "選項C", "選項D", "答案", "詳解", "有附圖"]];
-    qs.forEach(function (q, i) { var o = q.o || []; rows.push([i + 1, D.title(q.unit), LV[q.lv] || "", q.o ? "選擇題" : "填充題", q.q, o[0] || "", o[1] || "", o[2] || "", o[3] || "", (q.al ? q.al + "．" : "") + q.a, q.h || "", q.img ? "是" : ""]); });
+    var rows = [["題號", "單元", "學習表現", "學習內容", "難易度", "認知層次", "知識類型", "題型", "題目", "選項A", "選項B", "選項C", "選項D", "答案", "詳解", "有附圖"]];
+    qs.forEach(function (q, i) { var o = q.o || []; var a = q.m || {}; rows.push([i + 1, D.title(q.unit), a.p || "", a.c || "", a.d || LV[q.lv] || "", a.g || "", a.k || "", q.o ? "選擇題" : "填充題", q.q, o[0] || "", o[1] || "", o[2] || "", o[3] || "", (q.al ? q.al + "．" : "") + q.a, q.h || "", q.img ? "是" : ""]); });
     var blob = new Blob(["﻿" + rows.map(function (r) { return r.map(c).join(","); }).join("\r\n")], { type: "text/csv;charset=utf-8" }), a = document.createElement("a");
     a.href = URL.createObjectURL(blob); a.download = "練習卷題目.csv"; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
