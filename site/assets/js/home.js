@@ -2,11 +2,8 @@
 (function(){
 var app=document.getElementById("app"),CN="一二三四五六七八九十",probed={},rows={},grade=3;
 try{var sg=parseInt(localStorage.getItem("currentGrade"));if([1,2,3,4,5,6].indexOf(sg)>=0)grade=sg}catch(e){}
-function done(c){return c.secs.filter(function(o){return NB.built[o.id]}).length}
-function chapText(c){var k=done(c);return"共 "+c.secs.length+" 小節"+(k?"・已完成 "+k:"")}
-function semText(S){var t=0,n=0;S.chs.forEach(function(c){t+=c.secs.length;n+=done(c)});return"共 "+t+" 小節"+(n?"・已完成 "+n:"")}
-function probe(S){if(probed[S.id])return;probed[S.id]=1;S.chs.forEach(function(c){c.secs.forEach(function(o){NB.load(o.id,null,null)})})}
-NB.onProbe=function(id){var r=rows[id];if(!r)return;var o=NB.flat.filter(function(x){return x.id===id})[0],a=NB.h('<a class="lnk" href="'+NB.link(o)+'"></a>');a.textContent=r.t.textContent;r.t.replaceWith(a);r.t=a;r.cnt.textContent=chapText(r.c);r.sum.textContent=semText(r.S)};
+function chapText(c){return"共 "+c.secs.length+" 小節"}
+function semText(S){var t=0;S.chs.forEach(function(c){t+=c.secs.length});return"共 "+t+" 小節"}
 function showNotice(el){
  var api=(window.NB_CONFIG&&NB_CONFIG.api)||"";if(!api||!window.fetch)return;
  function dstr(ts){if(!ts)return"";var d=new Date(ts+8*36e5);return d.getUTCFullYear()+"-"+("0"+(d.getUTCMonth()+1)).slice(-2)+"-"+("0"+d.getUTCDate()).slice(-2)}
@@ -37,13 +34,10 @@ function render(){
   var d=NB.h('<details class="sheet"><summary><span class="tag">'+S.sem+'</span><small></small></summary></details>'),sum=d.querySelector("small");sum.textContent=semText(S);
   S.chs.forEach(function(c){
    var p=NB.h('<div class="chap"><span class="no">第'+CN[c.no-1]+'章</span><b>'+c.name+'</b><span class="dots"></span><span class="cnt"></span></div>'),cnt=p.querySelector(".cnt"),ul=NB.h('<div class="secs"></div>');cnt.textContent=chapText(c);
-   c.secs.forEach(function(o){var t=NB.h('<span class="todo">'+o.num+" "+o.title+'</span>');ul.appendChild(t);rows[o.id]={t:t,c:c,S:S,cnt:cnt,sum:sum}});
+   c.secs.forEach(function(o){var t=NB.h('<a class="lnk" href="'+NB.link(o)+'"></a>');t.textContent=o.num+" "+o.title;ul.appendChild(t)});
    d.appendChild(p);d.appendChild(ul)});
-  d.addEventListener("toggle",function(){if(d.open)probe(S)});
   app.appendChild(d);if(k===0)d.open=true});
- Object.keys(NB.built).forEach(function(id){NB.onProbe(id)});
- if(list[0])probe(list[0]);
- app.appendChild(NB.h('<p class="meta" style="text-align:center">虛線＝建置中　實線＝可以開始玩　選擇年級後展開學期即可查看各單元</p>'));
+ app.appendChild(NB.h('<p class="meta" style="text-align:center">選擇年級後展開學期，點小節即可開始</p>'));
 }
 render();
 })();

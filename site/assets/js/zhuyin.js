@@ -1,6 +1,7 @@
 /* 注音:把畫面上的國字加上注音(<ruby>)。
    拼音來自 pinyin-pro(MIT,執行時從 CDN 載入,含破音字判斷),再轉成注音符號。
    台灣讀音和大陸不同的字,可以寫在 assets/data/zhuyin-fix.json 覆蓋(格式:{"詞或字":"ㄗ ㄧˇ"},字之間用空白分開)。
+   「一」「不」的變調由程式自動處理(玩一玩→ㄨㄢˊ ㄧˋ ㄨㄢˊ、一年級→ㄧˋ ㄋㄧㄢˊ ㄐㄧˊ),不用逐詞寫。詞長的優先。
    載入失敗時整個功能自動關閉,畫面照常顯示國字。 */
 const INI = { b: "ㄅ", p: "ㄆ", m: "ㄇ", f: "ㄈ", d: "ㄉ", t: "ㄊ", n: "ㄋ", l: "ㄌ", g: "ㄍ", k: "ㄎ", h: "ㄏ", j: "ㄐ", q: "ㄑ", x: "ㄒ", zh: "ㄓ", ch: "ㄔ", sh: "ㄕ", r: "ㄖ", z: "ㄗ", c: "ㄘ", s: "ㄙ" };
 const FIN = { a: "ㄚ", o: "ㄛ", e: "ㄜ", ê: "ㄝ", ai: "ㄞ", ei: "ㄟ", ao: "ㄠ", ou: "ㄡ", an: "ㄢ", en: "ㄣ", ang: "ㄤ", eng: "ㄥ", er: "ㄦ", i: "ㄧ", ia: "ㄧㄚ", io: "ㄧㄛ", ie: "ㄧㄝ", iao: "ㄧㄠ", iu: "ㄧㄡ", iou: "ㄧㄡ", ian: "ㄧㄢ", in: "ㄧㄣ", iang: "ㄧㄤ", ing: "ㄧㄥ", iong: "ㄩㄥ", u: "ㄨ", ua: "ㄨㄚ", uo: "ㄨㄛ", uai: "ㄨㄞ", ui: "ㄨㄟ", uei: "ㄨㄟ", uan: "ㄨㄢ", un: "ㄨㄣ", uen: "ㄨㄣ", uang: "ㄨㄤ", ong: "ㄨㄥ", ueng: "ㄨㄥ", "ü": "ㄩ", "üe": "ㄩㄝ", "üan": "ㄩㄢ", "ün": "ㄩㄣ" };
@@ -44,8 +45,30 @@ export function syllables(run, L = lib) {
   const out = new Array([...run].length).fill("");
   let py = []; try { py = L(run, { type: "array", toneType: "symbol" }) || []; } catch {}
   [...run].forEach((_, i) => { out[i] = pyToZy(py[i] || ""); });
-  for (const [w, z] of Object.entries(fixes)) { let at = run.indexOf(w); const zs = String(z).split(/\s+/).map((x) => x.replace(/^([^˙]+)˙$/, "˙$1")); while (at >= 0) { [...w].forEach((_, k) => { if (zs[k]) out[at + k] = zs[k]; }); at = run.indexOf(w, at + 1); } }
+  for (const [w, z] of Object.entries(fixes).sort((a, b) => [...a[0]].length - [...b[0]].length)) { let at = run.indexOf(w); const zs = String(z).split(/\s+/).map((x) => x.replace(/^([^˙]+)˙$/, "˙$1")); while (at >= 0) { [...w].forEach((_, k) => { if (zs[k]) out[at + k] = zs[k]; }); at = run.indexOf(w, at + 1); } }
+  sandhi(run, out);
   return out;
+}
+/* 變調:「一」「不」依後一字的聲調改讀。序數/數字詞(第一、十一、一月、一百)維持原音;
+   重疊動詞中的「不」(好不好)讀輕聲。七、八依教育部課本不標變調。 */
+const NUMC = "零〇二三四五六七八九十百千萬億兆";
+const toneOf = (z) => (!z ? 0 : z.startsWith("˙") ? 5 : /ˊ$/.test(z) ? 2 : /ˇ$/.test(z) ? 3 : /ˋ$/.test(z) ? 4 : 1);
+function sandhi(run, out) {
+  const cs = [...run], orig = out.slice();
+  cs.forEach((c, i) => {
+    if (c !== "一" && c !== "不") return;
+    const prev = cs[i - 1] || "", next = cs[i + 1] || "", nt = toneOf(orig[i + 1]);
+    if (!next || !nt) return; // 詞尾或後面沒有注音:不變
+    if (c === "一") {
+      if (!/^ㄧ[ˊˋ]?$/.test(orig[i])) return;
+      if ((prev && "第初唯統之單".includes(prev)) || (prev && NUMC.includes(prev)) || NUMC.includes(next) || "月號樓".includes(next)) { out[i] = "ㄧ"; return; }
+      out[i] = nt === 4 || nt === 5 ? "ㄧˊ" : "ㄧˋ";
+    } else {
+      if (!/^(ㄅㄨ[ˊˋ]?|˙ㄅㄨ)$/.test(orig[i])) return;
+      if (prev && prev === next) out[i] = "˙ㄅㄨ";
+      else out[i] = nt === 4 ? "ㄅㄨˊ" : "ㄅㄨˋ";
+    }
+  });
 }
 /* 注音排版：符號直排，聲調符號（ˊˇˋ）放在符號欄的右邊，輕聲（˙）放在最上面 */
 function fillRt(t, z) {
