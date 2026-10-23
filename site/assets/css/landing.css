@@ -1,0 +1,245 @@
+@font-face{font-family:"MantouSans LP";src:url("../fonts/mantou-sans.woff") format("woff");font-display:swap}
+@font-face{font-family:"GenSen Round LP";src:url("../fonts/gensen-round-tw-r.woff") format("woff");font-weight:300 500;font-display:swap}
+@font-face{font-family:"GenSen Round LP";src:url("../fonts/gensen-round-tw-b.woff") format("woff");font-weight:600 900;font-display:swap}
+@font-face{font-family:"GenRyuMin TW";src:url("../fonts/genryumin-tw-sb.woff") format("woff");font-weight:400 800;font-display:swap}
+/* 導覽頁（index.html）：滾動式介紹。顏色沿用 notebook.css 的變數，主視覺區固定深色。 */
+body.lp{display:block;background:var(--bg);--head:"GenRyuMin TW","Huninn","Iansui","LXGW WenKai TC","Noto Sans TC",sans-serif}
+.lp main{display:block}
+.lp section{position:relative}
+.lp .w{width:min(1080px,100% - 40px);margin:0 auto}
+.lp h2.big{font-family:var(--head);font-weight:700;font-size:clamp(2rem,5.4vw,3.8rem);line-height:1.2;margin:0 0 .4em;letter-spacing:.02em}
+.lp .sub{font-size:clamp(1.02rem,1.8vw,1.25rem);color:var(--soft);max-width:34em}
+.lp .eyebrow{font-size:.88rem;letter-spacing:.28em;color:var(--p1);margin:0 0 10px}
+.lp-top{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) 20px 10px;color:#f3efe3;background:linear-gradient(#0b1220cc,#0b122000);pointer-events:none}
+.lp-top>*{pointer-events:auto}
+.lp-top .brand{display:flex;align-items:center;gap:8px;font-family:var(--head);font-weight:700;color:inherit;text-decoration:none}
+.lp-top .brand svg{width:26px;height:26px}
+.lp-top nav{display:flex;gap:6px;align-items:center}
+.lp-top a.pen{background:transparent;color:#f3efe3;border-color:#f3efe3aa;text-decoration:none;padding:2px 14px;font-size:.9rem}
+.lp-top a.pen.go{background:var(--p4);border-color:var(--p4);color:#1c2635}
+.lp-top.solid{background:color-mix(in srgb,var(--bg) 92%,transparent);color:var(--ink);backdrop-filter:blur(6px);box-shadow:0 1px 0 var(--line)}
+.lp-top.solid a.pen{color:var(--ink);border-color:var(--ink)}.lp-top.solid a.pen.go{color:#1c2635;border-color:var(--p4)}
+/* 主視覺 */
+.hero2{min-height:100vh;min-height:100svh;display:grid;place-items:center;padding:84px 0 clamp(150px,32vh,300px);text-align:center;color:#f3efe3;overflow:hidden;background:radial-gradient(900px 520px at 50% 38%,#26406b 0%,#101a2e 55%,#0a101c 100%)}
+.hero2 .fl{position:absolute;inset:0;pointer-events:none}
+.hero2 .fl i{position:absolute;font-style:normal;font-family:var(--head);color:#f3efe3;opacity:.16;animation:drift var(--d,16s) ease-in-out infinite alternate;animation-delay:var(--s,0s)}
+@keyframes drift{from{transform:translate3d(0,0,0) rotate(-6deg)}to{transform:translate3d(var(--x,20px),var(--y,-40px),0) rotate(8deg)}}
+.hero2 svg.rings{position:absolute;left:50%;top:44%;width:min(880px,150vw);transform:translate(-50%,-50%);opacity:.5;pointer-events:none}
+.hero2 svg.rings circle{fill:none;stroke:#f3efe3;stroke-opacity:.18;stroke-dasharray:3 9;transform-origin:center;animation:spin 90s linear infinite}
+.hero2 svg.rings circle:nth-child(2){animation-duration:140s;animation-direction:reverse}
+.hero2 svg.rings circle:nth-child(3){animation-duration:200s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero2 .in2{position:relative;padding:0 20px}
+.hero2 h1{font-family:var(--head);font-weight:700;font-size:clamp(2.7rem,10vw,6.6rem);line-height:1.08;margin:0 0 .25em;letter-spacing:.04em}
+.hero2 h1 mark{background:none;color:var(--p4)}
+@keyframes up{to{opacity:1;transform:none}}
+.hero2 p.lead2{font-size:clamp(1.05rem,2.4vw,1.5rem);opacity:0;animation:up 1s .9s forwards;margin:0 auto 1.6em;max-width:28em;color:#d9d4c4}
+.hero2 .cta{opacity:0;animation:up 1s 1.2s forwards;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn2{display:inline-block;font:inherit;font-size:1.08rem;padding:10px 30px;border-radius:999px;border:1.6px solid var(--p4);background:var(--p4);color:#1c2635;text-decoration:none;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .2s}
+.btn2:hover{transform:translateY(-2px);box-shadow:0 10px 24px -8px #ecc566aa}
+.btn2.ghost{background:transparent;color:#f3efe3;border-color:#f3efe3aa}
+.hero2 .cue{display:none;position:absolute;bottom:calc(22px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);color:#d9d4c4;font-size:.85rem;letter-spacing:.2em;opacity:0;animation:up 1s 1.8s forwards}
+.hero2 .cue::after{content:"";display:block;width:1.5px;height:34px;margin:8px auto 0;background:linear-gradient(#f3efe3,transparent);animation:cue 1.8s ease-in-out infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+/* 一句話（逐字亮起） */
+.say{height:230vh}
+.say .pin{position:sticky;top:0;height:100vh;height:100svh;display:grid;place-items:center;padding:0 24px}
+.say p{font-family:var(--head);font-weight:700;font-size:clamp(1.8rem,5.6vw,3.9rem);line-height:1.45;max-width:15em;text-align:center;margin:0}
+.say p b{font-weight:700;opacity:.14;transition:opacity .25s,color .25s}
+.say p b.on{opacity:1}.say p b.hl.on{color:var(--p1)}
+/* 加法積木（滾動帶動） */
+.scene{height:420vh}
+.scene .pin{position:sticky;top:0;height:100vh;height:100svh;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:70px 0 20px}
+.scene .stagebox{background:var(--paper);border:1px solid var(--line);border-top:3px solid var(--ink);border-radius:6px 6px 18px 18px;box-shadow:0 30px 60px -36px var(--shadow);padding:14px}
+.scene svg{display:block;width:100%;height:auto;max-height:46vh}
+.scene .cap{min-height:3.4em;font-family:var(--head);font-size:clamp(1.1rem,2.6vw,1.6rem);margin:6px 2px 0}
+.scene .bar2{height:4px;background:var(--rule);border-radius:4px;margin-top:10px;overflow:hidden}.scene .bar2 i{display:block;height:100%;width:0;background:var(--p1)}
+/* 試玩 */
+.play{padding:clamp(70px,12vw,150px) 0}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:34px}
+.pc{background:var(--paper);border:1px solid var(--line);border-top:3px solid var(--ink);border-radius:6px 6px 18px 18px;padding:16px 16px 14px;box-shadow:0 24px 48px -34px var(--shadow)}
+.pc h3{margin:0 0 2px;font-family:var(--head);font-size:1.15rem}.pc small{color:var(--soft)}
+.pc svg{display:block;width:100%;height:auto;margin:6px 0;touch-action:none}
+.pc .out{font-family:var(--head);font-size:1.15rem;min-height:1.8em}
+.pc .out b{color:var(--p1)}
+.pc .ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.pc .ctl label{font-size:.9rem;color:var(--soft)}
+.pc input[type=range]{accent-color:var(--p1);flex:1;min-width:110px}
+/* 數字 */
+.nums{padding:clamp(60px,10vw,120px) 0;text-align:center;background:var(--paper2)}
+.ngrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:30px}
+.ngrid div b{display:block;font-family:var(--head);font-size:clamp(2.4rem,7vw,4.6rem);line-height:1.1;color:var(--p2)}
+.ngrid div span{color:var(--soft)}
+/* 學習地圖預覽 */
+.mapv{padding:clamp(70px,12vw,150px) 0}
+.lane2{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:22px 4px 16px;margin-top:28px}
+.lane2 .nd{flex:none;min-width:112px;padding:7px 14px;border:1.6px solid var(--ink);border-left:6px solid var(--p2);border-radius:12px;background:var(--paper);line-height:1.35;opacity:0;transform:translateY(18px);transition:opacity .5s,transform .5s}
+.lane2 .nd small{display:block;color:var(--soft);font-size:.74rem}.lane2 .nd b{font-size:.95rem}
+.lane2 .ar{flex:none;width:38px;height:2px;background:var(--soft);position:relative;transform:scaleX(0);transform-origin:left;transition:transform .5s}
+.lane2 .ar::after{content:"";position:absolute;right:0;top:-4px;border:solid var(--soft);border-width:0 2px 2px 0;padding:3px;transform:rotate(-45deg)}
+.lane2.in .nd,.lane2.in .ar{opacity:1;transform:none}
+/* 功能 */
+.feats2{padding:clamp(60px,10vw,130px) 0;background:var(--paper2)}
+.fg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+.fc{background:var(--paper);border:1px solid var(--line);border-radius:6px 6px 18px 18px;border-top:3px solid var(--p2);padding:18px 18px 16px}
+.fc:nth-child(3n+2){border-top-color:var(--p1)}.fc:nth-child(3n){border-top-color:var(--p3)}
+.fc h3{margin:0 0 4px;font-family:var(--head);font-size:1.12rem}.fc p{margin:0;color:var(--soft);font-size:.95rem}
+.fc em{font-style:normal;font-size:.72rem;border:1px solid var(--soft);border-radius:999px;padding:0 8px;margin-left:8px;color:var(--soft);vertical-align:middle}
+/* 結尾 */
+.fin{min-height:90vh;display:grid;place-items:center;text-align:center;color:#f3efe3;padding:80px 20px;background:radial-gradient(800px 460px at 50% 60%,#26406b 0%,#101a2e 60%,#0a101c 100%);overflow:hidden}
+.fin h2{font-family:var(--head);font-size:clamp(2.2rem,7vw,4.8rem);margin:0 0 .3em;line-height:1.15}
+.fin p{color:#d9d4c4;margin:0 0 1.6em}
+.fin .btn2{font-size:1.3rem;padding:14px 44px;animation:pulse 2.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 #ecc56655}50%{box-shadow:0 0 0 18px #ecc56600}}
+/* 捲動顯示 */
+.rv{opacity:0;transform:translateY(30px);transition:opacity .8s,transform .8s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.12s}.rv.d2{transition-delay:.24s}
+@media (max-width:760px){.pgrid,.fg{grid-template-columns:1fr}.ngrid{grid-template-columns:repeat(2,1fr)}.lp-top nav .hide-s{display:none}.scene{height:380vh}}
+@media (prefers-reduced-motion:reduce){.hero2 .fl i,.hero2 svg.rings circle,.fin .btn2,.hero2 .cue::after{animation:none}.hero2 h1 span,.hero2 p.lead2,.hero2 .cta,.hero2 .cue{animation:none;opacity:1;transform:none}.rv{opacity:1;transform:none;transition:none}.lane2 .nd,.lane2 .ar{opacity:1;transform:none;transition:none}.say p b{opacity:1}}
+
+/* 大標逐字出場 */
+.hero2 h1,.lp h2.big,.fin h2{perspective:700px}
+.split .ch{display:inline-block;opacity:0;transform:translateY(.6em) rotateX(-75deg) scale(.92);filter:blur(10px);transform-origin:50% 100%;transition:opacity .8s,transform .95s cubic-bezier(.2,.9,.2,1.1),filter .8s;transition-delay:calc(var(--i)*60ms + var(--d0,0ms))}
+.split.go .ch{opacity:1;transform:none;filter:none}
+.hero2 h1 .split{display:inline-block;--d0:150ms}
+.hero2 h1 .split+br+.split{--d0:520ms}
+.hero2 h1 mark .ch{text-shadow:0 0 0 #ecc56600;animation:glow 3.6s ease-in-out 2.2s infinite}
+@keyframes glow{0%,100%{text-shadow:0 0 0 #ecc56600}50%{text-shadow:0 0 28px #ecc566cc,0 0 2px #fff3c4}}
+.hero2::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 420px at var(--mx,50%) var(--my,40%),#ecc56626,transparent 70%);pointer-events:none;transition:background .15s}
+.hero2 .sweep{position:absolute;left:-30%;top:0;width:30%;height:100%;background:linear-gradient(100deg,transparent,#ffffff12,transparent);transform:skewX(-18deg);animation:sweep 6s ease-in-out 2s infinite;pointer-events:none}
+@keyframes sweep{0%{left:-40%}55%,100%{left:130%}}
+.lp h2.big.split{overflow:visible}
+@media (prefers-reduced-motion:reduce){.split .ch{opacity:1;transform:none;filter:none;transition:none}.hero2 h1 mark .ch,.hero2 .sweep{animation:none}}
+
+/* 學習日常小劇場（原創簡筆畫） */
+.meme{padding:clamp(70px,12vw,150px) 0}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:34px}
+.mm{background:var(--paper);border:1px solid var(--line);border-radius:6px 6px 18px 18px;border-top:3px solid var(--ink);overflow:hidden;box-shadow:0 24px 48px -34px var(--shadow)}
+.mm .pn{display:flex;align-items:center;gap:12px;padding:14px 16px;min-height:112px}
+.mm .pn svg{flex:none;width:78px;height:78px}
+.mm .pn p{margin:0;font-family:var(--head);font-size:1.08rem;line-height:1.5}
+.mm .bad{background:var(--paper2);border-bottom:2px dashed var(--line)}
+.mm .good{background:color-mix(in srgb,var(--p4) 14%,var(--paper));opacity:0;transform:translateY(-14px);transition:opacity .6s .5s,transform .6s .5s}
+.mm.in .good{opacity:1;transform:none}
+.mm .bad svg{animation:wob 2.4s ease-in-out infinite}
+@keyframes wob{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.mm .good svg{animation:hop 1.8s ease-in-out infinite}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@media (max-width:760px){.mgrid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.mm .bad svg,.mm .good svg{animation:none}.mm .good{opacity:1;transform:none;transition:none}}
+
+/* 島嶼 */
+.isle{position:absolute;left:0;right:0;bottom:0;height:clamp(190px,36vh,360px);overflow:hidden;z-index:1}
+.isvg{width:100%;height:100%;display:block}
+.wv{animation:wv 7s linear infinite}.wv.w2{animation-duration:5s;animation-direction:reverse}
+@keyframes wv{to{transform:translateX(-200px)}}
+.beam{opacity:0;animation:beam 5s ease-in-out infinite}.beam.b2{animation-delay:2.5s}
+@keyframes beam{0%,100%{opacity:0}30%,60%{opacity:.9}}
+.lamp{animation:lamp 2.5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes lamp{0%,100%{transform:scale(.9);fill-opacity:.5}50%{transform:scale(1.5);fill-opacity:.95}}
+.boat{animation:bob 3.6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes bob{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(4deg) translateY(4px)}}
+.palm{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4.5s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(2deg)}}
+.blob{cursor:pointer;outline:none}.blob .bi{transform-box:fill-box;transform-origin:50% 100%;animation:idleb 2.8s ease-in-out infinite}
+.blob:nth-of-type(2n) .bi{animation-delay:-1s}
+@keyframes idleb{0%,100%{transform:scale(1,1)}50%{transform:scale(1.04,.95)}}
+.blob .bi.hop{animation:hopb .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes hopb{0%{transform:translateY(0) scale(1.1,.8)}40%{transform:translateY(-34px) scale(.9,1.15)}100%{transform:translateY(0) scale(1)}}
+.blob:focus-visible .bi{filter:drop-shadow(0 0 6px #ecc566)}
+.eye{transform-box:fill-box;transform-origin:center;transition:transform .08s}.eye.blink{transform:scaleY(.1)}
+.eye .pu{transition:transform .12s}
+.say{animation:pop .3s cubic-bezier(.3,1.6,.5,1);transform-box:fill-box;transform-origin:50% 100%}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+.moon{position:absolute;right:9%;top:15%;width:clamp(64px,9vw,120px);animation:bob2 6s ease-in-out infinite;z-index:1;filter:drop-shadow(0 0 22px #f3e3a655)}
+.moon svg{width:100%;height:auto;display:block}
+@keyframes bob2{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-12px) rotate(5deg)}}
+.hero2 .in2{z-index:2}
+.finisle{width:min(520px,100%);margin:0 auto 6px}.finisle svg{width:100%;height:auto;display:block;overflow:hidden}
+@media (prefers-reduced-motion:reduce){.wv,.beam,.lamp,.boat,.palm,.blob .bi,.moon,.say{animation:none}.beam.b1{opacity:.5}}
+
+/* 字體：標題用台灣開源的粉圓（Huninn），手寫感的氣泡用芫荽（Iansui）；內文維持 Noto Sans TC */
+.hero2 h1,.lp h2.big,.fin h2,.scene .cap{font-weight:400;-webkit-text-stroke:.018em currentColor;letter-spacing:.03em}
+.lp .eyebrow{font-family:var(--sans);font-weight:700}
+.lp-top .brand{-webkit-text-stroke:.4px currentColor}
+.say p{font-weight:400;-webkit-text-stroke:.016em currentColor}
+.pc h3,.fc h3,.mm .pn p{font-weight:400}
+.mm .pn p{font-family:"Iansui","Huninn",sans-serif;font-size:1.12rem}
+.ngrid div b{font-weight:400;-webkit-text-stroke:.012em currentColor}
+
+/* ---- 質感調整：收斂色彩、柔化光線、統一圓角與陰影 ---- */
+.hero2{background:radial-gradient(1000px 560px at 50% 34%,#1f3558 0%,#0f1a2e 58%,#080d18 100%)}
+.hero2::after,.fin::after,.say::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.09;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.hero2 .fl i{opacity:.09;font-weight:400}
+.hero2 .sweep{opacity:.5}
+.beam{filter:blur(6px)}.beam.b1,.beam.b2{mix-blend-mode:screen}
+@keyframes beam{0%,100%{opacity:0}30%,60%{opacity:.5}}
+.hero2 h1{-webkit-text-stroke:.008em currentColor;letter-spacing:.05em;line-height:1.14;text-shadow:0 2px 30px #00000055}
+.hero2 p.lead2{font-family:var(--sans);font-weight:400;letter-spacing:.06em;line-height:1.9;color:#c9cbd2}
+.btn2{background:linear-gradient(#f2d27c,#d6a738);border:1px solid #f6e3a8;color:#1a2233;font-family:var(--sans);font-weight:700;letter-spacing:.14em;padding:12px 34px;box-shadow:inset 0 1px 0 #fff7,0 10px 26px -12px #d9a93caa,0 1px 2px #0006}
+.btn2:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 #fff8,0 16px 34px -12px #d9a93ccc,0 1px 2px #0006}
+.btn2.ghost{background:#ffffff0d;border:1px solid #ffffff44;color:#eceff5;box-shadow:none;backdrop-filter:blur(6px)}
+.btn2.ghost:hover{background:#ffffff1a;box-shadow:none}
+.lp-top a.pen{border-color:#ffffff55;letter-spacing:.08em}.lp-top a.pen.go{background:linear-gradient(#f2d27c,#d6a738);border-color:#f6e3a8;box-shadow:inset 0 1px 0 #fff7}
+.lp-top.solid a.pen{border-color:var(--line)}
+.lp .eyebrow{display:flex;align-items:center;gap:12px;font-size:.78rem;letter-spacing:.32em;color:var(--p1);text-transform:uppercase}
+.lp .eyebrow::before{content:"";width:28px;height:1px;background:currentColor;opacity:.7}
+.lp h2.big{-webkit-text-stroke:.008em currentColor;line-height:1.18;letter-spacing:.04em}
+.lp .sub{font-family:var(--sans);line-height:1.95;letter-spacing:.03em}
+/* 一句話：延續深色，和主視覺接起來 */
+.say{background:linear-gradient(#080d18,#0d1626);color:#f1eee4}
+.say p b.hl.on{color:var(--p4)}.say p{-webkit-text-stroke:.01em currentColor}
+.scene,.play,.mapv,.meme{background:var(--bg)}
+/* 卡片：統一圓角、細邊、柔陰影 */
+.pc,.fc,.mm,.scene .stagebox{border-radius:18px;border:1px solid var(--line);border-top:1px solid var(--line);box-shadow:0 1px 0 #fff8 inset,0 30px 60px -40px var(--shadow),0 2px 6px -3px var(--shadow)}
+.fc{border-top:2px solid var(--p2)}.fc:nth-child(3n+2){border-top-color:var(--p1)}.fc:nth-child(3n){border-top-color:var(--p3)}
+.pc h3,.fc h3{letter-spacing:.04em}
+.mm .good{background:color-mix(in srgb,var(--p4) 10%,var(--paper))}
+.nums{background:linear-gradient(var(--paper2),var(--bg))}.feats2{background:linear-gradient(var(--bg),var(--paper2))}
+.ngrid div b{color:var(--ink)}
+.fin{background:radial-gradient(900px 520px at 50% 62%,#1f3558 0%,#0f1a2e 60%,#080d18 100%)}
+.fin .btn2{animation:ring 4s ease-in-out infinite;font-size:1.15rem;padding:15px 52px}
+@keyframes ring{0%,100%{box-shadow:inset 0 1px 0 #fff7,0 10px 26px -12px #d9a93caa,0 0 0 0 #ecc56633}50%{box-shadow:inset 0 1px 0 #fff7,0 10px 26px -12px #d9a93caa,0 0 0 14px #ecc56600}}
+.lane2 .nd{border-radius:14px;border:1px solid var(--line);border-left:4px solid var(--p2);box-shadow:0 14px 28px -22px var(--shadow)}
+
+/* ---- 夜空：星星、極光、星座、流星 ---- */
+.hero2 .fl{z-index:0}
+.hero2 .fl b{position:absolute;display:block;border-radius:50%;background:#f7f2e2;opacity:var(--o,.7);animation:tw var(--t,3s) ease-in-out infinite;animation-delay:var(--s,0s)}
+.hero2 .fl b.g{box-shadow:0 0 8px 2px #f7f2e255}
+.hero2 .fl b.g::before,.hero2 .fl b.g::after{content:"";position:absolute;left:50%;top:50%;background:#f7f2e2;opacity:.6;transform:translate(-50%,-50%)}
+.hero2 .fl b.g::before{width:14px;height:1px}.hero2 .fl b.g::after{width:1px;height:14px}
+@keyframes tw{0%,100%{opacity:calc(var(--o,.7)*.3);transform:scale(.8)}50%{opacity:var(--o,.7);transform:scale(1.15)}}
+.aur{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;opacity:.5;mix-blend-mode:screen}
+.aur.a1{width:56vw;height:30vh;left:-8vw;top:6vh;background:linear-gradient(90deg,#2f7f8f55,#3b5fa855);animation:aur 18s ease-in-out infinite alternate}
+.aur.a2{width:50vw;height:26vh;right:-6vw;top:14vh;background:linear-gradient(90deg,#6a4fa655,#c9953a33);animation:aur 22s ease-in-out -6s infinite alternate}
+.aur.a3{width:40vw;height:20vh;left:30vw;top:2vh;background:linear-gradient(90deg,#3f8f7a33,#4b6fb033);animation:aur 26s ease-in-out -12s infinite alternate}
+@keyframes aur{from{transform:translate(-4vw,0) scale(1)}to{transform:translate(6vw,4vh) scale(1.15)}}
+.const{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.7}
+.const .cs polyline{fill:none;stroke:#f7f2e2;stroke-opacity:.35;stroke-width:1;stroke-dasharray:600;stroke-dashoffset:600;animation:cdraw 3.4s ease-out forwards}
+.const .cs circle{fill:#f7f2e2;opacity:0;animation:cdot .8s ease-out forwards}
+.const .c1 *{animation-delay:1.8s}.const .c2 *{animation-delay:2.4s}.const .c3 *{animation-delay:3s}
+@keyframes cdraw{to{stroke-dashoffset:0}}@keyframes cdot{to{opacity:.9}}
+.shoot{position:absolute;left:12%;top:14%;width:150px;height:1.5px;background:linear-gradient(90deg,#fff,#fff0);transform:rotate(24deg);opacity:0;animation:shoot 9s ease-in 3s infinite;pointer-events:none}
+@keyframes shoot{0%{transform:translate(0,0) rotate(24deg);opacity:0}2%{opacity:1}12%{transform:translate(520px,230px) rotate(24deg);opacity:0}100%{opacity:0}}
+.beam{filter:blur(3px)}
+@keyframes beam{0%,100%{opacity:0}30%,60%{opacity:.6}}
+@media (max-width:900px){.const,.shoot{display:none}}
+@media (prefers-reduced-motion:reduce){.hero2 .fl b,.aur,.shoot,.const .cs polyline,.const .cs circle{animation:none}.const .cs polyline{stroke-dashoffset:0}.const .cs circle{opacity:.9}.shoot{opacity:0}}
+
+/* 標題改用源流明體（台灣標準字形、SIL OFL）；去掉假粗體描邊，字形本身就夠有力 */
+.hero2 h1,.lp h2.big,.fin h2,.scene .cap,.say p,.ngrid div b,.lp-top .brand{-webkit-text-stroke:0;font-weight:600;letter-spacing:.06em}
+.hero2 h1{line-height:1.2}
+.hero2 h1 mark .ch{font-weight:600}
+.pc h3,.fc h3{font-family:"GenRyuMin TW","Huninn",sans-serif;font-weight:600}
+
+.hero2 .trust{margin:16px 0 0;font-size:.85rem;letter-spacing:.14em;color:#a9afbd;opacity:0;animation:up 1s 1.6s forwards}
+.scene .pin .sub{margin:0 0 10px}
+.shoot{left:58%;top:7%}
+@media (prefers-reduced-motion:reduce){.hero2 .trust{animation:none;opacity:1}}
+
+/* 字體：源流明體（大標）、饅頭黑體（數字與強調）、源泉圓體（內文與卡片標題）；缺字時退回原本字體 */
+body.lp{--sans:"GenSen Round LP","Noto Sans TC",system-ui,sans-serif;font-family:var(--sans)}
+.ngrid div b,.hero2 .btn2,.fin .btn2{font-family:"MantouSans LP","GenRyuMin TW",sans-serif;font-weight:400}
+.ngrid div b{letter-spacing:.02em}
+.pc h3,.fc h3{font-family:"GenSen Round LP","Noto Sans TC",sans-serif;font-weight:700}
+.lp .eyebrow,.lp .sub,.hero2 p.lead2{font-family:var(--sans)}

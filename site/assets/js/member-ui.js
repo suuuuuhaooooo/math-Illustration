@@ -36,7 +36,7 @@ function ymdT(){return M.T||M.today()}
 
 /* ---- 外框與路由 ---- */
 function shell(){
- app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="index.html">← 回到目錄</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));
+ app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="island.html">← 回到目錄</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));
  app.appendChild(h('<h1 class="title"><mark>學員專區</mark></h1>'));
  var u=user();if(!u){login();return false}
  who=h('<div class="who"><b></b><span></span><button class="pen">登出</button></div>');

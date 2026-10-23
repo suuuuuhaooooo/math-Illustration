@@ -25,7 +25,7 @@ function teacherTour(){if(!NB.tour)return;
   {sel:tb("設定"),title:"設定",text:"系統參數與用量提醒。這一頁只有管理員看得到。"},
   {sel:tb("列印紀錄"),title:"列印紀錄",text:"查看出過的練習卷與列印次數。"},
   {sel:tb("模擬考紀錄"),title:"模擬考紀錄",text:"查看學生的模擬考成績與作答紀錄。"}])}
-function go(){try{return go0()}finally{teacherTour()}}function go0(){if(!TABS.some(function(t){return t[0]===TAB})){TAB="overview";try{history.replaceState(null,"","#overview")}catch(e){}}document.title="老師後台・"+(TABS.filter(function(t){return t[0]===TAB})[0]||[0,""])[1]+"｜數學筆記本"; /* 記在瀏覽器裡的分頁已不存在、或老師沒有權限時，回到班級分析 */
+function go(){try{return go0()}finally{teacherTour()}}function go0(){if(!TABS.some(function(t){return t[0]===TAB})){TAB="overview";try{history.replaceState(null,"","#overview")}catch(e){}}document.title="老師後台・"+(TABS.filter(function(t){return t[0]===TAB})[0]||[0,""])[1]+"｜數光島筆記本"; /* 記在瀏覽器裡的分頁已不存在、或老師沒有權限時，回到班級分析 */
  shell();var ctx={sheet:sheet,go:go,tab:tab};
  if(TAB==="overview")return load(CLS);
  if(TAB==="data")return NB.tadmin.data(ctx);

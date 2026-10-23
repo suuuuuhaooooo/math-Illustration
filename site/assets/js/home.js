@@ -21,7 +21,7 @@ function showNotice(el){
  }).catch(function(){})}
 function render(){
  app.innerHTML="";rows={};
- var bar=NB.h('<nav class="bar"><span class="brand">'+NB.deco.logo()+'數學筆記本</span></nav>');if(NB.member)bar.appendChild(NB.member.chip());var ml=NB.h('<a class="lnk maplink" href="map.html">學習地圖</a>');bar.appendChild(ml);bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(NB.h('<div class="ruler"></div>'));
+ var bar=NB.h('<nav class="bar"><a class="brand" href="index.html" title="回到導覽頁" style="text-decoration:none;color:inherit">'+NB.deco.logo()+'數光島筆記本</a></nav>');if(NB.member)bar.appendChild(NB.member.chip());var ml=NB.h('<a class="lnk maplink" href="map.html">學習地圖</a>');bar.appendChild(ml);bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(NB.h('<div class="ruler"></div>'));
  var hero=NB.h('<section class="hero"><div><p class="eyebrow">國小數學・圖解與互動</p><h1 class="title">看懂數學，<mark>動手玩一玩</mark></h1><p class="lead">從例題出發，拖拉、旋轉、疊一疊，把算式變成看得見的圖形。適用國小一至六年級。</p></div></section>');hero.appendChild(NB.deco.hero());app.appendChild(hero);
  var nt=NB.h('<div class="notices" hidden></div>');app.appendChild(nt);showNotice(nt);
  app.appendChild(NB.h('<section class="feats" aria-label="特色"><div class="feat"><b>01</b><h3>看懂</h3><p>每個單元從一個例題出發，用手繪圖解一步一步拆開算式，先理解，再計算。</p></div><div class="feat"><b>02</b><h3>動手</h3><p>拖拉、旋轉、疊一疊，自己操作圖形，從錯誤中修正想法。</p></div><div class="feat"><b>03</b><h3>練習</h3><p>班級學員可使用小測驗、每日一題、錯題本與模擬卷，累積積分與勳章，並可列印練習卷。</p></div></section>'));
@@ -42,7 +42,7 @@ function render(){
  app.appendChild(NB.h('<p class="meta" style="text-align:center">選擇年級後展開學期，點小節即可開始</p>'));
 }
 render();
-if(NB.tour)NB.tour.setup("home",[{title:"歡迎來到數學筆記本",text:"花一分鐘看看怎麼找單元、怎麼玩。想再看一次，隨時按右下角的 i 圓形按鈕。"},
+if(NB.tour)NB.tour.setup("home",[{title:"歡迎來到數光島筆記本",text:"花一分鐘看看怎麼找單元、怎麼玩。想再看一次，隨時按右下角的 i 圓形按鈕。"},
  {sel:".tabs",title:"選年級",text:"一到六年級的目錄都在這裡，按一下就切換。"},
  {sel:"details.sheet summary",title:"展開學期",text:"每個學期是一張紙，點一下展開，會看到章與小節。"},
  {sel:".secs .lnk",title:"選一個小節",text:"每個小節都是一頁：先看例題，再動手拖拉，接著看解法，最後挑戰一題。"},

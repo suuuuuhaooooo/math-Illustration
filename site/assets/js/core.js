@@ -76,8 +76,8 @@ NB.tx=function(html){return String(html).split(/(<[^>]*>|&[#\w]+;)/).map(functio
  if(j%2)return q.slice(0,2)==="$$"?kx(q.slice(2,-2),1):kx(q.slice(1,-1));
  return q.replace(RUN,function(m){var t=m.trim();return OPS.test(t)&&/[0-9A-Za-z]/.test(t)?m.replace(t,function(){return kx(toTex(t))}):m})}).join("")}).join("")};
 function mount(c){
- var app=document.getElementById("app"),I=NB.info(NB.cur)||{};c.title=c.title||I.title||"單元";c.ref=c.ref||I.ref||"";document.title=c.title+"｜數學筆記本";
- var bar=h('<nav class="bar"><a class="back" href="'+root+'index.html">← 回到目錄</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);
+ var app=document.getElementById("app"),I=NB.info(NB.cur)||{};c.title=c.title||I.title||"單元";c.ref=c.ref||I.ref||"";document.title=c.title+"｜數光島筆記本";
+ var bar=h('<nav class="bar"><a class="back" href="'+root+'island.html">← 回到目錄</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);
  app.appendChild(h('<h1 class="title"><mark>'+c.title+'</mark></h1>'));app.appendChild(h('<p class="meta">'+c.ref+'</p>'));app.appendChild(D.rule());
  app.appendChild(sheet("例題","",h('<div class="q">'+NB.tx(c.q)+'</div>')));
  var box=h("<div></div>"),eq=h('<div class="eq"></div>');var d0=Object.getOwnPropertyDescriptor(Element.prototype,"innerHTML");Object.defineProperty(eq,"innerHTML",{configurable:true,get:function(){return d0.get.call(eq)},set:function(x){d0.set.call(eq,NB.tx(x))}});c.tool(box,eq);box.appendChild(eq);app.appendChild(sheet("動手玩","拖拖看，觀察變化",box));
@@ -117,7 +117,7 @@ NB.page=document.body.getAttribute("data-page")||"unit";NB.cur=null;NB.built={};
 NB.unit=function(c){var sc=document.currentScript,id=sc&&sc.dataset.id;if(NB.page==="home"){NB.built[id]=true;if(NB.onProbe)NB.onProbe(id);return}if(NB.page==="member"){if(NB.onDef)NB.onDef(id,c);return}mount(c)};
 NB.load=function(id,ok,no){var e=document.createElement("script");e.src=root+"units/"+id+".js";e.dataset.id=id;e.onload=function(){e.remove();ok&&ok()};e.onerror=function(){e.remove();no&&no()};document.head.appendChild(e)};
 NB.boot=function(){var id=new URLSearchParams(location.search).get("u");NB.cur=id;var app=document.getElementById("app");
- NB.load(id,null,function(){var I=NB.info(id),bar=h('<nav class="bar"><a class="back" href="'+root+'index.html">← 回到目錄</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);
+ NB.load(id,null,function(){var I=NB.info(id),bar=h('<nav class="bar"><a class="back" href="'+root+'island.html">← 回到目錄</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);
   app.appendChild(h('<h1 class="title"><mark>'+(I?I.title:"找不到單元")+'</mark></h1>'));
   app.appendChild(sheet("建置中","",h('<p>這一節還沒有做好，先回目錄看看其他單元吧。<br><small class="meta">想補上它：新增檔案 units/'+id+'.js 即可。</small></p>')))})};
 })();
