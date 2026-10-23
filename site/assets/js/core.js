@@ -84,9 +84,10 @@ function mount(c){
  app.appendChild(sheet("解法","一步一步來",h('<ol class="steps">'+c.steps.map(function(x){return"<li>"+NB.tx(x)+"</li>"}).join("")+"</ol>")));
  var ch=h('<div><div class="q">'+NB.tx(c.ch.q)+'</div><div class="ctl"><input class="num" type="number" inputmode="numeric" placeholder="答案"><button class="pen go">檢查</button><button class="pen">提示</button></div><div class="fb"></div></div>');
  var inp=ch.querySelector("input"),fb=ch.querySelector(".fb"),bs=ch.querySelectorAll("button");
- bs[0].onclick=function(){if(inp.value==="")return;var ok=Math.abs(+inp.value-c.ch.a)<1e-6;fb.className="fb "+(ok?"ok":"no");fb.textContent=ok?"答對了！你好厲害！":"再想想看，可以按「提示」喔。"};
+ bs[0].onclick=function(){if(inp.value==="")return;var ok=Math.abs(+inp.value-c.ch.a)<1e-6;fb.className="fb "+(ok?"ok":"no");if(ok)NB.trail.done(NB.cur);fb.textContent=ok?"答對了！你好厲害！":"再想想看，可以按「提示」喔。"};
  bs[1].onclick=function(){fb.className="fb";fb.innerHTML=NB.tx("提示："+c.ch.h)};
  app.appendChild(sheet("挑戰","換你試試",ch));
+ NB.trail.visit(NB.cur);if(NB.map&&NB.map.card)NB.map.card(app,NB.cur);
  var nv=h('<nav class="bar"></nav>');if(I.prev)nv.appendChild(h('<a class="back" href="'+NB.link(I.prev)+'">← '+I.prev.title+'</a>'));else nv.appendChild(h("<span></span>"));if(I.next)nv.appendChild(h('<a class="back" href="'+NB.link(I.next)+'">'+I.next.title+' →</a>'));app.appendChild(nv);if(NB.member&&NB.member.onUnit)NB.member.onUnit(app,NB.cur);
 }
 NB.mount=mount;
@@ -99,6 +100,11 @@ NB.link=function(o){return root+"unit.html?u="+o.id};
 /* 單元排序：照目錄順序（上學期→下學期、第 1 章起），找不到的排最後 */
 NB.sortIds=function(a){var ix={};FLAT.forEach(function(o,i){ix[o.id]=i});return a.slice().sort(function(x,y){var i=x in ix?ix[x]:1e6,j=y in ix?ix[y]:1e6;return i-j||(x<y?-1:x>y?1:0)})};
 NB.info=function(id){var o=BYID[id];if(!o)return null;var i=FLAT.indexOf(o);return{title:o.num+" "+o.title,ref:"通用 "+o.sem+"・第"+CN[o.ch.no-1]+"章 "+o.ch.name+"・"+o.num+" "+o.title,prev:FLAT[i-1]&&{id:FLAT[i-1].id,title:FLAT[i-1].num+" "+FLAT[i-1].title},next:FLAT[i+1]&&{id:FLAT[i+1].id,title:FLAT[i+1].num+" "+FLAT[i+1].title}}};
+/* 學習軌跡：只存在這個瀏覽器（localStorage），不需登入、不用後端。u[id]={v:最近開啟,d:答對挑戰時間} */
+var TK="nb-trail";function trR(){try{var o=JSON.parse(localStorage.getItem(TK));return o&&typeof o==="object"?o:{}}catch(e){return{}}}
+function trW(o){try{localStorage.setItem(TK,JSON.stringify(o))}catch(e){}}
+function trM(id,k){if(!id||!BYID[id])return;var o=trR(),u=o.u||(o.u={}),x=u[id]||(u[id]={});x[k]=Date.now();if(k==="v")o.last=id;trW(o)}
+NB.trail={all:function(){return trR().u||{}},get:function(id){return(trR().u||{})[id]||null},last:function(){var l=trR().last;return l&&BYID[l]?l:""},visit:function(id){trM(id,"v")},done:function(id){trM(id,"d")},clear:function(){try{localStorage.removeItem(TK)}catch(e){}}};
 NB.page=document.body.getAttribute("data-page")||"unit";NB.cur=null;NB.built={};
 /* 單元檔只要呼叫 NB.unit({...})：在首頁只登記「已完成」，在單元頁才真正畫出來 */
 NB.unit=function(c){var sc=document.currentScript,id=sc&&sc.dataset.id;if(NB.page==="home"){NB.built[id]=true;if(NB.onProbe)NB.onProbe(id);return}if(NB.page==="member"){if(NB.onDef)NB.onDef(id,c);return}mount(c)};

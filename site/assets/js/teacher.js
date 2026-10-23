@@ -13,7 +13,19 @@ function sheet(tag,sub){var s=h('<section class="sheet"><h2><span class="tag">'+
 function msg(t){shell(1);var s=sheet("提示","");s.appendChild(h("<p>"+t+'</p><a class="pen go" href="member.html">前往登入</a>'))}
 function tab(t){if(location.hash==="#"+t){TAB=t;go();return}location.hash=t}
 window.addEventListener("hashchange",function(){if(!READY)return;TAB=decodeURIComponent(location.hash.slice(1))||"overview";go()});
-function go(){if(!TABS.some(function(t){return t[0]===TAB})){TAB="overview";try{history.replaceState(null,"","#overview")}catch(e){}}document.title="老師後台・"+(TABS.filter(function(t){return t[0]===TAB})[0]||[0,""])[1]+"｜數學筆記本"; /* 記在瀏覽器裡的分頁已不存在、或老師沒有權限時，回到班級分析 */
+/* 鎂光燈導覽：第一次進後台自動帶一遍，之後按右下角的 i 可以再看 */
+function tb(t){return function(){return[].filter.call(document.querySelectorAll(".tabs .pen"),function(b){return b.textContent===t})[0]||null}}
+function teacherTour(){if(!NB.tour)return;
+ NB.tour.setup("teacher",[{title:"歡迎來到老師後台",text:"花一分鐘看看各個分頁在做什麼。想再看一次，隨時按右下角的 i 圓形按鈕。"},
+  {sel:".tabs",title:"分頁列",text:"所有功能都從這一排進去，點一下就切換。"},
+  {sel:tb("班級分析"),title:"班級分析",text:"看班級的作答狀況與學習概況，找出需要加強的地方。"},
+  {sel:tb("學生名單"),title:"學生名單",text:"查看你班上的學生。新增學生與授權期限由管理員處理。"},
+  {sel:tb("派卷"),title:"派卷",text:"指定單元與題數派給學生，學生會在「待測清單」看到，並在時限內作答一次。"},
+  {sel:tb("題庫"),title:"題庫",text:"匯入與編輯題目、題目屬性（學習表現、學習內容、難易度、認知層次、知識類型）。這一頁只有管理員看得到。"},
+  {sel:tb("設定"),title:"設定",text:"系統參數與用量提醒。這一頁只有管理員看得到。"},
+  {sel:tb("列印紀錄"),title:"列印紀錄",text:"查看出過的練習卷與列印次數。"},
+  {sel:tb("模擬考紀錄"),title:"模擬考紀錄",text:"查看學生的模擬考成績與作答紀錄。"}])}
+function go(){try{return go0()}finally{teacherTour()}}function go0(){if(!TABS.some(function(t){return t[0]===TAB})){TAB="overview";try{history.replaceState(null,"","#overview")}catch(e){}}document.title="老師後台・"+(TABS.filter(function(t){return t[0]===TAB})[0]||[0,""])[1]+"｜數學筆記本"; /* 記在瀏覽器裡的分頁已不存在、或老師沒有權限時，回到班級分析 */
  shell();var ctx={sheet:sheet,go:go,tab:tab};
  if(TAB==="overview")return load(CLS);
  if(TAB==="data")return NB.tadmin.data(ctx);

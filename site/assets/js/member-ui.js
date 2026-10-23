@@ -52,8 +52,30 @@ function boot(){
  if(booting)return;booting=true;
  app.innerHTML="";app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
  M.boot().catch(function(e){M.U=null;M.err=(e&&e.code)||"net"}).then(function(){booted=true;booting=false;route()})}
-function route(){clearInterval(TM);if(XG){XG();XG=null}if(!booted){boot();return}var p=(location.hash||"#home").slice(1).split("/");if(p[0]==="print"&&PS&&PS.alive()){PS.go(p[1]);return}/* 出卷的步驟只切換顯示，不重畫整個頁面，設定與已出的卷子才不會遺失 */if(!shell())return;if(M.acct&&M.acct.expired&&["home","progress","stickers"].indexOf(p[0])<0)p=["expired"];(V[p[0]]||V.home)(p[1]);window.scrollTo(0,0)}
+function route(){clearInterval(TM);if(XG){XG();XG=null}if(!booted){boot();return}var p=(location.hash||"#home").slice(1).split("/");if(p[0]==="print"&&PS&&PS.alive()){PS.go(p[1]);return}/* 出卷的步驟只切換顯示，不重畫整個頁面，設定與已出的卷子才不會遺失 */if(!shell()){if(NB.tour)NB.tour.off();return}if(M.acct&&M.acct.expired&&["home","progress","stickers"].indexOf(p[0])<0)p=["expired"];(V[p[0]]||V.home)(p[1]);window.scrollTo(0,0);tourFor(p[0]||"home")}
 
+/* ---- 鎂光燈導覽（第一次進入每個分頁會自動帶一遍，之後按右下角的 i 可以再看） ---- */
+function tab(h){return function(){return document.querySelector('.tabs a[href="#'+h+'"]')}}
+var TOURS={
+ home:[{title:"歡迎來到學員專區",text:"花一分鐘看看主要功能。想再看一次，隨時按右下角的 i 圓形按鈕。"},
+  {sel:".who",title:"你的狀態",text:"這裡是你的班級、座號、等級、積分，以及連續練習的天數。"},
+  {sel:".tabs",title:"功能分頁",text:"每日一題、單元小測驗、待測清單、模擬卷、錯題本、學習進度、勳章、排行榜和列印練習卷，都從這排進去。"},
+  {sel:".tiles .tile",title:"積分與等級",text:"答對題目、完成測驗都會得到積分，積分累積到一定數量就會升級。"},
+  {sel:'.tiles a[href="#daily"]',title:"每日一題",text:"每天只有一次機會。做完這題，今天就完成了。"},
+  {sel:'.tiles a[href="#wrong"]',title:"錯題本",text:"答錯的題目會自動放進來，之後再答對就能慢慢畢業。"},
+  {sel:'.tiles a[href="#stickers"]',title:"勳章",text:"達成不同的目標可以收集勳章，從銅牌一路到鑽石。"},
+  {sel:tab("mock"),title:"模擬卷",text:"自己選單元和題數，像考試一樣限時作答，交卷後才公布答案。"},
+  {sel:tab("print"),title:"列印練習卷",text:"選好範圍與題數，按「出題」，就能印出題目卷和答案卷。"}],
+ daily:[{sel:".sheet",title:"每日一題",text:"每天只有一次機會，答對加比較多積分，答錯也有一點。做完就不用再做了。"}],
+ quiz:[{sel:".sheet",title:"單元小測驗",text:"選一個單元開始練習，完成一份測驗（3 題以上）還有額外積分。"}],
+ assign:[{sel:".sheet",title:"待測清單",text:"老師派給你的卷子在這裡。開始後就會計時，而且只能作答一次，準備好再按開始。"}],
+ mock:[{sel:".sheet",title:"模擬卷",text:"自選單元與題數，每題限時，交卷後才公布答案，適合考前練習。"}],
+ wrong:[{sel:".sheet",title:"錯題本",text:"答錯的題目都收在這裡。隔幾天各答對一次，這題就畢業了。"}],
+ progress:[{sel:".sheet",title:"學習進度",text:"看看累積答題數、答對題數和每個單元的成長。"}],
+ stickers:[{sel:".sheet",title:"勳章",text:"每枚勳章都有達成條件，收集越多，積分獎勵越多。"}],
+ board:[{sel:".sheet",title:"排行榜",text:"同班同學的排名，只顯示座號，不會顯示姓名。"}],
+ print:[{sel:".sheet",title:"列印練習卷",text:"跟著畫面一步一步設定範圍與題數，最後出題並列印。"}]};
+function tourFor(r){if(!NB.tour)return;var t=TOURS[r]||TOURS.home;NB.tour.setup("member-"+(TOURS[r]?r:"home"),t)}
 function login(){
  try{if(sessionStorage.getItem("nb-idle")){sessionStorage.removeItem("nb-idle");setTimeout(function(){var f=document.querySelector(".fb");if(f){f.className="fb no";f.textContent="因為閒置太久，已為了帳號安全自動登出，請重新登入。"}},0)}}catch(e){}
  var s=sheet("登入","僅供班內學員使用"),fb=h('<div class="fb"></div>'),em=M.auth&&M.auth.user()?M.auth.user().email:"";
