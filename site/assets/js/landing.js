@@ -72,11 +72,28 @@ $$(".ngrid b").forEach(function(b){if(io2)io2.observe(b);else b.textContent=b.da
    sv("path",{d:d,fill:i<K?"var(--p1)":"var(--paper2)","fill-opacity":i<K?.8:1,stroke:"var(--ink)","stroke-width":1.8,"stroke-linejoin":"round"},s)}
   out.innerHTML="分成 <b>"+N+"</b> 份，取 <b>"+K+"</b> 份，就是 <b>"+K+"／"+N+"</b>"}
  n.addEventListener("input",draw);k.addEventListener("input",draw);draw()})();
-/* 學習地圖預覽 */
+/* 學習地圖預覽：跳島 */
 (function(){var lane=$("#lane"),M=window.NB_MAP,list=M&&M.th&&M.th["分數"];if(!list||!window.CATALOG)return;
- list.forEach(function(k,i){var sp=k.split("-"),S=CATALOG.filter(function(x){return x.id===sp[0]})[0],name=S.ch[+sp[1]-1].split("|")[0];
-  if(i){var a=document.createElement("span");a.className="ar";a.style.transitionDelay=(i*.22-.1)+"s";lane.appendChild(a)}
-  var n=document.createElement("div");n.className="nd";n.style.transitionDelay=(i*.22)+"s";n.innerHTML="<small></small><b></b>";n.firstChild.textContent=S.sem;n.lastChild.textContent=name;lane.appendChild(n)})})();
+ var n=list.length,GAP=124,W=n*GAP+60,H=250,pts=[],reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+ var svg=sv("svg",{viewBox:"0 0 "+W+" "+H,width:W,height:H,role:"img","aria-label":"分數這條線的學習路線，從二年級走到六年級"},lane);
+ sv("rect",{x:0,y:0,width:W,height:H,"class":"lm-sea"},svg);
+ var wv=sv("g",{"class":"lm-waves"},svg);for(var wy=36;wy<H;wy+=42){for(var wx=((wy/42)%2)*50+10;wx<W;wx+=110)sv("path",{d:"M"+wx+" "+wy+"q10 -7 20 0t20 0","class":"wv"},wv)}
+ list.forEach(function(k,i){pts.push({x:70+i*GAP,y:H/2+(i%2?-34:26)+Math.sin(i*1.7)*10})});
+ var eg=sv("g",{},svg);
+ pts.forEach(function(P,i){if(!i)return;var A=pts[i-1],c=Math.min(70,40+Math.abs(P.y-A.y)*.4);var d="M"+(A.x+22)+" "+A.y+"C"+(A.x+60)+" "+(A.y-c)+" "+(P.x-60)+" "+(P.y-c)+" "+(P.x-22)+" "+P.y;var e=sv("path",{d:d,"class":"ln"},eg);e.style.transitionDelay=(i*.22-.1)+"s"});
+ list.forEach(function(k,i){var sp=k.split("-"),S=CATALOG.filter(function(x){return x.id===sp[0]})[0],name=S.ch[+sp[1]-1].split("|")[0],P=pts[i];
+  var g=sv("g",{"class":"lm-n lpn",transform:"translate("+P.x+","+P.y+") scale(1.9)"},svg);g.style.transitionDelay=(i*.22)+"s";
+  sv("ellipse",{cx:0,cy:11,rx:25,ry:8,"class":"rip"},g);sv("path",{d:"M-19 8C-19 1-9 -1 0 -1C10 -1 19 1 19 8C19 14 9 16 0 16C-9 16-19 14-19 8Z","class":"sand"},g);
+  sv("path",{d:"M-13 3C-13-7-5-12 1-12C9-12 13-6 13 3C7 6-7 6-13 3Z","class":"isl",fill:"var(--p2)"},g);
+  sv("path",{d:"M7 3Q9 -4 8 -12","class":"trk"},g);["M8 -12Q1 -21 -5 -13Q2 -16 8 -12Z","M8 -12Q15 -21 21 -13Q14 -16 8 -12Z","M8 -12Q4 -22 11 -24Q10 -18 8 -12Z"].forEach(function(d){sv("path",{d:d,"class":"plm"},g)});
+  var t1=sv("text",{x:P.x,y:P.y+54,"text-anchor":"middle","class":"lpt1"},svg);t1.textContent=S.sem;t1.style.transitionDelay=(i*.22)+"s";
+  var t2=sv("text",{x:P.x,y:P.y+74,"text-anchor":"middle","class":"lpt2"},svg);t2.textContent=name.length>8?name.slice(0,7)+"…":name;t2.style.transitionDelay=(i*.22)+"s"});
+ /* 小島民沿著弧線跳島 */
+ var hb=sv("g",{"class":"lphop"},svg);sv("path",{d:"M-12 0C-16-12-6-24 1-22C11-24 16-10 12 0C6 3-7 3-12 0Z",fill:"#e58a73",stroke:"var(--ink)","stroke-width":1.6,"stroke-linejoin":"round"},hb);
+ [[-4,-14],[5,-15]].forEach(function(e){sv("circle",{cx:e[0],cy:e[1],r:4,fill:"#fff",stroke:"var(--ink)","stroke-width":1.2},hb);sv("circle",{cx:e[0]+1,cy:e[1]+1,r:1.7,fill:"var(--ink)"},hb)});sv("path",{d:"M-3 -7q3 3 7 0",fill:"none",stroke:"var(--ink)","stroke-width":1.4,"stroke-linecap":"round"},hb);
+ function put(t){var i=Math.min(n-2,Math.floor(t)),u=t-i,A=pts[i],B=pts[i+1],j=u<.4?0:(u-.4)/.6,e=j*j*(3-2*j),x=A.x+(B.x-A.x)*e,y=A.y+(B.y-A.y)*e-Math.sin(Math.PI*j)*(48+Math.abs(B.y-A.y)*.3)-14;hb.setAttribute("transform","translate("+x+","+y+") scale(1.9)")}
+ put(0);if(reduce)return;var t0=0,run=false,last=0;function tick(ts){if(!run)return;var d=Math.min(.05,(ts-last)/1000||0);last=ts;t0+=d*.62;if(t0>n-1.01)t0=0;put(t0);requestAnimationFrame(tick)}
+ if(window.IntersectionObserver)new IntersectionObserver(function(es){es.forEach(function(e){var on=e.isIntersecting;if(on&&!run){run=true;last=performance.now();requestAnimationFrame(tick)}else if(!on)run=false})}).observe(lane)})();
 /* 學習日常小劇場：原創簡筆畫小人 */
 function face(type){var s=document.createElementNS(NS,"svg");s.setAttribute("viewBox","0 0 100 100");s.setAttribute("aria-hidden","true");
  sv("circle",{cx:50,cy:58,r:34,fill:"var(--paper)",stroke:"var(--ink)","stroke-width":3},s);

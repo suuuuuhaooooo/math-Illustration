@@ -72,7 +72,7 @@ function page(){
   S_("ellipse",{cx:0,cy:11,rx:25,ry:8,"class":"rip"},g);
   S_("path",{d:"M-19 8C-19 1-9 -1 0 -1C10 -1 19 1 19 8C19 14 9 16 0 16C-9 16-19 14-19 8Z","class":"sand"},g);
   S_("path",{d:"M-13 3C-13-7-5-12 1-12C9-12 13-6 13 3C7 6-7 6-13 3Z","class":"isl",fill:DCOL[d]},g);
-  S_("path",{d:"M7 3C7-3 6-8 8-13","class":"trk"},g);[[8,-13,3,-17],[8,-13,14,-17],[8,-13,11,-9]].forEach(function(l){S_("path",{d:"M"+l[0]+" "+l[1]+"Q"+(l[0]+(l[2]-l[0])/2)+" "+(l[1]-6)+" "+l[2]+" "+l[3]+"M"+l[0]+" "+l[1]+"L"+l[2]+" "+l[3],"class":"plm"},g)});
+  S_("path",{d:"M7 3Q9 -4 8 -12","class":"trk"},g);["M8 -12Q1 -21 -5 -13Q2 -16 8 -12Z","M8 -12Q15 -21 21 -13Q14 -16 8 -12Z","M8 -12Q4 -22 11 -24Q10 -18 8 -12Z"].forEach(function(d){S_("path",{d:d,"class":"plm"},g)});
   if(t.done)S_("path",{d:"M-6 2l4 4 8-9","class":"ck"},g);
   var tx=S_("text",{y:30,"text-anchor":"middle","class":"lm-nl"},g);var nm=chInfo[k].c.name;tx.textContent=nm.length>7?nm.slice(0,6)+"…":nm;
   var ti=S_("title",{},g);ti.textContent=chInfo[k].label;

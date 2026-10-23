@@ -468,3 +468,5 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 .lm-sea{animation:lmsea 14s ease-in-out infinite alternate}
 @keyframes lmsea{to{filter:brightness(1.06) saturate(1.1)}}
 @media (prefers-reduced-motion:reduce){.lm-waves .wv,.lm-boat,.lm-boat .bob,.lm-spark circle,.lm-sea{animation:none}.lm-boats{display:none}.lm-spark circle{opacity:.5}}
+
+.lm-n .plm{fill:#4f9d7a;stroke:var(--ink);stroke-width:1;stroke-linejoin:round}

@@ -49,7 +49,7 @@ var mo=document.createElement("div");mo.className="moon";hero.appendChild(mo);
 var ms=sv("svg",{viewBox:"0 0 120 120","aria-hidden":"true"},mo);sv("path",{d:"M78 14C46 12 20 38 22 68C24 98 54 112 80 104C52 96 46 56 62 36C68 28 74 20 78 14Z",fill:"#f3e3a6",stroke:INK,"stroke-width":3,"stroke-linejoin":"round"},ms);eye(ms,52,60,10);sv("path",{d:"M44 82q8 5 18-2",fill:"none",stroke:INK,"stroke-width":2.6,"stroke-linecap":"round"},ms);
 /* ---- 結尾的島民 ---- */
 var fin=$("#finisle");
-if(fin){var fs=sv("svg",{viewBox:"0 0 520 150",preserveAspectRatio:"xMidYMax meet","aria-hidden":"true"},fin);wave(122,8,1400,"#1b3560","wv w2",fs);blob(fs,150,118,1.1,"#78a9e0",12,8,"w");blob(fs,270,114,1.25,"#e58a73",9,13,"o");blob(fs,390,118,1.05,"#7fc3a0",11,11,"s");wave(138,9,1400,"#16294a","wv w1",fs)}
+if(fin){var fs=sv("svg",{viewBox:"0 -70 520 220",preserveAspectRatio:"xMidYMax meet","aria-hidden":"true"},fin);wave(122,8,1400,"#1b3560","wv w2",fs);blob(fs,150,118,1.1,"#78a9e0",12,8,"w");blob(fs,270,114,1.25,"#e58a73",9,13,"o");blob(fs,390,118,1.05,"#7fc3a0",11,11,"s");wave(138,9,1400,"#16294a","wv w1",fs)}
 /* ---- 說話與點擊 ---- */
 var lines=["路過的，進來玩玩吧！","拖一下，我就懂了","數學不可怕，我才可怕","按下面的按鈕上島","燈塔是為你亮的","你的眼睛在看我嗎","一二三，點我一下"],li=0;
 function say(g,text,ms){if(!g.ownerSVGElement||g.parentNode!==s)return;var old=s.querySelector(".say");if(old)old.remove();
