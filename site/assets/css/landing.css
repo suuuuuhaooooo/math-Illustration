@@ -1,6 +1,4 @@
 @font-face{font-family:"MantouSans LP";src:url("../fonts/mantou-sans.woff") format("woff");font-display:swap}
-@font-face{font-family:"GenSen Round LP";src:url("../fonts/gensen-round-tw-r.woff") format("woff");font-weight:300 500;font-display:swap}
-@font-face{font-family:"GenSen Round LP";src:url("../fonts/gensen-round-tw-b.woff") format("woff");font-weight:600 900;font-display:swap}
 @font-face{font-family:"GenRyuMin TW";src:url("../fonts/genryumin-tw-sb.woff") format("woff");font-weight:400 800;font-display:swap}
 /* 導覽頁（index.html）：滾動式介紹。顏色沿用 notebook.css 的變數，主視覺區固定深色。 */
 body.lp{display:block;background:var(--bg);--head:"GenRyuMin TW","Huninn","Iansui","LXGW WenKai TC","Noto Sans TC",sans-serif}
@@ -238,10 +236,10 @@ body.lp{display:block;background:var(--bg);--head:"GenRyuMin TW","Huninn","Iansu
 @media (prefers-reduced-motion:reduce){.hero2 .trust{animation:none;opacity:1}}
 
 /* 字體：源流明體（大標）、饅頭黑體（數字與強調）、源泉圓體（內文與卡片標題）；缺字時退回原本字體 */
-body.lp{--sans:"GenSen Round LP","Noto Sans TC",system-ui,sans-serif;font-family:var(--sans)}
+body.lp{--sans:"Huninn","Noto Sans TC",system-ui,sans-serif;font-family:var(--sans)}
 .ngrid div b,.hero2 .btn2,.fin .btn2{font-family:"MantouSans LP","GenRyuMin TW",sans-serif;font-weight:400}
 .ngrid div b{letter-spacing:.02em}
-.pc h3,.fc h3{font-family:"GenSen Round LP","Noto Sans TC",sans-serif;font-weight:700}
+.pc h3,.fc h3{font-family:"Huninn","Noto Sans TC",sans-serif;font-weight:700}
 .lp .eyebrow,.lp .sub,.hero2 p.lead2{font-family:var(--sans)}
 
 /* 版面修正與區塊過渡 */

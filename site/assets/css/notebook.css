@@ -470,3 +470,6 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 @media (prefers-reduced-motion:reduce){.lm-waves .wv,.lm-boat,.lm-boat .bob,.lm-spark circle,.lm-sea{animation:none}.lm-boats{display:none}.lm-spark circle{opacity:.5}}
 
 .lm-n .plm{fill:#4f9d7a;stroke:var(--ink);stroke-width:1;stroke-linejoin:round}
+/* 出卷步驟列：每顆等高、內容置中，亮起來的不再偏下 */
+.pstepbar{align-items:stretch}.pstepbar li{display:flex}.pstepbar a{flex:1 1 auto;min-height:2.6em;box-sizing:border-box;line-height:1.2}
+.pstepbar b{line-height:1;vertical-align:middle}
