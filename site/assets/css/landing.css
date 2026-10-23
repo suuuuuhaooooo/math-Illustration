@@ -243,3 +243,26 @@ body.lp{--sans:"GenSen Round LP","Noto Sans TC",system-ui,sans-serif;font-family
 .ngrid div b{letter-spacing:.02em}
 .pc h3,.fc h3{font-family:"GenSen Round LP","Noto Sans TC",sans-serif;font-weight:700}
 .lp .eyebrow,.lp .sub,.hero2 p.lead2{font-family:var(--sans)}
+
+/* 版面修正與區塊過渡 */
+.hero2{min-height:max(100svh,880px)}
+.hero2 p.lead2{max-width:42em;text-wrap:balance}
+.hero2 .trust{position:relative;z-index:3}
+.moon{top:22%}
+.hero2 .seam{position:absolute;left:0;right:0;bottom:0;height:clamp(90px,16vh,170px);background:linear-gradient(#080d1800,#080d18);pointer-events:none;z-index:4}
+.scene::before,.fin::before{content:"";position:absolute;left:0;right:0;top:0;height:clamp(110px,18vh,200px);pointer-events:none;z-index:0}
+.scene::before{background:linear-gradient(#0d1626,#0d162600)}
+.fin::before{background:linear-gradient(var(--paper2),transparent)}
+.say{background:linear-gradient(#080d18,#0d1626)}
+.nums{background:linear-gradient(var(--bg),var(--paper2) 18%,var(--paper2) 82%,var(--bg))}
+.feats2{background:linear-gradient(var(--bg),var(--paper2) 18%,var(--paper2) 82%,var(--paper2))}
+
+.hero2{padding-top:76px}
+.hero2 h1{font-size:clamp(2.6rem,9vw,5.4rem)}
+.hero2 p.lead2{margin-bottom:.6em}
+.hero2 .trust{margin:0 0 26px}
+.isle{height:clamp(190px,18.4vw,480px)}
+.isle{transform:translateY(2.1vw)}
+@media (max-width:900px){.hero2{min-height:100svh;padding-bottom:clamp(190px,40vh,330px)}.isle{height:clamp(190px,52vw,320px);transform:none}.moon{top:11%;right:5%;width:54px}}
+.fin{background:linear-gradient(#080d1800 calc(100% - 110px),var(--bg)),radial-gradient(900px 520px at 50% 62%,#1f3558 0%,#0f1a2e 60%,#080d18 100%)}
+.finisle svg{-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}

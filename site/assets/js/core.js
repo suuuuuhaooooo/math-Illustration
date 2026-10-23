@@ -28,7 +28,7 @@ function mode(){try{return localStorage.getItem(KEY)||"system"}catch(e){return"s
 function apply(m){var r=document.documentElement;if(m==="light"||m==="dark")r.setAttribute("data-theme",m);else r.removeAttribute("data-theme");var bs=document.querySelectorAll(".themes button");for(var i=0;i<bs.length;i++)bs[i].classList.toggle("on",bs[i].dataset.m===m)}
 NB.themeBar=function(){
  var I={light:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',dark:'<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>',system:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>'};
- var L={light:"淺色",dark:"深色",system:"系統"},d=h('<div class="themes" role="group" aria-label="主題"></div>');
+ var L={light:"永晝",dark:"永夜",system:"系統"},d=h('<div class="themes" role="group" aria-label="主題"></div>');
  ["light","dark","system"].forEach(function(m){var b=h('<button data-m="'+m+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+I[m]+'</svg>'+L[m]+'</button>');
   b.onclick=function(){try{localStorage.setItem(KEY,m)}catch(e){}apply(m)};d.appendChild(b)});
  setTimeout(function(){apply(mode())},0);return d};
@@ -43,7 +43,7 @@ function sheet(tag,sub,body){var d=h('<section class="sheet"><h2><span class="ta
 /* ---- 原創幾何點綴（全部是向量 SVG） ---- */
 var M=mk,D=NB.deco={};
 D.icon=function(n){var P={"例題":'<path d="M3 13l1-4 7-7 3 3-7 7z"/><path d="M9.5 3.5l3 3"/>',"動手玩":'<path d="M2 5h12M2 11h12"/><circle cx="6" cy="5" r="2" fill="currentColor"/><circle cx="10.5" cy="11" r="2" fill="currentColor"/>',"解法":'<path d="M2 13h4V9h4V5h4"/><path d="M2 13V2"/>',"挑戰":'<path d="M4 14V2"/><path d="M4 3h9l-2 3 2 3H4"/>'}[n];return P?'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+P+'</svg>':""};
-D.logo=function(){return'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="var(--ink)" stroke-width="1.6"/><polygon points="16,5 27.3,22.5 4.7,22.5" fill="var(--p4)" fill-opacity=".35" stroke="var(--ink)" stroke-width="1.4" stroke-linejoin="round"/><circle cx="16" cy="17" r="1.8" fill="var(--p1)"/></svg>'};
+D.logo=function(){return'<svg viewBox="-20 -28 40 40" aria-hidden="true"><path d="M-12 0C-16-12-6-24 1-22C11-24 16-10 12 0C6 3-7 3-12 0Z" fill="#e58a73" stroke="#1c2635" stroke-width="1.7" stroke-linejoin="round"/><path d="M-6 3v5M5 3v5" stroke="#1c2635" stroke-width="1.7" stroke-linecap="round"/><circle cx="-4" cy="-14" r="4.2" fill="#fff" stroke="#1c2635" stroke-width="1.2"/><circle cx="5" cy="-15" r="4.2" fill="#fff" stroke="#1c2635" stroke-width="1.2"/><circle cx="-3" cy="-13" r="1.8" fill="#1c2635"/><circle cx="6" cy="-14" r="1.8" fill="#1c2635"/><path d="M-3 -7q3 3 7 0" fill="none" stroke="#1c2635" stroke-width="1.5" stroke-linecap="round"/></svg>'};
 D.rule=function(){var v=NB.s("svg",{viewBox:"0 0 520 18",class:"orn","aria-hidden":"true"});M("path",{d:"M0 9H214M306 9H520",fill:"none",stroke:"var(--soft)"},v,1);M("path",{d:"M232 9l12-7 12 7-12 7z",fill:"var(--p4)","fill-opacity":.5},v,1.3);M("circle",{cx:274,cy:9,r:3.5,fill:"var(--p1)"},v,1);M("path",{d:"M224 9h4M292 9h4",fill:"none"},v,1.3);return v};
 D.hero=function(){var v=NB.s("svg",{viewBox:"0 0 380 280",class:"hero-art",role:"img","aria-label":"圓規、直尺與幾何圖形"}),i,x,l;
  M("path",{d:"M215 22V198M120 112H306",fill:"none",stroke:"var(--soft)","stroke-dasharray":"2 5"},v,1);

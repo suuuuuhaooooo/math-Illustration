@@ -49,5 +49,5 @@ if(NB.tour)NB.tour.setup("home",[{title:"歡迎來到數光島筆記本",text:"�
  {sel:".resume",title:"繼續上次",text:"玩過的單元會被記住，按這裡回到上次的地方。"},
  {sel:".maplink",title:"學習地圖",text:"看單元之間怎麼連起來：先學什麼、接著學什麼。"},
  {sel:".chip",title:"學員專區",text:"正式學員在這裡登入，有每日一題、錯題本、模擬卷和積分。"},
- {sel:".themes",title:"外觀與注音",text:"可以切換淺色、深色，也能開關注音。"}]);
+ {sel:".themes",title:"外觀與注音",text:"可以切換永晝、永夜或跟隨系統，也能開關注音。"}]);
 })();
