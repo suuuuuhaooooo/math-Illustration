@@ -473,3 +473,7 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 /* 出卷步驟列：每顆等高、內容置中，亮起來的不再偏下 */
 .pstepbar{align-items:stretch}.pstepbar li{display:flex}.pstepbar a{flex:1 1 auto;min-height:2.6em;box-sizing:border-box;line-height:1.2}
 .pstepbar b{line-height:1;vertical-align:middle}
+
+/* 注音字體版：用 Bpmf Huninn 顯示注音，版面不加上方注音；破音字可能顯示預設讀音 */
+body.zyfont :where(p,li,td,th,h1,h2,h3,h4,label,a,span,div,b,small,mark,em,summary,dt,dd):not(.katex *):not(.nozy){font-family:"Bpmf Huninn","Huninn",sans-serif}
+body.zyfont{line-height:1.95}
