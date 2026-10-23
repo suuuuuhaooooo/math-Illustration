@@ -64,7 +64,7 @@
       '<div class="ppr pcr"><b>紙張</b><div class="pcards p4">' + ["A3", "A4", "B4", "B5"].map(function (p) { return card("radio", "pp-paper", p, p, P.paper === p, "", ico("paper", p)); }).join("") + "</div></div>" +
       '<div class="ppr pcr"><b>排版</b><div class="pcards">' + [["s1", "橫書單欄"], ["d2", "橫書雙欄（直版）"], ["d2l", "橫書雙欄（橫版）"]].map(function (x) { return card("radio", "pp-layout", x[0], x[1], P.layout === x[0], "", ico("layout", x[0])); }).join("") + "</div></div>" +
       '<div class="ppr pcr"><b>選項排列</b><div class="pcards p2">' + [["col", "換行排列"], ["row", "接續排列"]].map(function (x) { return card("radio", "pp-opt", x[0], x[1], P.optMode === x[0], "", ico("opt", x[0])); }).join("") + "</div></div>" +
-      '<div class="ppr"><b>頁碼</b> ' + rad("pp-pageNo", "kn", "卷別＋頁碼（例：題目卷　第 2 頁）", P.pageNo) + rad("pp-pageNo", "n", "只印頁碼", P.pageNo) + rad("pp-pageNo", "off", "不印頁碼", P.pageNo) + '</div><div class="ppr meta">頁碼印在每頁下方。每一份卷別（題目卷、簡答與詳解…）都從第 1 頁開始編，要用出卷完成後各份旁邊的「列印這一份」；「全部一起列印」則頁碼會接續。（Firefox 不支援頁碼，建議用 Chrome 或 Edge。）</div></div></details>' +
+      '<div class="ppr"><b>頁碼</b> ' + rad("pp-pageNo", "kn", "卷別　第 2 頁", P.pageNo) + rad("pp-pageNo", "knt", "卷別　第 2 頁／共 3 頁", P.pageNo) + rad("pp-pageNo", "n", "第 2 頁", P.pageNo) + rad("pp-pageNo", "nt", "第 2 頁／共 3 頁", P.pageNo) + rad("pp-pageNo", "off", "不印頁碼", P.pageNo) + '</div><div class="ppr meta">頁碼印在每頁下方。每一份卷別（題目卷、簡答與詳解…）都從第 1 頁開始編，要用出卷完成後各份旁邊的「列印這一份」；「全部一起列印」則頁碼會接續（「共幾頁」是整批的總頁數）。（Firefox 不支援頁碼，建議用 Chrome 或 Edge。）</div></div></details>' +
       '<details open><summary>輸出卷別</summary><div class="ppg"><div class="ppr">' + chk("pp-all", "全選", false) + '</div><div class="pcards pk">' + KINDS.map(function (k) { return card("checkbox", "", "", k[1], !!P.kinds[k[0]], "pp-k-" + k[0], ico("kind", k[0])); }).join("") + "</div></div></details>" +
       '<details open><summary>浮水印（防止試卷外流，可追查是誰印的）</summary><div class="ppg">' +
       (u.role === "teacher" ? "" : '<div class="ppr meta">學生列印一律會加上浮水印（姓名、班級座號、Email、IP、裝置、卷號、時間），也會留下列印紀錄，不能關閉。</div>') +
@@ -111,10 +111,12 @@
     if (P.matrix) out.push({ id: "matrix-0", k: "matrix", v: 0, label: KLAB.matrix });
     return out;
   }
+  function PN_ON(P) { return ["kn", "n", "knt", "nt"].indexOf(P.pageNo) >= 0; }
   function pageCss(P) {
     var s = PAPER[P.paper] || PAPER.A4, w = s[0], h = s[1]; if (P.layout === "d2l") { var t = w; w = h; h = t; }
     var css = "@page{size:" + w + "mm " + h + "mm;margin:12mm 12mm 18mm}";
-    if (P.pageNo !== "off") list(P).forEach(function (x) { css += "@page pg-" + x.id + "{@bottom-center{content:" + (P.pageNo === "n" ? '"第 "' : '"' + x.label + '　第 "') + " counter(page) \" 頁\";font-size:9pt;color:#333;vertical-align:top;padding-top:3mm}}"; });
+    var PN = { kn: [true, false], n: [false, false], knt: [true, true], nt: [false, true] }[P.pageNo];
+    if (PN) list(P).forEach(function (x) { css += "@page pg-" + x.id + "{@bottom-center{content:" + (PN[0] ? '"' + x.label + '　"' : '""') + ' "第 " counter(page) " 頁' + (PN[1] ? '／共 " counter(pages) " 頁"' : ' "') + ';font-size:9pt;color:#333;vertical-align:top;padding-top:3mm}}'; });
     return { css: css, w: w };
   }
   function applyPage(P) { var st = document.getElementById("ppstyle"); if (!st) { st = document.createElement("style"); st.id = "ppstyle"; document.head.appendChild(st); } st.textContent = pageCss(P).css; }
@@ -259,7 +261,7 @@
       else if (k === "ak") { cls += " key"; h = head("簡答與詳解", tag) + keyList(arr, ""); }
       else if (k === "short") { cls += " key"; h = head("簡答卷", tag) + keyList(arr, "pshort"); }
       else h = head("答案卷", tag) + blankList(arr);
-      return '<div class="' + cls + '" data-sid="' + sid + '" style="--pw:' + pw + 'mm' + (P.pageNo === "off" ? "" : ";page:pg-" + sid) + '" data-cols="' + (k === "short" ? Math.max(cols, 3) : cols) + '">' + (WM ? WM.scr : "") + h + '<p class="pcopy">© ' + new Date().getFullYear() + " 蘇昊數理・CC BY-NC-ND 4.0・僅供班級教學使用，請勿轉載</p></div>";
+      return '<div class="' + cls + '" data-sid="' + sid + '" style="--pw:' + pw + 'mm' + (PN_ON(P) ? ";page:pg-" + sid : "") + '" data-cols="' + (k === "short" ? Math.max(cols, 3) : cols) + '">' + (WM ? WM.scr : "") + h + '<p class="pcopy">© ' + new Date().getFullYear() + " 蘇昊數理・保留所有權利・僅供購買者本人或授課班級教學使用，請勿轉載</p></div>";
     }
     for (var v = 0; v < P.variants; v++) { var arr = variant(qs, v, D.secs), tag = P.variants > 1 ? "（" + ZH[v] + "卷）" : ""; kinds.filter(function (x) { return x.v === v; }).forEach(function (x) { out.push(sheet(x.k, arr, tag, x.id)); }); }
     if (P.matrix) out.push(matrix(P, qs, nm, D, head, pw, WM));
@@ -278,7 +280,7 @@
     var rows = order.map(function (r) { var n = 0; cols.forEach(function (c) { var k = (by[r][c] || []).length; tot[c] += k; n += k; });
       return "<tr><td>" + esc(r) + "</td>" + cols.map(function (c) { var a = by[r][c] || []; return "<td>" + (a.length ? a.length + "<small>（" + a.join("、") + "）</small>" : "") + "</td>"; }).join("") + "<td>" + n + "</td></tr>"; }).join("");
     var rl = (MXR.filter(function (x) { return x[0] === rk; })[0] || MXR[0])[1];
-    return '<div class="psheet pp pp-matrix" data-sid="matrix-0" style="--pw:' + pw + 'mm' + (P.pageNo === "off" ? "" : ";page:pg-matrix-0") + '" data-cols="1">' + (WM ? WM.scr : "") + head("雙向細目表", "") + '<table class="pscore pmx"><tr><th>' + rl + "</th>" + cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "<th>合計</th></tr>" + rows + "<tr><th>合計</th>" + cols.map(function (c) { return "<th>" + tot[c] + "</th>"; }).join("") + "<th>" + qs.length + '</th></tr></table><p class="pcopy">格子裡：題數（題號）</p></div>';
+    return '<div class="psheet pp pp-matrix" data-sid="matrix-0" style="--pw:' + pw + 'mm' + (PN_ON(P) ? ";page:pg-matrix-0" : "") + '" data-cols="1">' + (WM ? WM.scr : "") + head("雙向細目表", "") + '<table class="pscore pmx"><tr><th>' + rl + "</th>" + cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "<th>合計</th></tr>" + rows + "<tr><th>合計</th>" + cols.map(function (c) { return "<th>" + tot[c] + "</th>"; }).join("") + "<th>" + qs.length + '</th></tr></table><p class="pcopy">格子裡：題數（題號）</p></div>';
   }
   /* 裝置資訊：Chrome 類瀏覽器能問到 Android 手機型號；其他資訊（螢幕、時區、語言）一併附上，伺服器另外也會自己讀 User-Agent */
   function device() {

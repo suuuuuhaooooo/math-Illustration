@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>方案與價格｜蘇昊數理 數學筆記本</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232f2a26' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20l1-4L16 5l3 3L8 19z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=LXGW+WenKai+TC:wght@400;700&family=Iansui&family=Huninn&display=swap">
+<link rel="stylesheet" href="assets/css/notebook.css">
+<script src="assets/js/theme-lite.js"></script>
+</head>
+<body data-root="./" data-page="plans">
+<main class="wrap" id="app">
+<nav class="bar"><a class="back" href="index.html">← 回首頁</a></nav>
+<section class="sheet"><h2><span class="tag">方案</span>方案與價格</h2>
+<p>依使用對象選擇方案。目前不線上刷卡：請點「LINE 洽詢」，確認方案、以轉帳付款後，我們會把你的 Google 帳號加入名單並設定使用期限，當天就能登入。</p>
+<div class="ctl" id="cyc" role="tablist"><button class="pen on" data-c="m" type="button">月繳</button><button class="pen" data-c="s" type="button">學期（6 個月）</button><button class="pen" data-c="y" type="button">年繳（最划算）</button></div>
+<div class="plans" id="plans"></div>
+<p class="meta">價格為新台幣。學期方案約為 5.3 個月的月費，年繳約為 9.3 個月的月費。實際方案與價格以 LINE 洽詢時的書面報價為準。</p></section>
+<section class="sheet"><h2><span class="tag">試算</span>班級費用試算</h2>
+<p>老師想幫整個班級開通：老師後台按人頭計、學生席位按人數計。</p>
+<div class="ctl"><label>老師人數 <input id="ct" type="number" min="0" max="20" value="1" style="width:5em"></label><label>學生人數 <input id="cs" type="number" min="0" max="500" value="30" style="width:6em"></label></div>
+<p id="calc" class="calc" aria-live="polite"></p></section>
+<section class="sheet"><h2><span class="tag">流程</span>怎麼開通</h2>
+<ol><li>點「LINE 洽詢」，告訴我們身分（學生家長、老師、學校或補習班）、人數與想要的期間。</li><li>我們回覆書面報價與付款方式；確認後以轉帳付款。</li><li>提供要登入的 Google 帳號 Email（學生未滿 18 歲，請由家長或監護人代為洽詢或同意）。</li><li>收到款項後設定帳號與使用期限，當天開通。</li><li>到期前會以 LINE 或 Email 提醒是否續約；目前不會自動扣款。不續約，帳號僅能查看自己的資料與公開的單元圖解。</li></ol></section>
+<section class="sheet"><h2><span class="tag">須知</span>訂購前請先了解</h2>
+<ul>
+<li><b>退款</b>：首次訂購開通後 7 日內，可申請全額退款；之後依《使用者條款》第十條處理（因本站原因無法提供服務時，按未提供的期間比例退費）。</li>
+<li><b>未成年人</b>：學生未滿 18 歲，訂購與使用需經家長或監護人同意；付款人視為已取得同意。</li>
+<li><b>帳號不可共用</b>：一個帳號限一位使用者，不得出借、轉讓或轉售。</li>
+<li><b>授權範圍</b>：購買的是使用權，題目、詳解與列印的練習卷僅供購買者自己或所屬班級教學使用，不得轉售、散布或作商業用途。</li>
+<li><b>發票與收據</b>：需要發票或收據請於洽詢時告知，並提供抬頭與統一編號（如有）。</li>
+<li>詳細規定請見<a href="terms.html">使用者條款</a>與<a href="privacy.html">隱私權政策</a>。</li>
+</ul>
+<p class="meta">經營者：蘇昊數理　聯絡：官方 LINE（@000gwomo）　【登記名稱、負責人、聯絡地址、電話、統一編號：請於正式收費前填寫】</p></section>
+</main>
+<script>
+/* 價格與文字都在這裡改（單位：新台幣）。m＝月繳、s＝學期（6 個月）、y＝年繳；null 顯示「洽詢報價」 */
+var LINE="https://line.me/ti/p/~@000gwomo";
+var PLANS=[
+ {id:"stu",name:"學生／家長",who:"個人使用，一個帳號",m:149,s:790,y:1390,items:["單元小測驗、每日一題、模擬卷","錯題本與弱點分析、學習進度與勳章","列印練習卷（題目卷＋答案卷）","排行榜（班級內只顯示座號）"]},
+ {id:"seat",name:"班級學生席位",who:"老師或學校統一採購，每位學生",m:79,s:399,y:690,items:["學生端全部功能","由老師在後台管理名單與期限","成績與錯題由授課老師查看","離班可由老師回收席位給同班同學"]},
+ {id:"tea",name:"老師後台",who:"每位授課老師",m:299,s:1490,y:2490,hot:true,items:["班級分析、學生個人檔與錯題","派卷與待測清單","出卷五步驟：電腦出題、手動出題、智慧配分、審題預覽","自訂大題、頁碼、雙向細目表、多份不同題序","列印紀錄與浮水印追查"]},
+ {id:"sch",name:"學校／補習班",who:"多班級、多位老師",m:null,s:null,y:null,items:["多班級、多位老師統一管理","依人數與期間報價（建議 60 席位起，量大另有折扣）","可討論題庫匯入與客製需求","可開立發票與正式報價單"]}
+];
+var CY={m:"月",s:"學期",y:"年"},cyc="m",box=document.getElementById("plans");
+function fmt(n){return"NT$ "+Math.round(n).toLocaleString("en-US")}
+function draw(){box.innerHTML="";PLANS.forEach(function(p){var v=p[cyc],d=document.createElement("div");d.className="plan"+(p.hot?" hot":"");
+ d.innerHTML='<h3></h3><p class="who"></p><p class="price"></p><ul></ul>';d.querySelector("h3").textContent=p.name;d.querySelector(".who").textContent=p.who;
+ d.querySelector(".price").innerHTML=v==null?"<b>洽詢報價</b>":"<b>"+fmt(v)+"</b> <small>／"+CY[cyc]+"</small>"+(cyc!=="m"?"<br><small>平均每月約 "+fmt(v/(cyc==="s"?6:12))+"</small>":"");
+ p.items.forEach(function(t){var li=document.createElement("li");li.textContent=t;d.querySelector("ul").appendChild(li)});
+ var a=document.createElement("a");a.className="pen go";a.href=LINE;a.target="_blank";a.rel="noopener";a.textContent="LINE 洽詢";d.appendChild(a);box.appendChild(d)});calc()}
+function pr(id){return PLANS.filter(function(p){return p.id===id})[0][cyc]}
+function calc(){var t=Math.max(0,+document.getElementById("ct").value||0),s=Math.max(0,+document.getElementById("cs").value||0),el=document.getElementById("calc");
+ if(s>=300){el.innerHTML="學生 300 人以上，請以「學校／補習班」方案 <a href=\""+LINE+"\" target=\"_blank\" rel=\"noopener\">LINE 洽詢</a>，有量大折扣。";return}
+ var sum=t*pr("tea")+s*pr("seat");el.innerHTML=t+" 位老師 ＋ "+s+" 位學生（"+CY[cyc]+"繳）：合計 <b>"+fmt(sum)+"</b>"+(s?"，平均每位學生約 "+fmt(sum/s)+"／"+CY[cyc]:"")}
+document.getElementById("cyc").onclick=function(e){var b=e.target.closest("button");if(!b)return;cyc=b.dataset.c;Array.prototype.forEach.call(this.children,function(x){x.classList.toggle("on",x===b)});draw()};
+document.getElementById("ct").oninput=document.getElementById("cs").oninput=calc;
+draw();
+</script>
+<script src="assets/js/footer.js"></script>
+</body>
+</html>

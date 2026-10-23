@@ -389,7 +389,7 @@ function printWiz(arg){
   L.push("出題方式："+({quick:"快速出題",auto:"電腦出題",manual:"手動出題"})[W.mode]);
   L.push("範圍："+(W.scope==="online"?"線上速測（只用線上題庫）":"紙本出卷（題型較全）")+"・"+grades().map(function(g){return"一二三四五六"[g-1]}).join("、")+"年級・"+({a:"上下冊",u:"上冊",d:"下冊"})[val("pw-sem")]+"・"+(val("pw-src")==="pick"?"自選 "+pk.get().length+" 個課次":"整個範圍綜合"));
   L.push("題目："+(pv?pv.qs.length+" 題"+(pv.secs&&ptsTotal()?"・總分 "+ptsTotal()+" 分":""):"尚未審題"));
-  L.push("紙張："+esc(P.paper)+"・"+({s1:"單欄",d2:"雙欄（直版）",d2l:"雙欄（橫版）"})[P.layout]+"・頁碼："+({kn:"卷別＋頁碼",n:"只印頁碼",off:"不印"})[P.pageNo||"kn"]);
+  L.push("紙張："+esc(P.paper)+"・"+({s1:"單欄",d2:"雙欄（直版）",d2l:"雙欄（橫版）"})[P.layout]+"・頁碼："+({kn:"卷別＋頁碼",knt:"卷別＋第N頁／共N頁",n:"只印頁碼",nt:"第N頁／共N頁",off:"不印"})[P.pageNo||"kn"]);
   L.push("輸出："+list.map(function(x){return esc(x.label)}).join("、")+"（共 "+list.length+" 份，每份頁碼各自從 1 開始）");
   $(".pstsum").innerHTML="<b>確認設定</b><ul>"+L.map(function(x){return"<li>"+x+"</li>"}).join("")+"</ul><p class=\"meta\">按「進行出卷」才會正式出卷，並記錄一筆列印紀錄；之後只改版面不會再多記一筆。</p>";
   drawRes()}

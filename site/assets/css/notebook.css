@@ -341,3 +341,11 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 @media print{.pdraft{display:none!important}}
 @media (max-width:480px){.pstepbar li:not(.on) span{display:none}.pstepbar li.on{flex:2 1 0}.pstepbar a{overflow:hidden;white-space:nowrap}}
 .pgs{display:inline-flex;flex-wrap:wrap;gap:4px 10px}
+
+/* 方案頁 */
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:12px 0}
+.plan{border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--paper);display:flex;flex-direction:column;gap:6px}
+.plan.hot{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset}.plan h3{margin:0}.plan .who{color:var(--soft);margin:0}
+.plan .price{margin:6px 0}.plan .price b{font-size:1.6rem}.plan ul{margin:0 0 10px;padding-left:1.2em;line-height:1.7;flex:1}.plan .pen{align-self:flex-start;text-decoration:none}
+.calc{font-size:1.05rem;margin:6px 0}.plans{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+#ct,#cs{padding:4px 8px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);font:inherit}
