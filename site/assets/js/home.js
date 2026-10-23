@@ -42,4 +42,12 @@ function render(){
  app.appendChild(NB.h('<p class="meta" style="text-align:center">選擇年級後展開學期，點小節即可開始</p>'));
 }
 render();
+if(NB.tour)NB.tour.setup("home",[{title:"歡迎來到數學筆記本",text:"花一分鐘看看怎麼找單元、怎麼玩。想再看一次，隨時按右下角的 i 圓形按鈕。"},
+ {sel:".tabs",title:"選年級",text:"一到六年級的目錄都在這裡，按一下就切換。"},
+ {sel:"details.sheet summary",title:"展開學期",text:"每個學期是一張紙，點一下展開，會看到章與小節。"},
+ {sel:".secs .lnk",title:"選一個小節",text:"每個小節都是一頁：先看例題，再動手拖拉，接著看解法，最後挑戰一題。"},
+ {sel:".resume",title:"繼續上次",text:"玩過的單元會被記住，按這裡回到上次的地方。"},
+ {sel:".maplink",title:"學習地圖",text:"看單元之間怎麼連起來：先學什麼、接著學什麼。"},
+ {sel:".chip",title:"學員專區",text:"正式學員在這裡登入，有每日一題、錯題本、模擬卷和積分。"},
+ {sel:".themes",title:"外觀與注音",text:"可以切換淺色、深色，也能開關注音。"}]);
 })();

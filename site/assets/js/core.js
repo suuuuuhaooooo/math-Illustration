@@ -88,6 +88,13 @@ function mount(c){
  bs[1].onclick=function(){fb.className="fb";fb.innerHTML=NB.tx("提示："+c.ch.h)};
  app.appendChild(sheet("挑戰","換你試試",ch));
  NB.trail.visit(NB.cur);if(NB.map&&NB.map.card)NB.map.card(app,NB.cur);
+ if(NB.tour){function sh(t){return function(){return[].filter.call(app.querySelectorAll(".sheet"),function(e){var g=e.querySelector("h2 .tag");return g&&g.textContent===t})[0]||null}}
+  NB.tour.setup("unit",[{title:"這一頁怎麼玩",text:"每個小節都是四步：例題、動手玩、解法、挑戰。想再看一次，按右下角的 i。"},
+  {sel:sh("例題"),title:"例題",text:"先讀題目，知道這一節要解決什麼問題。"},
+  {sel:sh("動手玩"),title:"動手玩",text:"拖拉滑桿，或直接在圖上拖，看圖形和算式怎麼一起變。"},
+  {sel:sh("解法"),title:"解法",text:"一步一步拆開算式，先理解，再計算。"},
+  {sel:sh("挑戰"),title:"挑戰",text:"輸入答案按「檢查」，卡住了可以按「提示」。"},
+  {sel:".lmap",title:"學習地圖",text:"看這一章之前該先學什麼，接著可以學什麼。"}])}
  var nv=h('<nav class="bar"></nav>');if(I.prev)nv.appendChild(h('<a class="back" href="'+NB.link(I.prev)+'">← '+I.prev.title+'</a>'));else nv.appendChild(h("<span></span>"));if(I.next)nv.appendChild(h('<a class="back" href="'+NB.link(I.next)+'">'+I.next.title+' →</a>'));app.appendChild(nv);if(NB.member&&NB.member.onUnit)NB.member.onUnit(app,NB.cur);
 }
 NB.mount=mount;
