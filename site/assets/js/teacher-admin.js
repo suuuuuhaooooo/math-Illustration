@@ -22,9 +22,17 @@ function migrateBanner(ctx,legacy){if(!legacy)return;var b=h('<div class="fb no"
 
 /* ---------- 學生名單 ---------- */
 function roster(ctx){
- var s=ctx.sheet("學生名單","新增、修改、停用、刪除；改完立即生效"),fb=h('<div class="fb"></div>');
+ var s=ctx.sheet("學生名單",M.U.admin?"新增、修改、停用、刪除；改完立即生效":"你班級的名單（唯讀）"),fb=h('<div class="fb"></div>');
  M.api("GET","/api/admin/roster").then(function(r){
-  ctx.box=s;migrateBanner(ctx,r.legacy);
+  ctx.box=s;
+  if(!M.U.admin){ /* 老師：只能看自己班的名單；新增、修改、刪除、授權期限、批次匯入都只有管理員能做 */
+   s.appendChild(h('<p class="meta">這裡是你班級的名單（唯讀）。新增、修改、刪除學生與授權期限，只有管理員可以操作；需要異動請聯絡管理員。</p>'));
+   var tr='<table class="tb"><tr><th>班</th><th>號</th><th>姓名</th><th>Email</th><th>年級</th><th>狀態</th></tr>';
+   r.rows.forEach(function(x){tr+='<tr class="'+(x.active==="0"||x.active===0?"low":"")+'"><td>'+esc(x.class)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+esc(x.email)+"</td><td>"+x.grade+"</td><td>"+(x.active==="0"||x.active===0?"停用":"啟用")+"</td></tr>"});
+   s.appendChild(h(tr+"</table>"));
+   var eb0=h('<div class="ctl"><button class="pen">匯出名單 CSV</button></div>');eb0.firstChild.onclick=function(){download("名單.csv","email,class,no,name,grade,active\n"+r.rows.map(function(x){return[x.email,x.class,x.no,x.name,x.grade,x.active==="0"?0:1].map(csvEsc).join(",")}).join("\n"))};s.appendChild(eb0);
+   return}
+  migrateBanner(ctx,r.legacy);
   var today=M.today(),rows=r.rows,form=h('<div class="ctl wrapctl"></div>'),f={email:inp("","Google 帳號 Email","email"),cls:inp("","班級 例 601"),no:inp("","座號","number"),name:inp("","姓名"),grade:sel([[1,"一年級"],[2,"二年級"],[3,"三年級"],[4,"四年級"],[5,"五年級"],[6,"六年級"]],6),role:sel(M.U.admin?[["student","學生"],["teacher","老師"],["admin","管理員"]]:[["student","學生"]],"student"),act:sel([["1","啟用"],["0","停用"]],"1"),exp:inp("","授權到期日","date")};f.exp.title="授權到期日（含當天）；留空＝不限期";
   Object.keys(f).forEach(function(k){form.appendChild(k==="exp"?field("授權到期日（空白＝不限期）",f[k]):f[k])});
   var save=h('<button class="pen go">儲存這位</button>');form.appendChild(save);s.appendChild(form);
@@ -75,7 +83,7 @@ function bank(ctx){
  bkCss();var s=ctx.sheet("題庫","固定題；沒有的單元會自動用「隨機產生器」出題");
  M.api("GET","/api/admin/bank").then(function(r){
   ctx.box=s;migrateBanner(ctx,r.legacy);var rows=r.rows,fb=h('<div class="fb"></div>'),list=h("<div></div>");
-  var bar=h('<div class="ctl wrapctl"></div>'),fc=document.createElement("select"),fu=document.createElement("select"),ft=sel([["","全部題型"],["num","數值題"],["choice","選擇題"],["text","文字題"]],""),fl=sel([["","全部難度"],["1","難度 1 基礎"],["2","難度 2 應用"],["3","難度 3 挑戰"]],""),fk=sel([["","全部用途"],["print","可出卷"],["daily","可當每日一題"],["mock","可放模擬卷"],["off","已停用"],["img","有附圖"],["grp","題組"]],""),fd=sel([["","全部難易度"],["易","難易度：易"],["中","難易度：中"],["難","難易度：難"],["none","尚未標屬性"]],""),fg=sel([["","全部認知層次"],["知識","知識"],["理解","理解"],["應用","應用"],["分析","分析"],["評鑑","評鑑"],["創造","創造"]],""),fq=inp("","搜尋題目文字、id 或題組ID"),nw=h('<button class="pen go">＋ 新增題目</button>');
+  var bar=h('<div class="ctl wrapctl"></div>'),fc=document.createElement("select"),fu=document.createElement("select"),ft=sel([["","全部題型"],["num","數值題"],["choice","選擇題"],["text","文字題"],["tf","是非題"],["multi","勾選題"],["match","連連看"]],""),fl=sel([["","全部難度"],["1","難度 1 基礎"],["2","難度 2 應用"],["3","難度 3 挑戰"]],""),fk=sel([["","全部用途"],["print","可出卷"],["daily","可當每日一題"],["mock","可放模擬卷"],["off","已停用"],["img","有附圖"],["grp","題組"]],""),fd=sel([["","全部難易度"],["易","難易度：易"],["中","難易度：中"],["難","難易度：難"],["none","尚未標屬性"]],""),fg=sel([["","全部認知層次"],["知識","知識"],["理解","理解"],["應用","應用"],["分析","分析"],["評鑑","評鑑"],["創造","創造"]],""),fq=inp("","搜尋題目文字、id 或題組ID"),nw=h('<button class="pen go">＋ 新增題目</button>');
   var units={},chs={};rows.forEach(function(x){units[x.unit]=1;chs[String(x.unit).split(".")[0]]=1});NB.flat.forEach(function(o){units[o.id]=1;chs[o.id.split(".")[0]]=1});
   var chName=function(c){var o=NB.flat.filter(function(y){return y.id.split(".")[0]===c})[0];return o?c+" "+o.sem+"第"+o.ch.no+"章 "+o.ch.name:c};
   fc.innerHTML='<option value="">全部章（'+rows.length+"）</option>"+Object.keys(chs).sort().map(function(c){return'<option value="'+esc(c)+'">'+esc(chName(c))+"</option>"}).join("");
@@ -84,7 +92,7 @@ function bank(ctx){
   [fc,fu,ft,fl,fk,fd,fg,fq,nw].forEach(function(e){bar.appendChild(e)});bar.className+=" bkbar";
   /* 統計面板：跟著下面的篩選即時變動（預設＝全部） */
   var USES={print:["可出卷",function(x){return x.print==="1"}],daily:["每日一題",function(x){return x.daily==="1"}],mock:["可放模擬卷",function(x){return x.mock!=="0"}],off:["已停用",function(x){return x.active==="0"}],img:["有附圖",function(x){return !!(x.img||x.himg)}],grp:["題組",function(x){return !!x.gid}]};
-  var TYPES=[["num","數值題"],["choice","選擇題"],["text","文字題"]],LVS=[["1","1 基礎"],["2","2 應用"],["3","3 挑戰"]];
+  var TYPES=[["num","數值題"],["choice","選擇題"],["text","文字題"],["tf","是非題"],["multi","勾選題"],["match","連連看"]],LVS=[["1","1 基礎"],["2","2 應用"],["3","3 挑戰"]];
   var chOf=function(u){return String(u).split(".")[0]};
   function match(x,skipUnit){var k=fq.value.trim();return(skipUnit||((!fc.value||chOf(x.unit)===fc.value)&&(!fu.value||x.unit===fu.value)))&&(!ft.value||x.type===ft.value)&&(!fl.value||String(x.lv)===fl.value)&&(!fk.value||USES[fk.value][1](x))&&(!fd.value||(fd.value==="none"?!(x.diff||x.cog||x.perf||x.content||x.know):x.diff===fd.value))&&(!fg.value||x.cog===fg.value)&&(!k||(x.q+x.id+(x.gid||"")).indexOf(k)>=0)}
   var dash=h('<div class="bkdash"></div>'),det=document.createElement("details");det.className="bkun";det.open=true;
@@ -119,17 +127,17 @@ function bank(ctx){
   function edit(x){x=x||{id:"",unit:fu.value||"6d-5.3",type:"num",lv:2,q:"",options:"",answer:"",hint:"",diag:"",img:"",himg:"",print:"",daily:"",mock:"1",active:"1",perf:"",content:"",diff:"",cog:"",know:"",gid:"",gstem:"",gimg:"",gord:""};
    var ed=ctx.sheet(x.id?"編輯題目":"新增題目",x.id?esc(x.id):"儲存後立刻出現在小測驗、出卷、每日一題、模擬卷"),F={};
    var dl=document.createElement("datalist");dl.id="ul";NB.flat.forEach(function(o){var e=document.createElement("option");e.value=o.id;e.label=o.sem+" "+o.num+" "+o.title;dl.appendChild(e)});ed.appendChild(dl);
-   F.unit=inp(x.unit);F.unit.setAttribute("list","ul");F.type=sel([["num","數值題（填數字）"],["choice","選擇題"],["text","文字題（輸入文字）"]],x.type);F.lv=sel([[1,"1 基礎"],[2,"2 應用"],[3,"3 挑戰"]],x.lv);F.q=area(x.q,3);F.options=area(String(x.options||"").split("|").join("\n"),4);F.answer=inp(x.answer);F.hint=area(x.hint,2);F.diag=area(String(x.diag||"").split(";;").join("\n"),2);F.img=inp(x.img);F.himg=inp(x.himg);
+   F.unit=inp(x.unit);F.unit.setAttribute("list","ul");F.type=sel([["num","數值題（填數字）"],["choice","選擇題"],["text","文字題（輸入文字）"],["tf","是非題（答案填 對 或 錯）"],["multi","勾選題（可複選，列印卷用）"],["match","連連看（列印卷用）"]],x.type);F.kind=sel([["","（未標示，列印時依題目長短推測）"],["計算題","計算題"],["應用題","應用題"],["情境題","情境題"],["圖表題","圖表題"],["概念題","概念題"]],x.kind||"");F.lv=sel([[1,"1 基礎"],[2,"2 應用"],[3,"3 挑戰"]],x.lv);F.q=area(x.q,3);F.options=area(String(x.options||"").split("|").join("\n"),4);F.answer=inp(x.answer);F.hint=area(x.hint,2);F.diag=area(String(x.diag||"").split(";;").join("\n"),2);F.img=inp(x.img);F.himg=inp(x.himg);
    F.perf=inp(x.perf||"","例如 n-III-3（多個用逗號）");F.content=inp(x.content||"","例如 N-5-3");F.diff=sel([["","（未標示）"],["易","易"],["中","中"],["難","難"]],x.diff||"");F.cog=sel([["","（未標示）"],["知識","知識"],["理解","理解"],["應用","應用"],["分析","分析"],["評鑑","評鑑"],["創造","創造"]],x.cog||"");F.know=inp(x.know||"","例如 公因數和最大公因數");
    F.gid=inp(x.gid||"","題組ID，例如 5u-9.2-A（沒有就留空）");F.gstem=area(x.gstem||"",3);F.gimg=inp(x.gimg||"","題組附圖（選填）");F.gord=inp(x.gord||"","小題序，例如 1（不填就排在最後）","number");
    F.print=sel([["","不放進出卷"],["1","可放進出卷"]],x.print);F.daily=sel([["","不當每日一題"],["1","可當每日一題"]],x.daily);F.mock=sel([["1","可放進模擬卷"],["0","不放模擬卷"]],x.mock);F.active=sel([["1","啟用"],["0","停用"]],x.active);
    var pv=h('<div class="q" style="min-height:3em"></div>');
    function prev(){var t=F.q.value;pv.innerHTML=NB.tx?NB.tx(t):esc(t)}F.q.oninput=prev;prev();
-   ed.appendChild(field("單元代號",F.unit));ed.appendChild(field("題型",F.type));ed.appendChild(field("難度",F.lv));
+   ed.appendChild(field("單元代號",F.unit));ed.appendChild(field("題型（作答形式）",F.type));ed.appendChild(field("題目類別（列印出卷可依類別挑題）",F.kind));ed.appendChild(field("難度",F.lv));
    ed.appendChild(h('<p class="meta">題目屬性（列印練習卷可依這些篩選、顯示、做雙向細目表；可以留空）</p>'));ed.appendChild(field("學習表現",F.perf));ed.appendChild(field("學習內容",F.content));ed.appendChild(field("難易度（易／中／難）",F.diff));ed.appendChild(field("認知層次",F.cog));ed.appendChild(field("知識類型",F.know));
    ed.appendChild(h('<p class="meta">題組（幾個小題共用一段題幹；留空＝一般單題。<b>同一個題組ID 的題幹是共用的</b>，改這裡的題幹會改到整組；題組ID 清空＝把這題移出題組。每日一題不使用題組。同一組的小題單元要相同、最多 10 題。）</p>'));ed.appendChild(field("題組ID",F.gid));ed.appendChild(field("題組題幹（可用 LaTeX；整組共用）",F.gstem));ed.appendChild(field("題組附圖",F.gimg));ed.appendChild(field("小題序",F.gord));
    ed.appendChild(field("題目（可用 $\\frac{1}{2}$ 這種 LaTeX）",F.q));ed.appendChild(h('<p class="meta">預覽</p>'));ed.appendChild(pv);
-   var ow=field("選項（選擇題用，一行一個）",F.options);ed.appendChild(ow);ed.appendChild(field("正確答案（選擇題要和某個選項完全相同；文字題可用 | 放多個可接受的答案，例如：假設法|假設）",F.answer));ed.appendChild(field("提示／詳解",F.hint));
+   var ow=field("選項（選擇題、勾選題：一行一個選項；連連看：一行一組，寫成「左邊=右邊」；是非題不用填）",F.options);ed.appendChild(ow);ed.appendChild(field("正確答案（選擇題要和某個選項完全相同；文字題可用 | 放多個可接受的答案，例如：假設法|假設；是非題填 對 或 錯；勾選題填所有正確選項，用 | 分隔；連連看可留空）",F.answer));ed.appendChild(field("提示／詳解",F.hint));
    ed.appendChild(field("常見錯誤提示（每行：錯誤答案=>提示）",F.diag));
    [["img","題目附圖"],["himg","詳解附圖"]].forEach(function(p){var w=h('<div class="ctl"></div>'),up=h('<button class="pen">上傳圖片</button>'),fl=document.createElement("input");fl.type="file";fl.accept="image/*";fl.hidden=true;
     up.onclick=function(){fl.click()};fl.onchange=function(){var f0=fl.files[0];if(!f0)return;up.textContent="上傳中…";resize(f0,function(b64){if(!b64){up.textContent="上傳圖片";return alert("讀不到這張圖片")}M.api("POST","/api/admin/image",{mime:"image/jpeg",b64:b64}).then(function(r){F[p[0]].value=r.ref;up.textContent="已上傳，換一張"},function(e){up.textContent="上傳圖片";alert(errs(e))})}) };
@@ -137,7 +145,7 @@ function bank(ctx){
    ["print","daily","mock","active"].forEach(function(k){ed.appendChild(field("",F[k]))});
    var ef=h('<div class="fb"></div>'),bt=h('<div class="ctl"><button class="pen go">儲存題目</button><button class="pen">取消</button></div>');ed.appendChild(bt);ed.appendChild(ef);
    bt.children[1].onclick=ctx.go;
-   bt.children[0].onclick=function(){var o={id:x.id};COLS.forEach(function(k){if(F[k])o[k]=F[k].value});var gid0=F.gid.value.trim();if(gid0){o["題組ID"]=gid0;o["題組題幹"]=F.gstem.value.trim();o["題組附圖"]=F.gimg.value.trim();o["小題序"]=F.gord.value.trim()}else if(x.gid)o["題組ID"]="-";
+   bt.children[0].onclick=function(){var o={id:x.id};COLS.forEach(function(k){if(F[k])o[k]=F[k].value});o.kind=F.kind.value;var gid0=F.gid.value.trim();if(gid0){o["題組ID"]=gid0;o["題組題幹"]=F.gstem.value.trim();o["題組附圖"]=F.gimg.value.trim();o["小題序"]=F.gord.value.trim()}else if(x.gid)o["題組ID"]="-";
     o.options=F.options.value.split("\n").map(function(v){return v.trim()}).filter(Boolean).join("|");o.diag=F.diag.value.split("\n").map(function(v){return v.trim()}).filter(Boolean).join(";;");
     var at={perf:F.perf.value.trim(),content:F.content.value.trim(),diff:F.diff.value,cog:F.cog.value,know:F.know.value.trim()},had=!!(x.perf||x.content||x.diff||x.cog||x.know),has=!!(at.perf||at.content||at.diff||at.cog||at.know);
     M.api("POST","/api/admin/bank",{rows:[o],mode:"merge"}).then(function(r){if(!r.ok)return msg(ef,r.errs.map(esc).join("<br>"),0);
@@ -147,11 +155,12 @@ function bank(ctx){
   /* ---- 匯入／匯出（題庫與題目屬性共用同一個區塊）：先選資料類型，欄名不符就整份不匯入 ---- */
   var bk=ctx.sheet("匯入／匯出","題庫與題目屬性都在這裡匯入。先選資料類型；第一列必須是欄名，欄名不符就整份都不會匯入"),mi=h('<p class="meta">讀取中…</p>');
   bk.appendChild(mi);M.api("GET","/api/admin/meta").then(function(r){mi.innerHTML="目前題庫 <b>"+r.bank+"</b> 題，其中 <b>"+r.covered+"</b> 題已有屬性"+(r.bank-r.covered?"，還有 <b>"+(r.bank-r.covered)+"</b> 題沒有（這些題在列印篩選時不會被選到）":"，全部都有了")+(r.orphans?"；屬性表裡有 "+r.orphans+" 列的 id 在題庫找不到（不影響使用）":"")+"。"},function(){mi.textContent=""});
+  var KH=["kind","題目類別","類別"];
   var GRPH=["題組id","題組題幹","題組附圖","小題序","gid","gstem","gimg","gord"],GRPN=["題組ID","題組題幹","題組附圖","小題序"];
   var AK=["perf","content","diff","cog","know"],AH=["學習表現","學習內容","難易度","認知層次","知識類型"],ATTR=AH.concat(AK);
-  var KINDS={bank:{label:"題庫（題目；後面可以多帶屬性欄與題組欄）",api:"/api/admin/bank",req:["unit","type","q","answer"],allow:COLS.concat(ATTR,GRPH),
-    guide:"必要欄位：<b>unit、type、q、answer</b>（id 可以空白，系統會自動編）。其他欄位：lv、options、hint、diag、img、himg、print、daily、mock、active。後面可以多加 <b>學習表現、學習內容、難易度、認知層次、知識類型</b>，題目和屬性會一起存。<br><b>題組</b>（幾個小題共用一段題幹或情境）：再加 <b>題組ID、題組題幹、小題序</b>（還可以有 題組附圖）。同一個題組ID的列會合成一組，<b>題幹只要寫在其中一列</b>，小題序決定順序（不填就照列的先後）；同一組的小題要<b>放在一起</b>、單元要相同、最多 10 題。題組會整組一起出題，不會拆開；<b>每日一題</b>不使用題組。沒有帶題組欄位的列，不會動到原本的題組；題組ID 填「-」＝把這題移出題組。",
-    sample:COLS.concat(AH,GRPN).join(",")+"\n"+["","6d-5.3","num","2","範例題目：2+3=?","","5","先算 2+3","","","","1","","1","1","","","易","理解","加法","","","",""].join(",")+"\n"+["","6d-5.3","num","2","（題組第 1 小題）小明有 5 顆糖，吃掉 2 顆，還剩幾顆？","","3","5-2","","","","1","","1","1","","","易","理解","減法","範例組A","小明有 5 顆糖，媽媽又給他 4 顆。請回答下列問題。","","1"].join(",")+"\n"+["","6d-5.3","num","2","（題組第 2 小題）現在共有幾顆糖？","","9","5+4","","","","1","","1","1","","","易","理解","加法","範例組A","","","2"].join(",")},
+  var KINDS={bank:{label:"題庫（題目；後面可以多帶屬性欄與題組欄）",api:"/api/admin/bank",req:["unit","type","q","answer"],allow:COLS.concat(ATTR,GRPH,KH),
+    guide:"必要欄位：<b>unit、type、q、answer</b>（id 可以空白，系統會自動編）。其他欄位：lv、options、hint、diag、img、himg、print、daily、mock、active、<b>題目類別</b>（計算題／應用題／情境題／圖表題／概念題；列印出卷可依類別挑題）。<br><b>type</b> 可填：num（填數字）、choice（選擇）、text（填文字）、<b>tf</b>（是非，answer 填 對 或 錯，也可以寫 ○／✕）、<b>multi</b>（勾選，options 用 | 分隔，answer 填所有正確選項、用 | 分隔）、<b>match</b>（連連看，options 寫成「左=右|左=右」，answer 可留空）。勾選題與連連看只用在列印練習卷，不會出現在小測驗、模擬卷和每日一題。後面可以多加 <b>學習表現、學習內容、難易度、認知層次、知識類型</b>，題目和屬性會一起存。<br><b>題組</b>（幾個小題共用一段題幹或情境）：再加 <b>題組ID、題組題幹、小題序</b>（還可以有 題組附圖）。同一個題組ID的列會合成一組，<b>題幹只要寫在其中一列</b>，小題序決定順序（不填就照列的先後）；同一組的小題要<b>放在一起</b>、單元要相同、最多 10 題。題組會整組一起出題，不會拆開；<b>每日一題</b>不使用題組。沒有帶題組欄位的列，不會動到原本的題組；題組ID 填「-」＝把這題移出題組。",
+    sample:COLS.concat(AH,GRPN,["題目類別"]).join(",")+"\n"+["","6d-5.3","num","2","範例題目：2+3=?","","5","先算 2+3","","","","1","","1","1","","","易","理解","加法","","","","","計算題"].join(",")+"\n"+["","6d-5.3","num","2","（題組第 1 小題）小明有 5 顆糖，吃掉 2 顆，還剩幾顆？","","3","5-2","","","","1","","1","1","","","易","理解","減法","範例組A","小明有 5 顆糖，媽媽又給他 4 顆。請回答下列問題。","","1","應用題"].join(",")+"\n"+["","6d-5.3","num","2","（題組第 2 小題）現在共有幾顆糖？","","9","5+4","","","","1","","1","1","","","易","理解","加法","範例組A","","","2","應用題"].join(",")+"\n"+["","6d-5.3","tf","1","三角形的內角和是 180 度。","","對","","","","","1","","0","1","","","易","知識","三角形","","","","","概念題"].join(",")},
    meta:{label:"題目屬性表（只有屬性，用 id 對應已有的題目）",api:"/api/admin/meta",req:["id"],need:ATTR,allow:["id"].concat(ATTR),
     guide:"必要欄位：<b>id</b>，加上至少一個屬性欄：<b>學習表現、學習內容、難易度、認知層次、知識類型</b>（中英文欄名皆可）。id 要和題庫的 id 一樣；難易度只能填 易／中／難。",
     sample:"id,學習表現,學習內容,難易度,認知層次,知識類型\n範例id,n-III-3,N-5-3,中,應用,公因數"}};
@@ -194,9 +203,60 @@ function bank(ctx){
    pass(true,0).then(function(){if(bad.length){done();return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+bad.slice(0,30).map(esc).join("<br>")+(bad.length>30?"<br>…還有 "+(bad.length-30)+" 項":""),0)}
     return pass(false,0).then(function(){done();msg(bf,"已匯入 "+total+(kind.value==="bank"?" 題":" 列屬性")+"（"+src.length+" 個來源）"+(gcount?"，含 "+gcount+" 個題組":"")+(orphan?"。其中 "+orphan+" 列的 id 在題庫找不到，已先存起來，之後題庫有那題就會對上":""),1);setTimeout(ctx.go,900)})}).catch(function(e){done();msg(bf,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
   bx.onclick=function(){download(kind.value==="bank"?"題庫範本.csv":"題目屬性表範本.csv",KINDS[kind.value].sample)};
-  b2.onclick=function(){download("題庫.csv",COLS.concat(AH).join(",")+"\n"+rows.map(function(x){return COLS.concat(AK).map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
+  b2.onclick=function(){download("題庫.csv",COLS.concat(AH,["題目類別"]).join(",")+"\n"+rows.map(function(x){return COLS.concat(AK,["kind"]).map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
   c2.onclick=function(){var K=["id","perf","content","diff","cog","know"];download("題目屬性表.csv",["id"].concat(AH).join(",")+"\n"+rows.filter(function(x){return x.perf||x.content||x.diff||x.cog||x.know}).map(function(x){return K.map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
+
+/* ---------- 系統參數與提醒（管理員、唯讀）：這個專案在 Cloudflare 上的所有參數，加上「怎麼設比較好」與寫入／讀取的注意事項 ---------- */
+var SYS_DOCS=[
+ ["PRINT_DAILY_CAP","學生每天（滾動 24 小時）最多出幾份練習卷","wrangler.toml","每出一份卷，資料庫就寫入 1 筆列印紀錄。建議 3～5；調高會讓寫入與流量跟著增加。用「自訂大題」或「挑題」出卷也只算 1 份、只寫 1 筆。"],
+ ["PRINT_DAILY_CAP_TEACHER","老師每天最多出幾份（管理員不限）","wrangler.toml","建議 10 左右。老師一份卷也只寫 1 筆；挑題只讀記憶體、不寫資料庫。"],
+ ["PRINT_WM","學生列印的練習卷是否一律加浮水印（姓名、班級座號、Email、IP、時間）","wrangler.toml",'"1"＝強制（建議）；"0"＝不強制。浮水印是外流時追查來源用的，不建議關。'],
+ ["MOCK_WM","模擬考作答畫面是否加浮水印","wrangler.toml",'預設開啟，設成 "0" 才關閉。'],
+ ["REPORT_TO","問題回報寄到哪個信箱","wrangler.toml","要同時設定 RESEND_API_KEY 才會真的寄信；沒設定時，回報仍會存在後台的「問題回報」。"],
+ ["ALLOWED_ORIGINS","允許呼叫 API 的前端網址（CORS，多個用逗號隔開）","wrangler.toml","必須和網站網址完全一致（含 https、不含結尾斜線）。網站換網域時一定要同步修改，否則瀏覽器會擋掉所有 API，畫面看起來像是全部壞掉。"],
+ ["ALLOW_LOCALHOST","是否允許本機（localhost）呼叫 API","wrangler.toml",'平常要是 "0"。只有在自己電腦測試時才改成 "1"，測完一定改回去，否則別人可以在自己電腦上冒充你的前端。'],
+ ["FIREBASE_PROJECT_ID","驗證 Google 登入用的 Firebase 專案代號","wrangler.toml","要和前端 Firebase 設定的專案一致。改錯會讓所有人登入失敗，平常不要動。"],
+ ["ALLOWED_PROVIDERS","允許的登入方式","wrangler.toml",'目前是 "google.com"。'],
+ ["JWKS_URL","驗證登入憑證的金鑰網址","wrangler.toml","通常不用設（空白＝用 Firebase 預設網址）。"],
+ ["POINTS_BY_LEVEL","答對一題的積分（基礎,應用,挑戰）","後台「遊戲設定」（優先）／wrangler.toml","在後台「遊戲設定」改，全班立刻生效，不用重新部署；這裡顯示的是 wrangler.toml 的值，實際生效的值看下方「目前生效」。"],
+ ["LEVEL_STEP","每幾分升一級","後台「遊戲設定」／wrangler.toml","同上。數字越大升級越慢。"],
+ ["DAILY_Q_CAP","每人每天最多計分的題數","後台「遊戲設定」／wrangler.toml","防止刷分；也等於限制每人每天的寫入量。太高會增加資料庫寫入，建議 100 左右。"],
+ ["DAILY_MOCK_CAP","每人每天最多做幾次模擬卷","後台「遊戲設定」／wrangler.toml","每份模擬卷會寫入作答紀錄，建議 2～3。"],
+ ["REVIEW_DAYS","錯題複習的間隔天數","後台「遊戲設定」／wrangler.toml","例如 1,3,7＝答對一次隔 1 天再考、再對隔 3 天、再對隔 7 天，全部通過才畢業。"],
+ ["HINT_COST","看一次提示扣幾分","後台「遊戲設定」／wrangler.toml","0＝不扣分；看過提示的題目答對只拿一半積分。"]
+];
+var SYS_LIM=[
+ ["printRange","每份練習卷題數（快速出卷）","5～40 題"],["planTeacher","自訂大題：老師每份卷最多","60 題、8 個大題"],["planStudent","自訂大題：學生每份卷最多","30 題、4 個大題"],
+ ["poolPer10min","挑題查詢：每人每 10 分鐘最多","60 次（每次最多 30 題）"],["announceMax","公告最多存","30 則"],["bankImportRows","題庫單次匯入","2000 題一批（大檔會自動分批）"],
+ ["groupMax","一個題組最多","10 個小題"],["cacheSeconds","題庫與名單的記憶體快取","10 秒檢查一次有沒有更新"],["printKeepDays","列印紀錄保留","180 天（自動清理）"]
+];
+var SYS_NOTES=[
+ ["免費額度（以 Cloudflare 官方文件為準）","<ul><li><b>D1 資料庫（免費）</b>：每天讀取 500 萬列、寫入 10 萬列、容量 5 GB；每天 UTC 00:00（台灣 08:00）歸零。</li><li><b>Workers（免費）</b>：每天 10 萬次請求；每次請求的 CPU 時間約 10 毫秒。</li><li>「讀取列數」算的是<b>掃描過的列數</b>，不是回傳的列數；「寫入列數」是新增、修改、刪除的列數（索引也會多算）。一列不論多大都只算一列。</li></ul>"],
+ ["哪些動作會寫入資料庫","<ul><li>學生答題、交卷：更新個人檔案，每次約 1～3 列。</li><li>每份列印卷：1 列列印紀錄（自訂大題、挑題一樣只有 1 列）。</li><li><b>匯入題庫：每一題 1 列，還要加上屬性表、題組表</b>。整本 4,700 題匯入一次約 5,000～10,000 列寫入。</li><li>老師後台改名單、公告、設定：每次幾列。</li></ul><p>大量寫入的動作，建議<b>避開上課時間</b>，而且一天不要重複做很多次。</p>"],
+ ["匯入題庫的建議做法","<ul><li>改一兩題：用「編輯題目」，只寫 1 列。</li><li>新增一批：用「合併」，只會新增／更新有出現的題。</li><li><b>「取代」會先刪光全部題庫再寫入</b>，寫入量最大，也會讓所有人的快取重讀，非必要不要用。</li><li>匯入前先用「只檢查」（系統會先全部檢查才寫入），有錯整份都不會寫入，不會浪費額度。</li><li>同一份檔案修好後再匯入，相同 id 是「更新」，不會變成兩份。</li></ul>"],
+ ["讀取量最大的是什麼","<ul><li>每個 Worker 伺服器實例第一次需要題庫時，會把整張題庫、名單、屬性表、題組表讀進記憶體：<b>讀取列數≈題庫題數＋名單人數＋屬性與題組列數</b>（題庫 4,700 題時，一次約 5,000～10,000 列）。</li><li>之後 10 秒檢查一次「版本號」，沒有改動就不會重讀。<b>只要有人改題庫、名單、設定，版本號就會變，所有實例都會重讀一次</b>。</li><li>所以：<b>不要在上課時間頻繁改題庫</b>；一天改很多次，讀取量會成倍增加。</li><li>挑題、題目清單都是讀記憶體裡的快取，不會多讀資料庫。</li></ul>"],
+ ["不要這樣做","<ul><li>不要把圖片放進資料庫（後台上傳圖片會存進 D1，量大會佔容量）；圖片請放在網站的 <code>assets/q/</code>，用檔名引用。</li><li>不要把 RESEND_API_KEY、Firebase 金鑰貼到聊天、截圖或程式碼裡；密鑰只用 <code>npx wrangler secret put 名稱</code> 設定。</li><li>不要開 ALLOW_LOCALHOST 後忘記關。</li><li>不要同時從多個瀏覽器分頁一直按「匯入」，一份一份來。</li></ul>"],
+ ["要改參數時","<ul><li><b>遊戲類</b>（積分、升級、每日題數、提示扣分…）：直接在上面「遊戲設定」改，立刻生效。</li><li><b>wrangler.toml 的參數</b>：改檔案 → commit、push 後端 repo → 等 GitHub Actions 出現 ✓ 才會生效。</li><li><b>密鑰</b>：在後端資料夾執行 <code>npx wrangler secret put RESEND_API_KEY</code>，貼上後 Enter（不用 push）。</li><li>這一頁只能看，不能改，避免誤按。</li></ul>"],
+ ["額度快用完時","<ul><li>先看「資料表筆數與用量」，確認是哪一張表最大。</li><li>列印紀錄會自動保留 180 天；問題回報、舊的作答紀錄可以到「資料管理」清理。</li><li>超過免費額度時，API 會開始失敗，到隔天 UTC 00:00 才恢復；若常常超過，再考慮升級付費方案（門檻比免費高很多）。</li><li>資料庫備份：Cloudflare 後台的 D1 有「Time Travel」可以還原到過去某個時間點（保留天數依方案而定），重大匯入或刪除前，也可以先匯出題庫與名單 CSV 留一份。</li></ul>"]
+];
+function sysinfo(ctx){
+ var s=ctx.sheet("系統參數與提醒","這個專案目前在 Cloudflare 上的設定（唯讀）。按說明展開看「怎麼設比較好」"),box=h("<div>讀取中…</div>");s.appendChild(box);
+ M.api("GET","/api/admin/sysinfo").then(function(r){
+  box.innerHTML="";var V=r.vars||{},ef=r.effective||{};
+  var sb=h('<div class="wi"></div>');
+  sb.innerHTML="<b>連線與密鑰</b><br>資料庫 D1（DB）："+(r.bindings.DB?"已連接":'<b class="flag">未連接</b>')+"　題庫與名單 KV（KV）："+(r.bindings.KV?"已連接":"未連接（沒有舊資料要搬時可忽略）")+"<br>寄信密鑰 RESEND_API_KEY："+(r.secrets.RESEND_API_KEY?"已設定":"<b>未設定</b>（問題回報只會存在後台，不會寄信）")+(V.ALLOW_LOCALHOST==="1"?'<br><b class="flag">注意：ALLOW_LOCALHOST 目前是 1，測完請改回 0。</b>':"");
+  box.appendChild(sb);
+  var eff=h('<div class="wi"></div>');eff.innerHTML="<b>目前生效的遊戲設定</b>（後台「遊戲設定」優先於 wrangler.toml）<br>積分 "+esc((ef.pts||[]).join(","))+"・每 "+ef.step+" 分升一級・每天最多計分 "+ef.capQ+" 題・模擬卷每天 "+ef.capMock+" 次・複習間隔 "+esc((ef.review||[]).join(","))+" 天・看提示扣 "+ef.hint+" 分";box.appendChild(eff);
+  box.appendChild(h("<p class=\"meta\"><b>參數一覽</b>（名稱＝程式讀取的變數名稱）</p>"));
+  SYS_DOCS.forEach(function(d){var v=V[d[0]],w=h('<div class="wi"></div>');w.innerHTML='<b><code>'+d[0]+"</code></b>　目前值："+(v===null||v===undefined?"<i>（未設定，用預設）</i>":"<code>"+esc(v)+"</code>")+'<br><small class="soft">設定位置：'+esc(d[2])+"</small><br>"+esc(d[1])+'<br><small class="soft">'+esc(d[3])+"</small>";box.appendChild(w)});
+  var lim=h('<div class="wi"></div>'),L=r.limits||{};lim.innerHTML="<b>程式內建的上限</b>（寫在程式裡，改要請我修改）<ul>"+SYS_LIM.map(function(x){var v=x[0]==="printRange"?x[2]:x[2];return"<li>"+esc(x[1])+"："+esc(v)+"</li>"}).join("")+"</ul>";box.appendChild(lim);
+  var st=h('<div class="wi"><b>資料表筆數與用量</b><br><small class="soft">按下去會逐張資料表計算筆數，<b>會讀取資料庫（約等於資料總筆數的讀取量）</b>，平常不用按。</small><div class="ctl"><button class="pen">查看資料表筆數</button></div><div class="st"></div></div>');
+  st.querySelector("button").onclick=function(){var o=st.querySelector(".st");o.textContent="計算中…";M.api("GET","/api/admin/sysinfo?stats=1").then(function(x){var R=x.stats.rows,names={bank:"題庫",bank_meta:"題目屬性",bank_grp:"題組成員",grp_stem:"題組題幹",roster:"名單",profiles:"學生檔案",sessions:"作答／考試場次",attempts:"作答紀錄",prints:"列印紀錄",reports:"問題回報",images:"後台上傳的圖片",settings:"設定"},t="<ul>";Object.keys(names).forEach(function(k){t+="<li>"+names[k]+"（"+k+"）："+(R[k]===null?"—":R[k])+"</li>"});o.innerHTML=t+"</ul>近 24 小時列印 "+(x.stats.prints24h==null?"—":x.stats.prints24h)+" 份；估計每個實例冷啟動時會讀約 <b>"+((R.bank||0)+(R.roster||0)+(R.bank_meta||0)+(R.bank_grp||0)+(R.grp_stem||0)+(R.settings||0))+"</b> 列。"},function(e){o.textContent=errs(e)})};
+  box.appendChild(st);
+  box.appendChild(h("<p class=\"meta\"><b>提醒</b></p>"));
+  SYS_NOTES.forEach(function(n){var d=h("<details class=\"wi\"><summary></summary><div></div></details>");d.querySelector("summary").textContent=n[0];d.lastChild.innerHTML=n[1];box.appendChild(d)});
+ },function(e){box.innerHTML='<div class="fb no">'+errs(e)+"</div>"})}
 
 /* ---------- 設定 ---------- */
 function ann(ctx){

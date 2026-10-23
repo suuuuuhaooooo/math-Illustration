@@ -109,10 +109,22 @@
   /* ---- 不同題序：用固定種子洗牌，同一份設定每次結果一樣 ---- */
   function seeded(n) { var s = n * 2654435761 >>> 0; return function () { s = (s + 0x6D2B79F5) >>> 0; var t = s; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
   function shuf(a, r) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-  function variant(qs, v) {
-    if (!v) return qs; var r = seeded(v + 1);
+  function variant1(qs, v) {
+    var r = seeded(v + 1);
     var blocks = []; qs.forEach(function (q) { var l = blocks[blocks.length - 1]; if (q.gid && l && l[0].gid === q.gid) l.push(q); else blocks.push([q]); }); /* 題組整組一起換位置，組內維持原順序 */
-    return shuf(blocks, r).reduce(function (a, b) { return a.concat(b); }, []).map(function (q) { if (!q.o) return q; var o = shuf(q.o, r), i = o.indexOf(String(q.a)); return Object.assign({}, q, { o: o, al: i >= 0 ? L(i) : q.al }); });
+    return shuf(blocks, r).reduce(function (a, b) { return a.concat(b); }, []).map(function (q) {
+      if (q.ty === "match") { var R = shuf(q.R, r), ans = q.L.map(function (_, i) { return i + 1 + "-" + L(R.indexOf(q.pr[i][1])); }).join("、"); return Object.assign({}, q, { R: R, al: ans }); }
+      if (!q.o) return q;
+      var o = shuf(q.o, r);
+      if (q.ty === "multi") { var ma = String(q.a).split("|"); return Object.assign({}, q, { o: o, al: o.map(function (t, i) { return ma.indexOf(t) >= 0 ? L(i) : ""; }).filter(Boolean).join("、") }); }
+      var i = o.indexOf(String(q.a)); return Object.assign({}, q, { o: o, al: i >= 0 ? L(i) : q.al });
+    });
+  }
+  /* 不同題序：有大題時，每個大題各自換序（題目不會跑到別的大題） */
+  function variant(qs, v, secs) {
+    if (!v) return qs;
+    if (!secs) return variant1(qs, v);
+    var out = []; secs.forEach(function (sc, si) { out = out.concat(variant1(qs.filter(function (q) { return q.s === si; }), v + si * 7)); }); return out;
   }
 
   /* 浮水印：整張卷斜著鋪滿重複的文字。是真正的文字，所以不管瀏覽器有沒有開「列印背景圖形」都印得出來 */
@@ -149,7 +161,7 @@
       if (P.showClass && (P.grade || P.cls)) line.push("<span>班級：" + esc(P.grade) + " 年 " + esc(P.cls) + " 班</span>");
       h += '<div class="ptitle">' + line.join("") + "</div>";
       var u = D.u, f = P.prefill;
-      h += '<div class="pinfo"><span>座號：' + (f ? esc(u.no) : "＿＿＿") + "</span><span>姓名：" + (f ? "<b>" + esc(u.name) + "</b>" : "＿＿＿＿＿＿") + "</span><span>日期：" + (f ? D.today : "＿＿＿＿") + "</span>" + (P.showScore ? "" : "<span>分數：＿＿＿</span>") + "</div>";
+      h += '<div class="pinfo"><span>座號：' + (f ? esc(u.no) : "＿＿＿") + "</span><span>姓名：" + (f ? "<b>" + esc(u.name) + "</b>" : "＿＿＿＿＿＿") + "</span><span>日期：" + (f ? D.today : "＿＿＿＿") + "</span>" + (P.showScore ? "" : "<span>分數：＿＿＿</span>") + (totalPts() ? "<span>滿分：" + totalPts() + " 分</span>" : "") + "</div>";
       if (P.showScore) h += '<table class="pscore"><tr><th>級距</th><td>100</td><td>99~90</td><td>89~80</td><td>79~70</td><td>69~60</td><td>未滿60</td><th>分數</th><th>家長簽章</th></tr><tr><th>得分</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>';
       return h + "</div>";
     }
@@ -165,8 +177,29 @@
       if (P.showKnow && a.k) m.push("知識類型：" + esc(a.k));
       return m.length ? '<div class="pmeta">' + m.join("　") + "</div>" : "";
     }
-    function opts(q) { return q.o ? '<div class="popts ' + P.optMode + '">' + q.o.map(function (t, k) { return "<div>" + L(k) + "．" + D.tx(esc(t)) + "</div>"; }).join("") + "</div>" : ""; }
-    function ans(q) { return (q.al ? q.al + "．" : "") + D.tx(esc(String(q.a))); }
+    var TYN = { choice: "選擇題", tf: "是非題", num: "填充題", text: "填充題", multi: "勾選題", match: "連連看", group: "題組", any: "綜合題" }, CN = "一二三四五六七八九十";
+    function tyOf(q) { return q.ty || (q.o ? "choice" : "num"); }
+    function matchTable(q, blank) {
+      return '<table class="pmatch"><tr><th>題目</th><th>答案</th></tr>' + q.L.map(function (l, i) { return "<tr><td>（　）" + (i + 1) + "．" + D.tx(esc(l)) + "</td><td>" + (q.R[i] != null ? L(i) + "．" + D.tx(esc(q.R[i])) : "") + "</td></tr>"; }).join("") + "</table>";
+    }
+    function opts(q) {
+      if (q.ty === "multi") return '<div class="popts ' + P.optMode + '">' + q.o.map(function (t, k) { return "<div>□ " + L(k) + "．" + D.tx(esc(t)) + "</div>"; }).join("") + "</div>";
+      if (q.ty === "match") return matchTable(q);
+      return q.o ? '<div class="popts ' + P.optMode + '">' + q.o.map(function (t, k) { return "<div>" + L(k) + "．" + D.tx(esc(t)) + "</div>"; }).join("") + "</div>" : "";
+    }
+    function ans(q) {
+      if (q.ty === "tf") return (q.a === "對" ? "○" : "✕") + "（" + esc(q.a) + "）";
+      if (q.ty === "multi") return esc(q.al) + "．" + String(q.a).split("|").map(function (t) { return D.tx(esc(t)); }).join("、");
+      if (q.ty === "match") return esc(q.al);
+      return (q.al ? q.al + "．" : "") + D.tx(esc(String(q.a)));
+    }
+    /* 題型提示：有大題標題時寫在標題上；沒有大題（快速出卷）就跟在題目後面 */
+    function hint(q, bySec) {
+      if (q.ty === "tf" && !bySec) return ' <small class="phint">（對的打 ○，錯的打 ✕）</small>';
+      if (q.ty === "multi") return ' <small class="phint">（可複選）</small>';
+      if (q.ty === "match" && !bySec) return ' <small class="phint">（把右邊的代號填進左邊的括號）</small>';
+      return "";
+    }
     /* 題組：共用題幹只在這組的第一小題前印一次，後面的小題標「承第 N 題」；題幹要完整放在第一小題的框裡，不拆頁 */
     function gHead(arr, i) {
       var q = arr[i]; if (!q.gid || !q.gs) return "";
@@ -178,20 +211,46 @@
       var n = 1; while (arr[i + n] && arr[i + n].gid === q.gid) n++;
       return '<div class="gstem"><small class="gtag">題組・第 ' + (i + 1) + (n > 1 ? "～" + (i + n) : "") + " 題</small><div>" + D.tx(q.gs) + "</div>" + D.qimg(q.gi) + "</div>";
     }
-    function qList(arr, withAns) {
-      return "<ol>" + arr.map(function (q, qi) { return "<li" + (q.gid ? ' class="gsub"' : "") + ">" + gHead(arr, qi) + meta(q, withAns ? "qa" : "q") + D.tx(q.q) + D.qimg(q.img) + opts(q) +
-        (withAns ? '<div class="pans"><b>答案：</b>' + ans(q) + (q.h ? "<br><small>詳解：" + D.tx(q.h) + "</small>" : "") + D.qimg(q.himg) + "</div>" : '<span class="ln">答：' + (q.o ? "（　　）" : "＿＿＿＿＿＿＿＿＿") + "</span>") + "</li>"; }).join("") + "</ol>";
+    /* 大題：依計畫把題目分組；沒有計畫（快速出卷）就是一整份 */
+    function secsOf(arr) {
+      if (!D.secs) return [{ sec: null, qs: arr }];
+      return D.secs.map(function (sec, si) { return { sec: sec, qs: arr.filter(function (q) { return q.s === si; }) }; }).filter(function (x) { return x.qs.length; });
+    }
+    function ptsOf(sec, n) { var k = sec.take && sec.take < n ? sec.take : n; return sec.pts > 0 ? sec.pts * k : 0; }
+    function secTitle(sec, si, n) {
+      var ty = sec.ty, t = sec.title || (ty === "any" && sec.kd ? sec.kd : TYN[ty] || "題目"), d = [];
+      if (sec.take && sec.take < n) d.push("共 " + n + " 題，任選 " + sec.take + " 題作答"); else d.push("共 " + n + " 題");
+      if (sec.pts > 0) { d.push("每題 " + sec.pts + " 分"); d.push("共 " + ptsOf(sec, n) + " 分"); }
+      var tip = ty === "tf" ? "對的打 ○，錯的打 ✕" : ty === "multi" ? "可複選" : ty === "match" ? "把右邊的代號填進左邊的括號" : "";
+      return '<h4 class="psec">' + (CN[si] || si + 1) + "、" + esc(t) + "<small>（" + d.join("，") + (tip ? "；" + tip : "") + "）</small></h4>";
+    }
+    function totalPts() { var t = 0; if (D.secs) D.secs.forEach(function (sec, si) { var n = qs.filter(function (q) { return q.s === si; }).length; t += ptsOf(sec, n); }); return t; }
+    function qItem(arr, q, qi, withAns, bySec) {
+      var tf = q.ty === "tf";
+      return "<li" + (q.gid ? ' class="gsub"' : "") + ">" + gHead(arr, qi) + meta(q, withAns ? "qa" : "q") + (tf && !withAns ? '<span class="pbr">（　　）</span>' : "") + D.tx(q.q) + hint(q, bySec) + D.qimg(q.img) + opts(q) +
+        (withAns ? '<div class="pans"><b>答案：</b>' + ans(q) + (q.h ? "<br><small>詳解：" + D.tx(q.h) + "</small>" : "") + D.qimg(q.himg) + "</div>" : tf || q.ty === "match" ? "" : '<span class="ln">答：' + (q.o ? "（　　）" : "＿＿＿＿＿＿＿＿＿") + "</span>") + "</li>";
+    }
+    function qList(all, withAns) {
+      var bySec = !!D.secs;
+      return secsOf(all).map(function (x, si) { var arr = x.qs; return (x.sec ? secTitle(x.sec, D.secs.indexOf(x.sec), arr.length) : "") + "<ol>" + arr.map(function (q, qi) { return qItem(arr, q, qi, withAns, bySec); }).join("") + "</ol>"; }).join("");
+    }
+    function keyList(all, cls) {
+      return secsOf(all).map(function (x) { var arr = x.qs; return (x.sec ? secTitle(x.sec, D.secs.indexOf(x.sec), arr.length) : "") + "<ol" + (cls ? ' class="' + cls + '"' : "") + ">" + arr.map(function (q) { return "<li>" + meta(q, "a") + ans(q) + (cls ? "" : (q.h ? "<br><small>" + D.tx(q.h) + "</small>" : "") + D.qimg(q.himg)) + "</li>"; }).join("") + "</ol>"; }).join("");
+    }
+    function blankList(all) {
+      return secsOf(all).map(function (x) { var arr = x.qs; return (x.sec ? secTitle(x.sec, D.secs.indexOf(x.sec), arr.length) : "") + '<ol class="pblank">' + arr.map(function (q) {
+        return "<li>" + (q.ty === "tf" ? '<span class="bub">○</span><span class="bub">✕</span>' : q.ty === "match" ? q.L.map(function (_, i) { return '<span class="ln0">' + (i + 1) + "＿</span>"; }).join("") : q.ty === "multi" ? q.o.map(function (_, i) { return '<span class="bub">' + L(i) + "</span>"; }).join("") : q.o ? q.o.map(function (_, i) { return '<span class="bub">' + L(i) + "</span>"; }).join("") : '<span class="ln0">＿＿＿＿＿＿＿＿</span>') + "</li>"; }).join("") + "</ol>"; }).join("");
     }
     function sheet(k, arr, tag) {
       var cls = "psheet pp pp-" + k, h;
       if (k === "q") h = head("題目卷", tag) + qList(arr, false);
       else if (k === "qa") h = head("題目與詳解", tag) + qList(arr, true);
-      else if (k === "ak") { cls += " key"; h = head("簡答與詳解", tag) + "<ol>" + arr.map(function (q) { return "<li>" + meta(q, "a") + ans(q) + (q.h ? "<br><small>" + D.tx(q.h) + "</small>" : "") + D.qimg(q.himg) + "</li>"; }).join("") + "</ol>"; }
-      else if (k === "short") { cls += " key"; h = head("簡答卷", tag) + '<ol class="pshort">' + arr.map(function (q) { return "<li>" + meta(q, "a") + ans(q) + "</li>"; }).join("") + "</ol>"; }
-      else h = head("答案卷", tag) + '<ol class="pblank">' + arr.map(function (q) { return "<li>" + (q.o ? q.o.map(function (_, i) { return "<span class=\"bub\">" + L(i) + "</span>"; }).join("") : '<span class="ln0">＿＿＿＿＿＿＿＿</span>') + "</li>"; }).join("") + "</ol>";
+      else if (k === "ak") { cls += " key"; h = head("簡答與詳解", tag) + keyList(arr, ""); }
+      else if (k === "short") { cls += " key"; h = head("簡答卷", tag) + keyList(arr, "pshort"); }
+      else h = head("答案卷", tag) + blankList(arr);
       return '<div class="' + cls + '" style="--pw:' + pw + 'mm" data-cols="' + (k === "short" ? Math.max(cols, 3) : cols) + '">' + (WM ? WM.scr : "") + h + '<p class="pcopy">© ' + new Date().getFullYear() + " suuuuuhaooooo・CC BY-NC-ND 4.0・僅供班級教學使用，請勿轉載</p></div>";
     }
-    for (var v = 0; v < P.variants; v++) { var arr = variant(qs, v), tag = P.variants > 1 ? "（" + ZH[v] + "卷）" : ""; kinds.forEach(function (k) { out.push(sheet(k, arr, tag)); }); }
+    for (var v = 0; v < P.variants; v++) { var arr = variant(qs, v, D.secs), tag = P.variants > 1 ? "（" + ZH[v] + "卷）" : ""; kinds.forEach(function (k) { out.push(sheet(k, arr, tag)); }); }
     if (P.matrix) out.push(matrix(P, qs, nm, D, head, pw, WM));
     return (WM ? WM.prn : "") + out.join("");
   }
@@ -229,7 +288,7 @@
   function csv(qs, D) {
     function c(v) { v = String(v == null ? "" : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
     var rows = [["題號", "單元", "學習表現", "學習內容", "難易度", "認知層次", "知識類型", "題型", "題目", "選項A", "選項B", "選項C", "選項D", "答案", "詳解", "有附圖", "題組ID", "題組題幹"]];
-    qs.forEach(function (q, i) { var o = q.o || []; var a = q.m || {}; rows.push([i + 1, D.title(q.unit), a.p || "", a.c || "", a.d || LV[q.lv] || "", a.g || "", a.k || "", q.o ? "選擇題" : "填充題", q.q, o[0] || "", o[1] || "", o[2] || "", o[3] || "", (q.al ? q.al + "．" : "") + q.a, q.h || "", q.img ? "是" : "", q.gid || "", q.gid && (i === 0 || qs[i - 1].gid !== q.gid) ? q.gs || "" : ""]); });
+    qs.forEach(function (q, i) { var o = q.o || []; var a = q.m || {}; rows.push([i + 1, D.title(q.unit), a.p || "", a.c || "", a.d || LV[q.lv] || "", a.g || "", a.k || "", ({ tf: "是非題", multi: "勾選題", match: "連連看" })[q.ty] || (q.o ? "選擇題" : "填充題"), q.q, o[0] || "", o[1] || "", o[2] || "", o[3] || "", (q.al ? q.al + "．" : "") + q.a, q.h || "", q.img ? "是" : "", q.gid || "", q.gid && (i === 0 || qs[i - 1].gid !== q.gid) ? q.gs || "" : ""]); });
     var blob = new Blob(["﻿" + rows.map(function (r) { return r.map(c).join(","); }).join("\r\n")], { type: "text/csv;charset=utf-8" }), a = document.createElement("a");
     a.href = URL.createObjectURL(blob); a.download = "練習卷題目.csv"; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
