@@ -13,7 +13,7 @@ function stkSvg(s,i,on){var t=(s.t||1)-1,c=TC[t],pips="",k;for(k=0;k<=t;k++)pips
  return'<svg viewBox="0 0 64 64" class="stk" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="'+(on?c:"var(--paper2)")+'" fill-opacity="'+(on?.28:1)+'" stroke="'+(on?c:"var(--ink)")+'" stroke-width="'+(on?3.4:2.4)+'"'+(on?"":' stroke-dasharray="4 4"')+'/><circle cx="32" cy="32" r="23" fill="none" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 4" opacity=".5"/><g transform="translate(17 14) scale(1.2)" fill="none" stroke="var(--ink)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"'+(on?"":' opacity=".28"')+'><path d="'+s.g+'"/></g>'+pips+'</svg>'}
 /* Firebase 登入錯誤 → 看得懂的說明（一定把代碼附上，方便回報） */
 function authMsg(c){var m={"auth/popup-closed-by-user":"登入視窗被關閉了，再按一次登入。","auth/network-request-failed":"網路不穩，連不上 Google 登入服務，請檢查網路後再試。","auth/unauthorized-domain":"這個網址還沒加進 Firebase 的「授權網域」，請管理員到 Firebase 設定。","auth/popup-blocked":"瀏覽器擋掉了登入視窗，請允許這個網站的彈出視窗後再試。","auth/operation-not-supported-in-this-environment":"這個瀏覽器不支援 Google 登入，請改用 Chrome 或 Safari 開啟。","auth/web-storage-unsupported":"瀏覽器關閉了網站儲存功能（或無痕模式限制），請改用一般視窗，並允許 Cookie。","auth/internal-error":"登入服務發生內部錯誤，請稍後再試。","auth/user-disabled":"這個 Google 帳號已被停用。"}[c];return(m||"登入沒有成功，請再試一次。")+(c?"（"+c+"）":"")}
-function errMsg(e){var c=e&&e.code;return{plan_too_big:"題數超過上限了，請減少題數。",bad_plan:"大題設定有誤，請檢查後再試。",pool_limit:"挑題查得太頻繁了，請等幾分鐘再試。",rate_limit:"操作太快了，請等一分鐘再試。",no_units:"請先勾選單元。",print_limit:"今天出的練習卷已經到上限了，明天再來，或請管理員調整。",net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請管理員完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",expired:"你的正式學員授權已到期，請找管理員延期。",forbidden:"沒有權限。",no_questions:"這個範圍（或篩選條件）沒有可以出的題目。",closed:"這份卷子已經截止了。",not_found:"找不到這份卷子，可能已被老師刪除。",server:"伺服器忙碌中，請稍後再試。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
+function errMsg(e){var c=e&&e.code;return{plan_too_big:"題數超過上限了，請減少題數。",bad_plan:"大題設定有誤，請檢查後再試。",preview_limit:"審題預覽太頻繁了，請等幾分鐘再試（為了節省資源，預覽每 10 分鐘有次數上限）。",pool_limit:"挑題查得太頻繁了，請等幾分鐘再試。",rate_limit:"操作太快了，請等一分鐘再試。",no_units:"請先勾選單元。",print_limit:"今天出的練習卷已經到上限了，明天再來，或請管理員調整。",net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請管理員完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",expired:"你的正式學員授權已到期，請找管理員延期。",forbidden:"沒有權限。",no_questions:"這個範圍（或篩選條件）沒有可以出的題目。",closed:"這份卷子已經截止了。",not_found:"找不到這份卷子，可能已被老師刪除。",server:"伺服器忙碌中，請稍後再試。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
 /* 題組的共用題幹：每一小題上方都顯示一次（學生一題一題作答，不用往上翻）；只有一小題（例如錯題本單獨練習）就不寫「第幾小題」 */
 function gstem(g,s,im,k,n){return s?'<div class="gstem">'+(n>1?'<small class="gtag">題組・第 '+k+"／"+n+" 小題</small>":'<small class="gtag">題組</small>')+"<div>"+tx(s)+"</div>"+qimg(im)+"</div>":""}
 function qimg(p,c){return p?'<img class="qimg'+(c?" "+c:"")+'" alt="附圖" src="'+esc(M.img(p))+'">':""}
@@ -25,10 +25,12 @@ function picker(ids,mine){
  var el=h('<details class="upick"><summary>自選單元（<b class="cnt">0</b> 個）</summary><div class="ctl"><button class="pen" data-a="all">全選</button><button class="pen" data-a="none">全不選</button><button class="pen" data-a="mine">只選我的年級</button></div><div class="ug"></div></details>'),g=el.querySelector(".ug"),boxes=[];
  var by={};ids.forEach(function(id){var o=NB.flat.filter(function(x){return x.id===id})[0];if(!o)return;(by[id[0]]=by[id[0]]||[]).push(o)});
  Object.keys(by).sort().forEach(function(gr){var d=h('<div class="ugr"><b>'+"一二三四五六"[gr-1]+"年級</b></div>");by[gr].forEach(function(o){var l=h('<label class="uck"><input type="checkbox"> <span></span></label>');l.querySelector("input").value=o.id;l.querySelector("span").textContent=o.sem+" "+o.num+" "+o.title;boxes.push(l.querySelector("input"));d.appendChild(l)});g.appendChild(d)});
- function cnt(){el.querySelector(".cnt").textContent=boxes.filter(function(b){return b.checked}).length}
+ function cnt(){el.querySelector(".cnt").textContent=boxes.filter(function(b){return b.checked&&!b.parentNode.hidden}).length}
  el.addEventListener("change",cnt);
  el.querySelector(".ctl").onclick=function(e){var b=e.target.closest("button");if(!b)return;boxes.forEach(function(x){x.checked=b.dataset.a==="all"||(b.dataset.a==="mine"&&x.value[0]==String(mine))});cnt()};
- return{el:el,get:function(){return boxes.filter(function(b){return b.checked}).map(function(b){return b.value})}}}
+ function vis(b){return!b.parentNode.hidden}
+ function filter(gr,sem){boxes.forEach(function(b){b.parentNode.hidden=!!((gr&&b.value[0]!=gr)||(sem&&b.value[1]!=sem))});Array.prototype.forEach.call(g.querySelectorAll(".ugr"),function(d){d.hidden=!d.querySelector(".uck:not([hidden])")});cnt()}
+ return{el:el,filter:filter,visible:function(){return boxes.filter(vis).map(function(b){return b.value})},get:function(){return boxes.filter(function(b){return b.checked&&vis(b)}).map(function(b){return b.value})}}}
 function user(){return M.U}
 function ymdT(){return M.T||M.today()}
 
@@ -250,59 +252,170 @@ V.board=function(){
   box.innerHTML='<table class="tb"><tr><th>名次</th><th>座號</th><th>等級</th><th>積分</th><th>答對</th><th>勳章</th></tr>'+rows.map(function(x,i){return'<tr class="'+(x.no===u.no?"me":"")+'"><td><span class="rk r'+(i+1)+'">'+(i+1)+"</span></td><td>"+esc(x.no)+(x.no===u.no?"（我）":"")+"</td><td>Lv."+x.lv+"</td><td>"+x.pts+"</td><td>"+x.ok+"</td><td>"+x.stk+"</td></tr>"}).join("")+"</table>"})
  .catch(function(e){box.textContent=errMsg(e)})};
 
-V.print=function(arg){
- var u=user(),D=M.D,s=sheet("列印練習卷","選好單元與題數就可以印出來寫");s.classList.add("noprint");
+/* ---- 列印練習卷 ----
+   學生：陽春版（來源、題數、出題、列印題目卷／答案卷）。
+   管理員與老師：五步驟 出題方式 → 範圍 → 審題預覽 → 版面配置 → 進行出卷；每一步有問題就跳出視窗說明。 */
+function popup(ttl,msg,after){
+ var ov=h('<div class="pkov noprint" role="alertdialog" aria-modal="true"><div class="pkbox pkmsg"><h3></h3><p></p><div class="ctl"><button type="button" class="pen go">知道了</button></div></div></div>');
+ ov.querySelector("h3").textContent=ttl;ov.querySelector("p").textContent=msg;
+ function close(){ov.remove();document.removeEventListener("keydown",key);if(after)after()}
+ function key(e){if(e.key==="Escape"||e.key==="Enter"){e.preventDefault();close()}}
+ ov.querySelector("button").onclick=close;ov.addEventListener("click",function(e){if(e.target===ov)close()});document.addEventListener("keydown",key);document.body.appendChild(ov);ov.querySelector("button").focus()}
+function fq(P){var o="";if(P.fd&&P.fd.length)o+="&d="+encodeURIComponent(P.fd.join(","));if(P.fg&&P.fg.length)o+="&cg="+encodeURIComponent(P.fg.join(","));if(P.fk)o+="&kw="+encodeURIComponent(P.fk);if(P.fp)o+="&pf="+encodeURIComponent(P.fp);return o}
+function ansOf(q){return(q.al?q.al+"．":"")+(q.ty==="match"?"":q.a)}
+
+V.print=function(arg){return user().role==="student"?printStudent():printWiz(arg)};
+
+/* ---- 學生：陽春版 ---- */
+function printStudent(){
+ var u=user(),D=M.D,PP=NB.pp,s=sheet("列印練習卷","選好範圍與題數，按「出題」，就能印出題目卷和答案卷");s.classList.add("noprint");
  var src='<select id="ps"><option value="mix">本年級綜合</option>'+(D.wr.length?'<option value="wrong">我的錯題（'+D.wr.length+" 題）</option>":"")+'<option value="pick">自選單元（下方勾選）</option></select>';
- var ctl=h('<div class="ctl"><label>出卷方式</label><select id="pm"><option value="quick">快速出卷</option><option value="plan">自訂大題（題型、配分、比例、挑題）</option></select><label>題目來源</label>'+src+'<label class="qn">題數</label><select id="pn"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>30</option><option>40</option></select>'+(u.role==="teacher"?'<label>年級</label><select id="pg"><option value="1">一年級</option><option value="2">二年級</option><option value="3">三年級</option><option value="4">四年級</option><option value="5">五年級</option><option value="6" selected>六年級</option></select>':"")+'</div>');
- var pk=picker((M.gens||[]).slice().sort(),u.grade),out=h("<div></div>"),note=h('<p class="meta noprint"></p>'),last=null,PP=NB.pp;
- var ed=NB.plan.editor({role:u.role,admin:!!u.admin,api:function(m,p){return M.api(m,p)},tx:tx,title:title,units:function(){return pk.get()},say:function(m){note.textContent=m}},function(){});ed.el.hidden=true;ed.el.classList.add("noprint");
- var panel=PP.panel(u,redraw),goB=h('<button class="pen go">出題</button>'),prB=h('<button class="pen">列印</button>'),act=h('<div class="ctl pact"></div>'),sum=h('<div class="pstsum"></div>');act.appendChild(goB);act.appendChild(prB);
- /* 一步一步：網址 #print/step1～step5。各步驟只是顯示／隱藏同一批控制項，所以改設定不會遺失，也不會重新載入 */
- var STEPS=[["選題","第 1 步　選擇出卷方式、題目來源與題數"],["篩選","第 2 步　題目篩選（選用，依題庫屬性挑題）"],["卷面","第 3 步　卷頭、紙張版面與輸出卷別"],["浮水印","第 4 步　浮水印與每題附註（選用）"],["出題","第 5 步　確認、出題與列印"]],step=1,stale=false;
- var bar=h('<ol class="pstepbar noprint"></ol>'),hd=h('<h3 class="pst noprint"></h3>'),nav=h('<div class="ctl pnav noprint"><button class="pen" type="button">上一步</button><button class="pen go" type="button">下一步</button></div>'),dts=panel.el.querySelectorAll(":scope > details");
- STEPS.forEach(function(x,i){var li=h('<li><a href="#print/step'+(i+1)+'"><b>'+(i+1)+"</b><span>"+x[0]+"</span></a></li>");bar.appendChild(li)});
- s.appendChild(bar);s.appendChild(hd);s.appendChild(ctl);s.appendChild(pk.el);s.appendChild(ed.el);s.appendChild(panel.el);s.appendChild(sum);s.appendChild(act);s.appendChild(nav);view.appendChild(s);view.appendChild(note);view.appendChild(out);
- var DS={2:[4],3:[0,1,2],4:[3,5]};
- function layout(){ed.el.hidden=!(step===1&&isPlan())}
- function ok1(){var v=v0();if(v==="pick"&&!pk.get().length){note.hidden=false;note.textContent="請先勾選至少一個單元，再進到下一步。";return false}if(isPlan()){if(v==="wrong"){note.hidden=false;note.textContent="錯題重練不能用自訂大題，請改用快速出卷。";return false}var g=ed.get();if(g.err){note.hidden=false;note.textContent=g.err;return false}}return true}
- function summ(){var v=v0(),p=panel.get(),L=[],g=null;if(isPlan()){g=ed.get()}var cnt=g&&g.plan?g.plan.secs.reduce(function(a,x){return a+Math.max(x.n||0,(x.ids||[]).length)},0):0;
-  L.push("出卷方式："+(isPlan()?"自訂大題（"+(g&&g.plan?g.plan.secs.length+" 個大題、共 "+cnt+" 題":"設定有誤")+"）":"快速出卷（"+ctl.querySelector("#pn").value+" 題）"));
-  L.push("題目來源："+(v==="pick"?"自選 "+pk.get().length+" 個單元":v==="wrong"?"我的錯題":"本年級綜合"));
-  L.push("題目篩選："+(fq(p)?"有設定條件":"不篩選"));L.push("紙張："+esc(p.paper)+"　輸出卷別："+Object.keys(p.kinds||{}).filter(function(k){return p.kinds[k]}).length+" 種");
-  sum.innerHTML="<b>目前的設定</b><ul>"+L.map(function(x){return"<li>"+x+"</li>"}).join("")+"</ul>"+(stale&&last?'<p class="fb no">選題設定改過了，請重新按「出題」，否則下面還是上一份卷子。</p>':"")+(last?"":'<p class="meta">確認沒問題就按「出題」。</p>')}
- function show(n){n=Math.max(1,Math.min(5,n||1));step=n;hd.textContent=STEPS[n-1][1];
-  ctl.hidden=pk.el.hidden=n!==1;layout();panel.el.hidden=n<2||n>4;for(var i=0;i<dts.length;i++){var on=(DS[n]||[]).indexOf(i)>=0;dts[i].hidden=!on;if(on)dts[i].open=true}
-  sum.hidden=act.hidden=n!==5;if(n===5)summ();out.hidden=note.hidden=n!==5;
-  nav.children[0].hidden=n===1;nav.children[1].hidden=n===5;
-  Array.prototype.forEach.call(bar.children,function(li,i){li.className=i+1===n?"on":i+1<n?"done":"";var a=li.firstChild;if(i+1===n)a.setAttribute("aria-current","step");else a.removeAttribute("aria-current")})}
- function goStep(n){n=Math.max(1,Math.min(5,n));if(n>step&&!ok1())return;step=n;location.hash="#print/step"+n}
- nav.children[0].onclick=function(){goStep(step-1)};nav.children[1].onclick=function(){goStep(step+1)};
- bar.addEventListener("click",function(e){var a=e.target.closest("a");if(!a)return;var n=+a.getAttribute("href").slice(-1);if(n>step&&!ok1()){e.preventDefault()}});
- [ctl,pk.el,ed.el].forEach(function(x){x.addEventListener("change",function(){stale=true});x.addEventListener("input",function(){stale=true})});
- var node=s;PS={alive:function(){return document.body.contains(node)},go:function(a){var m=/^step([1-5])$/.exec(a||"");show(m?+m[1]:1);window.scrollTo(0,0)}};
- goB.onclick=make;prB.onclick=function(){if(!last)return make();redraw();window.print()};
- panel.csvBtn.onclick=function(){if(last)PP.csv(last.qs,deps());else note.textContent="請先按「出題」。"};
- pk.el.addEventListener("change",function(){if(pk.get().length)ctl.querySelector("#ps").value="pick";ed.refreshWeights()});
- function isPlan(){return ctl.querySelector("#pm").value==="plan"}
- ctl.querySelector("#pm").onchange=function(){var p=isPlan();layout();ctl.querySelector(".qn").hidden=p;ctl.querySelector("#pn").hidden=p;if(p){ed.refreshWeights();var o=ctl.querySelector("#ps option[value=wrong]");if(o&&ctl.querySelector("#ps").value==="wrong")ctl.querySelector("#ps").value="mix"}};
- var stopG=PP.guard(out,function(){return !!(last&&last.wm&&last.wm.force)},function(){redraw()});
- window.addEventListener("hashchange",function f(){if(!/^#print(\/|$)/.test(location.hash)){PS=null;PP.clearPage();stopG();window.removeEventListener("hashchange",f)}});
- function fq(P){var o="";if(v0()==="wrong")return o;if(P.fd&&P.fd.length)o+="&d="+encodeURIComponent(P.fd.join(","));if(P.fg&&P.fg.length)o+="&cg="+encodeURIComponent(P.fg.join(","));if(P.fk)o+="&kw="+encodeURIComponent(P.fk);if(P.fp)o+="&pf="+encodeURIComponent(P.fp);return o}
- function v0(){return ctl.querySelector("#ps").value}
+ var ctl=h('<div class="ctl"><label>題目來源</label>'+src+'<label>題數</label><select id="pn"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>30</option><option>40</option></select><button class="pen go" id="go">出題</button></div>');
+ var pk=picker((M.gens||[]).slice().sort(),u.grade),out=h("<div></div>"),note=h('<p class="meta noprint"></p>'),last=null,panel=PP.panel(u,function(){});
+ var acts=h('<div class="ctl pact noprint" hidden><button class="pen go" data-k="q-0">列印題目卷</button><button class="pen" data-k="ak-0">列印答案卷（簡答與詳解）</button></div>');
+ s.appendChild(ctl);s.appendChild(pk.el);s.appendChild(acts);s.appendChild(note);view.appendChild(s);view.appendChild(out);
+ /* 學生的卷面固定：題目卷＋答案卷、一份、有頁碼、浮水印強制 */
+ function P(){var p=panel.get();p.kinds={q:true,ak:true};p.variants=1;p.matrix=false;p.pageNo="kn";p.fd=[];p.fg=[];p.fk="";p.fp="";return p}
  function deps(){return{u:u,today:M.today(),title:title,tx:tx,qimg:qimg,wm:last&&last.wm,secs:last&&last.secs}}
- function redraw(){if(!last)return;var P=panel.get();PP.applyPage(P);out.innerHTML=PP.build(P,last.qs,last.nm,deps())}
- out.innerHTML='<p class="meta">按上面的「出題」，題目就會出現在這裡。</p>';
- function make(){
-  var v=ctl.querySelector("#ps").value,n=+ctl.querySelector("#pn").value,us=pk.get();if(v==="pick"&&!us.length){out.innerHTML='<div class="fb no">請先在下面勾選至少一個單元。</div>';return}
-  out.innerHTML='<p class="meta">出題中…</p>';note.textContent="";
-  var pl=null;if(isPlan()){if(v==="wrong"){out.innerHTML='<div class="fb no">錯題重練不能用自訂大題，請改用快速出卷。</div>';return}var g=ed.get();if(g.err){out.innerHTML='<div class="fb no">'+esc(g.err)+"</div>";return}pl=g.plan}
-  PP.device().then(function(dv){return M.api("GET","/api/print?src="+(v==="pick"?"mix&units="+encodeURIComponent(us.join(",")):encodeURIComponent(v))+(pl?"&plan="+encodeURIComponent(JSON.stringify(pl)):"&n="+n)+(ctl.querySelector("#pg")?"&g="+ctl.querySelector("#pg").value:"")+fq(panel.get())+"&dev="+encodeURIComponent(JSON.stringify(dv)))}).then(function(r){
-   var nm=pl?"自訂出卷":v==="wrong"?"錯題重練":v==="mix"?"綜合練習":"自選 "+us.length+" 個單元",qs=r.qs;
-   if(r.secs){var lack=r.secs.filter(function(x){return x.got<x.want}).map(function(x){return"第 "+(x.i+1)+" 大題缺 "+(x.want-x.got)+" 題"});if(lack.length)note.textContent=lack.join("、")+"（符合條件的題目不夠，可放寬題型、類別或難易度）。"}
-   if(r.filled&&!r.secs)note.textContent="你選的單元不重複的題目不夠，已用同年級其他單元補了 "+r.filled+" 題。";if(r.short&&!r.secs)note.textContent+=(fq(panel.get())?" 符合篩選條件的題目只有 "+qs.length+" 題（只會從已有屬性的固定題挑；可放寬條件，或請管理員匯入屬性表）。":" 可出的題目只有 "+qs.length+" 題。");
-   last={qs:qs,nm:nm,wm:r.wm,secs:r.secs};stale=false;summ();redraw()},
-   function(e){out.innerHTML='<div class="fb no">'+esc(errMsg(e))+"</div>"})}
- show((/^step([1-5])$/.exec(arg||"")||[0,1])[1]);};
+ function redraw(){if(!last)return;var p=P();PP.applyPage(p);out.innerHTML=PP.build(p,last.qs,last.nm,deps())}
+ out.innerHTML='<p class="meta noprint">按上面的「出題」，題目就會出現在這裡。</p>';
+ acts.onclick=function(e){var b=e.target.closest("button");if(!b)return;redraw();PP.printSheet(out,b.dataset.k)};
+ var stopG=PP.guard(out,function(){return !!(last&&last.wm&&last.wm.force)},function(){redraw()});
+ window.addEventListener("hashchange",function f(){if(!/^#print(\/|$)/.test(location.hash)){PP.clearPage();stopG();window.removeEventListener("hashchange",f)}});
+ pk.el.addEventListener("change",function(){if(pk.get().length)ctl.querySelector("#ps").value="pick"});
+ var busy=false;
+ ctl.querySelector("#go").onclick=function(){
+  if(busy)return;var v=ctl.querySelector("#ps").value,n=+ctl.querySelector("#pn").value,us=pk.get();
+  if(v==="pick"&&!us.length){popup("還沒選單元","你選了「自選單元」，請先在下面勾選至少一個單元。");return}
+  busy=true;out.innerHTML='<p class="meta noprint">出題中…</p>';note.textContent="";acts.hidden=true;
+  PP.device().then(function(dv){return M.api("GET","/api/print?src="+(v==="pick"?"mix&units="+encodeURIComponent(us.join(",")):encodeURIComponent(v))+"&n="+n+"&dev="+encodeURIComponent(JSON.stringify(dv)))}).then(function(r){
+   busy=false;last={qs:r.qs,nm:v==="wrong"?"錯題重練":v==="mix"?"綜合練習":"自選 "+us.length+" 個單元",wm:r.wm};
+   if(r.filled)note.textContent="你選的單元不重複的題目不夠，已用同年級其他單元補了 "+r.filled+" 題。";if(r.short)note.textContent+=" 可出的題目只有 "+r.qs.length+" 題。";
+   acts.hidden=false;redraw()},function(e){busy=false;out.innerHTML="";popup("出題失敗",errMsg(e))})}}
+
+/* ---- 管理員／老師：五步驟 ---- */
+function printWiz(arg){
+ var u=user(),PP=NB.pp,s=sheet("列印練習卷","一步一步設定，最後按「進行出卷」");s.classList.add("noprint");
+ var W={mode:"quick",scope:"paper"},STEPS=[["出題方式","第 1 步　選擇出題方式"],["範圍","第 2 步　選擇出題範圍"],["審題預覽","第 3 步　審題預覽（還沒有正式出卷，不會留下列印紀錄）"],["版面配置","第 4 步　版面配置"],["進行出卷","第 5 步　確認並進行出卷"]],step=1;
+ var pk=picker((M.gens||[]).slice().sort(),u.grade),out=h("<div></div>"),pv=null,pvSig="",last=null,cm=null,busy=false,showAns=false;
+ var panel=PP.panel(u,function(){if(step===4)drawDraft()});
+ var ed=NB.plan.editor({role:u.role,admin:!!u.admin,api:function(m,p){return M.api(m,p)},tx:tx,title:title,units:function(){return unitsNow()},online:function(){return W.scope==="online"},say:function(m){popup("提醒",m)}},function(){});ed.el.classList.add("noprint");
+ var bar=h('<ol class="pstepbar noprint"></ol>'),hd=h('<h3 class="pst noprint"></h3>'),nav=h('<div class="ctl pnav noprint"><button class="pen" type="button">上一步</button><button class="pen go" type="button">下一步</button></div>');
+ STEPS.forEach(function(x,i){bar.appendChild(h('<li><a href="#print/step'+(i+1)+'"><b>'+(i+1)+"</b><span>"+x[0]+"</span></a></li>"))});
+ var s1=h('<div class="pstp"><div class="pmodes"><label class="pmode"><input type="radio" name="pw-mode" value="quick" checked><b>快速出題</b><small>選好範圍和題數，電腦直接隨機出題。最快，適合日常練習卷。</small></label><label class="pmode"><input type="radio" name="pw-mode" value="auto"><b>電腦出題</b><small>自己安排大題、題型、題數、配分與難易度比例，題目由電腦依條件挑；可以用「智慧配分」。</small></label><label class="pmode"><input type="radio" name="pw-mode" value="manual"><b>手動出題</b><small>每個大題自己從題庫挑題（可用題目 ID 搜尋），考哪些題完全由你決定。</small></label></div></div>');
+ var gsel='<select id="pw-g">'+"一二三四五六".split("").map(function(c,i){return'<option value="'+(i+1)+'"'+((u.grade||6)==i+1?" selected":"")+">"+c+"年級</option>"}).join("")+"</select>";
+ var s2=h('<div class="pstp"><h4>出題範圍</h4><div class="pmodes"><label class="pmode"><input type="radio" name="pw-scope" value="paper" checked><b>紙本出卷</b><small>題目較全，題型較多（含勾選題、連連看）。</small></label><label class="pmode"><input type="radio" name="pw-scope" value="online"><b>線上速測</b><small>只用線上題庫的題目（沒有勾選題、連連看），和學生線上測驗的題目一致。</small></label></div>'+
+  '<div class="ctl"><label>年級</label>'+gsel+'<label>冊次</label><select id="pw-sem"><option value="a">上下冊（全學年）</option><option value="u">上冊</option><option value="d">下冊</option></select><label>課次</label><select id="pw-src"><option value="all">整個範圍綜合</option><option value="pick">自選課次（下方勾選）</option></select><label class="qn">題數</label><select id="pw-n"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>30</option><option>40</option></select></div><div class="pbox2"></div></div>');
+ var s3=h('<div class="pstp"><div class="ctl pvbar"><button type="button" class="pen" id="pv-re">重新出題</button><label class="ppc"><input type="checkbox" id="pv-ans"> 顯示答案</label></div><div class="pvsum"></div><div class="pvlist"></div></div>');
+ var s4=h('<div class="pstp"><p class="meta">下面的卷面預覽只是草稿，還沒有正式出卷；到下一步按「進行出卷」才算數。</p><div class="pbox4"></div></div>');
+ var s5=h('<div class="pstp"><div class="pstsum"></div><div class="ctl"><button type="button" class="pen go" id="pw-go">進行出卷</button></div><div class="pres"></div></div>');
+ var stepEls=[s1,s2,s3,s4,s5],box2=s2.querySelector(".pbox2"),box4=s4.querySelector(".pbox4"),dts=panel.el.querySelectorAll(":scope > details");
+ s2.insertBefore(pk.el,box2);box2.appendChild(ed.el);
+ s.appendChild(bar);s.appendChild(hd);stepEls.forEach(function(x){s.appendChild(x)});s.appendChild(nav);view.appendChild(s);view.appendChild(out);
+ function $(sel,root){return(root||s).querySelector(sel)}
+ function val(id){return $("#"+id).value}
+ function unitsNow(){var e=$("#pw-src");return e&&e.value==="pick"?pk.get():pk.visible()}
+ function curPlan(){return W.mode==="quick"?null:ed.get()}
+ function qurl(dry,g){var p=panel.get(),pick=val("pw-src")==="pick",us=pk.get();
+  return"/api/print?src=mix"+(pick?"&units="+encodeURIComponent(us.join(",")):"&sem="+val("pw-sem"))+"&g="+val("pw-g")+(W.scope==="online"?"&scope=online":"")+fq(p)+(g&&g.plan?"&plan="+encodeURIComponent(JSON.stringify(g.plan)):"&n="+val("pw-n"))+(dry?"&dry=1":"")}
+ function sig(){var g=curPlan();return g&&g.err?"ERR:"+g.err:qurl(true,g)}
+ /* 各步驟的檢查：有問題回傳要說的話 */
+ function chk(n){
+  if(n===2){if(val("pw-src")==="pick"&&!pk.get().length)return["還沒選課次","你選了「自選課次」，但還沒有勾選任何課次。請在下方勾選，或把「課次」改成「整個範圍綜合」。"];if(W.mode!=="quick"){var g=ed.get();if(g.err)return["大題設定有問題",g.err]}}
+  if(n===3){if(busy)return["出題中","題目還在準備，請稍等一下再按下一步。"];if(pv&&pvSig!==sig())return["需要重新審題","範圍或題目設定改過了，需要先重新審題。"];if(!pv)return["還沒有審題","請先在第 3 步看過這份卷的題目（系統正在幫你出題），再往後走。"];if(!pv.qs.length)return["沒有題目","目前沒有可以出的題目。請回到上一步放寬範圍或條件，或按「重新出題」。"]}
+  if(n===4){var P=panel.get();if(!Object.keys(P.kinds||{}).some(function(k){return P.kinds[k]})&&!P.matrix)return["還沒選輸出卷別","請至少勾選一種輸出卷別（例如題目卷），不然沒有東西可以印。"]}
+  return null}
+ function request(n){
+  n=Math.max(1,Math.min(5,n||1));
+  var order=[2,3,4];for(var k=0;k<order.length;k++){var st=order[k];if(st>=n)break;var bad=chk(st);if(bad){popup(bad[0],bad[1],function(){});show(st);if(location.hash!=="#print/step"+st)location.replace("#print/step"+st);return}}
+  show(n)}
+ function show(n){
+  step=n;hd.textContent=STEPS[n-1][1];stepEls.forEach(function(x,i){x.hidden=i+1!==n});
+  if(n===2){layout2();box2.appendChild(panel.el);for(var i=0;i<dts.length;i++){dts[i].hidden=i!==4;if(i===4)dts[i].open=true}}
+  if(n===3){if(!pv||pvSig!==sig())runPreview();else drawPreview()}
+  if(n===4){box4.appendChild(panel.el);for(var j=0;j<dts.length;j++){dts[j].hidden=j===4;if(j!==4)dts[j].open=j<3}drawDraft()}
+  if(n===5){if(fresh())redrawFinal();else out.innerHTML="";summ()}
+  out.hidden=!(n===4||(n===5&&fresh()));
+  nav.children[0].hidden=n===1;nav.children[1].hidden=n===5;nav.children[1].textContent=n===4?"下一步：進行出卷":"下一步";
+  Array.prototype.forEach.call(bar.children,function(li,i){li.className=i+1===n?"on":i+1<n?"done":"";var a=li.firstChild;if(i+1===n)a.setAttribute("aria-current","step");else a.removeAttribute("aria-current")});
+  if(n!==4&&n!==5)out.innerHTML=""}
+ function keyOf(){return pv?pv.qs.map(function(q){return q.unit+"|"+q.q+"|"+q.a}).join("\n"):""}
+ function fresh(){return!!(last&&cm&&pv&&cm.key===keyOf())}
+ function goStep(n){location.hash="#print/step"+Math.max(1,Math.min(5,n))}
+ nav.children[0].onclick=function(){goStep(step-1)};nav.children[1].onclick=function(){goStep(step+1)};
+ var node=s;PS={alive:function(){return document.body.contains(node)},go:function(a){var m=/^step([1-5])$/.exec(a||"");request(m?+m[1]:1);window.scrollTo(0,0)}};
+ bar.addEventListener("click",function(e){var a=e.target.closest("a");if(!a)return;e.preventDefault();goStep(+a.getAttribute("href").slice(-1))});
+ /* 第 1 步 */
+ s1.addEventListener("change",function(e){if(e.target.name!=="pw-mode")return;W.mode=e.target.value;if(W.mode!=="quick")ed.setMode(W.mode);layout2()});
+ /* 第 2 步 */
+ function layout2(){var q=W.mode==="quick";$(".qn").hidden=q?false:true;$("#pw-n").hidden=!q;ed.el.hidden=q;pk.el.hidden=val("pw-src")!=="pick";if(!pk.el.hidden)pk.el.open=true;ed.refreshWeights()}
+ function filt(){pk.filter(val("pw-g"),val("pw-sem")==="a"?"":val("pw-sem"));ed.refreshWeights()}
+ s2.addEventListener("change",function(e){
+  if(e.target.name==="pw-scope"){W.scope=e.target.value;if(W.mode!=="quick"){var c=ed.syncScope();if(c)popup("已調整題型",c+" 個大題原本是勾選題或連連看，線上速測的題庫沒有這些題型，已改成選擇題。")}}
+  else if(e.target.id==="pw-g"||e.target.id==="pw-sem")filt();
+  else if(e.target.id==="pw-src"){layout2()}});
+ pk.el.addEventListener("change",function(){if(pk.get().length&&val("pw-src")!=="pick"){$("#pw-src").value="pick";layout2()}ed.refreshWeights()});
+ /* 第 3 步：審題預覽（dry：不寫資料庫） */
+ function runPreview(){
+  if(busy)return;var g=curPlan(),sg=sig();if(g&&g.err){popup("大題設定有問題",g.err,function(){goStep(2)});return}
+  busy=true;pv=null;$(".pvsum").textContent="";$(".pvlist").innerHTML='<p class="meta">出題中…</p>';
+  M.api("GET",qurl(true,g)).then(function(r){busy=false;pv={qs:r.qs,secs:r.secs,nm:r.name,short:r.short,filled:r.filled};pvSig=sg;drawPreview();if(!r.qs.length)popup("沒有題目","目前的範圍與條件沒有可以出的題目。請回到上一步放寬條件。",function(){goStep(2)})},
+   function(e){busy=false;pv=null;pvSig="";$(".pvlist").innerHTML="";popup("出題失敗",errMsg(e),function(){goStep(2)})})}
+ $("#pv-re").onclick=function(){pvSig="";runPreview()};
+ $("#pv-ans").onchange=function(){showAns=this.checked;drawPreview()};
+ function ptsTotal(){if(!pv||!pv.secs)return 0;var t=0;pv.secs.forEach(function(sec,i){var n=pv.qs.filter(function(q){return q.s===i}).length,k=sec.take&&sec.take<n?sec.take:n;t+=(sec.pts||0)*k});return Math.round(t*10)/10}
+ var TYN={tf:"是非",multi:"勾選",match:"連連看"};function tyOf(q){return TYN[q.ty]||(q.o?"選擇":"填充")}
+ function drawPreview(){
+  if(!pv)return;var box=$(".pvlist"),n=pv.qs.length,lack=pv.secs?pv.secs.filter(function(x){return x.got<x.want}).map(function(x){return"第 "+(x.i+1)+" 大題缺 "+(x.want-x.got)+" 題"}):[];
+  $(".pvsum").innerHTML="共 <b>"+n+"</b> 題"+(pv.secs&&ptsTotal()?"・總分 <b>"+ptsTotal()+"</b> 分":"")+"　<span class=\"meta\">不要的題目按「移除」；想整份重來按「重新出題」。</span>"+(lack.length?'<div class="fb no">'+esc(lack.join("、"))+"（符合條件的題目不夠，可回上一步放寬題型、類別或難易度）。</div>":"")+(pv.filled&&!pv.secs?'<div class="fb no">你選的範圍不重複的題目不夠，已用同年級其他單元補了 '+pv.filled+" 題。</div>":"")+(pv.short&&!pv.secs?'<div class="fb no">可出的題目只有 '+n+" 題（想要的比較多）。</div>":"");
+  box.innerHTML="";var lastS=-1;
+  pv.qs.forEach(function(q,i){
+   if(pv.secs&&q.s!==lastS){lastS=q.s;var sc=pv.secs[q.s];if(sc)box.appendChild(h('<h4 class="pvsec">第 '+(q.s+1)+" 大題"+(sc.title?"・"+esc(sc.title):"")+(sc.pts?"　每題 "+sc.pts+" 分":"")+"</h4>"))}
+   var opts=q.ty==="match"?"　"+q.L.map(function(l,k){return(k+1)+"."+esc(l)}).join("　")+"　／　"+q.R.map(function(r,k){return String.fromCharCode(65+k)+"."+esc(r)}).join("　"):q.o?"<div class=\"pvo\">"+q.o.map(function(o,k){return String.fromCharCode(65+k)+"．"+tx(esc(o))}).join("　")+"</div>":"";
+   var d=h('<div class="pvq"><div class="pvh"><b>'+(i+1)+'</b><span class="pvm"></span><button type="button" class="pen">移除</button></div><div class="pvt"></div>'+(showAns?'<div class="pva"><b>答案：</b></div>':"")+"</div>");
+   d.querySelector(".pvm").textContent=tyOf(q)+"｜"+(({1:"易",2:"中",3:"難"})[q.lv]||"中")+"｜"+title(q.unit).split(" ").slice(-1)[0]+(q.qid?"｜ID "+q.qid:"");
+   d.querySelector(".pvt").innerHTML=tx(esc(q.q))+qimg(q.img)+opts;
+   if(showAns)d.querySelector(".pva").appendChild(h("<span>"+tx(esc(ansOf(q)))+(q.ty==="match"?esc(q.al||""):"")+"</span>"));
+   d.querySelector("button").onclick=function(){if(pv.qs.length<=1){popup("至少要留一題","這是最後一題了，不能再移除。想換一批題目請按「重新出題」。");return}pv.qs.splice(i,1);drawPreview()};
+   box.appendChild(d)})}
+ /* 第 4 步：草稿（還沒有正式出卷，列印時不會輸出） */
+ function deps(c){return{u:u,today:M.today(),title:title,tx:tx,qimg:qimg,wm:c&&c.wm,secs:c&&c.secs}}
+ function drawDraft(){if(!pv)return;var P=panel.get();PP.applyPage(P);out.className="pdraft";out.innerHTML=PP.build(P,pv.qs,pv.nm,deps(pv))}
+ function redrawFinal(){if(!last)return;var P=panel.get();PP.applyPage(P);out.className="";out.innerHTML=PP.build(P,last.qs,last.nm,deps(last));drawRes()}
+ /* 第 5 步 */
+ function summ(){
+  var g=curPlan(),P=panel.get(),L=[],list=PP.list(P);
+  L.push("出題方式："+({quick:"快速出題",auto:"電腦出題",manual:"手動出題"})[W.mode]);
+  L.push("範圍："+(W.scope==="online"?"線上速測（只用線上題庫）":"紙本出卷（題型較全）")+"・"+"一二三四五六"[val("pw-g")-1]+"年級・"+({a:"上下冊",u:"上冊",d:"下冊"})[val("pw-sem")]+"・"+(val("pw-src")==="pick"?"自選 "+pk.get().length+" 個課次":"整個範圍綜合"));
+  L.push("題目："+(pv?pv.qs.length+" 題"+(pv.secs&&ptsTotal()?"・總分 "+ptsTotal()+" 分":""):"尚未審題"));
+  L.push("紙張："+esc(P.paper)+"・"+({s1:"單欄",d2:"雙欄（直版）",d2l:"雙欄（橫版）"})[P.layout]+"・頁碼："+({kn:"卷別＋頁碼",n:"只印頁碼",off:"不印"})[P.pageNo||"kn"]);
+  L.push("輸出："+list.map(function(x){return esc(x.label)}).join("、")+"（共 "+list.length+" 份，每份頁碼各自從 1 開始）");
+  $(".pstsum").innerHTML="<b>確認設定</b><ul>"+L.map(function(x){return"<li>"+x+"</li>"}).join("")+"</ul><p class=\"meta\">按「進行出卷」才會正式出卷，並記錄一筆列印紀錄；之後只改版面不會再多記一筆。</p>";
+  drawRes()}
+ $("#pw-go").onclick=function(){
+  if(busy)return;
+  if(!pv||pvSig!==sig()){popup("題目要重新審題","範圍或題目設定在審題之後改過了，請回到第 3 步重新審題。",function(){goStep(3)});return}
+  var bad=chk(3)||chk(4);if(bad){popup(bad[0],bad[1],function(){goStep(bad[0]==="還沒選輸出卷別"?4:3)});return}
+  var key=keyOf();
+  if(fresh()){redrawFinal();return}
+  busy=true;$("#pw-go").disabled=true;
+  var P=panel.get(),srcTag=({quick:"快速出題",auto:"電腦出題",manual:"手動出題"})[W.mode]+(W.scope==="online"?"（線上速測）":"")+":"+val("pw-g")+val("pw-sem");
+  PP.device().then(function(dv){return M.api("POST","/api/print/commit",{src:srcTag,dev:dv,qs:pv.qs.map(function(q){return{u:q.unit,q:String(q.q).slice(0,80),a:String(q.a).slice(0,30)}})})}).then(function(r){
+   busy=false;$("#pw-go").disabled=false;cm={key:key};last={qs:pv.qs.slice(),secs:pv.secs,nm:pv.nm,wm:r.wm};redrawFinal();out.hidden=false;window.scrollTo(0,$(".pres").getBoundingClientRect().top+window.scrollY-60)},
+   function(e){busy=false;$("#pw-go").disabled=false;popup("進行出卷失敗",errMsg(e))})}
+ function drawRes(){
+  var r=$(".pres");r.innerHTML="";if(!fresh()){return}
+  var P=panel.get(),list=PP.list(P);
+  r.appendChild(h('<div class="fb">已出卷，卷號 <b>'+esc(last.wm&&last.wm.pid||"")+"</b>。下面每一份都從第 1 頁開始編頁碼。</div>"));
+  var box=h('<div class="pshl"></div>');
+  list.forEach(function(x){var row=h('<div class="pshr"><span></span><button type="button" class="pen go">列印這一份</button></div>');row.firstChild.textContent=x.label;row.lastChild.onclick=function(){if(!PP.printSheet(out,x.id))popup("找不到這一份","請重新按「進行出卷」。")};box.appendChild(row)});
+  r.appendChild(box);
+  var act=h('<div class="ctl"><button type="button" class="pen">全部一起列印（頁碼會接續）</button><button type="button" class="pen">匯出題目 CSV</button><button type="button" class="pen">回到版面配置修改</button></div>');
+  act.children[0].onclick=function(){PP.printSheet(out,"")};act.children[1].onclick=function(){PP.csv(last.qs,deps(last))};act.children[2].onclick=function(){goStep(4)};r.appendChild(act)}
+ panel.csvBtn.onclick=function(){var c=last||pv;if(c)PP.csv(c.qs,deps(c));else popup("還沒有題目","請先到第 3 步審題。")};
+ window.addEventListener("hashchange",function f(){if(!/^#print(\/|$)/.test(location.hash)){PS=null;PP.clearPage();window.removeEventListener("hashchange",f)}});
+ filt();layout2();
+ var m=/^step([1-5])$/.exec(arg||"");request(m?+m[1]:1)}
 
 V.expired=function(){
  var a=M.acct||{},s=sheet("授權已到期","正式學員功能暫停");s.appendChild(h("<p>你的正式學員授權已於 <b>"+esc(a.expires||"")+"</b> 到期。目前只能查看自己的首頁、學習進度與勳章；小測驗、模擬卷、錯題本、列印與排行榜需要老師延長授權後才能使用。</p>"));

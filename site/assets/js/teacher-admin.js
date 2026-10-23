@@ -3,7 +3,8 @@
 "use strict";
 var M=NB.member,h=NB.h;
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function errs(e){return e&&e.code?"失敗（"+e.code+"）":"連線失敗"}
+var ERRMAP={bad_HINT_COST:"看一次提示扣的分數要是 0～10000 的整數",bad_LEVEL_STEP:"每幾分升一級要在 10～100000 之間",bad_DAILY_Q_CAP:"每天最多計分的題數要在 10～5000 之間",bad_DAILY_MOCK_CAP:"每天可領獎勵的模擬卷份數要在 0～50 之間",bad_POINTS_BY_LEVEL:"答對積分要填 3 個 1～1000 的數字，用逗號分開（例：10,15,20）",bad_REVIEW_DAYS:"錯題複習間隔要填 1～6 個 1～90 的整數，用逗號分開（例：1,3,7）",forbidden:"沒有這個權限（這項功能只有管理員能用）"};
+function errs(e){return e&&e.code?(ERRMAP[e.code]||"失敗（"+e.code+"）"):"連線失敗"}
 function csvEsc(v){v=String(v==null?"":v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function parseCSV(t){var rows=[],r=[],f="",q=false,i,c;t=t.replace(/^﻿/,"");
  for(i=0;i<t.length;i++){c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
@@ -312,7 +313,7 @@ function settings(ctx){
   POINTS_BY_LEVEL:inp(e.pts.join(",")),LEVEL_STEP:inp(e.step,"","number"),DAILY_Q_CAP:inp(e.capQ,"","number"),DAILY_MOCK_CAP:inp(e.capMock,"","number"),REVIEW_DAYS:inp(e.review.join(",")),HINT_COST:inp(e.hint,"","number")};
   s.appendChild(field("答對一題的積分（基礎,應用,挑戰）",F.POINTS_BY_LEVEL));s.appendChild(field("每幾分升一級",F.LEVEL_STEP));s.appendChild(field("每天最多計分的題數（防刷）",F.DAILY_Q_CAP));s.appendChild(field("每天可領獎勵的模擬卷份數",F.DAILY_MOCK_CAP));s.appendChild(field("看一次提示扣幾分（0＝不扣；看過提示的題目答對只拿一半積分）",F.HINT_COST));s.appendChild(field("錯題複習間隔（幾天後，用逗號分隔）",F.REVIEW_DAYS));
   var fb=h('<div class="fb"></div>'),b=h('<div class="ctl"><button class="pen go">儲存設定</button></div>');s.appendChild(b);s.appendChild(fb);
-  b.firstChild.onclick=function(){var o={};Object.keys(F).forEach(function(k){o[k]=F[k].value});M.api("POST","/api/admin/settings",o).then(function(){msg(fb,"已儲存",1)},function(er){msg(fb,"數值不合理："+errs(er),0)})}},function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))});
+  b.firstChild.onclick=function(){var o={};Object.keys(F).forEach(function(k){o[k]=F[k].value});M.api("POST","/api/admin/settings",o).then(function(){msg(fb,"已儲存",1)},function(er){msg(fb,errs(er),0)})}},function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))});
  if(M.U&&M.U.admin){usage(ctx);sysinfo(ctx)}}
 
 /* ---------- 資料管理 ---------- */
@@ -344,19 +345,19 @@ function reports(ctx){
 
 /* ---- 列印紀錄：學生每出一份練習卷就記一筆；卷子上印著卷號，外流時在搜尋框輸入卷號就查得到是誰、什麼時候、用什麼裝置 ---- */
 function prints(ctx){
- var s=ctx.sheet("列印紀錄","最近 500 筆；試卷上印的「卷號」可以直接在搜尋框查（老師只看得到自己班）");
+ var s=ctx.sheet("列印紀錄",M.U.admin?"最近 500 筆；試卷上印的「卷號」可以查到是誰、什麼時候、用什麼裝置印的。只有管理員能刪除":"最近 500 筆（只看得到自己班）；IP、網路、裝置與刪除紀錄只有管理員能用");
  M.api("GET","/api/admin/prints").then(function(r){
   if(!r.rows.length){s.appendChild(h("<p>還沒有列印紀錄。</p>"));return}
   function when(t){var d=new Date(t+288e5).toISOString();return d.slice(5,10)+" "+d.slice(11,16)}
   function devOf(x){var c={};try{c=JSON.parse(x.dev||"{}")||{}}catch(e){}return esc(x.brief||"")+(c.model?"（"+esc(c.model)+"）":"")+(c.scr?" "+esc(c.scr):"")}
-  var box=h('<div></div>'),t='<table class="tb"><tr><th>時間</th><th>班</th><th>號</th><th>姓名</th><th>卷號</th><th>題數</th><th>IP</th><th>網路</th><th>裝置</th><th></th></tr>';
-  r.rows.forEach(function(x){t+="<tr><td>"+when(x.ts)+"</td><td>"+esc(x.cls)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td><b>"+esc(x.id)+"</b></td><td>"+x.n+"</td><td>"+esc(x.ip)+"</td><td>"+esc(x.net||"")+"</td><td>"+devOf(x)+'</td><td><button class="pen" data-id="'+esc(x.id)+'">看題目</button> <button class="pen" data-del="'+esc(x.id)+'">刪除</button></td></tr>'});
+  var AD=!!M.U.admin,box=h('<div></div>'),t='<table class="tb"><tr><th>時間</th><th>班</th><th>號</th><th>姓名</th><th>卷號</th><th>題數</th>'+(AD?"<th>IP</th><th>網路</th><th>裝置</th>":"")+"<th></th></tr>";
+  r.rows.forEach(function(x){t+="<tr><td>"+when(x.ts)+"</td><td>"+esc(x.cls)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td><b>"+esc(x.id)+"</b></td><td>"+x.n+"</td>"+(AD?"<td>"+esc(x.ip)+"</td><td>"+esc(x.net||"")+"</td><td>"+devOf(x)+"</td>":"")+'<td><button class="pen" data-id="'+esc(x.id)+'">看題目</button>'+(AD?' <button class="pen" data-del="'+esc(x.id)+'">刪除</button>':"")+"</td></tr>"});
   var tb=h(t+"</table>"),det=h('<div class="sbox" hidden></div>');box.appendChild(tb);box.appendChild(det);s.appendChild(box);
   box.addEventListener("click",function(e){var dl=e.target.closest("button[data-del]");if(dl){if(!confirm("確定刪除卷號 "+dl.dataset.del+" 的列印紀錄？刪除後就查不到這份卷子是誰印的。"))return;dl.disabled=true;
    M.api("POST","/api/admin/print/delete",{ids:[dl.dataset.del]}).then(function(r){if(r.n){var tr=dl.closest("tr");if(tr)tr.remove();det.hidden=true}else{dl.disabled=false;alert("沒有刪除（可能不是你的班）")}},function(){dl.disabled=false;alert("刪除失敗，請再試一次")});return}
    var b=e.target.closest("button[data-id]");if(!b)return;b.disabled=true;
    M.api("GET","/api/admin/print?id="+encodeURIComponent(b.dataset.id)).then(function(d){b.disabled=false;det.hidden=false;
-    det.innerHTML="<p><b>卷號 "+esc(d.id)+"</b>　"+esc(d.name)+"（"+esc(d.email)+"）　"+esc(d.cls)+" 班 "+d.no+" 號　"+when(d.ts)+"<br><small>IP "+esc(d.ip)+"　"+esc(d.net||"")+"　"+esc(d.place||"")+"　"+esc(d.brief||"")+"<br>裝置回報："+esc(d.dev||"（無）")+"<br>來源："+esc(d.src||"")+"</small></p><ol>"+d.qs.map(function(q){return"<li>"+esc(q.q)+"　<small>答："+esc(q.a)+"</small></li>"}).join("")+"</ol>";det.scrollIntoView({block:"nearest"})},function(){b.disabled=false})})
+    det.innerHTML="<p><b>卷號 "+esc(d.id)+"</b>　"+esc(d.name)+"（"+esc(d.email)+"）　"+esc(d.cls)+" 班 "+d.no+" 號　"+when(d.ts)+"<br><small>"+(AD?"IP "+esc(d.ip)+"　"+esc(d.net||"")+"　"+esc(d.place||"")+"　"+esc(d.brief||"")+"<br>裝置回報："+esc(d.dev||"（無）")+"<br>":"")+"來源："+esc(d.src||"")+"</small></p><ol>"+d.qs.map(function(q){return"<li>"+esc(q.q)+"　<small>答："+esc(q.a)+"</small></li>"}).join("")+"</ol>";det.scrollIntoView({block:"nearest"})},function(){b.disabled=false})})
  },function(e){s.appendChild(h("<p>載入失敗（"+esc(e.code||"net")+"）</p>"))})}
 
 /* ---------- 模擬考紀錄 ---------- */
@@ -368,7 +369,7 @@ function mocks(ctx){
   function mmss(x){return Math.floor(x/60)+":"+("0"+x%60).slice(-2)}
   var t='<table class="tb"><tr><th>時間</th><th>班</th><th>號</th><th>姓名</th><th>成績</th><th>答對</th><th>用時</th><th>離開次數</th><th>離開秒數</th><th>注意</th><th></th></tr>';
   r.rows.forEach(function(x){var f=[];if(x.late)f.push("逾時");if(x.leaves>=3||x.away>=60)f.push("離開多次");if(x.n>=5&&x.used/x.n<6)f.push("作答過快");
-   t+="<tr><td>"+when(x.ts)+"</td><td>"+esc(x.cls)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+(x.late?"—":x.sc)+"</td><td>"+x.c+" / "+x.n+"</td><td>"+mmss(x.used)+"</td><td>"+x.leaves+"</td><td>"+x.away+"</td><td>"+(f.length?"<b>"+f.join("、")+"</b>":"")+'</td><td><button class="pen" data-del="'+esc(x.id)+'">刪除</button></td></tr>'});
+   t+="<tr><td>"+when(x.ts)+"</td><td>"+esc(x.cls)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+(x.late?"—":x.sc)+"</td><td>"+x.c+" / "+x.n+"</td><td>"+mmss(x.used)+"</td><td>"+x.leaves+"</td><td>"+x.away+"</td><td>"+(f.length?"<b>"+f.join("、")+"</b>":"")+"</td><td>"+(M.U.admin?'<button class="pen" data-del="'+esc(x.id)+'">刪除</button>':"")+"</td></tr>"});
   var tb=h(t+"</table>");s.appendChild(tb);
   tb.addEventListener("click",function(e){var d=e.target.closest("button[data-del]");if(!d)return;if(!confirm("確定刪除這筆模擬考紀錄？刪除後老師就看不到這次的離開次數與用時。成績和積分不受影響。"))return;d.disabled=true;
    M.api("POST","/api/admin/mock/delete",{ids:[d.dataset.del]}).then(function(r){if(r.n){var tr=d.closest("tr");if(tr)tr.remove()}else{d.disabled=false;alert("沒有刪除（可能不是你的班）")}},function(){d.disabled=false;alert("刪除失敗，請再試一次")})})},function(e){s.appendChild(h("<p>載入失敗（"+esc(e.code||"net")+"）</p>"))})}

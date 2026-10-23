@@ -14,14 +14,17 @@
   ];
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function h(html) { var d = document.createElement("div"); d.innerHTML = html; return d.firstChild; }
-  function opt(list, cur) { return list.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (String(x[0]) === String(cur) ? " selected" : "") + ">" + esc(x[1]) + "</option>"; }).join(""); }
+  function opt(list, cur, off) { return list.map(function (x) { var d = off && off.indexOf(x[0]) >= 0; return '<option value="' + esc(x[0]) + '"' + (String(x[0]) === String(cur) ? " selected" : "") + (d ? " disabled" : "") + ">" + esc(x[1]) + (d ? "（線上題庫沒有）" : "") + "</option>"; }).join(""); }
+  var ONLY_PAPER = ["multi", "match"]; /* 只有紙本題庫才有的題型 */
+  var TYW = { tf: 2, choice: 3, num: 4, text: 4, multi: 4, match: 5, group: 6, any: 5 }, KDW = { "應用題": 1.8, "情境題": 1.5, "圖表題": 1.3 }; /* 智慧配分：越花時間的題型、題目類別，每題分數越高 */
   function num(v, d) { v = parseFloat(v); return isFinite(v) ? v : d; }
 
   /* env：{ role, api(method,url), tx(html), title(unitId), units() → 目前勾選的單元 }，onchange：設定改了就通知 */
   function editor(env, onchange) {
     function say(m) { if (env.say) env.say(m); else window.alert(m); }
     var cap = env.admin ? 200 : env.role === "student" ? 30 : 50, maxSec = env.admin ? 20 : env.role === "student" ? 4 : 8;
-    var secs = [], uw = {}, el = h('<div class="pplan"></div>');
+    var secs = [], uw = {}, mode = "auto", el = h('<div class="pplan"></div>'), isOn = function () { return !!(env.online && env.online()); };
+    var fullV = 100;
     function blank(o) { return Object.assign({ ty: "choice", kd: "", n: 5, pts: 2, take: 0, lv: ["", "", ""], title: "", ids: [], idq: {} }, o || {}); }
     function count(s) { return Math.max(+s.n || 0, s.ids.length); }
     function answered(s) { var c = count(s); return s.take > 0 && s.take < c ? s.take : c; }
@@ -35,8 +38,8 @@
 
     function card(s, i) {
       var c = h('<div class="pcs"><div class="pcs-h"><b>大題 ' + (i + 1) + '</b><input class="pcs-t" maxlength="20" placeholder="名稱（可留白，自動用題型）"><span class="pcs-b"><button type="button" class="pen" data-a="up">上移</button><button type="button" class="pen" data-a="dn">下移</button><button type="button" class="pen" data-a="rm">刪除</button></span></div>' +
-        '<div class="pcs-g"><label>題型<select data-k="ty">' + opt(TY, s.ty) + '</select></label><label>題目類別<select data-k="kd">' + opt(KD, s.kd) + '</select></label>' +
-        '<label>題數<input data-k="n" type="number" min="0" max="40" step="1" value="' + esc(s.n) + '"></label><label>每題配分<input data-k="pts" type="number" min="0" max="100" step="0.5" value="' + esc(s.pts) + '"></label>' +
+        '<div class="pcs-g"><label>題型<select data-k="ty">' + opt(TY, s.ty, isOn() ? ONLY_PAPER : null) + '</select></label><label>題目類別<select data-k="kd">' + opt(KD, s.kd) + '</select></label>' +
+        '<label>題數<input data-k="n" type="number" min="0" max="40" step="1" value="' + esc(mode === "manual" ? s.ids.length : s.n) + '"' + (mode === "manual" ? ' disabled title="手動出題的題數＝你挑的題數"' : "") + '></label><label>每題配分<input data-k="pts" type="number" min="0" max="100" step="0.5" value="' + esc(s.pts) + '"></label>' +
         '<label>選答題數<input data-k="take" type="number" min="0" max="40" step="1" value="' + esc(s.take) + '" title="0＝全部作答；例如共 8 題、填 6＝任選 6 題作答"></label></div>' +
         '<div class="pcs-lv"><span>難易度比例</span><label>易<input data-lv="0" type="number" min="0" max="20" step="1" value="' + esc(s.lv[0]) + '"></label><label>中<input data-lv="1" type="number" min="0" max="20" step="1" value="' + esc(s.lv[1]) + '"></label><label>難<input data-lv="2" type="number" min="0" max="20" step="1" value="' + esc(s.lv[2]) + '"></label><small>全部留空＝不限</small></div>' +
         '<div class="pcs-p"><button type="button" class="pen" data-a="pick">挑題…</button><span class="pcs-n"></span></div></div>');
@@ -69,8 +72,8 @@
     }
 
     function draw() {
-      el.innerHTML = '<div class="ppl-top"><label>套用範本<select class="ppre"><option value="">選一個範本…</option>' + PRESETS.map(function (p, i) { return '<option value="' + i + '">' + esc(p[0]) + "</option>"; }).join("") + '</select></label><button type="button" class="pen" data-a="add">新增大題</button></div><div class="pcs-list"></div>' +
-        '<div class="ppl-sum"><span class="psum"></span><span class="pauto"><label>滿分<input class="pfull" type="number" min="1" max="500" step="1" value="100"></label><button type="button" class="pen" data-a="auto">平均配分</button></span></div>' +
+      el.innerHTML = '<div class="ppl-top">' + (mode === "manual" ? '<span class="meta">手動出題：每個大題按「挑題…」自己指定題目；題數就是你挑的題數。</span>' : '<label>套用範本<select class="ppre"><option value="">選一個範本…</option>' + PRESETS.map(function (p, i) { return '<option value="' + i + '">' + esc(p[0]) + "</option>"; }).join("") + '</select></label>') + '<button type="button" class="pen" data-a="add">新增大題</button></div><div class="pcs-list"></div>' +
+        '<div class="ppl-sum"><span class="psum"></span><span class="pauto"><label>滿分<input class="pfull" type="number" min="1" max="500" step="1" value="' + fullV + '"></label><button type="button" class="pen go" data-a="smart" title="依題型與題目類別的難度自動分配，總分剛好等於滿分">智慧配分</button><button type="button" class="pen" data-a="auto">平均配分</button></span></div>' +
         '<details class="ppw"><summary>各單元的比例（可選）</summary><div class="pw"></div></details><p class="meta">題目不夠時，系統會用其他條件相近的題補，並告訴你哪一個大題缺幾題。每份卷只會記錄一筆列印紀錄。</p>';
       var list = el.querySelector(".pcs-list"); secs.forEach(function (s, i) { list.appendChild(card(s, i)); });
       if (!secs.length) list.appendChild(h('<p class="meta">還沒有大題，按「新增大題」，或先套用一個範本。</p>'));
@@ -79,8 +82,23 @@
     el.addEventListener("click", function (e) {
       var b = e.target.closest("button[data-a]"); if (!b || e.target.closest(".pcs")) return;
       if (b.dataset.a === "add") { if (secs.length >= maxSec) return say("最多 " + maxSec + " 個大題"); secs.push(blank()); draw(); changed(); }
+      if (b.dataset.a === "smart") {
+        var full0 = Math.max(1, num(el.querySelector(".pfull").value, 100)); fullV = full0;
+        var W = secs.map(function (s) { return (TYW[s.ty] || 4) * (KDW[s.kd] || 1); }), den = secs.reduce(function (a, s, i) { return a + W[i] * answered(s); }, 0);
+        if (!den) return say("請先設定各大題的題數，再按智慧配分。");
+        var unit = full0 / den, T = Math.round(full0 * 2), ideal = W.map(function (w) { return w * unit; });
+        /* 每個大題的每題分數取 0.5 的倍數，在「總分剛好等於滿分」的條件下，找出離理想比例最近的一組（小型動態規劃） */
+        var cand = secs.map(function (sc, i) { var n = answered(sc), base = Math.floor(ideal[i] * 2) / 2, out = []; if (!n) return [{ p: sc.pts, c: 0, w: 0 }]; for (var k = -8; k <= 8; k++) { var p = base + k * 0.5; if (p < 0.5) continue; out.push({ p: p, c: Math.pow((p - ideal[i]) / ideal[i], 2), w: Math.round(p * 2 * n) }); } return out; });
+        var st = [{ 0: { c: 0, ch: [] } }];
+        cand.forEach(function (cs, i) { var nx = {}; Object.keys(st[i]).forEach(function (r) { cs.forEach(function (x) { var t = +r + x.w; if (t > T) return; var c = st[i][r].c + x.c; if (!nx[t] || c < nx[t].c) nx[t] = { c: c, ch: st[i][r].ch.concat(x.p) }; }); }); st.push(nx); });
+        var hit = st[secs.length][T];
+        if (hit) hit.ch.forEach(function (p, i) { secs[i].pts = p; });
+        else { secs.forEach(function (sc, i) { sc.pts = Math.max(0.5, Math.floor(ideal[i] * 2) / 2); }); }
+        draw(); changed(); var tt = total(); if (Math.abs(tt.p - full0) > 0.01) say("已依題型配分，總分是 " + (Math.round(tt.p * 10) / 10) + " 分（題數組合無法剛好湊到 " + full0 + " 分，可以微調個別大題的配分）。");
+        return;
+      }
       if (b.dataset.a === "auto") {
-        var full = Math.max(1, num(el.querySelector(".pfull").value, 100)), cnt = secs.reduce(function (a, s) { return a + answered(s); }, 0); if (!cnt) return;
+        var full = Math.max(1, num(el.querySelector(".pfull").value, 100)); fullV = full; var cnt = secs.reduce(function (a, s) { return a + answered(s); }, 0); if (!cnt) return;
         var each = Math.floor(full / cnt * 2) / 2; secs.forEach(function (s) { s.pts = each; });
         var left = full - each * cnt; for (var k = secs.length - 1, guard = 0; k >= 0 && left > 0 && guard < 400; guard++) { var step = 0.5 * answered(secs[k]); if (step > 0 && step <= left + 1e-9) { secs[k].pts += 0.5; left -= step; } else k--; }
         draw(); changed();
@@ -132,10 +150,17 @@
     el.refreshWeights = weights;
     return {
       el: el, refreshWeights: weights,
+      /* 出題方式：auto＝電腦出題（範本＋條件自動挑）、manual＝手動出題（每個大題自己挑題）；換方式會重設大題 */
+      setMode: function (m) { if (m === mode) return; mode = m; secs = m === "manual" ? [blank({ ty: "any", n: 0, pts: 2 })] : PRESETS[0][1].map(function (x) { return blank({ ty: x.ty, kd: x.kd || "", n: x.n, pts: x.pts }); }); draw(); changed(); },
+      /* 範圍改成線上速測時，紙本才有的題型（勾選題、連連看）自動改成選擇題；回傳改了幾個大題 */
+      syncScope: function () { var n = 0; if (isOn()) secs.forEach(function (s) { if (ONLY_PAPER.indexOf(s.ty) >= 0) { s.ty = "choice"; n++; } }); draw(); changed(); return n; },
+      total: total,
       /* 整理成要送給伺服器的計畫；有錯回傳 {err} */
       get: function () {
         var out = [], t = total();
         if (!secs.length) return { err: "請至少設定一個大題。" };
+        if (mode === "manual") { for (var mi = 0; mi < secs.length; mi++) if (!secs[mi].ids.length) return { err: "第 " + (mi + 1) + " 大題還沒有挑題。手動出題要在每個大題按「挑題…」指定題目，不要的大題請刪除。" }; }
+        if (isOn()) { for (var oi2 = 0; oi2 < secs.length; oi2++) if (ONLY_PAPER.indexOf(secs[oi2].ty) >= 0) return { err: "第 " + (oi2 + 1) + " 大題是「" + TYN[secs[oi2].ty] + "」，線上速測的題庫沒有這種題型。請改題型，或回上一步改成紙本出卷。" }; }
         if (t.n > cap) return { err: "題數超過上限（最多 " + cap + " 題）。" };
         secs.forEach(function (s) {
           var lv = s.lv.map(function (v) { return Math.max(0, Math.floor(num(v, 0))); });
