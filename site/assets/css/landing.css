@@ -309,4 +309,11 @@ body.lp{--sans:"Huninn","Noto Sans TC",system-ui,sans-serif;font-family:var(--sa
 @media (max-width:860px){.exam .xg{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.exam .xch span,.exam .xp p{animation:none;opacity:1;transform:none}}
 .fc,.fc:nth-child(3n+2),.fc:nth-child(3n){border-top:1px solid var(--line);border-top-color:var(--line)}
-.say p{max-width:min(24em,92vw);text-wrap:balance;word-break:keep-all;line-break:strict}
+.say p {
+  width: min(24em, 92vw);
+  margin-inline: auto;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
