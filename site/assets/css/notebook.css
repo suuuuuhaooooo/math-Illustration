@@ -132,7 +132,7 @@ table.tb{width:100%;border-collapse:collapse}.tb th,.tb td{padding:7px 8px;borde
 .tb tr.low td{background:color-mix(in srgb,var(--p1,#b4452f) 12%,transparent)}
 
 /* ---- 題目附圖 ---- */
-.qimg{display:block;max-width:100%;max-height:340px;margin:.5em auto;border-radius:10px;background:#fff}
+.qimg{display:block;max-width:100%;max-height:340px;margin:.5em auto;background:#fff}
 .qimg.h{max-height:240px}
 @media print{.qimg{max-height:200px;break-inside:avoid}}
 .nextlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:6px 0 14px}.nx small{color:var(--soft)}
