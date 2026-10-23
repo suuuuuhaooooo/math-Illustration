@@ -13,9 +13,9 @@
     var m = /^([1-6])(\d{1,2})$/.exec(String(u.cls || "")), t = u.role === "teacher";
     return { school: "", showSchool: false, exam: "數學練習卷", showExam: true, subject: "數學", showSubject: true, grade: m ? m[1] : "", cls: m ? String(+m[2]) : "", showClass: true,
       showScore: t, prefill: !t, paper: "A4", layout: "s1", optMode: "col", kinds: { q: true, ak: true }, showFocus: false, showId: false, showPerf: false, showCont: false, showLv: false, showCog: false, showKnow: false, metaAt: "q", matrix: false, mxRow: "unit", mxCol: "diff", variants: 1, pageNo: "kn",
-      wm: !t, wmName: true, wmCls: true, wmEmail: true, wmIp: true, wmDev: true, wmTime: true, wmText: "", wmDen: "2", wmDens: "1" };
+      wm: !t, wmName: true, wmCls: true, wmEmail: true, wmIp: true, wmDev: true, wmTime: true, wmText: "", wmDen: "2", wmDens: "1", mascot: true };
   }
-  function load(u) { var d = defaults(u), s = null; try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {} if (s) { Object.keys(d).forEach(function (k) { if (s[k] !== undefined && k !== "grade" && k !== "cls") d[k] = s[k]; }); } return d; }
+  function load(u) { var d = defaults(u), s = null; try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {} if (s) { Object.keys(d).forEach(function (k) { if (s[k] !== undefined && k !== "grade" && k !== "cls") d[k] = s[k]; }); } if (!u.admin) d.mascot = true; return d; }
   function save(P) { try { var c = Object.assign({}, P); delete c.grade; delete c.cls; delete c.fd; delete c.fg; delete c.fk; delete c.fp; localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {} }
 
 
@@ -68,6 +68,7 @@
       '<details open><summary>輸出卷別</summary><div class="ppg"><div class="ppr">' + chk("pp-all", "全選", false) + '</div><div class="pcards pk">' + KINDS.map(function (k) { return card("checkbox", "", "", k[1], !!P.kinds[k[0]], "pp-k-" + k[0], ico("kind", k[0])); }).join("") + "</div></div></details>" +
       '<details open><summary>浮水印（防止試卷外流，可追查是誰印的）</summary><div class="ppg">' +
       (u.role === "teacher" ? "" : '<div class="ppr meta">學生列印一律會加上浮水印（姓名、班級座號、Email、IP、裝置、卷號、時間），也會留下列印紀錄，不能關閉。</div>') +
+      (u.admin ? '<div class="ppr">' + chk("pp-mascot", "印上小紅人浮水印（黑白、很淡、在文字底下；只有管理員能關）", P.mascot) + "</div>" : "") +
       '<div class="ppr">' + chk("pp-wm", "加上浮水印", P.wm) + chk("pp-wmName", "姓名", P.wmName) + chk("pp-wmCls", "班級座號", P.wmCls) + chk("pp-wmEmail", "Email", P.wmEmail) + chk("pp-wmIp", "IP 位址", P.wmIp) + chk("pp-wmDev", "裝置", P.wmDev) + chk("pp-wmTime", "列印時間", P.wmTime) + "</div>" +
       '<div class="ppr"><label>自訂文字 <input id="pp-wmText" maxlength="30" value="' + esc(P.wmText) + '" placeholder="例如：校內使用"></label><label>疏密 <select id="pp-wmDens"><option value="1"' + (P.wmDens === "1" ? " selected" : "") + '>疏</option><option value="2"' + (P.wmDens === "2" ? " selected" : "") + '>中</option><option value="3"' + (P.wmDens === "3" ? " selected" : "") + '>密</option></select></label><label>濃度 <select id="pp-wmDen"><option value="1"' + (P.wmDen === "1" ? " selected" : "") + '>淡</option><option value="2"' + (P.wmDen === "2" ? " selected" : "") + '>中</option><option value="3"' + (P.wmDen === "3" ? " selected" : "") + ">深</option></select></label></div></div></details>" +
       '<details><summary>題目篩選（依題庫屬性表挑題）</summary><div class="ppg">' +
@@ -90,7 +91,7 @@
         grade: q("pp-grade").value.trim(), cls: q("pp-cls").value.trim(), showClass: q("pp-showClass").checked, showScore: q("pp-showScore").checked, prefill: q("pp-prefill").checked,
         paper: r("pp-paper") || "A4", layout: r("pp-layout") || "s1", optMode: r("pp-opt") || "col", kinds: kinds, showFocus: q("pp-showFocus").checked, showId: q("pp-showId").checked, showPerf: q("pp-showPerf").checked, showCont: q("pp-showCont").checked, showLv: q("pp-showLv").checked, showCog: q("pp-showCog").checked, showKnow: q("pp-showKnow").checked, metaAt: r("pp-metaAt") || "q", pageNo: r("pp-pageNo") || "kn", matrix: q("pp-matrix").checked, mxRow: q("pp-mxRow").value, mxCol: q("pp-mxCol").value,
         fd: checked("pp-fd"), fg: checked("pp-fg"), fk: q("pp-fk").value.trim(), fp: q("pp-fp").value.trim(), variants: +q("pp-variants").value || 1,
-        wm: q("pp-wm").checked, wmName: q("pp-wmName").checked, wmCls: q("pp-wmCls").checked, wmEmail: q("pp-wmEmail").checked, wmIp: q("pp-wmIp").checked, wmDev: q("pp-wmDev").checked, wmTime: q("pp-wmTime").checked, wmText: q("pp-wmText").value.trim(), wmDen: q("pp-wmDen").value, wmDens: q("pp-wmDens").value };
+        mascot: u.admin ? q("pp-mascot").checked : true, wm: q("pp-wm").checked, wmName: q("pp-wmName").checked, wmCls: q("pp-wmCls").checked, wmEmail: q("pp-wmEmail").checked, wmIp: q("pp-wmIp").checked, wmDev: q("pp-wmDev").checked, wmTime: q("pp-wmTime").checked, wmText: q("pp-wmText").value.trim(), wmDen: q("pp-wmDen").value, wmDens: q("pp-wmDens").value };
     }
     el.addEventListener("change", function (e) {
       if (e.target.id === "pp-all") { KINDS.forEach(function (k) { el.querySelector("#pp-k-" + k[0]).checked = e.target.checked; }); }
@@ -255,7 +256,7 @@
         return "<li>" + (q.ty === "tf" ? '<span class="bub">○</span><span class="bub">✕</span>' : q.ty === "match" ? q.L.map(function (_, i) { return '<span class="ln0">' + (i + 1) + "＿</span>"; }).join("") : q.ty === "multi" ? q.o.map(function (_, i) { return '<span class="bub">' + L(i) + "</span>"; }).join("") : q.o ? q.o.map(function (_, i) { return '<span class="bub">' + L(i) + "</span>"; }).join("") : '<span class="ln0">＿＿＿＿＿＿＿＿</span>') + "</li>"; }).join("") + "</ol>"; }).join("");
     }
     function sheet(k, arr, tag, sid) {
-      var cls = "psheet pp pp-" + k, h;
+      var cls = "psheet pp pp-" + k + (P.mascot === false ? " nomascot" : ""), h;
       if (k === "q") h = head("題目卷", tag) + qList(arr, false);
       else if (k === "qa") h = head("題目與詳解", tag) + qList(arr, true);
       else if (k === "ak") { cls += " key"; h = head("簡答與詳解", tag) + keyList(arr, ""); }
@@ -280,7 +281,7 @@
     var rows = order.map(function (r) { var n = 0; cols.forEach(function (c) { var k = (by[r][c] || []).length; tot[c] += k; n += k; });
       return "<tr><td>" + esc(r) + "</td>" + cols.map(function (c) { var a = by[r][c] || []; return "<td>" + (a.length ? a.length + "<small>（" + a.join("、") + "）</small>" : "") + "</td>"; }).join("") + "<td>" + n + "</td></tr>"; }).join("");
     var rl = (MXR.filter(function (x) { return x[0] === rk; })[0] || MXR[0])[1];
-    return '<div class="psheet pp pp-matrix" data-sid="matrix-0" style="--pw:' + pw + 'mm' + (PN_ON(P) ? ";page:pg-matrix-0" : "") + '" data-cols="1">' + (WM ? WM.scr : "") + head("雙向細目表", "") + '<table class="pscore pmx"><tr><th>' + rl + "</th>" + cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "<th>合計</th></tr>" + rows + "<tr><th>合計</th>" + cols.map(function (c) { return "<th>" + tot[c] + "</th>"; }).join("") + "<th>" + qs.length + '</th></tr></table><p class="pcopy">格子裡：題數（題號）</p></div>';
+    return '<div class="psheet pp pp-matrix' + (P.mascot === false ? ' nomascot' : '') + '" data-sid="matrix-0" style="--pw:' + pw + 'mm' + (PN_ON(P) ? ";page:pg-matrix-0" : "") + '" data-cols="1">' + (WM ? WM.scr : "") + head("雙向細目表", "") + '<table class="pscore pmx"><tr><th>' + rl + "</th>" + cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "<th>合計</th></tr>" + rows + "<tr><th>合計</th>" + cols.map(function (c) { return "<th>" + tot[c] + "</th>"; }).join("") + "<th>" + qs.length + '</th></tr></table><p class="pcopy">格子裡：題數（題號）</p></div>';
   }
   /* 裝置資訊：Chrome 類瀏覽器能問到 Android 手機型號；其他資訊（螢幕、時區、語言）一併附上，伺服器另外也會自己讀 User-Agent */
   function device() {

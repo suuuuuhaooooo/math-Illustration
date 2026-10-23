@@ -477,3 +477,8 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 /* 注音字體版：用 Bpmf Huninn 顯示注音，版面不加上方注音；破音字可能顯示預設讀音 */
 body.zyfont :where(p,li,td,th,h1,h2,h3,h4,label,a,span,div,b,small,mark,em,summary,dt,dd):not(.katex *):not(.nozy){font-family:"Bpmf Huninn","Huninn",sans-serif}
 body.zyfont{line-height:1.95}
+
+/* 練習卷浮水印：黑白小紅人，很淡，放在文字底下 */
+.psheet.pp{isolation:isolate;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.psheet.pp::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:url("../img/islander-bw.svg") center 52%/min(62%,380px) no-repeat;opacity:.07;filter:grayscale(1);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.psheet.pp.nomascot::before{display:none}
