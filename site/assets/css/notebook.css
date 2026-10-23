@@ -313,3 +313,13 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 .ubars span{height:84px}.ubars{height:84px}.ubars span i{flex:none}
 .uad{margin-top:10px}.ua{display:flex;gap:10px;align-items:flex-start;border-top:1px solid var(--rule);padding:8px 0}.ua .ul{flex:none;font-size:.78em;font-weight:700;padding:1px 8px;border-radius:10px;border:1px solid var(--p3);color:var(--p3);margin-top:2px}
 .ua.warn .ul{border-color:var(--p4b);color:var(--p4b)}.ua.bad .ul{border-color:var(--p1);color:var(--p1)}.ua div{min-width:0;overflow-wrap:anywhere}
+
+/* 出卷：一步一步 */
+.pstepbar{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:6px 0 10px;padding:0;counter-reset:none}.pstepbar li{flex:1 1 0;min-width:0}
+.pstepbar a{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 4px;border:1.5px solid var(--line);border-radius:20px;background:var(--paper);color:var(--soft);text-decoration:none;font-size:.9em;white-space:nowrap}
+.pstepbar b{display:inline-flex;align-items:center;justify-content:center;width:1.6em;height:1.6em;border-radius:50%;border:1.5px solid currentColor;font-size:.85em;flex:none}
+.pstepbar li.on a{background:var(--ink);color:var(--paper);border-color:var(--ink)}.pstepbar li.done a{color:var(--p3);border-color:var(--p3)}
+.pst{margin:10px 0 6px;font-size:1.05em}.pstsum{border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;background:var(--paper2);margin:8px 0}.pstsum ul{margin:6px 0 0;padding-left:1.3em}
+.pnav{justify-content:space-between;margin-top:12px}.pnav [hidden],.pact [hidden]{display:none!important}.ppanel details[hidden],.pstp[hidden]{display:none!important}
+@media (max-width:480px){.pstepbar{gap:4px}.pstepbar a{padding:6px 2px;font-size:.8em;gap:3px}.pstepbar b{width:1.5em;height:1.5em}}
+[hidden]{display:none!important}

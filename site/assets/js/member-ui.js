@@ -2,7 +2,7 @@
    題目、判分、積分都由伺服器處理（見 member.js）；這裡只負責顯示與收集答案。 */
 (function(){
 "use strict";
-var M=NB.member,app=document.getElementById("app"),h=NB.h,tx=NB.tx,view,who,TM=null,XG=null,qg=null,booted=false;
+var M=NB.member,app=document.getElementById("app"),h=NB.h,tx=NB.tx,view,who,TM=null,XG=null,PS=null,qg=null,booted=false;
 var TABS=[["home","首頁"],["daily","每日一題"],["quiz","單元小測驗"],["assign","待測清單"],["mock","模擬卷"],["wrong","錯題本"],["progress","學習進度"],["stickers","勳章"],["board","排行榜"],["print","列印練習卷"]];
 function pad(n){return("0"+n).slice(-2)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -50,7 +50,7 @@ function boot(){
  if(booting)return;booting=true;
  app.innerHTML="";app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
  M.boot().catch(function(e){M.U=null;M.err=(e&&e.code)||"net"}).then(function(){booted=true;booting=false;route()})}
-function route(){clearInterval(TM);if(XG){XG();XG=null}if(!booted){boot();return}if(!shell())return;var p=(location.hash||"#home").slice(1).split("/");if(M.acct&&M.acct.expired&&["home","progress","stickers"].indexOf(p[0])<0)p=["expired"];(V[p[0]]||V.home)(p[1]);window.scrollTo(0,0)}
+function route(){clearInterval(TM);if(XG){XG();XG=null}if(!booted){boot();return}var p=(location.hash||"#home").slice(1).split("/");if(p[0]==="print"&&PS&&PS.alive()){PS.go(p[1]);return}/* 出卷的步驟只切換顯示，不重畫整個頁面，設定與已出的卷子才不會遺失 */if(!shell())return;if(M.acct&&M.acct.expired&&["home","progress","stickers"].indexOf(p[0])<0)p=["expired"];(V[p[0]]||V.home)(p[1]);window.scrollTo(0,0)}
 
 function login(){
  try{if(sessionStorage.getItem("nb-idle")){sessionStorage.removeItem("nb-idle");setTimeout(function(){var f=document.querySelector(".fb");if(f){f.className="fb no";f.textContent="因為閒置太久，已為了帳號安全自動登出，請重新登入。"}},0)}}catch(e){}
@@ -250,25 +250,48 @@ V.board=function(){
   box.innerHTML='<table class="tb"><tr><th>名次</th><th>座號</th><th>等級</th><th>積分</th><th>答對</th><th>勳章</th></tr>'+rows.map(function(x,i){return'<tr class="'+(x.no===u.no?"me":"")+'"><td><span class="rk r'+(i+1)+'">'+(i+1)+"</span></td><td>"+esc(x.no)+(x.no===u.no?"（我）":"")+"</td><td>Lv."+x.lv+"</td><td>"+x.pts+"</td><td>"+x.ok+"</td><td>"+x.stk+"</td></tr>"}).join("")+"</table>"})
  .catch(function(e){box.textContent=errMsg(e)})};
 
-V.print=function(){
+V.print=function(arg){
  var u=user(),D=M.D,s=sheet("列印練習卷","選好單元與題數就可以印出來寫");s.classList.add("noprint");
  var src='<select id="ps"><option value="mix">本年級綜合</option>'+(D.wr.length?'<option value="wrong">我的錯題（'+D.wr.length+" 題）</option>":"")+'<option value="pick">自選單元（下方勾選）</option></select>';
- var ctl=h('<div class="ctl"><label>出卷方式</label><select id="pm"><option value="quick">快速出卷</option><option value="plan">自訂大題（題型、配分、比例、挑題）</option></select><label>題目來源</label>'+src+'<label class="qn">題數</label><select id="pn"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>30</option><option>40</option></select>'+(u.role==="teacher"?'<label>年級</label><select id="pg"><option value="1">一年級</option><option value="2">二年級</option><option value="3">三年級</option><option value="4">四年級</option><option value="5">五年級</option><option value="6" selected>六年級</option></select>':"")+'<button class="pen go">出題</button><button class="pen">列印</button></div>');
+ var ctl=h('<div class="ctl"><label>出卷方式</label><select id="pm"><option value="quick">快速出卷</option><option value="plan">自訂大題（題型、配分、比例、挑題）</option></select><label>題目來源</label>'+src+'<label class="qn">題數</label><select id="pn"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>30</option><option>40</option></select>'+(u.role==="teacher"?'<label>年級</label><select id="pg"><option value="1">一年級</option><option value="2">二年級</option><option value="3">三年級</option><option value="4">四年級</option><option value="5">五年級</option><option value="6" selected>六年級</option></select>':"")+'</div>');
  var pk=picker((M.gens||[]).slice().sort(),u.grade),out=h("<div></div>"),note=h('<p class="meta noprint"></p>'),last=null,PP=NB.pp;
  var ed=NB.plan.editor({role:u.role,admin:!!u.admin,api:function(m,p){return M.api(m,p)},tx:tx,title:title,units:function(){return pk.get()},say:function(m){note.textContent=m}},function(){});ed.el.hidden=true;ed.el.classList.add("noprint");
- var panel=PP.panel(u,redraw);s.appendChild(ctl);s.appendChild(pk.el);s.appendChild(ed.el);s.appendChild(panel.el);view.appendChild(s);view.appendChild(note);view.appendChild(out);
- var bs=ctl.querySelectorAll("button");bs[0].onclick=make;bs[1].onclick=function(){if(!last)return make();redraw();window.print()};
+ var panel=PP.panel(u,redraw),goB=h('<button class="pen go">出題</button>'),prB=h('<button class="pen">列印</button>'),act=h('<div class="ctl pact"></div>'),sum=h('<div class="pstsum"></div>');act.appendChild(goB);act.appendChild(prB);
+ /* 一步一步：網址 #print/step1～step5。各步驟只是顯示／隱藏同一批控制項，所以改設定不會遺失，也不會重新載入 */
+ var STEPS=[["選題","第 1 步　選擇出卷方式、題目來源與題數"],["篩選","第 2 步　題目篩選（選用，依題庫屬性挑題）"],["卷面","第 3 步　卷頭、紙張版面與輸出卷別"],["浮水印","第 4 步　浮水印與每題附註（選用）"],["出題","第 5 步　確認、出題與列印"]],step=1,stale=false;
+ var bar=h('<ol class="pstepbar noprint"></ol>'),hd=h('<h3 class="pst noprint"></h3>'),nav=h('<div class="ctl pnav noprint"><button class="pen" type="button">上一步</button><button class="pen go" type="button">下一步</button></div>'),dts=panel.el.querySelectorAll(":scope > details");
+ STEPS.forEach(function(x,i){var li=h('<li><a href="#print/step'+(i+1)+'"><b>'+(i+1)+"</b><span>"+x[0]+"</span></a></li>");bar.appendChild(li)});
+ s.appendChild(bar);s.appendChild(hd);s.appendChild(ctl);s.appendChild(pk.el);s.appendChild(ed.el);s.appendChild(panel.el);s.appendChild(sum);s.appendChild(act);s.appendChild(nav);view.appendChild(s);view.appendChild(note);view.appendChild(out);
+ var DS={2:[4],3:[0,1,2],4:[3,5]};
+ function layout(){ed.el.hidden=!(step===1&&isPlan())}
+ function ok1(){var v=v0();if(v==="pick"&&!pk.get().length){note.hidden=false;note.textContent="請先勾選至少一個單元，再進到下一步。";return false}if(isPlan()){if(v==="wrong"){note.hidden=false;note.textContent="錯題重練不能用自訂大題，請改用快速出卷。";return false}var g=ed.get();if(g.err){note.hidden=false;note.textContent=g.err;return false}}return true}
+ function summ(){var v=v0(),p=panel.get(),L=[],g=null;if(isPlan()){g=ed.get()}var cnt=g&&g.plan?g.plan.secs.reduce(function(a,x){return a+Math.max(x.n||0,(x.ids||[]).length)},0):0;
+  L.push("出卷方式："+(isPlan()?"自訂大題（"+(g&&g.plan?g.plan.secs.length+" 個大題、共 "+cnt+" 題":"設定有誤")+"）":"快速出卷（"+ctl.querySelector("#pn").value+" 題）"));
+  L.push("題目來源："+(v==="pick"?"自選 "+pk.get().length+" 個單元":v==="wrong"?"我的錯題":"本年級綜合"));
+  L.push("題目篩選："+(fq(p)?"有設定條件":"不篩選"));L.push("紙張："+esc(p.paper)+"　輸出卷別："+Object.keys(p.kinds||{}).filter(function(k){return p.kinds[k]}).length+" 種");
+  sum.innerHTML="<b>目前的設定</b><ul>"+L.map(function(x){return"<li>"+x+"</li>"}).join("")+"</ul>"+(stale&&last?'<p class="fb no">選題設定改過了，請重新按「出題」，否則下面還是上一份卷子。</p>':"")+(last?"":'<p class="meta">確認沒問題就按「出題」。</p>')}
+ function show(n){n=Math.max(1,Math.min(5,n||1));step=n;hd.textContent=STEPS[n-1][1];
+  ctl.hidden=pk.el.hidden=n!==1;layout();panel.el.hidden=n<2||n>4;for(var i=0;i<dts.length;i++){var on=(DS[n]||[]).indexOf(i)>=0;dts[i].hidden=!on;if(on)dts[i].open=true}
+  sum.hidden=act.hidden=n!==5;if(n===5)summ();out.hidden=note.hidden=n!==5;
+  nav.children[0].hidden=n===1;nav.children[1].hidden=n===5;
+  Array.prototype.forEach.call(bar.children,function(li,i){li.className=i+1===n?"on":i+1<n?"done":"";var a=li.firstChild;if(i+1===n)a.setAttribute("aria-current","step");else a.removeAttribute("aria-current")})}
+ function goStep(n){n=Math.max(1,Math.min(5,n));if(n>step&&!ok1())return;step=n;location.hash="#print/step"+n}
+ nav.children[0].onclick=function(){goStep(step-1)};nav.children[1].onclick=function(){goStep(step+1)};
+ bar.addEventListener("click",function(e){var a=e.target.closest("a");if(!a)return;var n=+a.getAttribute("href").slice(-1);if(n>step&&!ok1()){e.preventDefault()}});
+ [ctl,pk.el,ed.el].forEach(function(x){x.addEventListener("change",function(){stale=true});x.addEventListener("input",function(){stale=true})});
+ var node=s;PS={alive:function(){return document.body.contains(node)},go:function(a){var m=/^step([1-5])$/.exec(a||"");show(m?+m[1]:1);window.scrollTo(0,0)}};
+ goB.onclick=make;prB.onclick=function(){if(!last)return make();redraw();window.print()};
  panel.csvBtn.onclick=function(){if(last)PP.csv(last.qs,deps());else note.textContent="請先按「出題」。"};
  pk.el.addEventListener("change",function(){if(pk.get().length)ctl.querySelector("#ps").value="pick";ed.refreshWeights()});
  function isPlan(){return ctl.querySelector("#pm").value==="plan"}
- ctl.querySelector("#pm").onchange=function(){var p=isPlan();ed.el.hidden=!p;ctl.querySelector(".qn").hidden=p;ctl.querySelector("#pn").hidden=p;if(p){ed.refreshWeights();var o=ctl.querySelector("#ps option[value=wrong]");if(o&&ctl.querySelector("#ps").value==="wrong")ctl.querySelector("#ps").value="mix"}};
+ ctl.querySelector("#pm").onchange=function(){var p=isPlan();layout();ctl.querySelector(".qn").hidden=p;ctl.querySelector("#pn").hidden=p;if(p){ed.refreshWeights();var o=ctl.querySelector("#ps option[value=wrong]");if(o&&ctl.querySelector("#ps").value==="wrong")ctl.querySelector("#ps").value="mix"}};
  var stopG=PP.guard(out,function(){return !!(last&&last.wm&&last.wm.force)},function(){redraw()});
- window.addEventListener("hashchange",function f(){if(location.hash!=="#print"){PP.clearPage();stopG();window.removeEventListener("hashchange",f)}});
+ window.addEventListener("hashchange",function f(){if(!/^#print(\/|$)/.test(location.hash)){PS=null;PP.clearPage();stopG();window.removeEventListener("hashchange",f)}});
  function fq(P){var o="";if(v0()==="wrong")return o;if(P.fd&&P.fd.length)o+="&d="+encodeURIComponent(P.fd.join(","));if(P.fg&&P.fg.length)o+="&cg="+encodeURIComponent(P.fg.join(","));if(P.fk)o+="&kw="+encodeURIComponent(P.fk);if(P.fp)o+="&pf="+encodeURIComponent(P.fp);return o}
  function v0(){return ctl.querySelector("#ps").value}
  function deps(){return{u:u,today:M.today(),title:title,tx:tx,qimg:qimg,wm:last&&last.wm,secs:last&&last.secs}}
  function redraw(){if(!last)return;var P=panel.get();PP.applyPage(P);out.innerHTML=PP.build(P,last.qs,last.nm,deps())}
- out.innerHTML='<p class="meta">先選好題目來源、題數與下方的設定，再按「出題」。</p>';
+ out.innerHTML='<p class="meta">按上面的「出題」，題目就會出現在這裡。</p>';
  function make(){
   var v=ctl.querySelector("#ps").value,n=+ctl.querySelector("#pn").value,us=pk.get();if(v==="pick"&&!us.length){out.innerHTML='<div class="fb no">請先在下面勾選至少一個單元。</div>';return}
   out.innerHTML='<p class="meta">出題中…</p>';note.textContent="";
@@ -277,8 +300,9 @@ V.print=function(){
    var nm=pl?"自訂出卷":v==="wrong"?"錯題重練":v==="mix"?"綜合練習":"自選 "+us.length+" 個單元",qs=r.qs;
    if(r.secs){var lack=r.secs.filter(function(x){return x.got<x.want}).map(function(x){return"第 "+(x.i+1)+" 大題缺 "+(x.want-x.got)+" 題"});if(lack.length)note.textContent=lack.join("、")+"（符合條件的題目不夠，可放寬題型、類別或難易度）。"}
    if(r.filled&&!r.secs)note.textContent="你選的單元不重複的題目不夠，已用同年級其他單元補了 "+r.filled+" 題。";if(r.short&&!r.secs)note.textContent+=(fq(panel.get())?" 符合篩選條件的題目只有 "+qs.length+" 題（只會從已有屬性的固定題挑；可放寬條件，或請管理員匯入屬性表）。":" 可出的題目只有 "+qs.length+" 題。");
-   last={qs:qs,nm:nm,wm:r.wm,secs:r.secs};redraw()},
-   function(e){out.innerHTML='<div class="fb no">'+esc(errMsg(e))+"</div>"})}};
+   last={qs:qs,nm:nm,wm:r.wm,secs:r.secs};stale=false;summ();redraw()},
+   function(e){out.innerHTML='<div class="fb no">'+esc(errMsg(e))+"</div>"})}
+ show((/^step([1-5])$/.exec(arg||"")||[0,1])[1]);};
 
 V.expired=function(){
  var a=M.acct||{},s=sheet("授權已到期","正式學員功能暫停");s.appendChild(h("<p>你的正式學員授權已於 <b>"+esc(a.expires||"")+"</b> 到期。目前只能查看自己的首頁、學習進度與勳章；小測驗、模擬卷、錯題本、列印與排行榜需要老師延長授權後才能使用。</p>"));

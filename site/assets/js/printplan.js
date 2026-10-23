@@ -96,7 +96,7 @@
       if (!us.length) { say("請先在上面「自選單元」勾選要挑題的單元（最多 30 個）。"); return; }
       var st = { ty: s.ty === "any" || s.ty === "group" ? "" : s.ty, kd: s.kd, lv: "", kw: "", page: 0, total: 0 }, ov = h('<div class="pkov" role="dialog" aria-modal="true"><div class="pkbox"><h3>挑題</h3><div class="pk-f"></div><div class="pk-l">載入中…</div><div class="pk-p"></div><div class="pk-b"></div></div></div>');
       var f = ov.querySelector(".pk-f"), l = ov.querySelector(".pk-l"), pg = ov.querySelector(".pk-p"), bt = ov.querySelector(".pk-b");
-      f.innerHTML = '<label>題型<select data-f="ty">' + opt([["", "全部"]].concat(TY.filter(function (x) { return x[0] !== "any" && x[0] !== "group"; })).map(function (x) { return [x[0], x[1].replace(/（.*）/, "")]; }), st.ty) + '</select></label><label>類別<select data-f="kd">' + opt(KD, st.kd) + '</select></label><label>難度<select data-f="lv">' + opt([["", "全部"], ["1", "易"], ["2", "中"], ["3", "難"]], st.lv) + '</select></label><label>關鍵字<input data-f="kw" maxlength="30"></label><button type="button" class="pen" data-a="go">搜尋</button>';
+      f.innerHTML = '<label>題型<select data-f="ty">' + opt([["", "全部"]].concat(TY.filter(function (x) { return x[0] !== "any" && x[0] !== "group"; })).map(function (x) { return [x[0], x[1].replace(/（.*）/, "")]; }), st.ty) + '</select></label><label>類別<select data-f="kd">' + opt(KD, st.kd) + '</select></label><label>難度<select data-f="lv">' + opt([["", "全部"], ["1", "易"], ["2", "中"], ["3", "難"]], st.lv) + '</select></label><label>關鍵字或題目ID<input data-f="kw" maxlength="30"></label><button type="button" class="pen" data-a="go">搜尋</button>';
       var picked = s.ids.slice(), pq = Object.assign({}, s.idq), room = Math.max(0, cap - (total().n - s.ids.length));
       function foot() { bt.innerHTML = '<span class="meta">已選 <b>' + picked.length + '</b> 題（這份卷最多再放 ' + room + ' 題；題組會整組一起放入）</span><button type="button" class="pen go" data-a="ok">加入這個大題</button><button type="button" class="pen" data-a="cancel">取消</button>'; }
       function load() {
@@ -107,7 +107,7 @@
           if (!r.rows.length) { l.textContent = "沒有符合的題目。"; }
           r.rows.forEach(function (x) {
             var row = h('<label class="pk-r"><input type="checkbox"><span class="pk-m"></span><span class="pk-q"></span></label>'), cb = row.querySelector("input");
-            cb.checked = picked.indexOf(x.id) >= 0; row.querySelector(".pk-m").textContent = (env.title(x.unit).split(" ").slice(-1)[0] || x.unit) + "｜" + ({ 1: "易", 2: "中", 3: "難" })[x.lv] + "｜" + x.kd + (x.inf ? "（推測）" : "") + "｜" + ({ num: "填數字", choice: "選擇", text: "填文字", tf: "是非", multi: "勾選", match: "連連看" })[x.ty] + (x.g ? "｜題組" : "") + (x.img ? "｜有圖" : "");
+            cb.checked = picked.indexOf(x.id) >= 0; row.querySelector(".pk-m").textContent = "ID " + x.id + "｜" + (env.title(x.unit).split(" ").slice(-1)[0] || x.unit) + "｜" + ({ 1: "易", 2: "中", 3: "難" })[x.lv] + "｜" + x.kd + (x.inf ? "（推測）" : "") + "｜" + ({ num: "填數字", choice: "選擇", text: "填文字", tf: "是非", multi: "勾選", match: "連連看" })[x.ty] + (x.g ? "｜題組" : "") + (x.img ? "｜有圖" : "");
             row.querySelector(".pk-q").innerHTML = env.tx(esc(x.q));
             cb.onchange = function () { if (cb.checked) { if (picked.length >= room) { cb.checked = false; say("這份卷的題數已經到上限了。"); return; } picked.push(x.id); pq[x.id] = x.q; } else picked = picked.filter(function (i) { return i !== x.id; }); foot(); };
             l.appendChild(row);
