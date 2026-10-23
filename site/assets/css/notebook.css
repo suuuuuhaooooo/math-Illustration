@@ -340,3 +340,4 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 .pkmsg{max-width:420px}.pkmsg p{white-space:pre-line;line-height:1.7;margin:6px 0 12px}
 @media print{.pdraft{display:none!important}}
 @media (max-width:480px){.pstepbar li:not(.on) span{display:none}.pstepbar li.on{flex:2 1 0}.pstepbar a{overflow:hidden;white-space:nowrap}}
+.pgs{display:inline-flex;flex-wrap:wrap;gap:4px 10px}

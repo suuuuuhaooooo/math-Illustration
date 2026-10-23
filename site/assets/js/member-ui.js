@@ -29,7 +29,7 @@ function picker(ids,mine){
  el.addEventListener("change",cnt);
  el.querySelector(".ctl").onclick=function(e){var b=e.target.closest("button");if(!b)return;boxes.forEach(function(x){x.checked=b.dataset.a==="all"||(b.dataset.a==="mine"&&x.value[0]==String(mine))});cnt()};
  function vis(b){return!b.parentNode.hidden}
- function filter(gr,sem){boxes.forEach(function(b){b.parentNode.hidden=!!((gr&&b.value[0]!=gr)||(sem&&b.value[1]!=sem))});Array.prototype.forEach.call(g.querySelectorAll(".ugr"),function(d){d.hidden=!d.querySelector(".uck:not([hidden])")});cnt()}
+ function filter(gr,sem){boxes.forEach(function(b){b.parentNode.hidden=!!((gr&&gr.length&&gr.indexOf(b.value[0])<0)||(sem&&b.value[1]!=sem))});Array.prototype.forEach.call(g.querySelectorAll(".ugr"),function(d){d.hidden=!d.querySelector(".uck:not([hidden])")});cnt()}
  return{el:el,filter:filter,visible:function(){return boxes.filter(vis).map(function(b){return b.value})},get:function(){return boxes.filter(function(b){return b.checked&&vis(b)}).map(function(b){return b.value})}}}
 function user(){return M.U}
 function ymdT(){return M.T||M.today()}
@@ -303,9 +303,9 @@ function printWiz(arg){
  var bar=h('<ol class="pstepbar noprint"></ol>'),hd=h('<h3 class="pst noprint"></h3>'),nav=h('<div class="ctl pnav noprint"><button class="pen" type="button">上一步</button><button class="pen go" type="button">下一步</button></div>');
  STEPS.forEach(function(x,i){bar.appendChild(h('<li><a href="#print/step'+(i+1)+'"><b>'+(i+1)+"</b><span>"+x[0]+"</span></a></li>"))});
  var s1=h('<div class="pstp"><div class="pmodes"><label class="pmode"><input type="radio" name="pw-mode" value="quick" checked><b>快速出題</b><small>選好範圍和題數，電腦直接隨機出題。最快，適合日常練習卷。</small></label><label class="pmode"><input type="radio" name="pw-mode" value="auto"><b>電腦出題</b><small>自己安排大題、題型、題數、配分與難易度比例，題目由電腦依條件挑；可以用「智慧配分」。</small></label><label class="pmode"><input type="radio" name="pw-mode" value="manual"><b>手動出題</b><small>每個大題自己從題庫挑題（可用題目 ID 搜尋），考哪些題完全由你決定。</small></label></div></div>');
- var gsel='<select id="pw-g">'+"一二三四五六".split("").map(function(c,i){return'<option value="'+(i+1)+'"'+((u.grade||6)==i+1?" selected":"")+">"+c+"年級</option>"}).join("")+"</select>";
+ var gsel='<span id="pw-g" class="pgs">'+"一二三四五六".split("").map(function(c,i){return'<label class="ppc"><input type="checkbox" value="'+(i+1)+'"'+((u.grade||6)==i+1?" checked":"")+">"+c+"</label>"}).join("")+"</span>";
  var s2=h('<div class="pstp"><h4>出題範圍</h4><div class="pmodes"><label class="pmode"><input type="radio" name="pw-scope" value="paper" checked><b>紙本出卷</b><small>題目較全，題型較多（含勾選題、連連看）。</small></label><label class="pmode"><input type="radio" name="pw-scope" value="online"><b>線上速測</b><small>只用線上題庫的題目（沒有勾選題、連連看），和學生線上測驗的題目一致。</small></label></div>'+
-  '<div class="ctl"><label>年級</label>'+gsel+'<label>冊次</label><select id="pw-sem"><option value="a">上下冊（全學年）</option><option value="u">上冊</option><option value="d">下冊</option></select><label>課次</label><select id="pw-src"><option value="all">整個範圍綜合</option><option value="pick">自選課次（下方勾選）</option></select><label class="qn">題數</label><select id="pw-n"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>30</option><option>40</option></select></div><div class="pbox2"></div></div>');
+  '<div class="ctl"><label>年級（可多選）</label>'+gsel+'<label>冊次</label><select id="pw-sem"><option value="a">上下冊（全學年）</option><option value="u">上冊</option><option value="d">下冊</option></select><label>課次</label><select id="pw-src"><option value="all">整個範圍綜合</option><option value="pick">自選課次（下方勾選）</option></select><label class="qn">題數</label><select id="pw-n"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>30</option><option>40</option></select></div><div class="pbox2"></div></div>');
  var s3=h('<div class="pstp"><div class="ctl pvbar"><button type="button" class="pen" id="pv-re">重新出題</button><label class="ppc"><input type="checkbox" id="pv-ans"> 顯示答案</label></div><div class="pvsum"></div><div class="pvlist"></div></div>');
  var s4=h('<div class="pstp"><p class="meta">下面的卷面預覽只是草稿，還沒有正式出卷；到下一步按「進行出卷」才算數。</p><div class="pbox4"></div></div>');
  var s5=h('<div class="pstp"><div class="pstsum"></div><div class="ctl"><button type="button" class="pen go" id="pw-go">進行出卷</button></div><div class="pres"></div></div>');
@@ -314,10 +314,11 @@ function printWiz(arg){
  s.appendChild(bar);s.appendChild(hd);stepEls.forEach(function(x){s.appendChild(x)});s.appendChild(nav);view.appendChild(s);view.appendChild(out);
  function $(sel,root){return(root||s).querySelector(sel)}
  function val(id){return $("#"+id).value}
+ function grades(){return Array.prototype.map.call($("#pw-g").querySelectorAll("input:checked"),function(x){return x.value})}
  function unitsNow(){var e=$("#pw-src");return e&&e.value==="pick"?pk.get():pk.visible()}
  function curPlan(){return W.mode==="quick"?null:ed.get()}
  function qurl(dry,g){var p=panel.get(),pick=val("pw-src")==="pick",us=pk.get();
-  return"/api/print?src=mix"+(pick?"&units="+encodeURIComponent(us.join(",")):"&sem="+val("pw-sem"))+"&g="+val("pw-g")+(W.scope==="online"?"&scope=online":"")+fq(p)+(g&&g.plan?"&plan="+encodeURIComponent(JSON.stringify(g.plan)):"&n="+val("pw-n"))+(dry?"&dry=1":"")}
+  return"/api/print?src=mix"+(pick?"&units="+encodeURIComponent(us.join(",")):"&sem="+val("pw-sem"))+"&g="+grades().join(",")+(W.scope==="online"?"&scope=online":"")+fq(p)+(g&&g.plan?"&plan="+encodeURIComponent(JSON.stringify(g.plan)):"&n="+val("pw-n"))+(dry?"&dry=1":"")}
  function sig(){var g=curPlan();return g&&g.err?"ERR:"+g.err:qurl(true,g)}
  /* 各步驟的檢查：有問題回傳要說的話 */
  function chk(n){
@@ -349,10 +350,10 @@ function printWiz(arg){
  s1.addEventListener("change",function(e){if(e.target.name!=="pw-mode")return;W.mode=e.target.value;if(W.mode!=="quick")ed.setMode(W.mode);layout2()});
  /* 第 2 步 */
  function layout2(){var q=W.mode==="quick";$(".qn").hidden=q?false:true;$("#pw-n").hidden=!q;ed.el.hidden=q;pk.el.hidden=val("pw-src")!=="pick";if(!pk.el.hidden)pk.el.open=true;ed.refreshWeights()}
- function filt(){pk.filter(val("pw-g"),val("pw-sem")==="a"?"":val("pw-sem"));ed.refreshWeights()}
+ function filt(){pk.filter(grades(),val("pw-sem")==="a"?"":val("pw-sem"));ed.refreshWeights()}
  s2.addEventListener("change",function(e){
   if(e.target.name==="pw-scope"){W.scope=e.target.value;if(W.mode!=="quick"){var c=ed.syncScope();if(c)popup("已調整題型",c+" 個大題原本是勾選題或連連看，線上速測的題庫沒有這些題型，已改成選擇題。")}}
-  else if(e.target.id==="pw-g"||e.target.id==="pw-sem")filt();
+  else if(e.target.closest("#pw-g")||e.target.id==="pw-sem"){if(e.target.closest("#pw-g")&&!grades().length){e.target.checked=true;popup("至少選一個年級","年級不能全部取消，請至少保留一個。")}filt()}
   else if(e.target.id==="pw-src"){layout2()}});
  pk.el.addEventListener("change",function(){if(pk.get().length&&val("pw-src")!=="pick"){$("#pw-src").value="pick";layout2()}ed.refreshWeights()});
  /* 第 3 步：審題預覽（dry：不寫資料庫） */
@@ -386,7 +387,7 @@ function printWiz(arg){
  function summ(){
   var g=curPlan(),P=panel.get(),L=[],list=PP.list(P);
   L.push("出題方式："+({quick:"快速出題",auto:"電腦出題",manual:"手動出題"})[W.mode]);
-  L.push("範圍："+(W.scope==="online"?"線上速測（只用線上題庫）":"紙本出卷（題型較全）")+"・"+"一二三四五六"[val("pw-g")-1]+"年級・"+({a:"上下冊",u:"上冊",d:"下冊"})[val("pw-sem")]+"・"+(val("pw-src")==="pick"?"自選 "+pk.get().length+" 個課次":"整個範圍綜合"));
+  L.push("範圍："+(W.scope==="online"?"線上速測（只用線上題庫）":"紙本出卷（題型較全）")+"・"+grades().map(function(g){return"一二三四五六"[g-1]}).join("、")+"年級・"+({a:"上下冊",u:"上冊",d:"下冊"})[val("pw-sem")]+"・"+(val("pw-src")==="pick"?"自選 "+pk.get().length+" 個課次":"整個範圍綜合"));
   L.push("題目："+(pv?pv.qs.length+" 題"+(pv.secs&&ptsTotal()?"・總分 "+ptsTotal()+" 分":""):"尚未審題"));
   L.push("紙張："+esc(P.paper)+"・"+({s1:"單欄",d2:"雙欄（直版）",d2l:"雙欄（橫版）"})[P.layout]+"・頁碼："+({kn:"卷別＋頁碼",n:"只印頁碼",off:"不印"})[P.pageNo||"kn"]);
   L.push("輸出："+list.map(function(x){return esc(x.label)}).join("、")+"（共 "+list.length+" 份，每份頁碼各自從 1 開始）");
@@ -399,7 +400,7 @@ function printWiz(arg){
   var key=keyOf();
   if(fresh()){redrawFinal();return}
   busy=true;$("#pw-go").disabled=true;
-  var P=panel.get(),srcTag=({quick:"快速出題",auto:"電腦出題",manual:"手動出題"})[W.mode]+(W.scope==="online"?"（線上速測）":"")+":"+val("pw-g")+val("pw-sem");
+  var P=panel.get(),srcTag=({quick:"快速出題",auto:"電腦出題",manual:"手動出題"})[W.mode]+(W.scope==="online"?"（線上速測）":"")+":"+grades().join("")+val("pw-sem");
   PP.device().then(function(dv){return M.api("POST","/api/print/commit",{src:srcTag,dev:dv,qs:pv.qs.map(function(q){return{u:q.unit,q:String(q.q).slice(0,80),a:String(q.a).slice(0,30)}})})}).then(function(r){
    busy=false;$("#pw-go").disabled=false;cm={key:key};last={qs:pv.qs.slice(),secs:pv.secs,nm:pv.nm,wm:r.wm};redrawFinal();out.hidden=false;window.scrollTo(0,$(".pres").getBoundingClientRect().top+window.scrollY-60)},
    function(e){busy=false;$("#pw-go").disabled=false;popup("進行出卷失敗",errMsg(e))})}
