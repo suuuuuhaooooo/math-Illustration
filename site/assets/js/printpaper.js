@@ -178,7 +178,6 @@
       return m.length ? '<div class="pmeta">' + m.join("　") + "</div>" : "";
     }
     var TYN = { choice: "選擇題", tf: "是非題", num: "填充題", text: "填充題", multi: "勾選題", match: "連連看", group: "題組", any: "綜合題" }, CN = "一二三四五六七八九十";
-    function tyOf(q) { return q.ty || (q.o ? "choice" : "num"); }
     function matchTable(q, blank) {
       return '<table class="pmatch"><tr><th>題目</th><th>答案</th></tr>' + q.L.map(function (l, i) { return "<tr><td>（　）" + (i + 1) + "．" + D.tx(esc(l)) + "</td><td>" + (q.R[i] != null ? L(i) + "．" + D.tx(esc(q.R[i])) : "") + "</td></tr>"; }).join("") + "</table>";
     }
