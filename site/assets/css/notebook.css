@@ -482,3 +482,4 @@ body.zyfont{line-height:1.95}
 .psheet.pp{isolation:isolate;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .psheet.pp::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:url("../img/islander-bw.svg") center 52%/min(62%,380px) no-repeat;opacity:.07;filter:grayscale(1);-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .psheet.pp.nomascot::before{display:none}
+.pvadd{margin:8px 0 14px;text-align:center}.pvh .pv-sw{margin-left:auto}.pvh .pv-rm{margin-left:6px}

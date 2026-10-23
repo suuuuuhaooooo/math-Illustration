@@ -388,19 +388,35 @@ function printWiz(arg){
  $("#pv-ans").onchange=function(){showAns=this.checked;drawPreview()};
  function ptsTotal(){if(!pv||!pv.secs)return 0;var t=0;pv.secs.forEach(function(sec,i){var n=pv.qs.filter(function(q){return q.s===i}).length,k=sec.take&&sec.take<n?sec.take:n;t+=(sec.pts||0)*k});return Math.round(t*10)/10}
  var TYN={tf:"是非",multi:"勾選",match:"連連看"};function tyOf(q){return TYN[q.ty]||(q.o?"選擇":"填充")}
+ var pool=[],poolSig="",swapBusy=false;
+ function keyQ(q){return q.qid?"id:"+q.qid:"t:"+q.q+"|"+q.a}
+ function getCand(pred){
+  var s0=pvSig;if(poolSig!==s0){pool=[];poolSig=s0}
+  function have(c){return pv.qs.some(function(x){return keyQ(x)===keyQ(c)})}
+  function take(){for(var i=0;i<pool.length;i++){var c=pool[i];if(!have(c)&&pred(c)){pool.splice(i,1);return c}}return null}
+  var c=take();if(c)return Promise.resolve(c);var tries=0;
+  function more(){if(tries++>=3)return Promise.resolve(null);return M.api("GET",qurl(true,curPlan())).then(function(r){if(poolSig===s0)pool=pool.concat(r.qs||[]);var c=take();return c||more()})}
+  return more()}
+ function noMore(){popup("找不到更多題目","符合目前範圍與條件、而且還沒出現在這份卷裡的題目已經不多了。可以回上一步放寬條件，或按「重新出題」。")}
+ function swapQ(i,btn){if(swapBusy)return;swapBusy=true;btn.disabled=true;var q0=pv.qs[i];
+  getCand(function(c){return pv.secs?c.s===q0.s:true}).then(function(c){swapBusy=false;if(!c){btn.disabled=false;noMore();return}pv.qs[i]=c;drawPreview()},function(e){swapBusy=false;btn.disabled=false;popup("換題失敗",errMsg(e))})}
+ function addQ(sec,btn){if(swapBusy)return;swapBusy=true;btn.disabled=true;
+  getCand(function(c){return pv.secs?c.s===sec:true}).then(function(c){swapBusy=false;if(!c){btn.disabled=false;noMore();return}var at=pv.qs.length;if(pv.secs){for(var k=pv.qs.length-1;k>=0;k--){if(pv.qs[k].s===sec){at=k+1;break}}}pv.qs.splice(at,0,c);drawPreview()},function(e){swapBusy=false;btn.disabled=false;popup("新增題目失敗",errMsg(e))})}
  function drawPreview(){
   if(!pv)return;var box=$(".pvlist"),n=pv.qs.length,lack=pv.secs?pv.secs.filter(function(x){return x.got<x.want}).map(function(x){return"第 "+(x.i+1)+" 大題缺 "+(x.want-x.got)+" 題"}):[];
-  $(".pvsum").innerHTML="共 <b>"+n+"</b> 題"+(pv.secs&&ptsTotal()?"・總分 <b>"+ptsTotal()+"</b> 分":"")+"　<span class=\"meta\">不要的題目按「移除」；想整份重來按「重新出題」。</span>"+(lack.length?'<div class="fb no">'+esc(lack.join("、"))+"（符合條件的題目不夠，可回上一步放寬題型、類別或難易度）。</div>":"")+(pv.filled&&!pv.secs?'<div class="fb no">你選的範圍不重複的題目不夠，已用同年級其他單元補了 '+pv.filled+" 題。</div>":"")+(pv.short&&!pv.secs?'<div class="fb no">可出的題目只有 '+n+" 題（想要的比較多）。</div>":"");
+  $(".pvsum").innerHTML="共 <b>"+n+"</b> 題"+(pv.secs&&ptsTotal()?"・總分 <b>"+ptsTotal()+"</b> 分":"")+"　<span class=\"meta\">不要的題目按「移除」，想換一題按「換題」，想多一題按「＋新增一題」；整份重來按「重新出題」。</span>"+(lack.length?'<div class="fb no">'+esc(lack.join("、"))+"（符合條件的題目不夠，可回上一步放寬題型、類別或難易度）。</div>":"")+(pv.filled&&!pv.secs?'<div class="fb no">你選的範圍不重複的題目不夠，已用同年級其他單元補了 '+pv.filled+" 題。</div>":"")+(pv.short&&!pv.secs?'<div class="fb no">可出的題目只有 '+n+" 題（想要的比較多）。</div>":"");
   box.innerHTML="";var lastS=-1;
   pv.qs.forEach(function(q,i){
-   if(pv.secs&&q.s!==lastS){lastS=q.s;var sc=pv.secs[q.s];if(sc)box.appendChild(h('<h4 class="pvsec">第 '+(q.s+1)+" 大題"+(sc.title?"・"+esc(sc.title):"")+(sc.pts?"　每題 "+sc.pts+" 分":"")+"</h4>"))}
+   if(pv.secs&&q.s!==lastS){if(lastS>=0)addRow(lastS);lastS=q.s;var sc=pv.secs[q.s];if(sc)box.appendChild(h('<h4 class="pvsec">第 '+(q.s+1)+" 大題"+(sc.title?"・"+esc(sc.title):"")+(sc.pts?"　每題 "+sc.pts+" 分":"")+"</h4>"))}
    var opts=q.ty==="match"?"　"+q.L.map(function(l,k){return(k+1)+"."+esc(l)}).join("　")+"　／　"+q.R.map(function(r,k){return String.fromCharCode(65+k)+"."+esc(r)}).join("　"):q.o?"<div class=\"pvo\">"+q.o.map(function(o,k){return String.fromCharCode(65+k)+"．"+tx(esc(o))}).join("　")+"</div>":"";
-   var d=h('<div class="pvq"><div class="pvh"><b>'+(i+1)+'</b><span class="pvm"></span><button type="button" class="pen">移除</button></div><div class="pvt"></div>'+(showAns?'<div class="pva"><b>答案：</b></div>':"")+"</div>");
+   var d=h('<div class="pvq"><div class="pvh"><b>'+(i+1)+'</b><span class="pvm"></span><button type="button" class="pen pv-sw">換題</button><button type="button" class="pen pv-rm">移除</button></div><div class="pvt"></div>'+(showAns?'<div class="pva"><b>答案：</b></div>':"")+"</div>");
    d.querySelector(".pvm").textContent=tyOf(q)+"｜"+(({1:"易",2:"中",3:"難"})[q.lv]||"中")+"｜"+title(q.unit).split(" ").slice(-1)[0]+(q.qid?"｜ID "+q.qid:"");
    d.querySelector(".pvt").innerHTML=tx(esc(q.q))+qimg(q.img)+opts;
    if(showAns)d.querySelector(".pva").appendChild(h("<span>"+tx(esc(ansOf(q)))+(q.ty==="match"?esc(q.al||""):"")+"</span>"));
-   d.querySelector("button").onclick=function(){if(pv.qs.length<=1){popup("至少要留一題","這是最後一題了，不能再移除。想換一批題目請按「重新出題」。");return}pv.qs.splice(i,1);drawPreview()};
-   box.appendChild(d)})}
+   d.querySelector(".pv-sw").onclick=function(){swapQ(i,this)};d.querySelector(".pv-rm").onclick=function(){if(pv.qs.length<=1){popup("至少要留一題","這是最後一題了，不能再移除。想換一批題目請按「重新出題」。");return}pv.qs.splice(i,1);drawPreview()};
+   box.appendChild(d)});
+  if(pv.secs&&lastS>=0)addRow(lastS);else if(!pv.secs)addRow(0);
+  function addRow(sec){var r=h('<div class="pvadd"><button type="button" class="pen go">＋新增一題</button></div>');r.firstChild.onclick=function(){addQ(sec,this)};box.appendChild(r)}}
  /* 第 4 步：草稿（還沒有正式出卷，列印時不會輸出） */
  function deps(c){return{u:u,today:M.today(),title:title,tx:tx,qimg:qimg,wm:c&&c.wm,secs:c&&c.secs}}
  function drawDraft(){if(!pv)return;var P=panel.get();PP.applyPage(P);out.className="pdraft";out.innerHTML=PP.build(P,pv.qs,pv.nm,deps(pv))}
