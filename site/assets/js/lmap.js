@@ -52,6 +52,8 @@ function page(){
  var defs=S_("defs",{},svg);var gl=S_("filter",{id:"lmglow",x:"-60%",y:"-60%",width:"220%",height:"220%"},defs);S_("feGaussianBlur",{stdDeviation:"5",result:"b"},gl);var mg=S_("feMerge",{},gl);S_("feMergeNode",{"in":"b"},mg);S_("feMergeNode",{"in":"SourceGraphic"},mg);
  S_("rect",{x:0,y:0,width:Wd,height:Hd,"class":"lm-sea"},svg);
  var wv=S_("g",{"class":"lm-waves"},svg);for(var wy=70;wy<Hd;wy+=46){for(var wx=((wy/46)%2)*60+20;wx<Wd;wx+=120){S_("path",{d:"M"+wx+" "+wy+"q10 -7 20 0t20 0","class":"wv"},wv)}}
+ var bt=S_("g",{"class":"lm-boats","aria-hidden":"true"},svg);[[.18,0],[.5,-22],[.82,-40]].forEach(function(b,i){var by=Math.max(60,Hd*b[0]),g=S_("g",{"class":"lm-boat b"+i,style:"--by:"+by+"px;--dx:"+(Wd+120)+"px;animation-duration:"+(70+i*26)+"s;animation-delay:"+b[1]+"s",transform:"translate(-60,"+by+")"},bt),bb=S_("g",{"class":"bob"},g);S_("path",{d:"M-16 0h32l-6 8h-20z",fill:"#b5835a",stroke:"var(--ink)","stroke-width":1.6,"stroke-linejoin":"round"},bb);S_("path",{d:"M0 -1V-24L13 -3Z",fill:"#fffdf7",stroke:"var(--ink)","stroke-width":1.5,"stroke-linejoin":"round"},bb)});
+ var sp=S_("g",{"class":"lm-spark","aria-hidden":"true"},svg);for(var q=0;q<46;q++){var c=S_("circle",{cx:(q*173)%Wd,cy:(q*97)%Hd,r:1.6,style:"animation-delay:"+((q*0.37)%4).toFixed(2)+"s"},sp)}
  /* 學期標頭 */
  NB.cat.forEach(function(S,i){var t=S_("text",{x:X0+i*CW+CW/2-10,y:30,"text-anchor":"middle","class":"lm-sem"},svg);t.textContent=S.sem;if(i&&S.grade!==NB.cat[i-1].grade)S_("path",{d:"M"+(X0+i*CW-10)+" 40V"+(Hd-8),"class":"lm-gl"},svg)});
  /* 領域群島的底 */

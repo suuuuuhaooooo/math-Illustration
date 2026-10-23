@@ -452,3 +452,19 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 .lm-n.dim .rip{animation:none}
 .lm-nl{stroke:var(--sea);fill:var(--ink)}
 @media (prefers-reduced-motion:reduce){.lm-n .rip{animation:none}}
+
+/* 海面動態：浪漂移、小船橫越、水面閃光 */
+.lm-waves .wv{animation:lmwv 7s ease-in-out infinite alternate}
+.lm-waves .wv:nth-child(3n+1){animation-duration:9s;animation-delay:-2s}
+.lm-waves .wv:nth-child(3n+2){animation-duration:6s;animation-delay:-4s}
+@keyframes lmwv{from{transform:translate(-12px,0)}to{transform:translate(12px,3px)}}
+.lm-boat{animation:lmsail linear infinite;pointer-events:none}
+@keyframes lmsail{to{transform:translate(calc(var(--dx) - 60px),var(--by,0))}}
+.lm-boat .bob{animation:lmbob 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center bottom}
+@keyframes lmbob{50%{transform:translateY(-3px) rotate(3deg)}}
+.lm-spark{pointer-events:none}
+.lm-spark circle{fill:#fff;opacity:0;animation:lmtw 4s ease-in-out infinite}
+@keyframes lmtw{40%{opacity:.85}60%{opacity:0}}
+.lm-sea{animation:lmsea 14s ease-in-out infinite alternate}
+@keyframes lmsea{to{filter:brightness(1.06) saturate(1.1)}}
+@media (prefers-reduced-motion:reduce){.lm-waves .wv,.lm-boat,.lm-boat .bob,.lm-spark circle,.lm-sea{animation:none}.lm-boats{display:none}.lm-spark circle{opacity:.5}}

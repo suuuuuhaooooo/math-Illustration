@@ -3,7 +3,7 @@
 var NS="http://www.w3.org/2000/svg",$=function(s){return document.querySelector(s)};
 var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches,INK="#101a2e";
 function sv(tag,a,p){var e=document.createElementNS(NS,tag);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
-function wave(y,amp,w,fill,cls,p){var d="M0 "+y,n=Math.ceil(w/100);for(var i=0;i<n;i++)d+="q25 "+(-amp)+" 50 0t50 0";d+="V400H0Z";return sv("path",{d:d,fill:fill,"class":cls},p)}
+function wave(y,amp,w,fill,cls,p){var d="M-1400 "+y,n=Math.ceil((w+1400)/100);for(var i=0;i<n;i++)d+="q25 "+(-amp)+" 50 0t50 0";d+="V400H-1400Z";return sv("path",{d:d,fill:fill,"class":cls},p)}
 function eye(p,cx,cy,r){var g=sv("g",{"class":"eye","data-r":r},p);sv("circle",{cx:cx,cy:cy,r:r,fill:"#fff",stroke:INK,"stroke-width":2.4},g);sv("circle",{"class":"pu",cx:cx,cy:cy,r:r*.45,fill:INK},g);return g}
 function blob(p,x,y,sc,col,rl,rr,mood){
  var g=sv("g",{"class":"blob",transform:"translate("+x+","+y+")scale("+sc+")",tabindex:0,role:"img","aria-label":"島民"},p),b=sv("g",{"class":"bi"},g);
@@ -15,7 +15,7 @@ function blob(p,x,y,sc,col,rl,rr,mood){
  return g}
 /* ---- 主視覺的島 ---- */
 var hero=$("#hero"),box=document.createElement("div");box.className="isle";box.setAttribute("aria-hidden","false");hero.appendChild(box);
-var s=sv("svg",{viewBox:"0 0 1200 320",preserveAspectRatio:"xMidYMax slice","class":"isvg"},box);
+var s=sv("svg",{viewBox:"0 0 1200 320",preserveAspectRatio:"xMidYMax slice","class":"isvg"},box);function par(){s.setAttribute("preserveAspectRatio",innerWidth>900?"xMidYMax meet":"xMidYMax slice")}par();addEventListener("resize",par);
 var df=sv("defs",{},s),lg=sv("linearGradient",{id:"beam",x1:0,x2:1,y1:0,y2:0},df);sv("stop",{offset:0,"stop-color":"#ffe9a0","stop-opacity":.75},lg);sv("stop",{offset:1,"stop-color":"#ffe9a0","stop-opacity":0},lg);
 var lg2=sv("linearGradient",{id:"beam2",x1:1,x2:0,y1:0,y2:0},df);sv("stop",{offset:0,"stop-color":"#ffe9a0","stop-opacity":.75},lg2);sv("stop",{offset:1,"stop-color":"#ffe9a0","stop-opacity":0},lg2);
 sv("polygon",{points:"640,108 1500,30 1500,118","class":"beam b1",fill:"url(#beam)"},s);

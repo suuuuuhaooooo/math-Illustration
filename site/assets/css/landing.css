@@ -266,3 +266,13 @@ body.lp{--sans:"GenSen Round LP","Noto Sans TC",system-ui,sans-serif;font-family
 @media (max-width:900px){.hero2{min-height:100svh;padding-bottom:clamp(190px,40vh,330px)}.isle{height:clamp(190px,52vw,320px);transform:none}.moon{top:11%;right:5%;width:54px}}
 .fin{background:linear-gradient(#080d1800 calc(100% - 110px),var(--bg)),radial-gradient(900px 520px at 50% 62%,#1f3558 0%,#0f1a2e 60%,#080d18 100%)}
 .finisle svg{-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
+
+.hero2 .pun{margin:0 0 .9em;font-family:var(--sans);font-size:clamp(.8rem,1.5vw,1rem);letter-spacing:.22em;color:#e9c46a;opacity:0;animation:up 1s .3s forwards}
+.fin .pun2{font-family:var(--head);letter-spacing:.12em;color:#e9c46a;margin-top:-.6em}
+.hero2{padding-top:64px}
+.isle,.isle .isvg{overflow:visible}
+@media (prefers-reduced-motion:reduce){.hero2 .pun{animation:none;opacity:1}}
+
+@media (min-width:901px){.isle{height:clamp(260px,40vh,420px);transform:none}.hero2{min-height:max(100svh,820px);padding-bottom:clamp(200px,34vh,340px)}}
+@media (max-width:900px){.hero2 .pun{font-size:.72rem;letter-spacing:.06em;padding:0 12px}.moon{top:auto;bottom:46%;right:4%;width:44px;opacity:.9}}
+@media (max-width:900px){.moon{bottom:28%;right:6%}}
