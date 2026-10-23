@@ -212,7 +212,8 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 @media print{.pfoot{display:block;position:fixed;left:0;right:0;bottom:-9mm;text-align:center;font-size:8pt;color:rgba(0,0,0,.6)}}
 
 /* 沒勾浮水印時：每頁正中間一條細字 */
-.pwm.pwm-one>.pwm-line{position:absolute;left:50%;right:auto;top:50%;width:max-content;max-width:none;height:auto;transform:translate(-50%,-50%) rotate(-35deg);text-align:center;font-size:8.5pt;line-height:1.2;color:rgba(0,0,0,.3);white-space:nowrap;overflow:visible}
+.pwm.pwm-one>.pwm-line{position:absolute;left:50%;right:auto;top:50%;width:max-content;max-width:none;height:auto;transform:translate(-50%,-50%) rotate(-35deg);text-align:center;font-size:8.5pt;line-height:1.5;color:rgba(0,0,0,.3);white-space:nowrap;overflow:visible}
+.pwm.pwm-one>.pwm-line>div{position:static;left:auto;top:auto;width:auto;height:auto;transform:none;font-size:inherit;line-height:inherit;color:inherit;text-align:center;white-space:nowrap}
 .psheet.pp .pwm-line{color:rgba(0,0,0,.3)}
 
 /* 模擬考：畫面動態浮水印、離開提醒 */
@@ -300,3 +301,15 @@ table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;
 .pk-p,.pk-b{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}.pk-b{position:sticky;bottom:-14px;background:var(--paper);padding:8px 0}
 @media (max-width:560px){.pk-r{flex-wrap:wrap}.pk-m{flex:1 1 100%;order:2}.pk-q{flex:1 1 calc(100% - 2em)}.pcs-b{margin-left:0;width:100%}}
 @media print{.pplan,.pkov{display:none!important}}
+
+/* 用量儀表板 */
+.ugrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px;margin:8px 0}
+.um{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--paper2);min-width:0}.um .ut{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.um .ut span{font-size:1.3em;font-weight:700}
+.um .ub{height:10px;border-radius:6px;background:var(--rule);margin:8px 0;overflow:hidden}.um .ub i{display:block;height:100%;background:var(--p3);border-radius:6px}
+.um.warn .ub i{background:var(--p4b)}.um.bad .ub i{background:var(--p1)}.um.warn .ut span{color:var(--p4b)}.um.bad .ut span{color:var(--p1)}.um .uv{font-size:.9em;overflow-wrap:anywhere}
+.utr{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px;margin:10px 0}.us b{font-size:.9em}
+.ubars{display:flex;gap:4px;align-items:flex-end;height:64px;margin-top:6px}.ubars span{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.ubars span i{display:block;width:100%;background:var(--p2);opacity:.75;border-radius:3px 3px 0 0;min-height:2px}.ubars span small{font-size:.62em;color:var(--soft);margin-top:2px;white-space:nowrap}
+.ubars span{height:84px}.ubars{height:84px}.ubars span i{flex:none}
+.uad{margin-top:10px}.ua{display:flex;gap:10px;align-items:flex-start;border-top:1px solid var(--rule);padding:8px 0}.ua .ul{flex:none;font-size:.78em;font-weight:700;padding:1px 8px;border-radius:10px;border:1px solid var(--p3);color:var(--p3);margin-top:2px}
+.ua.warn .ul{border-color:var(--p4b);color:var(--p4b)}.ua.bad .ul{border-color:var(--p1);color:var(--p1)}.ua div{min-width:0;overflow-wrap:anywhere}

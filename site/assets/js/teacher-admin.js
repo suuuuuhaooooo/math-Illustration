@@ -241,6 +241,27 @@ var SYS_NOTES=[
  ["要改參數時","<ul><li><b>遊戲類</b>（積分、升級、每日題數、提示扣分…）：直接在上面「遊戲設定」改，立刻生效。</li><li><b>wrangler.toml 的參數</b>：改檔案 → commit、push 後端 repo → 等 GitHub Actions 出現 ✓ 才會生效。</li><li><b>密鑰</b>：在後端資料夾執行 <code>npx wrangler secret put RESEND_API_KEY</code>，貼上後 Enter（不用 push）。</li><li>這一頁只能看，不能改，避免誤按。</li></ul>"],
  ["額度快用完時","<ul><li>先看「資料表筆數與用量」，確認是哪一張表最大。</li><li>列印紀錄會自動保留 180 天；問題回報、舊的作答紀錄可以到「資料管理」清理。</li><li>超過免費額度時，API 會開始失敗，到隔天 UTC 00:00 才恢復；若常常超過，再考慮升級付費方案（門檻比免費高很多）。</li><li>資料庫備份：Cloudflare 後台的 D1 有「Time Travel」可以還原到過去某個時間點（保留天數依方案而定），重大匯入或刪除前，也可以先匯出題庫與名單 CSV 留一份。</li></ul>"]
 ];
+/* ---------- Cloudflare 用量儀表板（管理員）：讀 Cloudflare 的統計，不讀自己的資料庫 ---------- */
+function usage(ctx){
+ var s=ctx.sheet("Cloudflare 用量儀表板","今天的實際用量對照免費額度（每天 UTC 00:00＝台灣早上 8 點歸零）。讀的是 Cloudflare 的統計，不會增加資料庫讀寫。"),box=h("<div>讀取中…</div>");s.appendChild(box);
+ var LV={ok:"正常",warn:"留意",bad:"要處理"};
+ function pct(a,b){return b?Math.min(100,Math.round(a/b*100)):0}
+ function lvOf(p){return p>=80?"bad":p>=50?"warn":"ok"}
+ function num(n){return Math.round(+n||0).toLocaleString()}
+ function meter(name,val,lim,unit,extra){var p=pct(val,lim),l=lvOf(p);return'<div class="um '+l+'"><div class="ut"><b>'+esc(name)+'</b><span>'+p+'%</span></div><div class="ub"><i style="width:'+Math.max(p,val>0?2:0)+'%"></i></div><div class="uv">'+num(val)+" / "+num(lim)+" "+esc(unit)+(extra?"<br><small class=\"soft\">"+esc(extra)+"</small>":"")+"</div></div>"}
+ function spark(name,days,key,lim){var mx=Math.max.apply(null,days.map(function(d){return d[key]}).concat([lim?lim*0.1:1]));return'<div class="us"><b>'+esc(name)+'</b><div class="ubars">'+days.map(function(d){var p=Math.max(2,Math.round(d[key]/mx*100));return'<span title="'+esc(d.d+"：約 "+num(d[key]))+'"><i style="height:'+p+'%"></i><small>'+esc(d.d.slice(5))+"</small></span>"}).join("")+"</div></div>"}
+ function draw(r){
+  box.innerHTML="";
+  if(!r.configured){box.appendChild(h('<div class="wi"><b>還沒啟用</b>（缺：'+esc((r.missing||[]).join("、"))+'）<br><small class="soft">只要設定兩樣東西就會顯示真實用量：</small><ol class="soft"><li>Cloudflare 後台 → 右上角頭像 → My Profile → API Tokens → Create Token → Create Custom Token。權限選「Account → Account Analytics → Read」，建立後複製 token。</li><li>在專案的 backend 資料夾執行 <code>npx wrangler@4.151.3 secret put CF_API_TOKEN</code>，貼上 token。<b>token 不要貼在聊天或程式碼裡。</b></li><li>Cloudflare 後台首頁網址或右側欄找到「帳戶 ID」，填進 wrangler.toml 的 <code>CF_ACCOUNT_ID = "…"</code>，commit、push 後等 Actions ✓。</li></ol><small class="soft">沒設定時，下面的「系統參數與提醒」仍然可以用。</small></div>'));return}
+  var T=r.today,L=r.limits,ok=r.ok||{},g=h('<div class="ugrid"></div>');
+  g.innerHTML=(ok.workers?meter("Workers 請求數",T.requests,L.reqDay,"次",T.errors?"錯誤 "+num(T.errors)+" 次":""):"")+(ok.d1?meter("資料庫讀取",T.rowsRead,L.rowsReadDay,"列","讀取查詢 "+num(T.readQueries)+" 次")+meter("資料庫寫入",T.rowsWritten,L.rowsWrittenDay,"列","寫入查詢 "+num(T.writeQueries)+" 次"):"")+(ok.workers?meter("CPU 時間 P99",Math.round(T.cpuP99Ms*10)/10,L.cpuMs,"ms","P50 約 "+(Math.round(T.cpuP50Ms*10)/10)+" ms（每次請求上限）"):"")+(r.storage!=null?meter("資料庫容量",Math.round(r.storage/1048576),Math.round(L.storageBytes/1048576),"MB","整個帳號共用 5 GB"):"");
+  box.appendChild(g);
+  var tr=h('<div class="utr"></div>');tr.innerHTML=(ok.workersDays?spark("近 7 天請求數",r.days,"requests",L.reqDay):"")+(ok.d1?spark("近 7 天讀取列數",r.days,"rowsRead",L.rowsReadDay)+spark("近 7 天寫入列數",r.days,"rowsWritten",L.rowsWrittenDay):"");if(tr.innerHTML)box.appendChild(tr);
+  var ad=h('<div class="uad"><b>建議</b></div>');(r.advice||[]).forEach(function(a){ad.appendChild(h('<div class="ua '+esc(a.level)+'"><span class="ul">'+(LV[a.level]||"")+"</span><div><b>"+esc(a.title)+"</b><br><small>"+esc(a.text)+"</small></div></div>"))});box.appendChild(ad);
+  var er=Object.keys(r.errors||{}).filter(function(k){return r.errors[k]&&r.errors[k]!=="token"});if(er.length)box.appendChild(h('<p class="meta">有 '+er.length+" 項統計讀不到（"+esc(er.join("、"))+"），其餘照常顯示。可能是 Cloudflare 尚未提供該項統計。</p>"));
+  var d=new Date(r.asof);box.appendChild(h('<p class="meta">資料時間：'+d.toLocaleString("zh-TW",{hour12:false})+(r.cached?"（暫存，2 分鐘內不會重抓）":"")+"。Cloudflare 的統計約有 1～2 分鐘延遲。</p>"))}
+ function load(force){box.innerHTML="讀取中…";M.api("GET","/api/admin/usage"+(force?"?refresh=1":"")).then(function(r){draw(r);var b=h('<div class="ctl"><button class="pen">重新整理</button></div>');b.firstChild.onclick=function(){load(true)};box.appendChild(b)},function(e){box.innerHTML="";box.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
+ load(false)}
 function sysinfo(ctx){
  var s=ctx.sheet("系統參數與提醒","這個專案目前在 Cloudflare 上的設定（唯讀）。按說明展開看「怎麼設比較好」"),box=h("<div>讀取中…</div>");s.appendChild(box);
  M.api("GET","/api/admin/sysinfo").then(function(r){
@@ -292,7 +313,7 @@ function settings(ctx){
   s.appendChild(field("答對一題的積分（基礎,應用,挑戰）",F.POINTS_BY_LEVEL));s.appendChild(field("每幾分升一級",F.LEVEL_STEP));s.appendChild(field("每天最多計分的題數（防刷）",F.DAILY_Q_CAP));s.appendChild(field("每天可領獎勵的模擬卷份數",F.DAILY_MOCK_CAP));s.appendChild(field("看一次提示扣幾分（0＝不扣；看過提示的題目答對只拿一半積分）",F.HINT_COST));s.appendChild(field("錯題複習間隔（幾天後，用逗號分隔）",F.REVIEW_DAYS));
   var fb=h('<div class="fb"></div>'),b=h('<div class="ctl"><button class="pen go">儲存設定</button></div>');s.appendChild(b);s.appendChild(fb);
   b.firstChild.onclick=function(){var o={};Object.keys(F).forEach(function(k){o[k]=F[k].value});M.api("POST","/api/admin/settings",o).then(function(){msg(fb,"已儲存",1)},function(er){msg(fb,"數值不合理："+errs(er),0)})}},function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))});
- if(M.U&&M.U.admin)sysinfo(ctx)}
+ if(M.U&&M.U.admin){usage(ctx);sysinfo(ctx)}}
 
 /* ---------- 資料管理 ---------- */
 function data(ctx){

@@ -131,9 +131,9 @@
   function wmHtml(P, D) {
     var w = D.wm || {}, force = !!w.force, on = force || P.wm;
     if (!on) { /* 沒勾浮水印：每頁正中間只放「一條」淡淡的細線字，把所有資訊寫在同一行 */
-      var u0 = D.u, all = [u0.name, u0.cls && u0.cls !== "all" ? u0.cls + " 班 " + u0.no + " 號" : "", w.email || "", w.ip ? "IP " + w.ip + (w.net ? "（" + w.net + "）" : "") : "", w.brief || "", w.ts ? stamp(w.ts) : "", w.pid ? "卷號 " + w.pid : ""].filter(Boolean).map(esc).join("　");
+      var u0 = D.u, L1 = [u0.name, u0.cls && u0.cls !== "all" ? u0.cls + " 班 " + u0.no + " 號" : "", w.email || ""].filter(Boolean).map(esc).join("　"), L2 = [w.ip ? "IP " + w.ip + (w.net ? "（" + w.net + "）" : "") : "", w.brief || "", w.ts ? stamp(w.ts) : "", w.pid ? "卷號 " + w.pid : ""].filter(Boolean).map(esc).join("　"), all = L1 || L2; /* 預設的細線浮水印分成兩行（內容和以前一樣：姓名班級 Email／IP 裝置時間卷號） */
       if (!all) return null;
-      var ln = '<div class="pwm-line">' + all + "</div>";
+      var ln = '<div class="pwm-line">' + (L1 ? "<div>" + L1 + "</div>" : "") + (L2 ? "<div>" + L2 + "</div>" : "") + "</div>";
       return { scr: '<div class="pwm pwm-abs pwm-one" aria-hidden="true">' + ln + "</div>", prn: '<div class="pwm pwm-fix pwm-one" aria-hidden="true">' + ln + "</div>" };
     }
     var u = D.u, e = function (k, mine) { return force || P[k] ? mine : ""; }, A = [], B = [];
