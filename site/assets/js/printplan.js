@@ -20,7 +20,7 @@
   /* env：{ role, api(method,url), tx(html), title(unitId), units() → 目前勾選的單元 }，onchange：設定改了就通知 */
   function editor(env, onchange) {
     function say(m) { if (env.say) env.say(m); else window.alert(m); }
-    var cap = env.role === "student" ? 30 : 60, maxSec = env.role === "student" ? 4 : 8;
+    var cap = env.admin ? 200 : env.role === "student" ? 30 : 50, maxSec = env.admin ? 20 : env.role === "student" ? 4 : 8;
     var secs = [], uw = {}, el = h('<div class="pplan"></div>');
     function blank(o) { return Object.assign({ ty: "choice", kd: "", n: 5, pts: 2, take: 0, lv: ["", "", ""], title: "", ids: [], idq: {} }, o || {}); }
     function count(s) { return Math.max(+s.n || 0, s.ids.length); }

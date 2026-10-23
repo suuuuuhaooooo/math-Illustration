@@ -248,7 +248,7 @@
       else if (k === "ak") { cls += " key"; h = head("簡答與詳解", tag) + keyList(arr, ""); }
       else if (k === "short") { cls += " key"; h = head("簡答卷", tag) + keyList(arr, "pshort"); }
       else h = head("答案卷", tag) + blankList(arr);
-      return '<div class="' + cls + '" style="--pw:' + pw + 'mm" data-cols="' + (k === "short" ? Math.max(cols, 3) : cols) + '">' + (WM ? WM.scr : "") + h + '<p class="pcopy">© ' + new Date().getFullYear() + " suuuuuhaooooo・CC BY-NC-ND 4.0・僅供班級教學使用，請勿轉載</p></div>";
+      return '<div class="' + cls + '" style="--pw:' + pw + 'mm" data-cols="' + (k === "short" ? Math.max(cols, 3) : cols) + '">' + (WM ? WM.scr : "") + h + '<p class="pcopy">© ' + new Date().getFullYear() + " 蘇昊數理・CC BY-NC-ND 4.0・僅供班級教學使用，請勿轉載</p></div>";
     }
     for (var v = 0; v < P.variants; v++) { var arr = variant(qs, v, D.secs), tag = P.variants > 1 ? "（" + ZH[v] + "卷）" : ""; kinds.forEach(function (k) { out.push(sheet(k, arr, tag)); }); }
     if (P.matrix) out.push(matrix(P, qs, nm, D, head, pw, WM));

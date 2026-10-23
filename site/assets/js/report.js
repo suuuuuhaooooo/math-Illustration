@@ -26,7 +26,7 @@
     if (document.getElementById("rpov")) return;
     var M = window.NB && NB.member, files = [], busy = false;
     var ov = el("div", "rpov"), box = el("div", "rpbox"); ov.id = "rpov"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", "回報問題");
-    box.innerHTML = '<h3>回報問題</h3><p class="meta">遇到錯誤、題目怪怪的、或有想法，都可以告訴老師。系統會自動附上你目前看的頁面和裝置資訊，方便查原因。</p>' +
+    box.innerHTML = '<h3>回報問題</h3><p class="meta">遇到錯誤、題目怪怪的、或有想法，都可以告訴管理員。系統會自動附上你目前看的頁面和裝置資訊，方便查原因。</p>' +
       '<label>類型<select id="rp-cat">' + CATS.map(function (c) { return "<option>" + c + "</option>"; }).join("") + "</select></label>" +
       '<label>題目ID（選填；錯題本或列印卷上的小字，多題用逗號分隔）<input id="rp-qid" type="text" maxlength="80" placeholder="例如 5u-9.2-003"></label>' +
       '<label>發生了什麼事？（請寫是哪個單元、哪一題、你按了什麼）<textarea id="rp-msg" rows="5" maxlength="2000" placeholder="例如：三上 2-1 的第 3 題，我選的答案是對的但顯示錯"></textarea></label>' +
@@ -55,7 +55,7 @@
         box.innerHTML = '<h3>已送出</h3><p>謝謝你的回報（編號 ' + esc(r.id) + '）。老師看到後會處理。</p><div class="ctl"><button class="pen go" id="rp-ok">關閉</button></div>'; box.querySelector("#rp-ok").onclick = close;
       }, function (e) {
         busy = false; $("rp-send").disabled = false;
-        say(e.code === "rate_limited" ? "今天已經回報 5 次了，明天再試，或直接告訴老師。" : e.code === "too_big" ? "附件太大，請少附幾張圖。" : e.code === "nologin" ? "請先登入再回報。" : "送出失敗（" + (e.code || "net") + "），請稍後再試。", 0);
+        say(e.code === "rate_limited" ? "今天已經回報 5 次了，明天再試，或直接告訴管理員。" : e.code === "too_big" ? "附件太大，請少附幾張圖。" : e.code === "nologin" ? "請先登入再回報。" : "送出失敗（" + (e.code || "net") + "），請稍後再試。", 0);
       });
     };
   }
