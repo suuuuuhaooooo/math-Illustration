@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="240" viewBox="0 0 380 240">
+<rect x="0" y="0" width="380" height="240" fill="#ffffff"/>
+<polygon points="40.0,200.0 160.0,60.0 330.0,60.0 330.0,200.0" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<line x1="160.0" y1="60.0" x2="160.0" y2="200.0" stroke="#000000" stroke-width="2" stroke-dasharray="7 5"/>
+<path d="M58.0,200.0 A18,18 0 0 0 51.7,186.3" fill="none" stroke="#000000" stroke-width="1.5"/>
+<text x="76.3" y="188.9" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">∠1</text>
+<path d="M148.3,73.7 A18,18 0 0 0 178.0,60.0" fill="none" stroke="#000000" stroke-width="1.5"/>
+<text x="175.0" y="98.3" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">∠2</text>
+<polyline points="318.0,60.0 318.0,72.0 330.0,72.0" fill="none" stroke="#000000" stroke-width="1.5"/>
+<polyline points="330.0,188.0 318.0,188.0 318.0,200.0" fill="none" stroke="#000000" stroke-width="1.5"/>
+<polyline points="148.0,200.0 148.0,188.0 160.0,188.0" fill="none" stroke="#000000" stroke-width="1.5"/>
+<line x1="100.0" y1="194.0" x2="100.0" y2="206.0" stroke="#000000" stroke-width="1.5"/>
+<line x1="154.0" y1="130.0" x2="166.0" y2="130.0" stroke="#000000" stroke-width="1.5"/>
+</svg>
