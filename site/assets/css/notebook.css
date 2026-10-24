@@ -507,11 +507,10 @@ table.pvst{max-width:680px;width:100%;border-collapse:collapse;margin:6px 0;text
 body.zymode .psheet li,body.zymode .psheet .pgstem,body.zymode .psheet .gstem{line-height:2.3}body.zymode .psheet rt{font-size:.5em}
 body.zyfont .psheet li{line-height:2.1}
 
-/* QR code 線上作答：卷頭右上角 */
-.psheet .phead{position:relative}.psheet .phead.hasqr{padding-right:30mm;min-height:27mm}
-.psheet .pqr{position:absolute;right:0;top:0;width:26mm;text-align:center;line-height:1.2}.psheet .pqr svg{width:24mm;height:24mm;display:block;margin:0 auto}.psheet .pqr small{font-size:7.5pt;display:block}
-.psheet .pqr-ph span{display:flex;align-items:center;justify-content:center;width:24mm;height:24mm;margin:0 auto;border:1.2px dashed #888;font-size:8pt;color:#666}
-
+/* QR code 線上作答：小小一個疊在卷頭右上角；卷頭與級距表維持原本的寬度，只有標題、座號兩行右邊讓出一點位置 */
+.psheet .phead{position:relative}.psheet .phead.hasqr .ptitle,.psheet .phead.hasqr .pinfo{padding-right:21mm}
+.psheet .pqr{position:absolute;right:0;top:0;width:19mm;text-align:center;line-height:1.1;background:#fff}.psheet .pqr svg{width:18mm;height:18mm;display:block;margin:0 auto}.psheet .pqr small{font-size:6pt;display:block;white-space:nowrap}
+.psheet .pqr-ph span{display:flex;align-items:center;justify-content:center;width:18mm;height:18mm;margin:0 auto;border:1px dashed #888;font-size:6pt;line-height:1.2;color:#666}
 /* QR code 線上作答：學生作答頁（手機優先）與老師成績頁 */
 .ans-hd{margin:4px 0 10px}.ans-sec{margin:16px 0 6px;font-family:var(--serif)}
 .ans-row{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:8px 10px;margin:6px 0;border:1.5px solid var(--line);border-radius:10px;background:var(--paper)}.ans-row.ok{border-color:#3c9d5d}
