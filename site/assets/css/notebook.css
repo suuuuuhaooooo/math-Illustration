@@ -187,6 +187,14 @@ body.zymode #app,body.zymode #app p,body.zymode #app .q,body.zymode #app label,b
 .ppc{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .psheet.pp{width:min(100%,var(--pw,210mm));box-sizing:border-box;margin:14px auto}.psheet.pp ol{columns:1}.psheet.pp[data-cols="2"] ol{columns:2;column-gap:12mm}.psheet.pp[data-cols="3"] ol{columns:3;column-gap:8mm}
 .psheet.pp + .psheet.pp{page-break-before:always;break-before:page}
+/* 雙欄＋中線（仿紙本段考卷）：卷頭跨欄，題目整份連續分兩欄，欄間一條實線；每題不拆到兩欄 */
+.psheet.pp[data-lay="d2s"] .pbody{columns:2;column-gap:10mm;column-rule:1px solid #000;column-fill:auto}
+.psheet.pp[data-lay="d2s"] .pbody ol{columns:1!important}
+.psheet.pp[data-lay="d2s"] .pbody li{break-inside:avoid;page-break-inside:avoid}
+.psheet.pp[data-lay="d2s"] .pbody h4.psec{column-span:none;break-after:avoid;page-break-after:avoid}
+.psheet.pp[data-lay="d2s"] .pbody h4.psec:first-child{margin-top:0}
+.psheet.pp[data-lay="d2s"] .phead{border-bottom:1.5px solid #000;padding-bottom:6px}
+@media screen{.psheet.pp[data-lay="d2s"] .pbody{column-fill:balance}}
 .phead{margin-bottom:10px}.pschool{text-align:center;font-size:1.25rem;font-weight:700;letter-spacing:.1em}.ptitle{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 18px;margin:4px 0;font-size:1.05rem}.pexam{font-size:1.2rem}
 .phead .pinfo{margin-bottom:6px}
 table.pscore{width:100%;border-collapse:collapse;margin:6px 0;text-align:center;font-size:.9rem}.pscore th,.pscore td{border:1.2px solid #000;padding:4px 6px}.pscore tr:nth-child(2) td,.pscore tr:nth-child(2) th{height:2.6em}
