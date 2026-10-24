@@ -187,11 +187,14 @@ body.zymode #app,body.zymode #app p,body.zymode #app .q,body.zymode #app label,b
 .ppc{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .psheet.pp{width:min(100%,var(--pw,210mm));box-sizing:border-box;margin:14px auto}.psheet.pp ol{columns:1}.psheet.pp[data-cols="2"] ol{columns:2;column-gap:12mm}.psheet.pp[data-cols="3"] ol{columns:3;column-gap:8mm}
 .psheet.pp + .psheet.pp{page-break-before:always;break-before:page}
+/* 題組併成一題：題幹一次，小題 (1)(2)… */
+.psheet .pgstem{margin:0 0 4px}.psheet ol.psub{list-style:none;padding-left:.2em;margin:4px 0 0;columns:auto!important}.psheet ol.psub>li{margin:0 0 12px;break-inside:avoid}
+.psheet .psn{display:inline-block;min-width:2.2em;font-weight:400}.psheet .pka{margin:0 0 4px}.psheet .pbk{display:inline-block;margin-right:1.4em}
 /* 雙欄＋中線（仿紙本段考卷）：卷頭跨欄，題目整份連續分兩欄，欄間一條實線；每題不拆到兩欄 */
-.psheet.pp[data-lay="d2s"] .pbody{columns:2;column-gap:10mm;column-rule:1px solid #000;column-fill:auto}
-.psheet.pp[data-lay="d2s"] .pbody ol{columns:1!important}
+.psheet.pp[data-lay="d2s"] .pbody{columns:2;column-gap:10mm;column-rule:1px solid #000;column-fill:balance}
+.psheet.pp[data-lay="d2s"] .pbody ol{columns:auto!important;column-count:auto!important}
 .psheet.pp[data-lay="d2s"] .pbody li{break-inside:avoid;page-break-inside:avoid}
-.psheet.pp[data-lay="d2s"] .pbody h4.psec{column-span:none;break-after:avoid;page-break-after:avoid}
+.psheet.pp[data-lay="d2s"] .pbody h4.psec{column-span:none;break-inside:avoid;break-after:avoid;page-break-after:avoid}
 .psheet.pp[data-lay="d2s"] .pbody h4.psec:first-child{margin-top:0}
 .psheet.pp[data-lay="d2s"] .phead{border-bottom:1.5px solid #000;padding-bottom:6px}
 @media screen{.psheet.pp[data-lay="d2s"] .pbody{column-fill:balance}}
@@ -491,3 +494,33 @@ body.zyfont{line-height:1.95}
 .psheet.pp::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:url("../img/islander-bw.svg") center 52%/min(62%,380px) no-repeat;opacity:.07;filter:grayscale(1);-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .psheet.pp.nomascot::before{display:none}
 .pvadd{margin:8px 0 14px;text-align:center}.pvh .pv-sw{margin-left:auto}.pvh .pv-rm{margin-left:6px}
+
+/* 審題預覽：題目資訊勾選、排序、拖曳、配分表、題組 */
+.pvinfo{display:inline-flex;flex-wrap:wrap;align-items:center;gap:2px 10px;margin-left:10px;padding-left:12px;border-left:1.5px solid var(--line)}.pvinfo b{font-size:.92rem}
+.pvsort{align-items:center;gap:6px 8px}.pvsort .meta{flex-basis:100%}
+.pvdrag{cursor:grab;color:var(--soft);font-size:1.1rem;user-select:none;padding:0 2px}.pvq.drag{opacity:.45}.pvq.dropb{box-shadow:0 -3px 0 var(--margin,#c0392b)}.pvq.dropa{box-shadow:0 3px 0 var(--margin,#c0392b)}
+.pvh .pv-up,.pvh .pv-dn{padding:2px 8px;min-width:0}.pvh .pv-up{margin-left:auto}.pvh .pv-sw{margin-left:6px}
+.pvtag{font-size:.82rem;color:var(--soft)}.pvbody .pvm{display:block;margin:2px 0}.pvgs{border-left:3px solid var(--line);padding:2px 8px;margin:4px 0 6px}.pvsub{display:grid;grid-template-columns:2.2em 1fr;margin:4px 0}.pvsub .psn{grid-row:span 3}
+table.pvst{max-width:680px;width:100%;border-collapse:collapse;margin:6px 0;text-align:center;font-size:.92rem}table.pvst td,table.pvst th{padding:3px 6px;border:1.2px solid var(--line)}table.pvst input{width:5em;padding:2px 4px;font:inherit}table.pvst select{font:inherit}table.pvst tr.tot th{height:auto}.pvscore .ctl{align-items:center}.pvscore .pvfull{width:5em}
+
+/* 注音：卷面跟著右上角「注音」開關（開＝國字加注音、字體版＝注音字型）；注音模式行距放寬，浮水印與版權列不加注音 */
+body.zymode .psheet li,body.zymode .psheet .pgstem,body.zymode .psheet .gstem{line-height:2.3}body.zymode .psheet rt{font-size:.5em}
+body.zyfont .psheet li{line-height:2.1}
+
+/* QR code 線上作答：卷頭右上角 */
+.psheet .phead{position:relative}.psheet .phead.hasqr{padding-right:30mm;min-height:27mm}
+.psheet .pqr{position:absolute;right:0;top:0;width:26mm;text-align:center;line-height:1.2}.psheet .pqr svg{width:24mm;height:24mm;display:block;margin:0 auto}.psheet .pqr small{font-size:7.5pt;display:block}
+.psheet .pqr-ph span{display:flex;align-items:center;justify-content:center;width:24mm;height:24mm;margin:0 auto;border:1.2px dashed #888;font-size:8pt;color:#666}
+
+/* QR code 線上作答：學生作答頁（手機優先）與老師成績頁 */
+.ans-hd{margin:4px 0 10px}.ans-sec{margin:16px 0 6px;font-family:var(--serif)}
+.ans-row{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:8px 10px;margin:6px 0;border:1.5px solid var(--line);border-radius:10px;background:var(--paper)}.ans-row.ok{border-color:#3c9d5d}
+.ans-lab{min-width:4.2em}.ans-ctl{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;flex:1}
+.abtn{min-width:3.2em;min-height:2.4em;font-size:1.05rem}.abtn.on{background:#3c9d5d!important;color:#fff!important;border-color:#3c9d5d!important}
+.ainp{font-size:1.1rem;padding:6px 10px;min-width:9em;max-width:100%;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:inherit}
+.amatch select{font-size:1rem;padding:4px 6px}.ans-go{margin-top:14px}.ans-go .go{font-size:1.15rem;padding:8px 28px}
+.ans-res{text-align:center;padding:14px;border:2px solid #3c9d5d;border-radius:14px;margin:8px 0}.ans-sc{font-size:1.2rem}.ans-sc b{font-size:2.6rem;color:#2e7d4f}
+.ans-wrong{margin:10px 0}.ans-wrong .chip{display:inline-block;margin:3px 4px;padding:2px 10px;border:1.5px solid var(--margin,#c0392b);border-radius:999px}
+.qrsum{display:flex;gap:10px;flex-wrap:wrap}.qrsum .tile{flex:1;min-width:8em;text-align:center;padding:8px;border:1.5px solid var(--line);border-radius:10px}.qrsum .tile b{display:block;font-size:1.5rem}
+.rbar{display:inline-block;width:80px;height:10px;border:1px solid var(--line);border-radius:6px;vertical-align:middle;overflow:hidden}.rbar i{display:block;height:100%;background:#3c9d5d}
+table.qrrate td.qtx{text-align:left;max-width:22em}table.qrt td{vertical-align:middle}
