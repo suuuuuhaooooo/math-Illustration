@@ -9,10 +9,14 @@
   var MXR = [["unit", "單元"], ["content", "學習內容"], ["perf", "學習表現"], ["know", "知識類型"]], MXC = [["diff", "難易度"], ["cog", "認知層次"]];
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function L(i) { return String.fromCharCode(65 + i); }
+  /* 選項代號：paren＝(A)（預設，孩子較好辨識）、dot＝A． */
+  var OPTLAB = "paren";
+  function OL(i) { return OPTLAB === "dot" ? L(i) + "．" : "(" + L(i) + ") "; }
+  function AL(al) { if (!al) return ""; return OPTLAB === "dot" ? al + "．" : String(al).split("、").map(function (c) { return "(" + c + ")"; }).join("") + " "; }
   function defaults(u) {
     var m = /^([1-6])(\d{1,2})$/.exec(String(u.cls || "")), t = u.role === "teacher";
     return { school: "", showSchool: false, exam: "數學練習卷", showExam: true, subject: "數學", showSubject: true, grade: m ? m[1] : "", cls: m ? String(+m[2]) : "", showClass: true,
-      showScore: t, prefill: !t, paper: "A4", layout: "s1", optMode: "col", kinds: { q: true, ak: true }, showFocus: false, showId: false, showPerf: false, showCont: false, showLv: false, showCog: false, showKnow: false, metaAt: "q", matrix: false, mxRow: "unit", mxCol: "diff", variants: 1, pageNo: "kn",
+      showScore: t, prefill: !t, paper: "A4", layout: "s1", optMode: "col", optLab: "paren", kinds: { q: true, ak: true }, showFocus: false, showId: false, showPerf: false, showCont: false, showLv: false, showCog: false, showKnow: false, metaAt: "q", matrix: false, mxRow: "unit", mxCol: "diff", variants: 1, pageNo: "kn",
       wm: !t, wmName: true, wmCls: true, wmEmail: true, wmIp: true, wmDev: true, wmTime: true, wmText: "", wmDen: "2", wmDens: "1", mascot: true };
   }
   function load(u) { var d = defaults(u), s = null; try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {} if (s) { Object.keys(d).forEach(function (k) { if (s[k] !== undefined && k !== "grade" && k !== "cls") d[k] = s[k]; }); } if (!u.admin) d.mascot = true; return d; }
@@ -32,9 +36,11 @@
     if (kind === "layout") {
       if (v === "s1") return SV(PG + lines(15, 41, 13, 6, 6));
       if (v === "d2") return SV(PG + lines(15, 26, 13, 6, 6) + lines(30, 41, 13, 6, 6) + '<path d="M28 11V45" stroke-dasharray="2 2" stroke-width="1"/>');
+      if (v === "d2s") return SV(PG + ln(14, 9, 42, "") + lines(14, 26, 14, 6, 6) + lines(30, 42, 14, 6, 6) + '<path d="M28 12V47" stroke-width="1.4"/>');
       return SV(pg(4, 11, 48, 34) + lines(9, 25, 19, 4, 6) + lines(31, 47, 19, 4, 6) + '<path d="M28 15V41" stroke-dasharray="2 2" stroke-width="1"/>');
     }
     if (kind === "opt") {
+      if (v === "paren" || v === "dot") return SV([0, 1, 2].map(function (i) { var c = "ABC".charAt(i); return tx(6, 18 + i * 13, v === "dot" ? c + "．" : "(" + c + ")") + ln(24, 15.5 + i * 13, 48, TH); }).join(""));
       if (v === "col") return SV([0, 1, 2, 3].map(function (i) { return tx(8, 18 + i * 11, "ABCD".charAt(i) + ".") + ln(22, 15.5 + i * 11, 47, TH); }).join(""));
       return SV(ln(8, 14, 48, TH) + ln(8, 20, 36, TH) + ["A", "B", "C", "D"].map(function (c, i) { return '<text x="' + (5 + i * 12.5) + '" y="37" font-size="10" font-family="sans-serif" fill="currentColor" stroke="none">' + c + ".</text>"; }).join("") + ln(8, 47, 48, ' stroke-dasharray="2 2" stroke-width="1" opacity=".4"'));
     }
@@ -62,8 +68,9 @@
       '<div class="ppr">' + chk("pp-showScore", "顯示級距與得分框（100／99~90／…／未滿60、分數、家長簽章）", P.showScore) + chk("pp-prefill", "座號、姓名先填好（不勾＝留空白線）", P.prefill) + "</div></div></details>" +
       '<details open><summary>紙本卷列印設定</summary><div class="ppg">' +
       '<div class="ppr pcr"><b>紙張</b><div class="pcards p4">' + ["A3", "A4", "B4", "B5"].map(function (p) { return card("radio", "pp-paper", p, p, P.paper === p, "", ico("paper", p)); }).join("") + "</div></div>" +
-      '<div class="ppr pcr"><b>排版</b><div class="pcards">' + [["s1", "橫書單欄"], ["d2", "橫書雙欄（直版）"], ["d2l", "橫書雙欄（橫版）"]].map(function (x) { return card("radio", "pp-layout", x[0], x[1], P.layout === x[0], "", ico("layout", x[0])); }).join("") + "</div></div>" +
+      '<div class="ppr pcr"><b>排版</b><div class="pcards">' + [["s1", "橫書單欄"], ["d2", "橫書雙欄（直版）"], ["d2s", "雙欄＋中線（直版）"], ["d2l", "橫書雙欄（橫版）"]].map(function (x) { return card("radio", "pp-layout", x[0], x[1], P.layout === x[0], "", ico("layout", x[0])); }).join("") + "</div></div>" +
       '<div class="ppr pcr"><b>選項排列</b><div class="pcards p2">' + [["col", "換行排列"], ["row", "接續排列"]].map(function (x) { return card("radio", "pp-opt", x[0], x[1], P.optMode === x[0], "", ico("opt", x[0])); }).join("") + "</div></div>" +
+      '<div class="ppr pcr"><b>選項代號</b><div class="pcards p2">' + [["paren", "(A)　(B)"], ["dot", "A．　B．"]].map(function (x) { return card("radio", "pp-optLab", x[0], x[1], P.optLab === x[0], "", ico("opt", x[0])); }).join("") + "</div></div>" +
       '<div class="ppr"><b>頁碼</b> ' + rad("pp-pageNo", "kn", "卷別　第 2 頁", P.pageNo) + rad("pp-pageNo", "knt", "卷別　第 2 頁／共 3 頁", P.pageNo) + rad("pp-pageNo", "n", "第 2 頁", P.pageNo) + rad("pp-pageNo", "nt", "第 2 頁／共 3 頁", P.pageNo) + rad("pp-pageNo", "off", "不印頁碼", P.pageNo) + '</div><div class="ppr meta">頁碼印在每頁下方。每一份卷別（題目卷、簡答與詳解…）都從第 1 頁開始編，要用出卷完成後各份旁邊的「列印這一份」；「全部一起列印」則頁碼會接續（「共幾頁」是整批的總頁數）。（Firefox 不支援頁碼，建議用 Chrome 或 Edge。）</div></div></details>' +
       '<details open><summary>輸出卷別</summary><div class="ppg"><div class="ppr">' + chk("pp-all", "全選", false) + '</div><div class="pcards pk">' + KINDS.map(function (k) { return card("checkbox", "", "", k[1], !!P.kinds[k[0]], "pp-k-" + k[0], ico("kind", k[0])); }).join("") + "</div></div></details>" +
       '<details open><summary>浮水印（防止試卷外流，可追查是誰印的）</summary><div class="ppg">' +
@@ -89,7 +96,7 @@
       var r = function (n) { var x = el.querySelector('input[name="' + n + '"]:checked'); return x ? x.value : ""; };
       return { school: q("pp-school").value.trim(), showSchool: q("pp-showSchool").checked, exam: q("pp-exam").value.trim(), showExam: q("pp-showExam").checked, subject: q("pp-subject").value.trim(), showSubject: q("pp-showSubject").checked,
         grade: q("pp-grade").value.trim(), cls: q("pp-cls").value.trim(), showClass: q("pp-showClass").checked, showScore: q("pp-showScore").checked, prefill: q("pp-prefill").checked,
-        paper: r("pp-paper") || "A4", layout: r("pp-layout") || "s1", optMode: r("pp-opt") || "col", kinds: kinds, showFocus: q("pp-showFocus").checked, showId: q("pp-showId").checked, showPerf: q("pp-showPerf").checked, showCont: q("pp-showCont").checked, showLv: q("pp-showLv").checked, showCog: q("pp-showCog").checked, showKnow: q("pp-showKnow").checked, metaAt: r("pp-metaAt") || "q", pageNo: r("pp-pageNo") || "kn", matrix: q("pp-matrix").checked, mxRow: q("pp-mxRow").value, mxCol: q("pp-mxCol").value,
+        paper: r("pp-paper") || "A4", layout: r("pp-layout") || "s1", optMode: r("pp-opt") || "col", optLab: r("pp-optLab") || "paren", kinds: kinds, showFocus: q("pp-showFocus").checked, showId: q("pp-showId").checked, showPerf: q("pp-showPerf").checked, showCont: q("pp-showCont").checked, showLv: q("pp-showLv").checked, showCog: q("pp-showCog").checked, showKnow: q("pp-showKnow").checked, metaAt: r("pp-metaAt") || "q", pageNo: r("pp-pageNo") || "kn", matrix: q("pp-matrix").checked, mxRow: q("pp-mxRow").value, mxCol: q("pp-mxCol").value,
         fd: checked("pp-fd"), fg: checked("pp-fg"), fk: q("pp-fk").value.trim(), fp: q("pp-fp").value.trim(), variants: +q("pp-variants").value || 1,
         mascot: u.admin ? q("pp-mascot").checked : true, wm: q("pp-wm").checked, wmName: q("pp-wmName").checked, wmCls: q("pp-wmCls").checked, wmEmail: q("pp-wmEmail").checked, wmIp: q("pp-wmIp").checked, wmDev: q("pp-wmDev").checked, wmTime: q("pp-wmTime").checked, wmText: q("pp-wmText").value.trim(), wmDen: q("pp-wmDen").value, wmDens: q("pp-wmDens").value };
     }
@@ -165,6 +172,7 @@
   function stamp(t) { var d = new Date(t + 288e5).toISOString(); return d.slice(0, 10) + " " + d.slice(11, 16); }
   /* ---- 畫面 ---- */
   function build(P, qs, nm, D) { /* D：{u, today, title, tx, qimg} */
+    OPTLAB = P.optLab === "dot" ? "dot" : "paren";
     var cols = P.layout === "s1" ? 1 : 2, kinds = list(P).filter(function (x) { return x.k !== "matrix"; }), out = [], pw = pageCss(P).w, WM = wmHtml(P, D);
     if (!kinds.length && !P.matrix) return '<div class="fb no noprint">請至少勾選一種輸出卷別。</div>';
     function head(label, tag) {
@@ -194,18 +202,18 @@
     }
     var TYN = { choice: "選擇題", tf: "是非題", num: "填充題", text: "填充題", multi: "勾選題", match: "連連看", group: "題組", any: "綜合題" }, CN = "一二三四五六七八九十";
     function matchTable(q, blank) {
-      return '<table class="pmatch"><tr><th>題目</th><th>答案</th></tr>' + q.L.map(function (l, i) { return "<tr><td>（　）" + (i + 1) + "．" + D.tx(esc(l)) + "</td><td>" + (q.R[i] != null ? L(i) + "．" + D.tx(esc(q.R[i])) : "") + "</td></tr>"; }).join("") + "</table>";
+      return '<table class="pmatch"><tr><th>題目</th><th>答案</th></tr>' + q.L.map(function (l, i) { return "<tr><td>（　）" + (i + 1) + "．" + D.tx(esc(l)) + "</td><td>" + (q.R[i] != null ? OL(i) + D.tx(esc(q.R[i])) : "") + "</td></tr>"; }).join("") + "</table>";
     }
     function opts(q) {
-      if (q.ty === "multi") return '<div class="popts ' + P.optMode + '">' + q.o.map(function (t, k) { return "<div>□ " + L(k) + "．" + D.tx(esc(t)) + "</div>"; }).join("") + "</div>";
+      if (q.ty === "multi") return '<div class="popts ' + P.optMode + '">' + q.o.map(function (t, k) { return "<div>□ " + OL(k) + D.tx(esc(t)) + "</div>"; }).join("") + "</div>";
       if (q.ty === "match") return matchTable(q);
-      return q.o ? '<div class="popts ' + P.optMode + '">' + q.o.map(function (t, k) { return "<div>" + L(k) + "．" + D.tx(esc(t)) + "</div>"; }).join("") + "</div>" : "";
+      return q.o ? '<div class="popts ' + P.optMode + '">' + q.o.map(function (t, k) { return "<div>" + OL(k) + D.tx(esc(t)) + "</div>"; }).join("") + "</div>" : "";
     }
     function ans(q) {
       if (q.ty === "tf") return (q.a === "對" ? "○" : "✕") + "（" + esc(q.a) + "）";
-      if (q.ty === "multi") return esc(q.al) + "．" + String(q.a).split("|").map(function (t) { return D.tx(esc(t)); }).join("、");
+      if (q.ty === "multi") return esc(AL(q.al)) + String(q.a).split("|").map(function (t) { return D.tx(esc(t)); }).join("、");
       if (q.ty === "match") return esc(q.al);
-      return (q.al ? q.al + "．" : "") + D.tx(esc(String(q.a)));
+      return esc(AL(q.al)) + D.tx(esc(String(q.a)));
     }
     /* 題型提示：有大題標題時寫在標題上；沒有大題（快速出卷）就跟在題目後面 */
     function hint(q, bySec) {
@@ -257,12 +265,14 @@
     }
     function sheet(k, arr, tag, sid) {
       var cls = "psheet pp pp-" + k + (P.mascot === false ? " nomascot" : ""), h;
-      if (k === "q") h = head("題目卷", tag) + qList(arr, false);
-      else if (k === "qa") h = head("題目與詳解", tag) + qList(arr, true);
-      else if (k === "ak") { cls += " key"; h = head("簡答與詳解", tag) + keyList(arr, ""); }
-      else if (k === "short") { cls += " key"; h = head("簡答卷", tag) + keyList(arr, "pshort"); }
-      else h = head("答案卷", tag) + blankList(arr);
-      return '<div class="' + cls + '" data-sid="' + sid + '" style="--pw:' + pw + 'mm' + (PN_ON(P) ? ";page:pg-" + sid : "") + '" data-cols="' + (k === "short" ? Math.max(cols, 3) : cols) + '">' + (WM ? WM.scr : "") + h + '<p class="pcopy">© ' + new Date().getFullYear() + " 蘇昊數理・保留所有權利・僅供購買者本人或授課班級教學使用，請勿轉載</p></div>";
+      /* 卷頭跨整頁；題目放進 .pbody，「雙欄＋中線」時整份題目連續分兩欄、中間一條直線 */
+      var B = function (x) { return '<div class="pbody">' + x + "</div>"; };
+      if (k === "q") h = head("題目卷", tag) + B(qList(arr, false));
+      else if (k === "qa") h = head("題目與詳解", tag) + B(qList(arr, true));
+      else if (k === "ak") { cls += " key"; h = head("簡答與詳解", tag) + B(keyList(arr, "")); }
+      else if (k === "short") { cls += " key"; h = head("簡答卷", tag) + B(keyList(arr, "pshort")); }
+      else h = head("答案卷", tag) + B(blankList(arr));
+      return '<div class="' + cls + '" data-sid="' + sid + '" style="--pw:' + pw + 'mm' + (PN_ON(P) ? ";page:pg-" + sid : "") + '" data-cols="' + (k === "short" ? Math.max(cols, 3) : cols) + '" data-lay="' + esc(P.layout) + '">' + (WM ? WM.scr : "") + h + '<p class="pcopy">© ' + new Date().getFullYear() + " 蘇昊數理・保留所有權利・僅供購買者本人或授課班級教學使用，請勿轉載</p></div>";
     }
     for (var v = 0; v < P.variants; v++) { var arr = variant(qs, v, D.secs), tag = P.variants > 1 ? "（" + ZH[v] + "卷）" : ""; kinds.filter(function (x) { return x.v === v; }).forEach(function (x) { out.push(sheet(x.k, arr, tag, x.id)); }); }
     if (P.matrix) out.push(matrix(P, qs, nm, D, head, pw, WM));

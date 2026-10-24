@@ -19,7 +19,7 @@ function gstem(g,s,im,k,n){return s?'<div class="gstem">'+(n>1?'<small class="gt
 function qimg(p,c){return p?'<img class="qimg'+(c?" "+c:"")+'" alt="附圖" src="'+esc(M.img(p))+'">':""}
 
 function L(i){return String.fromCharCode(65+i)}
-function labOf(o,v){if(o&&o.length===2&&o[0]==="對"&&o[1]==="錯")return v==="對"?"○ 對":v==="錯"?"✕ 錯":v;var k=o?o.indexOf(String(v)):-1;return k>=0?L(k)+"．"+v:v}
+function labOf(o,v){if(o&&o.length===2&&o[0]==="對"&&o[1]==="錯")return v==="對"?"○ 對":v==="錯"?"✕ 錯":v;var k=o?o.indexOf(String(v)):-1;return k>=0?"("+L(k)+") "+v:v}
 /* 單元多選器：不選＝由系統依年級自動配；可依年級展開勾選 */
 function picker(ids,mine){
  var el=h('<details class="upick"><summary>自選單元（<b class="cnt">0</b> 個）</summary><div class="ctl"><button class="pen" data-a="all">全選</button><button class="pen" data-a="none">全不選</button><button class="pen" data-a="mine">只選我的年級</button></div><div class="ug"></div></details>'),g=el.querySelector(".ug"),boxes=[];
@@ -104,7 +104,7 @@ function run(o){
  function tick(){left=S.seconds-Math.floor((Date.now()-t0)/1000);if(left<0)left=0;clock.textContent="剩 "+pad(Math.floor(left/60))+":"+pad(left%60);if(left<=0)finish()}
  function show(){
   var q=qs[i],sel=null,done=false,ob=[],inp,hb,d=h('<div><div class="prog">第 '+(i+1)+" / "+qs.length+' 題</div>'+(q.g?gstem(0,q.g.s,q.g.i,q.g.k,q.g.n):"")+'<div class="q">'+tx(q.q)+"</div>"+qimg(q.img)+"</div>");body.innerHTML="";
-  if(q.o){var w=h('<div class="opts"></div>');q.o.forEach(function(t,ti){var b=h('<button class="pen opt"></button>');b.innerHTML=q.tf?"<b>"+(t==="對"?"○":"✕")+"　</b>"+tx(esc(t)):"<b>"+L(ti)+"．</b>"+tx(esc(t));b.dataset.v=t;b.onclick=function(){if(done)return;sel=t;ob.forEach(function(x){x.classList.toggle("sel",x===b)})};ob.push(b);w.appendChild(b)});d.appendChild(w)}
+  if(q.o){var w=h('<div class="opts"></div>');q.o.forEach(function(t,ti){var b=h('<button class="pen opt"></button>');b.innerHTML=q.tf?"<b>"+(t==="對"?"○":"✕")+"　</b>"+tx(esc(t)):"<b>("+L(ti)+")</b> "+tx(esc(t));b.dataset.v=t;b.onclick=function(){if(done)return;sel=t;ob.forEach(function(x){x.classList.toggle("sel",x===b)})};ob.push(b);w.appendChild(b)});d.appendChild(w)}
   else if(q.t==="text"){var c=h('<div class="ctl"><input class="num txt" type="text" maxlength="60" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="輸入答案"></div>');inp=c.firstChild;d.appendChild(c)}
   else{var c=h('<div class="ctl"><input class="num" type="number" step="any" inputmode="decimal" placeholder="答案"></div>');inp=c.firstChild;d.appendChild(c)}
   var bar=h('<div class="ctl"><button class="pen go">'+(exam?(i+1<qs.length?"下一題":"交卷"):"檢查")+"</button></div>"),go=bar.firstChild,fb=h('<div class="fb"></div>');
@@ -126,7 +126,7 @@ function run(o){
     busy=false;go.disabled=false;res.push({q:q,ok:r.ok});if(S.kind==="daily"&&r.data){M.setData(r.data,r.prog);dres={gain:r.gain,got:r.got||[]};updWho()}done=true;go.textContent=i+1<qs.length?"下一題":"看結果";if(hb)hb.disabled=true;
     if(q.o)ob.forEach(function(b){b.disabled=true;if(b.dataset.v===String(r.a))b.classList.add("right");else if(b.classList.contains("sel"))b.classList.add("wrong")});else inp.disabled=true;
     fb.className="fb "+(r.ok?"ok":"no");
-    fb.innerHTML=r.ok?"答對了！":tx("答案是 "+(r.al?r.al+"．":"")+r.a+"。"+r.h)+(r.diag?'<br><b class="diag">'+tx(r.diag)+"</b>":"")+qimg(r.himg)+"<br><small>"+(S.kind==="fix"?"還沒訂正成功，會留在錯題本。":"這題已放進錯題本。")+"</small>"
+    fb.innerHTML=r.ok?"答對了！":tx("答案是 "+(r.al?"("+r.al+") ":"")+r.a+"。"+r.h)+(r.diag?'<br><b class="diag">'+tx(r.diag)+"</b>":"")+qimg(r.himg)+"<br><small>"+(S.kind==="fix"?"還沒訂正成功，會留在錯題本。":"這題已放進錯題本。")+"</small>"
    }).catch(function(e){busy=false;go.disabled=false;fb.className="fb no";fb.textContent=errMsg(e)})}}
  function next(){if(i+1<qs.length){i++;show()}else finish()}
  function finish(){
@@ -284,7 +284,7 @@ function popup(ttl,msg,after){
  function key(e){if(e.key==="Escape"||e.key==="Enter"){e.preventDefault();close()}}
  ov.querySelector("button").onclick=close;ov.addEventListener("click",function(e){if(e.target===ov)close()});document.addEventListener("keydown",key);document.body.appendChild(ov);ov.querySelector("button").focus()}
 function fq(P){var o="";if(P.fd&&P.fd.length)o+="&d="+encodeURIComponent(P.fd.join(","));if(P.fg&&P.fg.length)o+="&cg="+encodeURIComponent(P.fg.join(","));if(P.fk)o+="&kw="+encodeURIComponent(P.fk);if(P.fp)o+="&pf="+encodeURIComponent(P.fp);return o}
-function ansOf(q){return(q.al?q.al+"．":"")+(q.ty==="match"?"":q.a)}
+function ansOf(q){return(q.al?"("+q.al+") ":"")+(q.ty==="match"?"":q.a)}
 
 V.print=function(arg){return user().role==="student"?printStudent():printWiz(arg)};
 
@@ -408,7 +408,7 @@ function printWiz(arg){
   box.innerHTML="";var lastS=-1;
   pv.qs.forEach(function(q,i){
    if(pv.secs&&q.s!==lastS){if(lastS>=0)addRow(lastS);lastS=q.s;var sc=pv.secs[q.s];if(sc)box.appendChild(h('<h4 class="pvsec">第 '+(q.s+1)+" 大題"+(sc.title?"・"+esc(sc.title):"")+(sc.pts?"　每題 "+sc.pts+" 分":"")+"</h4>"))}
-   var opts=q.ty==="match"?"　"+q.L.map(function(l,k){return(k+1)+"."+esc(l)}).join("　")+"　／　"+q.R.map(function(r,k){return String.fromCharCode(65+k)+"."+esc(r)}).join("　"):q.o?"<div class=\"pvo\">"+q.o.map(function(o,k){return String.fromCharCode(65+k)+"．"+tx(esc(o))}).join("　")+"</div>":"";
+   var opts=q.ty==="match"?"　"+q.L.map(function(l,k){return(k+1)+"."+esc(l)}).join("　")+"　／　"+q.R.map(function(r,k){return "("+String.fromCharCode(65+k)+") "+esc(r)}).join("　"):q.o?"<div class=\"pvo\">"+q.o.map(function(o,k){return "("+String.fromCharCode(65+k)+") "+tx(esc(o))}).join("　")+"</div>":"";
    var d=h('<div class="pvq"><div class="pvh"><b>'+(i+1)+'</b><span class="pvm"></span><button type="button" class="pen pv-sw">換題</button><button type="button" class="pen pv-rm">移除</button></div><div class="pvt"></div>'+(showAns?'<div class="pva"><b>答案：</b></div>':"")+"</div>");
    d.querySelector(".pvm").textContent=tyOf(q)+"｜"+(({1:"易",2:"中",3:"難"})[q.lv]||"中")+"｜"+title(q.unit).split(" ").slice(-1)[0]+(q.qid?"｜ID "+q.qid:"");
    d.querySelector(".pvt").innerHTML=tx(esc(q.q))+qimg(q.img)+opts;
