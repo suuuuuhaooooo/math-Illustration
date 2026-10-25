@@ -22,6 +22,8 @@
       img.onerror = function () { URL.revokeObjectURL(u); no(new Error("img")); }; img.src = u;
     });
   }
+  /* 從見微理畫（國中理化網站）按「回報問題」過來：網址帶 rp=1&from=頁面，登入後自動打開回報視窗並記下原本的頁面 */
+  var Q = new URLSearchParams(location.search), FROM = Q.get("rp") === "1" ? String(Q.get("from") || "").slice(0, 160) : "";
   function open() {
     if (document.getElementById("rpov")) return;
     var M = window.NB && NB.member, files = [], busy = false;
@@ -51,7 +53,7 @@
       if (msg.length < 5) return say("請至少寫幾個字說明問題。", 0);
       if (!M || !M.api) return say("請先登入再回報。", 0);
       busy = true; $("rp-send").disabled = true; say("送出中…", 1);
-      M.api("POST", "/api/report", { cat: $("rp-cat").value, msg: msg, qid: $("rp-qid").value.trim(), files: files, ctx: { page: location.pathname.split("/").pop() + location.hash, ua: navigator.userAgent, screen: innerWidth + "x" + innerHeight, errs: errs } }).then(function (r) {
+      M.api("POST", "/api/report", { cat: $("rp-cat").value, msg: msg, qid: $("rp-qid").value.trim(), files: files, ctx: { page: (FROM ? "見微理畫 " + FROM + "（經由 " : "") + location.pathname.split("/").pop() + location.hash + (FROM ? "）" : ""), ua: navigator.userAgent, screen: innerWidth + "x" + innerHeight, errs: errs } }).then(function (r) {
         box.innerHTML = '<h3>已送出</h3><p>謝謝你的回報（編號 ' + esc(r.id) + '）。老師看到後會處理。</p><div class="ctl"><button class="pen go" id="rp-ok">關閉</button></div>'; box.querySelector("#rp-ok").onclick = close;
       }, function (e) {
         busy = false; $("rp-send").disabled = false;
@@ -61,7 +63,7 @@
   }
   function mount() {
     var b = el("button", "rpbtn nozy noprint", "回報問題"); b.type = "button"; b.hidden = true; b.setAttribute("aria-label", "回報問題"); b.onclick = open; document.body.appendChild(b);
-    setInterval(function () { var on = !!(window.NB && NB.member && NB.member.U); if (b.hidden === on) b.hidden = !on; }, 1200);
+    var auto = !!FROM; setInterval(function () { var on = !!(window.NB && NB.member && NB.member.U); if (b.hidden === on) b.hidden = !on; if (on && auto) { auto = false; open(); var m = document.getElementById("rp-msg"); if (m && !m.value) m.value = "（我在見微理畫的「" + FROM + "」遇到的問題）\n"; } }, 1200);
   }
   if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
   window.NB = window.NB || {}; NB.report = { open: open };

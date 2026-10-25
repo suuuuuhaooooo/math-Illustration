@@ -2,7 +2,7 @@
    只負責「怎麼印」。題目由 /api/print 出好，這裡拿到題目後想換排版不用重新出題。 */
 (function () {
   "use strict";
-  var KEY = "nb-print-v1";
+  var KEY = "nb-print-v1" + (window.NB && NB.member && NB.member.subj === "sci" ? "-sci" : ""); /* 數學、理化的卷頭設定分開存 */
   var PAPER = { A3: [297, 420], A4: [210, 297], B4: [257, 364], B5: [182, 257] };
   var KINDS = [["q", "題目卷"], ["blank", "空白答案卷"], ["qa", "題目與詳解"], ["ak", "簡答與詳解"], ["short", "簡答卷"], ["qpk", "題目卷＋詳解卷"]];
   var LV = { 1: "易", 2: "中", 3: "難" }, ZH = "甲乙丙丁", DIFFS = ["易", "中", "難"], COGS = ["知識", "理解", "應用", "分析", "評鑑", "創造"];
@@ -14,8 +14,8 @@
   function OL(i) { return OPTLAB === "dot" ? L(i) + "．" : "(" + L(i) + ") "; }
   function AL(al) { if (!al) return ""; return OPTLAB === "dot" ? al + "．" : String(al).split("、").map(function (c) { return "(" + c + ")"; }).join("") + " "; }
   function defaults(u) {
-    var m = /^([1-6])(\d{1,2})$/.exec(String(u.cls || "")), t = u.role === "teacher";
-    return { school: "", showSchool: false, exam: "數學練習卷", showExam: true, subject: "數學", showSubject: true, grade: m ? m[1] : "", cls: m ? String(+m[2]) : "", showClass: true,
+    var m = /^([1-9])(\d{1,2})$/.exec(String(u.cls || "")), t = u.role === "teacher", sci = window.NB && NB.member && NB.member.subj === "sci";
+    return { school: "", showSchool: false, exam: sci ? "理化練習卷" : "數學練習卷", showExam: true, subject: sci ? "理化" : "數學", showSubject: true, grade: m ? m[1] : "", cls: m ? String(+m[2]) : "", showClass: true,
       showScore: t, prefill: !t, paper: "A4", layout: "s1", optMode: "col", optLab: "paren", gmerge: true, qr: false, kinds: { q: true, ak: true }, showFocus: false, showId: false, showPerf: false, showCont: false, showLv: false, showCog: false, showKnow: false, metaAt: "q", matrix: false, mxRow: "unit", mxCol: "diff", variants: 1, pageNo: "kn",
       wm: !t, wmName: true, wmCls: true, wmEmail: true, wmIp: true, wmDev: true, wmTime: true, wmText: "", wmDen: "2", wmDens: "1", mascot: true };
   }
@@ -224,7 +224,7 @@
       if (q.ty === "tf") return (q.a === "對" ? "○" : "✕") + "（" + esc(q.a) + "）";
       if (q.ty === "multi") return esc(AL(q.al)) + String(q.a).split("|").map(function (t) { return D.tx(esc(t)); }).join("、");
       if (q.ty === "match") return esc(q.al);
-      return esc(AL(q.al)) + D.tx(esc(String(q.a)));
+      return esc(AL(q.al)) + D.tx(esc(String(q.a) + (q.au ? " " + q.au : "")));
     }
     /* 題型提示：有大題標題時寫在標題上；沒有大題（快速出卷）就跟在題目後面 */
     function hint(q, bySec) {

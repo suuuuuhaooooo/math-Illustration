@@ -7,7 +7,9 @@ var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["assign","�
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function title(id){var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
 function pct(c,n){return n?Math.round(c/n*100):null}
-function shell(notabs){app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="member.html">← 回到學員專區</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));app.appendChild(h('<h1 class="title"><mark>老師後台</mark></h1>'));
+function shell(notabs){app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="member.html">← 回到學員專區</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));app.appendChild(h('<h1 class="title"><mark>老師後台</mark>'+(M.U?'<small class="subj-now">・'+(M.SUBJ[M.subj]||M.subj)+"</small>":"")+'</h1>'));
+ /* 科目切換：帳號開通兩科（老師、管理員預設都有）才顯示；切換後整頁重新載入，名單、題庫、派卷、紀錄都只看那一科 */
+ var ss=M.U&&M.U.subjects||[];if(ss.length>1){var sw=h('<div class="ctl subj-sw"><span class="meta">目前科目：</span></div>');ss.forEach(function(k){if(!M.SUBJ[k])return;var b=h('<button class="pen'+(k===M.subj?" go":"")+'"></button>');b.textContent=M.SUBJ[k];b.onclick=function(){if(k===M.subj)return;M.setSubj(k);location.reload()};sw.appendChild(b)});app.appendChild(sw)}
  var tabs=h('<div class="tabs"></div>');TABS.forEach(function(t){var b=h('<button class="pen'+(t[0]===TAB?" go":"")+'">'+t[1]+"</button>");b.onclick=function(){tab(t[0])};tabs.appendChild(b)});if(!notabs)app.appendChild(tabs)}
 function sheet(tag,sub){var s=h('<section class="sheet"><h2><span class="tag">'+tag+'</span>'+(sub||"")+'</h2></section>');app.appendChild(s);return s}
 function msg(t,btn){shell(1);var s=sheet("提示","");s.appendChild(h("<p>"+t+'</p>'+(btn||'<a class="pen go" href="member.html">前往登入</a>')))}
@@ -41,10 +43,23 @@ function meterRow(label,p,right){return'<div class="urow"><span>'+label+'</span>
 
 function load(cls){
  M.api("GET","/api/admin/overview"+(cls?"?cls="+encodeURIComponent(cls):"")).then(render,function(e){if(e.code==="expired")return expiredMsg();msg(e.code==="forbidden"?"只有名單裡設定為 teacher 的帳號可以使用老師後台。":"載入失敗（"+esc(e.code||"未知")+"），請稍後再試。")})}
+/* 各班比較（目前這一科）：老師只看自己的班；管理員看全校，另加這一科的帳號概況 */
+function compare(after){
+ var cs=h('<section class="sheet cmp"><h2><span class="tag">各班比較</span>'+esc(M.SUBJ[M.subj]||"")+(M.U.admin?"・全校":"・你任教的班")+'</h2><p class="meta">讀取中…</p></section>');
+ if(after&&after.nextSibling)app.insertBefore(cs,after.nextSibling);else app.appendChild(cs);
+ M.api("GET","/api/admin/compare").then(function(r){cs.querySelector(".meta").remove();
+  if(r.acct){var a=r.acct,tl=h('<div class="tiles"></div>');tl.innerHTML=[["本科學生帳號",a.students],["本科老師",a.teachers],["授權已到期",a.expired],["30 天內到期",a.soon],["不限期",a.unlimited],["本科題庫（啟用）",a.bank+" 題"]].map(function(x){return'<div class="tile"><small>'+x[0]+"</small><strong>"+x[1]+"</strong></div>"}).join("");cs.appendChild(tl)}
+  if(!r.rows.length){cs.appendChild(h('<p class="meta">這一科還沒有班級。</p>'));return}
+  if(r.rows.length<2&&!r.admin){cs.remove();return} /* 只有一個班的老師，上面的班級分析就夠了 */
+  var t='<table class="tb"><tr><th>班級</th><th>學生</th><th>已登入</th><th>近 7 天活躍</th><th>近 30 天作答</th><th>答對率</th><th>模擬卷平均</th></tr>';
+  r.rows.forEach(function(x){t+='<tr><td><a href="#" data-c="'+esc(x.cls)+'">'+esc(x.cls)+" 班</a></td><td>"+x.total+"</td><td>"+x.joined+"</td><td>"+x.active7+"</td><td>"+x.n+"</td><td>"+(x.acc===null?"—":x.acc+"%")+"</td><td>"+(x.mockAvg===null?"—":x.mockAvg+"（"+x.mockN+" 份）")+"</td></tr>"});
+  var tb=h(t+"</table>");tb.onclick=function(e){var a=e.target.closest("a[data-c]");if(!a)return;e.preventDefault();CLS=a.dataset.c;load(CLS)};cs.appendChild(tb);
+  cs.appendChild(h('<p class="meta">點班級可以切換到那一班的詳細分析。'+(r.admin?"帳號概況只有管理員看得到。":"")+"</p>"))},function(e){cs.querySelector(".meta").textContent="載入失敗（"+(e.code||"未知")+"）"})}
 function render(r){
+ if(r.empty){shell();var s0=sheet("班級","");s0.appendChild(h("<p>「"+(M.SUBJ[M.subj]||"")+"」目前還沒有你班上的學生。學生開通這一科後，這裡就會出現班級分析。</p>"));if(M.U.admin)compare(s0);return}
  CLS=r.cls;shell();var S=r.summary,rows=r.students,today=M.today(),limit=M.today(new Date(Date.now()-7*864e5));
  var s=sheet("班級",""),sel=h("<select></select>");r.classes.forEach(function(c){var o=h("<option></option>");o.value=c;o.textContent=c+" 班";if(c===r.cls)o.selected=true;sel.appendChild(o)});sel.onchange=function(){CLS=sel.value;load(CLS)};s.appendChild(sel);
- var tl=h('<div class="tiles"></div>');tl.innerHTML=[["已登入／全班",S.joined+" / "+S.total],["近 7 天有練習",S.active7+" 人"],["全班答對率",S.acc===null?"—":S.acc+"%"],["模擬卷平均",S.mockAvg===null?"—":S.mockAvg],["需要關心",S.atRisk+" 人"],["看提示次數",S.hints]].map(function(x){return'<div class="tile"><small>'+x[0]+"</small><strong>"+x[1]+"</strong></div>"}).join("");s.appendChild(tl);
+ var tl=h('<div class="tiles"></div>');tl.innerHTML=[["已登入／全班",S.joined+" / "+S.total],["近 7 天有練習",S.active7+" 人"],["全班答對率",S.acc===null?"—":S.acc+"%"],["模擬卷平均",S.mockAvg===null?"—":S.mockAvg],["需要關心",S.atRisk+" 人"],["看提示次數",S.hints]].map(function(x){return'<div class="tile"><small>'+x[0]+"</small><strong>"+x[1]+"</strong></div>"}).join("");s.appendChild(tl);compare(s);
 
  /* 需要關心的學生 */
  var risk=rows.filter(function(x){return x.flags.length}).concat(r.never.map(function(x){return{no:x.no,name:x.name,flags:["還沒登入過"]}}));
@@ -99,6 +114,10 @@ function detail(cls,no){
   if(d.wrong.length)s.appendChild(h('<div><p class="meta">錯題本（最近 '+d.wrong.length+' 題）</p><table class="tb"><tr><th>單元</th><th>題目ID</th><th>題型／難度</th><th>題目</th><th>正確答案</th><th class="pc">錯幾次</th><th>下次複習</th></tr>'+d.wrong.map(function(x){return"<tr><td>"+esc(title(x.unit))+"</td><td>"+(x.qid?(String(x.qid).indexOf("gen:")===0?"產生器":esc(x.qid)):"—")+"</td><td>"+esc(({num:"填數字",choice:"選擇",text:"填文字",tf:"是非",multi:"勾選",match:"連連看"}[x.ty]||"")+(x.kd?"・"+x.kd:"")+(x.lv?" Lv."+x.lv:""))+(x.gid?" 題組":"")+"</td><td>"+esc(String(x.q).slice(0,40))+"</td><td>"+esc(x.ans||"—")+'</td><td class="pc">'+x.n+"</td><td>"+(x.due||"—")+"</td></tr>"}).join("")+"</table></div>"));
   s.appendChild(close);close.firstChild.onclick=function(){s.remove()};var old=app.querySelector(".sheet.prof");if(old)old.remove();s.classList.add("prof");app.insertBefore(s,app.querySelector(".sheet:nth-of-type(1)"));s.scrollIntoView()},function(e){alert("載入失敗："+(e.code||"未知"))})}
 
+var swapped=false;
+function after(){if(!M.U&&M.err==="no_subject"&&!swapped){var ok=(M.errX&&M.errX.subjects||[]).filter(function(k){return M.SUBJ[k]&&k!==M.subj});if(ok.length){swapped=true;M.setSubj(ok[0]);return M.boot().then(after)}}
+ start()}
 shell(1);app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
-M.boot().then(function(){if(M.U&&!M.U.admin){TABS=TABS_ALL.filter(function(t){return t[0]!=="bank"&&t[0]!=="settings"&&t[0]!=="data"&&t[0]!=="reports"});if(TAB==="bank"||TAB==="settings"||TAB==="data"||TAB==="reports")TAB="overview"}if(!M.U)return msg("請先用老師的 Google 帳號登入學員專區。");if(M.U.expired||(M.acct&&M.acct.expired))return expiredMsg();if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");READY=true;go()});
+function start(){if(M.U&&!M.U.admin){TABS=TABS_ALL.filter(function(t){return t[0]!=="bank"&&t[0]!=="settings"&&t[0]!=="data"&&t[0]!=="reports"});if(TAB==="bank"||TAB==="settings"||TAB==="data"||TAB==="reports")TAB="overview"}if(!M.U&&M.err==="no_subject")return msg("你的帳號沒有開通可以在這裡使用的科目，請聯絡管理員。");if(!M.U)return msg("請先用老師的 Google 帳號登入學員專區。");if(M.U.expired||(M.acct&&M.acct.expired))return expiredMsg();if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");READY=true;go()}
+M.boot().then(after);
 })();

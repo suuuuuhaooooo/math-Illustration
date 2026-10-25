@@ -3,7 +3,7 @@
 "use strict";
 var M=NB.member,h=NB.h;
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-var ERRMAP={bad_HINT_COST:"看一次提示扣的分數要是 0～10000 的整數",bad_LEVEL_STEP:"每幾分升一級要在 10～100000 之間",bad_DAILY_Q_CAP:"每天最多計分的題數要在 10～5000 之間",bad_DAILY_MOCK_CAP:"每天可領獎勵的模擬卷份數要在 0～50 之間",bad_POINTS_BY_LEVEL:"答對積分要填 3 個 1～1000 的數字，用逗號分開（例：10,15,20）",bad_REVIEW_DAYS:"錯題複習間隔要填 1～6 個 1～90 的整數，用逗號分開（例：1,3,7）",forbidden:"沒有這個權限（這項功能只有管理員能用）",expired:"你的老師帳號使用期限已到期，請聯絡管理員延長；延長後重新整理頁面",bad_PURGE_DAYS:"舊紀錄保留天數只能選清單裡的選項",bad_email:"Email 格式不對",confirm_mismatch:"確認欄的 Email 和上面查詢的不一樣，沒有刪除",cannot_delete_self:"不能刪除自己的帳號",bad_parts:"勾選的項目不正確，請重新查詢"};
+var ERRMAP={bad_date:"日期格式不對，請用 2027-01-31 這種寫法",last_subject:"每個帳號至少要保留一個科目；這個班有人只剩這一科，要停用請改用「停用」或刪除",no_subject:"你的帳號沒有開通這一科",wrong_subject:"這份資料屬於另一科，請先切換科目",bad_HINT_COST:"看一次提示扣的分數要是 0～10000 的整數",bad_LEVEL_STEP:"每幾分升一級要在 10～100000 之間",bad_DAILY_Q_CAP:"每天最多計分的題數要在 10～5000 之間",bad_DAILY_MOCK_CAP:"每天可領獎勵的模擬卷份數要在 0～50 之間",bad_POINTS_BY_LEVEL:"答對積分要填 3 個 1～1000 的數字，用逗號分開（例：10,15,20）",bad_REVIEW_DAYS:"錯題複習間隔要填 1～6 個 1～90 的整數，用逗號分開（例：1,3,7）",forbidden:"沒有這個權限（這項功能只有管理員能用）",expired:"你的老師帳號使用期限已到期，請聯絡管理員延長；延長後重新整理頁面",bad_PURGE_DAYS:"舊紀錄保留天數只能選清單裡的選項",bad_email:"Email 格式不對",confirm_mismatch:"確認欄的 Email 和上面查詢的不一樣，沒有刪除",cannot_delete_self:"不能刪除自己的帳號",bad_parts:"勾選的項目不正確，請重新查詢"};
 function errs(e){return e&&e.code?(ERRMAP[e.code]||"失敗（"+e.code+"）"):"連線失敗"}
 function csvEsc(v){v=String(v==null?"":v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function parseCSV(t){var rows=[],r=[],f="",q=false,i,c;t=t.replace(/^﻿/,"");
@@ -16,6 +16,10 @@ function download(name,text){var a=document.createElement("a");a.href=URL.create
 function msg(box,t,ok){box.className="fb "+(ok?"ok":"no");box.innerHTML=t}
 function field(label,el){var d=h('<label class="fld"><span>'+label+"</span></label>");d.appendChild(el);return d}
 function inp(v,ph,type){var i=document.createElement("input");i.type=type||"text";i.value=v==null?"":v;if(ph)i.placeholder=ph;return i}
+/* 科目：row.sj = {math:"到期日或空白", sci:…}；顯示成「數學 2027-01-31・理化 不限期」 */
+var SJN={math:"數學",sci:"理化"};
+function sjText(x,today){var m=x.sj||{math:x.expires||""};if(x.role==="admin")return"全科";return Object.keys(SJN).filter(function(k){return k in m}).map(function(k){var d=m[k];return SJN[k]+" "+(!M.U.admin?"":d?(d<today?'<b class="flag">已到期 '+d+"</b>":d):"不限期")}).join("<br>")||"—"}
+function sjCsv(x){var m=x.sj||{math:x.expires||""};return Object.keys(SJN).filter(function(k){return k in m}).map(function(k){return k+(m[k]?":"+m[k]:"")}).join(",")}
 function sel(opts,v){var s=document.createElement("select");opts.forEach(function(o){var e=document.createElement("option");e.value=o[0];e.textContent=o[1];if(String(o[0])===String(v))e.selected=true;s.appendChild(e)});return s}
 function area(v,rows){var a=document.createElement("textarea");a.rows=rows||3;a.value=v||"";a.style.width="100%";return a}
 function migrateBanner(ctx,legacy){if(!legacy)return;var b=h('<div class="fb no">偵測到你還在使用舊的「試算表同步」資料，尚未搬進資料庫。搬完後就能在這裡直接新增、修改、刪除。<div class="ctl"><button class="pen go">一鍵搬移舊資料</button></div></div>');
@@ -28,42 +32,54 @@ function roster(ctx){
   ctx.box=s;
   if(!M.U.admin){ /* 老師：只能看自己班的名單；新增、修改、刪除、授權期限、批次匯入都只有管理員能做 */
    s.appendChild(h('<p class="meta">這裡是你班級的名單（唯讀）。新增、修改、刪除學生與授權期限，只有管理員可以操作；需要異動請聯絡管理員。</p>'));
-   var tr='<table class="tb"><tr><th>班</th><th>號</th><th>姓名</th><th>Email</th><th>年級</th><th>狀態</th></tr>';
-   r.rows.forEach(function(x){tr+='<tr class="'+(x.active==="0"||x.active===0?"low":"")+'"><td>'+esc(x.class)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+esc(x.email)+"</td><td>"+x.grade+"</td><td>"+(x.active==="0"||x.active===0?"停用":"啟用")+"</td></tr>"});
+   var tr='<table class="tb"><tr><th>班</th><th>號</th><th>姓名</th><th>Email</th><th>年級</th><th>科目</th><th>狀態</th></tr>';
+   r.rows.forEach(function(x){tr+='<tr class="'+(x.active==="0"||x.active===0?"low":"")+'"><td>'+esc(x.class)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+esc(x.email)+"</td><td>"+x.grade+"</td><td>"+sjText(x)+"</td><td>"+(x.active==="0"||x.active===0?"停用":"啟用")+"</td></tr>"});
    s.appendChild(h(tr+"</table>"));
    var eb0=h('<div class="ctl"><button class="pen">匯出名單 CSV</button></div>');eb0.firstChild.onclick=function(){download("名單.csv","email,class,no,name,grade,active\n"+r.rows.map(function(x){return[x.email,x.class,x.no,x.name,x.grade,x.active==="0"?0:1].map(csvEsc).join(",")}).join("\n"))};s.appendChild(eb0);
    return}
   migrateBanner(ctx,r.legacy);
-  var today=M.today(),rows=r.rows,form=h('<div class="ctl wrapctl"></div>'),f={email:inp("","Google 帳號 Email","email"),cls:inp("","班級 例 601"),no:inp("","座號","number"),name:inp("","姓名"),grade:sel([[1,"一年級"],[2,"二年級"],[3,"三年級"],[4,"四年級"],[5,"五年級"],[6,"六年級"]],6),role:sel(M.U.admin?[["student","學生"],["teacher","老師"],["admin","管理員"]]:[["student","學生"]],"student"),act:sel([["1","啟用"],["0","停用"]],"1"),exp:inp("","授權到期日","date")};f.exp.title="授權到期日（含當天）；留空＝不限期";
-  Object.keys(f).forEach(function(k){form.appendChild(k==="exp"?field("授權到期日（空白＝不限期）",f[k]):f[k])});
+  var today=M.today(),rows=r.rows,form=h('<div class="ctl wrapctl"></div>'),f={email:inp("","Google 帳號 Email","email"),cls:inp("","班級 例 601"),no:inp("","座號","number"),name:inp("","姓名"),grade:sel([[1,"一年級"],[2,"二年級"],[3,"三年級"],[4,"四年級"],[5,"五年級"],[6,"六年級"],[7,"七年級（國一）"],[8,"八年級（國二）"],[9,"九年級（國三）"]],6),role:sel(M.U.admin?[["student","學生"],["teacher","老師"],["admin","管理員"]]:[["student","學生"]],"student"),act:sel([["1","啟用"],["0","停用"]],"1")};
+  Object.keys(f).forEach(function(k){form.appendChild(f[k])});
+  /* 科目：可以同時開通數學與理化，各自有到期日（空白＝不限期）；老師、管理員預設兩科都有 */
+  var SB={};Object.keys(SJN).forEach(function(k){var w=h('<span class="fld sjf"><label><input type="checkbox"> '+SJN[k]+'</label> </span>'),d=inp("","","date");d.title=SJN[k]+"的授權到期日（含當天）；留空＝不限期";w.appendChild(d);SB[k]={ck:w.querySelector("input"),d:d};form.appendChild(w)});
+  function setSj(m){Object.keys(SB).forEach(function(k){SB[k].ck.checked=k in m;SB[k].d.value=m[k]||""})}setSj({math:""});
+  f.role.onchange=function(){if(f.role.value!=="student")setSj({math:SB.math.d.value,sci:SB.sci.d.value})};
+  function sjVal(){return Object.keys(SB).filter(function(k){return SB[k].ck.checked}).map(function(k){return k+(SB[k].d.value?":"+SB[k].d.value:"")}).join(",")}
   var save=h('<button class="pen go">儲存這位</button>');form.appendChild(save);s.appendChild(form);
   function send(list,done){M.api("POST","/api/admin/roster",{rows:list}).then(function(x){if(!x.ok)return msg(fb,"<b>有地方要修正，完全沒有儲存：</b><br>"+x.errs.map(esc).join("<br>"),0);msg(fb,"已儲存 "+x.n+" 筆",1);if(done)done()},function(e){msg(fb,errs(e),0)})}
-  save.onclick=function(){send([{email:f.email.value,class:f.cls.value,no:f.no.value,name:f.name.value,role:f.role.value,grade:f.grade.value,active:f.act.value,expires:f.exp.value}],ctx.go)};
+  save.onclick=function(){var sv=sjVal();if(!sv&&f.role.value!=="admin")return msg(fb,"請至少勾選一個科目",0);send([{email:f.email.value,class:f.cls.value,no:f.no.value,name:f.name.value,role:f.role.value,grade:f.grade.value,active:f.act.value,subjects:f.role.value==="admin"?"":sv,expires:SB.math.ck.checked?SB.math.d.value:""}],ctx.go)};
   s.appendChild(fb);
-  var t='<table class="tb"><tr><th>班</th><th>號</th><th>姓名</th><th>Email</th><th>身分</th><th>年級</th><th>狀態</th><th>授權到期</th><th></th></tr>';
-  rows.forEach(function(x,i){t+='<tr class="'+(x.active==="0"||x.active===0?"low":"")+'"><td>'+esc(x.class)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+esc(x.email)+"</td><td>"+(x.role==="student"?"學生":x.role==="admin"?"管理員":"老師")+"</td><td>"+x.grade+"</td><td>"+(x.active==="0"||x.active===0?"停用":"啟用")+"</td><td>"+(x.role==="admin"?"—":(x.expires?(x.expires<today?"<b class=\"flag\">已到期 "+x.expires+"</b>":x.expires):"不限期"))+'</td><td><button class="pen" data-e="'+i+'">編輯</button> <button class="pen" data-d="'+i+'">刪除</button></td></tr>'});
+  var t='<table class="tb"><tr><th>班</th><th>號</th><th>姓名</th><th>Email</th><th>身分</th><th>年級</th><th>狀態</th><th>科目・授權到期</th><th></th></tr>';
+  rows.forEach(function(x,i){t+='<tr class="'+(x.active==="0"||x.active===0?"low":"")+'"><td>'+esc(x.class)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+esc(x.email)+"</td><td>"+(x.role==="student"?"學生":x.role==="admin"?"管理員":"老師")+"</td><td>"+x.grade+"</td><td>"+(x.active==="0"||x.active===0?"停用":"啟用")+"</td><td>"+sjText(x,today)+'</td><td><button class="pen" data-e="'+i+'">編輯</button> <button class="pen" data-d="'+i+'">刪除</button></td></tr>'});
   var tb=h(t+"</table>");s.appendChild(tb);
   tb.onclick=function(e){var b=e.target.closest("button");if(!b)return;
-   if(b.dataset.e!==undefined){var x=rows[+b.dataset.e];f.email.value=x.email;f.cls.value=x.class;f.no.value=x.no;f.name.value=x.name;f.grade.value=x.grade;f.role.value=x.role;f.act.value=x.active==="0"?"0":"1";f.exp.value=x.expires||"";scrollTo(0,0)}
+   if(b.dataset.e!==undefined){var x=rows[+b.dataset.e];f.email.value=x.email;f.cls.value=x.class;f.no.value=x.no;f.name.value=x.name;f.grade.value=x.grade;f.role.value=x.role;f.act.value=x.active==="0"?"0":"1";setSj(x.sj||{math:x.expires||""});scrollTo(0,0)}
    else{var y=rows[+b.dataset.d];if(!confirm("從名單刪除 "+y.name+"（"+y.email+"）？他就無法登入。成績資料另外在「資料管理」處理。"))return;M.api("POST","/api/admin/roster/delete",{email:y.email}).then(ctx.go,function(er){msg(fb,errs(er),0)})}};
   var cls=[];rows.forEach(function(x){if(x.role==="student"&&cls.indexOf(String(x.class))<0)cls.push(String(x.class))});
-  var ex=ctx.sheet("授權期限","到期後，學生只能看自己的資料，不能練習、考試、列印；老師帳號不受影響");
+  var CUR=M.subj,CURN=SJN[CUR]||CUR;
+  var ex=ctx.sheet("授權期限・"+CURN,"這裡改的是「"+CURN+"」的到期日（到期後，學生在這一科只能看自己的資料，不能練習、考試、列印）；要改另一科，請先在上方切換科目");
   var cs=sel(cls.map(function(c){return[c,c+" 班"]}),cls[0]),ed=inp("","","date"),exf=h('<div class="fb"></div>'),eb=h('<div class="ctl"></div>');
   var b1=h('<button class="pen go">整班設定到期日</button>'),b2=h('<button class="pen">整班改為不限期</button>'),b3=h('<button class="pen">整班延長 1 學期（+6 個月）</button>');
-  eb.appendChild(cs);eb.appendChild(ed);eb.appendChild(b1);eb.appendChild(b2);eb.appendChild(b3);ex.appendChild(eb);ex.appendChild(exf);
-  function setExp(d){M.api("POST","/api/admin/roster/expire",{cls:cs.value,date:d}).then(function(){msg(exf,"已更新 "+cs.value+" 班："+(d||"不限期"),1);setTimeout(ctx.go,700)},function(e){msg(exf,errs(e),0)})}
+  eb.appendChild(cs);eb.appendChild(ed);eb.appendChild(b1);eb.appendChild(b2);eb.appendChild(b3);ex.appendChild(eb);
+  /* 整班開通／取消某一科（取消不會刪掉那一科的作答紀錄；每人至少要留一科） */
+  var sb2=h('<div class="ctl"></div>'),ss=sel(Object.keys(SJN).map(function(k){return[k,SJN[k]]}),CUR==="math"?"sci":"math"),b4=h('<button class="pen">整班開通這一科</button>'),b5=h('<button class="pen">整班取消這一科</button>');
+  sb2.appendChild(h("<span>科目：</span>"));sb2.appendChild(ss);sb2.appendChild(b4);sb2.appendChild(b5);ex.appendChild(h('<p class="meta">開通時會用上面選的日期當到期日（沒選＝不限期）。</p>'));ex.appendChild(sb2);ex.appendChild(exf);
+  function subjAct(act){var nm=SJN[ss.value];if(act==="remove"&&!confirm("取消 "+cs.value+" 班所有學生的「"+nm+"」？他們在這一科的紀錄會保留，之後重新開通就能接著用。"))return;
+   M.api("POST","/api/admin/roster/expire",{cls:cs.value,subj:ss.value,act:act,date:ed.value||""}).then(function(r){msg(exf,cs.value+" 班："+(act==="add"?"開通":"取消")+"「"+nm+"」"+r.n+" 人",1);setTimeout(ctx.go,900)},function(e){msg(exf,errs(e),0)})}
+  b4.onclick=function(){subjAct("add")};b5.onclick=function(){subjAct("remove")};
+  function setExp(d){M.api("POST","/api/admin/roster/expire",{cls:cs.value,date:d,subj:CUR}).then(function(r){msg(exf,"已更新 "+cs.value+" 班「"+CURN+"」："+(d||"不限期")+"（"+r.n+" 人）",1);setTimeout(ctx.go,700)},function(e){msg(exf,errs(e),0)})}
   b1.onclick=function(){if(!ed.value)return msg(exf,"請先選日期",0);setExp(ed.value)};b2.onclick=function(){setExp("")};
   b3.onclick=function(){var d=new Date(Math.max(Date.now(),0));d.setMonth(d.getMonth()+6);setExp(M.today(d))};
-  var bulk=ctx.sheet("批次匯入／匯出","從 Excel、Google 試算表複製貼上；欄位：email, 班級, 座號, 姓名, 身分, 年級, 啟用(1/0), 到期日(2027-01-31，可省略)");
+  var bulk=ctx.sheet("批次匯入／匯出","從 Excel、Google 試算表複製貼上；欄位：email, 班級, 座號, 姓名, 身分, 年級, 啟用(1/0), 到期日(2027-01-31，可省略), 科目(可省略)。科目寫 math、sci（或 數學、理化），兩科用逗號分開並加引號，例如 \"math,sci:2027-01-31\"；科目後面的日期是那一科的到期日。沒有科目欄就不改原本的科目；新學生預設只開數學，老師預設兩科");
   var ta=area("",5),rn=h('<p class="meta"></p>');ta.placeholder="a@gmail.com,601,1,王小明,student,6";bulk.appendChild(pickCsv(ta,rn));bulk.appendChild(rn);bulk.appendChild(ta);
   var bt=h('<div class="ctl"><button class="pen go">匯入（相同 Email 會更新）</button><button class="pen">匯出名單 CSV</button></div>'),bf=h('<div class="fb"></div>');bulk.appendChild(bt);bulk.appendChild(bf);
-  bt.children[0].onclick=function(){var p=parseCSV(ta.value);if(!p.length)return;var list=toObjs(p,["email","class","no","name","role","grade","active","expires"]);
+  bt.children[0].onclick=function(){var p=parseCSV(ta.value);if(!p.length)return;var list=toObjs(p,["email","class","no","name","role","grade","active","expires","subjects"]);
    M.api("POST","/api/admin/roster",{rows:list}).then(function(x){if(!x.ok)return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+x.errs.map(esc).join("<br>"),0);msg(bf,"已匯入 "+x.n+" 筆",1);setTimeout(ctx.go,600)},function(e){msg(bf,errs(e),0)})};
-  bt.children[1].onclick=function(){download("名單.csv","email,class,no,name,role,grade,active,expires\n"+rows.map(function(x){return[x.email,x.class,x.no,x.name,x.role,x.grade,x.active==="0"?0:1,x.expires||""].map(csvEsc).join(",")}).join("\n"))};
+  bt.children[1].onclick=function(){download("名單.csv","email,class,no,name,role,grade,active,expires,subjects\n"+rows.map(function(x){return[x.email,x.class,x.no,x.name,x.role,x.grade,x.active==="0"?0:1,x.expires||"",x.role==="admin"?"":sjCsv(x)].map(csvEsc).join(",")}).join("\n"))};
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 
 /* 選 CSV：可一次選很多個檔。keep=true（題庫）：檔案分開保存、逐檔檢查匯入；否則（名單）合併成一份文字貼進框裡 */
-var HEADS="id,unit,type,lv,q,options,answer,hint,diag,img,himg,print,daily,mock,active,email,class,no,name,role,grade,expires,學習表現,學習內容,難易度,認知層次,知識類型,perf,content,diff,cog,know,題組id,題組題幹,題組附圖,小題序,gid,gstem,gimg,gord".split(",");
+var HEADS="id,unit,type,lv,q,options,answer,hint,diag,img,himg,print,daily,mock,active,email,class,no,name,role,grade,expires,subjects,科目,學習表現,學習內容,難易度,認知層次,知識類型,perf,content,diff,cog,know,題組id,題組題幹,題組附圖,小題序,gid,gstem,gimg,gord".split(",");
 function isHead(line){var c=parseCSV(line)[0]||[];return c.filter(function(x){return HEADS.indexOf(x.trim().toLowerCase())>=0}).length>=2}
 function pickCsv(ta,note,keep){var w=h('<div class="ctl"></div>'),b=h('<button class="pen">選擇 CSV 檔（可多選）</button>'),f=document.createElement("input");f.type="file";f.multiple=true;f.accept=".csv,.txt,text/csv,text/plain";f.hidden=true;
  ta.addEventListener("input",function(){ta.__files=null});
@@ -170,7 +186,12 @@ function bank(ctx){
   var ta=area("",5),bn=h('<p class="meta"></p>');bk.appendChild(pickCsv(ta,bn,true));bk.appendChild(bn);bk.appendChild(ta);
   var mode=sel([["merge","合併（id 相同就更新，其他保留）"],["replace","全部取代（原有的會被清掉）"]],"merge"),bt=h('<div class="ctl"></div>'),bf=h('<div class="fb"></div>');
   var b1=h('<button class="pen go">匯入</button>'),bx=h('<button class="pen">下載範本</button>'),b2=h('<button class="pen">匯出題庫 CSV（含屬性）</button>'),c2=h('<button class="pen">匯出屬性表 CSV</button>');
-  [mode,b1,bx,b2,c2].forEach(function(e){bt.appendChild(e)});bk.appendChild(bt);bk.appendChild(bf);
+  [mode,b1,bx,b2,c2].forEach(function(e){bt.appendChild(e)});
+  /* 國中理化：另有 Excel 範本（小節代號、學習內容代碼、認知層次等都有下拉選單）；CSV 範本也換成理化的例題 */
+  if(M.subj==="sci"){var xb=h('<a class="pen go" download="國中理化題庫範本.xlsx">下載理化範本（Excel，含下拉選單）</a>');xb.href=NB.root+"assets/templates/sci-bank-template.xlsx";bt.insertBefore(xb,b2);
+   KINDS.bank.sample=COLS.concat(AH,GRPN,["題目類別"]).join(",")+"\n"+["","v3-1.2","num","2","質量 54 g、體積 20 cm³ 的金屬塊，密度是多少？","","2.7 g/cm³","密度＝質量÷體積","","","","1","1","1","1","pa-Ⅳ","Ea-Ⅳ-1","易","應用","程序性","","","","","計算題"].join(",")+"\n"+["","v3-6.4","text","1","水的化學式是什麼？","","H₂O|H2O","","","","","1","1","1","1","","Cb-Ⅳ-1","易","知識","事實性","","","","","概念題"].join(",")+"\n"+["","v5-4.1","num","3","一個電子的電量大小是多少庫侖？","","1.6×10^-19 C","","","","","1","0","1","1","","Kc-Ⅳ-1","中","知識","事實性","","","","","概念題"].join(",");
+   KINDS.bank.guide+="<br><b>國中理化</b>：unit 用小節代號（例如 v3-4.2，見 Excel 範本的「小節代號」）；數值題的 answer 可以寫成「數值 單位」，例如 2.7 g/cm³、1.6×10^-19 C，學生寫 2700 kg/m³、2.70 都算對；文字題的化學式會分大小寫。"}
+  bk.appendChild(bt);bk.appendChild(bf);
   function drawGuide(){gd.innerHTML=KINDS[kind.value].guide;mode.options[1].textContent=kind.value==="bank"?"全部取代（整個題庫會被換掉）":"全部取代（原有的屬性會被清掉）"}kind.onchange=drawGuide;drawGuide();
   /* 檢查一份檔案的格式；回傳 {err} 或 {rows, ignored} */
   function parseSrc(x,K){
@@ -275,7 +296,8 @@ function sysinfo(ctx){
   SYS_DOCS.forEach(function(d){var v=V[d[0]],w=h('<div class="wi"></div>');w.innerHTML='<b><code>'+d[0]+"</code></b>　目前值："+(v===null||v===undefined?"<i>（未設定，用預設）</i>":"<code>"+esc(v)+"</code>")+'<br><small class="soft">設定位置：'+esc(d[2])+"</small><br>"+esc(d[1])+'<br><small class="soft">'+esc(d[3])+"</small>";box.appendChild(w)});
   var lim=h('<div class="wi"></div>'),L=r.limits||{};lim.innerHTML="<b>程式內建的上限</b>（寫在程式裡，改要請我修改）<ul>"+SYS_LIM.map(function(x){var v=x[0]==="printRange"?x[2]:x[2];return"<li>"+esc(x[1])+"："+esc(v)+"</li>"}).join("")+"</ul>";box.appendChild(lim);
   var st=h('<div class="wi"><b>資料表筆數與用量</b><br><small class="soft">按下去會逐張資料表計算筆數，<b>會讀取資料庫（約等於資料總筆數的讀取量）</b>，平常不用按。</small><div class="ctl"><button class="pen">查看資料表筆數</button></div><div class="st"></div></div>');
-  st.querySelector("button").onclick=function(){var o=st.querySelector(".st");o.textContent="計算中…";M.api("GET","/api/admin/sysinfo?stats=1").then(function(x){var R=x.stats.rows,names={bank:"題庫",bank_meta:"題目屬性",bank_grp:"題組成員",grp_stem:"題組題幹",roster:"名單",profiles:"學生檔案",sessions:"作答／考試場次",attempts:"作答紀錄",prints:"列印紀錄",reports:"問題回報",images:"後台上傳的圖片",settings:"設定"},t="<ul>";Object.keys(names).forEach(function(k){t+="<li>"+names[k]+"（"+k+"）："+(R[k]===null?"—":R[k])+"</li>"});o.innerHTML=t+"</ul>近 24 小時列印 "+(x.stats.prints24h==null?"—":x.stats.prints24h)+" 份；估計每個實例冷啟動時會讀約 <b>"+((R.bank||0)+(R.roster||0)+(R.bank_meta||0)+(R.bank_grp||0)+(R.grp_stem||0)+(R.settings||0))+"</b> 列。"},function(e){o.textContent=errs(e)})};
+  st.querySelector("button").onclick=function(){var o=st.querySelector(".st");o.textContent="計算中…";M.api("GET","/api/admin/sysinfo?stats=1").then(function(x){var R=x.stats.rows,names={bank:"題庫",bank_meta:"題目屬性",bank_grp:"題組成員",grp_stem:"題組題幹",roster:"名單",profiles:"學生檔案",sessions:"作答／考試場次",attempts:"作答紀錄",prints:"列印紀錄",reports:"問題回報",images:"後台上傳的圖片",settings:"設定"},t="<ul>";Object.keys(names).forEach(function(k){t+="<li>"+names[k]+"（"+k+"）："+(R[k]===null?"—":R[k])+"</li>"});o.innerHTML=t+"</ul>近 24 小時列印 "+(x.stats.prints24h==null?"—":x.stats.prints24h)+" 份；估計每個實例冷啟動時會讀約 <b>"+((R.bank||0)+(R.roster||0)+(R.bank_meta||0)+(R.bank_grp||0)+(R.grp_stem||0)+(R.settings||0))+"</b> 列。"+(function(){var B=x.stats.bySubj;if(!B)return"";var ks=Object.keys(B),nm=x.stats.subjNames||{},L=[["bank","題庫題目"],["roster","名單（開通人數）"],["profiles","學生檔案"],["sessions","作答／考試場次"],["attempts","作答紀錄"],["mock_log","模擬考紀錄"],["assigns","派卷"],["papers","QR 卷"],["prints","列印紀錄"]];
+   return'<h4 style="margin:12px 0 4px">各科分開統計</h4><table class="tb"><tr><th>項目</th>'+ks.map(function(k){return"<th>"+esc(nm[k]||k)+"</th>"}).join("")+"</tr>"+L.map(function(r){return"<tr><td>"+r[1]+"</td>"+ks.map(function(k){var v=B[k][r[0]];return"<td>"+(v==null?"—":v)+"</td>"}).join("")+"</tr>"}).join("")+'</table><p class="meta">雙科的人在兩科各算一次；其他資料表（圖片、設定、問題回報）兩科共用。</p>'})()},function(e){o.textContent=errs(e)})};
   box.appendChild(st);
   box.appendChild(h("<p class=\"meta\"><b>提醒</b></p>"));
   SYS_NOTES.forEach(function(n){var d=h("<details class=\"wi\"><summary></summary><div></div></details>");d.querySelector("summary").textContent=n[0];d.lastChild.innerHTML=n[1];box.appendChild(d)});
@@ -310,8 +332,8 @@ function settings(ctx){
  ann(ctx);
  var s=ctx.sheet("遊戲設定","改完按儲存，全班立刻套用；空白＝用預設值");
  M.api("GET","/api/admin/settings").then(function(r){var e=r.effective,F={
-  POINTS_BY_LEVEL:inp(e.pts.join(",")),LEVEL_STEP:inp(e.step,"","number"),DAILY_Q_CAP:inp(e.capQ,"","number"),DAILY_MOCK_CAP:inp(e.capMock,"","number"),REVIEW_DAYS:inp(e.review.join(",")),HINT_COST:inp(e.hint,"","number"),QR_ON:h('<select><option value="0">關閉</option><option value="1">開放</option></select>'),PURGE_DAYS:h('<select><option value="0">不自動清除（由管理員手動清）</option><option value="90">保留 90 天</option><option value="180">保留 180 天</option><option value="365">保留 1 年</option><option value="730">保留 2 年</option></select>')};F.QR_ON.value=e.qr?"1":"0";F.PURGE_DAYS.value=String(e.purge===undefined?180:e.purge);
-  s.appendChild(field("答對一題的積分（基礎,應用,挑戰）",F.POINTS_BY_LEVEL));s.appendChild(field("每幾分升一級",F.LEVEL_STEP));s.appendChild(field("每天最多計分的題數（防刷）",F.DAILY_Q_CAP));s.appendChild(field("每天可領獎勵的模擬卷份數",F.DAILY_MOCK_CAP));s.appendChild(field("看一次提示扣幾分（0＝不扣；看過提示的題目答對只拿一半積分）",F.HINT_COST));s.appendChild(field("錯題複習間隔（幾天後，用逗號分隔）",F.REVIEW_DAYS));s.appendChild(field("舊紀錄自動清除（列印紀錄、作答紀錄、模擬考紀錄、QR 線上作答；超過保留天數會自動刪掉。選「不自動清除」就只能由管理員手動清）",F.PURGE_DAYS));s.appendChild(field("QR code 線上作答（總開關：開放後，老師出卷時才能勾選「印 QR code 線上作答」；關閉時學生掃描也不能作答）",F.QR_ON));
+  POINTS_BY_LEVEL:inp(e.pts.join(",")),LEVEL_STEP:inp(e.step,"","number"),DAILY_Q_CAP:inp(e.capQ,"","number"),DAILY_MOCK_CAP:inp(e.capMock,"","number"),REVIEW_DAYS:inp(e.review.join(",")),HINT_COST:inp(e.hint,"","number"),QR_ON:h('<select><option value="0">關閉</option><option value="1">開放</option></select>'),TOOLS_PRACTICE:h('<select><option value="1">開放</option><option value="0">不開放</option></select>'),TOOLS_MOCK:h('<select><option value="0">不開放</option><option value="1">開放</option></select>'),PURGE_DAYS:h('<select><option value="0">不自動清除（由管理員手動清）</option><option value="90">保留 90 天</option><option value="180">保留 180 天</option><option value="365">保留 1 年</option><option value="730">保留 2 年</option></select>')};F.QR_ON.value=e.qr?"1":"0";if(e.tools){F.TOOLS_PRACTICE.value=e.tools.practice?"1":"0";F.TOOLS_MOCK.value=e.tools.mock?"1":"0"}F.PURGE_DAYS.value=String(e.purge===undefined?180:e.purge);
+  s.appendChild(field("答對一題的積分（基礎,應用,挑戰）",F.POINTS_BY_LEVEL));s.appendChild(field("每幾分升一級",F.LEVEL_STEP));s.appendChild(field("每天最多計分的題數（防刷）",F.DAILY_Q_CAP));s.appendChild(field("每天可領獎勵的模擬卷份數",F.DAILY_MOCK_CAP));s.appendChild(field("看一次提示扣幾分（0＝不扣；看過提示的題目答對只拿一半積分）",F.HINT_COST));s.appendChild(field("錯題複習間隔（幾天後，用逗號分隔）",F.REVIEW_DAYS));s.appendChild(field("舊紀錄自動清除（列印紀錄、作答紀錄、模擬考紀錄、QR 線上作答；超過保留天數會自動刪掉。選「不自動清除」就只能由管理員手動清）",F.PURGE_DAYS));s.appendChild(field("QR code 線上作答（總開關：開放後，老師出卷時才能勾選「印 QR code 線上作答」；關閉時學生掃描也不能作答）",F.QR_ON));s.appendChild(field("國中理化小工具：練習時（小測驗、每日一題、錯題訂正）",F.TOOLS_PRACTICE));s.appendChild(field("國中理化小工具：模擬卷（派卷由老師在派卷時逐份決定）",F.TOOLS_MOCK));
   var fb=h('<div class="fb"></div>'),b=h('<div class="ctl"><button class="pen go">儲存設定</button></div>');s.appendChild(b);s.appendChild(fb);
   b.firstChild.onclick=function(){var o={};Object.keys(F).forEach(function(k){o[k]=F[k].value});M.api("POST","/api/admin/settings",o).then(function(){msg(fb,"已儲存",1)},function(er){msg(fb,errs(er),0)})}},function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))});
  if(M.U&&M.U.admin){usage(ctx);sysinfo(ctx)}}
@@ -369,7 +391,7 @@ function reports(ctx){
   var list=h('<div class="sbox"></div>');s.appendChild(list);
   function when(t){var d=new Date(t+288e5).toISOString();return d.slice(5,10)+" "+d.slice(11,16)}
   function draw(){list.innerHTML="";var n=0;r.rows.forEach(function(x){if(sel.value&&x.status!==sel.value)return;n++;
-   var c=h('<div class="rcard'+(x.status==="done"?" done":"")+'"><div><b>#'+x.id+"　"+esc(x.cat)+'</b>　<span class="rst '+x.status+'">'+ST[x.status]+"</span>"+(x.mailed?"":'　<small>未寄信</small>')+'</div><div class="rmsg">'+esc(x.msg)+"</div><small>"+when(x.ts)+"　"+esc(x.cls||"")+" 班 "+(x.no||"")+" 號 "+esc(x.name||"")+"（"+esc(x.email)+"）　"+((x.ctx||{}).qid?"題目ID "+esc(x.ctx.qid)+"　":"")+"頁面 "+esc((x.ctx||{}).page||"")+"　"+esc((x.ctx||{}).screen||"")+"</small>"+((x.ctx&&x.ctx.errs&&x.ctx.errs.length)?'<br><small>程式錯誤：'+x.ctx.errs.map(esc).join("；")+"</small>":"")+'<div class="rimgs"></div><div class="ctl"></div></div>'),act=c.lastChild,im=c.querySelector(".rimgs");
+   var c=h('<div class="rcard'+(x.status==="done"?" done":"")+'"><div><b>#'+x.id+"　"+esc(x.cat)+'</b>　<span class="rst '+x.status+'">'+ST[x.status]+"</span>"+(x.mailed?"":'　<small>未寄信</small>')+(x.ctx&&x.ctx.subj?'　<small>'+esc((M.SUBJ||{})[x.ctx.subj]||x.ctx.subj)+"</small>":"")+'</div><div class="rmsg">'+esc(x.msg)+"</div><small>"+when(x.ts)+"　"+esc(x.cls||"")+" 班 "+(x.no||"")+" 號 "+esc(x.name||"")+"（"+esc(x.email)+"）　"+((x.ctx||{}).qid?"題目ID "+esc(x.ctx.qid)+"　":"")+"頁面 "+esc((x.ctx||{}).page||"")+"　"+esc((x.ctx||{}).screen||"")+"</small>"+((x.ctx&&x.ctx.errs&&x.ctx.errs.length)?'<br><small>程式錯誤：'+x.ctx.errs.map(esc).join("；")+"</small>":"")+'<div class="rimgs"></div><div class="ctl"></div></div>'),act=c.lastChild,im=c.querySelector(".rimgs");
    [["new","設為新的"],["doing","處理中"],["done","已處理"]].forEach(function(p){if(p[0]===x.status)return;var b=h('<button class="pen">'+p[1]+"</button>");b.onclick=function(){M.api("POST","/api/admin/report/status",{id:x.id,status:p[0]}).then(function(){x.status=p[0];draw()},function(){})};act.appendChild(b)});
    if(x.hasFiles){var fb=h('<button class="pen">看附件</button>');fb.onclick=function(){fb.disabled=true;M.api("GET","/api/admin/report?id="+x.id).then(function(d){im.innerHTML="";d.files.forEach(function(f){var i=document.createElement("img");i.alt=f.name;i.src="data:"+f.mime+";base64,"+f.data;im.appendChild(i)});fb.remove()},function(){fb.disabled=false})};act.appendChild(fb)}
    var mb=h('<a class="pen" href="mailto:'+esc(x.email)+"?subject="+encodeURIComponent("回覆你的問題回報 #"+x.id)+'">寫信給他</a>');act.appendChild(mb);
@@ -427,10 +449,11 @@ function assign(ctx){
   s.appendChild(dl);s.appendChild(field("標題",ti));s.appendChild(field("班級",cw));s.appendChild(pw);s.appendChild(field("題數",n));s.appendChild(field("時限（分鐘）",mi));s.appendChild(field("截止日（當天晚上 11:59 截止，可留空）",du));
   s.appendChild(field("單元範圍",un));s.appendChild(h('<p class="meta">題目篩選（可以不選）：有勾選或填寫任何一項，就只會從題庫裡「已有屬性」的固定題挑，不使用自動產生的題目。</p>'));
   s.appendChild(field("難易度",fd));s.appendChild(field("認知層次",fg));s.appendChild(field("知識類型",fk));s.appendChild(field("學習表現／內容",fp));
+  var tl=null;if(M.subj==="sci"){tl=h('<label class="ppc"><input type="checkbox"> 作答時允許使用理化小工具（週期表、公式卡、單位換算）</label>');s.appendChild(tl)}
   var fb=h('<div class="fb"></div>'),go=h('<button class="pen go">派卷</button>');s.appendChild(h('<div class="ctl"></div>')).appendChild(go);s.appendChild(fb);
   function vals(name){return Array.prototype.map.call(document.querySelectorAll('input[name="'+name+'"]:checked'),function(x){return x.value})}
   go.onclick=function(){var o={title:ti.value.trim(),classes:cks.filter(function(x){return x.checked}).map(function(x){return x.value}),emails:Array.prototype.map.call(pw.querySelectorAll("input[data-e]:checked"),function(x){return x.dataset.e}),n:+n.value,mins:mi.value,due:du.value,
-    units:un.value.split(/[,，\s]+/).filter(Boolean),filt:{d:vals("afd"),cg:vals("afg"),kw:fk.value.trim(),pf:fp.value.trim()}};
+    units:un.value.split(/[,，\s]+/).filter(Boolean),filt:{d:vals("afd"),cg:vals("afg"),kw:fk.value.trim(),pf:fp.value.trim(),tl:!!(tl&&tl.querySelector("input").checked)}};
    if(!o.title)return msg(fb,"請填標題。",0);if(!o.classes.length)return msg(fb,"請至少勾一個班級。",0);
    go.disabled=true;M.api("POST","/api/admin/assign",o).then(function(x){go.disabled=false;msg(fb,"已派卷，學生開啟網站就看得到。"+(x.warn?"<br>"+esc(x.warn):""),1);setTimeout(ctx.go,x.warn?3500:900)},function(e){go.disabled=false;msg(fb,e.code==="forbidden"?"只能派給自己的班級。":e.code==="bad_students"?"選的學生不在勾選的班級裡。":e.code==="bad_due"?"截止日格式不對。":errs(e),0)})};
   var ls=ctx.sheet("已派的卷子","最近 200 份；點「看狀況」查看每位學生的完成情形"),det=h('<div class="sbox" hidden></div>');

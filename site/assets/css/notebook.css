@@ -601,3 +601,8 @@ body:has(.i3page){overflow-x:hidden}
 @media (max-width:640px){.i3-play{left:8px;right:8px;top:92px;bottom:auto;transform:none;width:auto;padding:6px 8px}.i3-pl-cap{font-size:.82rem}.i3-play .pen{padding:2px 6px}.i3-pl-skip{display:none}
  .i3-log-tabs button{font-size:.72rem}}
 @media (max-width:640px){.i3.touring .i3-log{display:none}}
+/* 老師後台的科目切換與名單的科目欄 */
+h1.title .subj-now{font-size:.55em;color:var(--soft);font-weight:normal}
+.subj-sw{justify-content:center;margin:-.4em 0 .8em}.subj-sw .meta{align-self:center}
+.sjf{display:inline-flex;align-items:center;gap:4px;margin:6px 8px 6px 0;padding:2px 6px;border:1px dashed var(--soft);border-radius:6px}.sjf label{white-space:nowrap}
+.num.sci{width:15em;max-width:100%}.sci-tip{flex-basis:100%;margin-top:2px}
