@@ -9,7 +9,9 @@
   var PRESETS = [
     ["段考型（共 100 分）", [{ ty: "tf", n: 5, pts: 2 }, { ty: "choice", n: 10, pts: 3 }, { ty: "num", n: 8, pts: 4 }, { ty: "any", kd: "應用題", n: 4, pts: 7 }]],
     ["小考型（共 50 分）", [{ ty: "tf", n: 5, pts: 2 }, { ty: "choice", n: 10, pts: 2 }, { ty: "num", n: 5, pts: 4 }]],
-    ["低年級型（共 100 分）", [{ ty: "tf", n: 5, pts: 4 }, { ty: "choice", n: 10, pts: 4 }, { ty: "num", n: 10, pts: 4 }]],
+    (window.NB && NB.member && NB.member.subj === "sci")
+      ? ["會考型（選擇題為主，共 100 分）", [{ ty: "choice", n: 20, pts: 4 }, { ty: "any", kd: "情境題", n: 5, pts: 4 }]] /* 國中理化：會考自然科以選擇題、情境題組為主 */
+      : ["低年級型（共 100 分）", [{ ty: "tf", n: 5, pts: 4 }, { ty: "choice", n: 10, pts: 4 }, { ty: "num", n: 10, pts: 4 }]],
     ["難易度分層（易中難 3:5:2）", [{ ty: "any", n: 10, pts: 10, lv: [3, 5, 2] }]]
   ];
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
