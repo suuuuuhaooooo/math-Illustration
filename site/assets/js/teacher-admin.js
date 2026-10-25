@@ -339,12 +339,12 @@ function purgePerson(ctx){
    out.appendChild(h("<p><b>"+esc(r.email)+"</b>　"+(w?esc((w.cls||"")+" 班 "+(w.no||"")+" 號 "+(w.name||"")+"（"+(RO[w.role]||w.role||"")+"）")+(w.inRoster?"":'　<span class="meta">已不在名單上，只剩資料</span>'):'<span class="meta">名單和個人資料裡都找不到這個人</span>')+"</p>"));
    out.appendChild(h('<table class="tb"><tr><th>資料</th><th>筆數</th></tr>'+r.counts.map(function(c){return"<tr><td>"+esc(c.label)+'</td><td style="text-align:right">'+c.n+"</td></tr>"}).join("")+"</table>"));out.appendChild(h('<p>合計 <b>'+r.total+"</b> 筆資料。</p>"));
    if(r.legacy)out.appendChild(h('<p class="fb no">注意：學生名單目前還在舊的試算表同步資料裡，這裡刪不到名單，這個人可能還能登入。請先按上方「檢查是否有舊資料可搬移」把名單搬進資料庫。</p>'));
-   if(r.self){out.appendChild(h('<p class="fb no">這是你自己的帳號，不能刪除。</p>'));return}
+   if(r.isAdmin)out.appendChild(h('<p class="fb ok">'+(r.self?"這是你自己的帳號。":"這是管理員帳號。")+'管理員的帳號會保留（不然會進不了後台），只刪除他的其他資料。</p>'));
    if(!r.total){out.appendChild(h('<p class="meta">這個人沒有任何資料，不需要刪除。</p>'));return}
-   var z=h('<div class="pdanger"><p>確定要刪除，請在下面再輸入一次 Email：</p><div class="ctl"><input type="email" style="min-width:18em" autocomplete="off"><button class="pen pdel" disabled>永久刪除這個人的所有資料</button></div></div>'),ci=z.querySelector("input"),go=z.querySelector("button");out.appendChild(z);
+   var z=h('<div class="pdanger"><p>確定要刪除，請在下面再輸入一次 Email：</p><div class="ctl"><input type="email" style="min-width:18em" autocomplete="off">'+(r.isAdmin?'<button class="pen pdel" disabled>永久刪除這個人的資料（保留帳號）</button>':'<button class="pen pdel" disabled>永久刪除這個人的所有資料</button>')+'</div></div>'),ci=z.querySelector("input"),go=z.querySelector("button");out.appendChild(z);
    ci.oninput=function(){go.disabled=!ci.value.trim()};
    go.onclick=function(){if(!confirm("最後確認：刪除 "+r.email+" 的全部 "+r.total+" 筆資料？刪除後無法復原。"))return;go.disabled=true;
-    M.api("POST","/api/admin/person/purge",{email:r.email,confirm:ci.value.trim()}).then(function(x){out.innerHTML="";inp.value="";msg(fb,"已刪除 "+esc(r.email)+" 的 "+x.total+" 筆資料。",1)},function(e){go.disabled=false;msg(fb,errs(e),0)})}},
+    M.api("POST","/api/admin/person/purge",{email:r.email,confirm:ci.value.trim()}).then(function(x){out.innerHTML="";inp.value="";msg(fb,"已刪除 "+esc(r.email)+" 的 "+x.total+" 筆資料。"+(x.keptAccount?"帳號已保留。":""),1)},function(e){go.disabled=false;msg(fb,errs(e),0)})}},
    function(e){q.lastChild.disabled=false;msg(fb,errs(e),0)})}
  q.lastChild.onclick=look;inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();look()}})}
 
