@@ -555,3 +555,49 @@ table.qrrate td.qtx{text-align:left;max-width:22em}table.qrt td{vertical-align:m
 body:has(.i3page){overflow-x:hidden}
 .i3-hud{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:.8rem;flex-wrap:wrap}.i3-hud span:first-child{font-weight:700}.i3-bar{display:inline-block;width:80px;height:8px;border:1.2px solid #101a2e;border-radius:6px;overflow:hidden;background:#fff}.i3-bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd65a,#ff9f6e)}
 @media (max-width:640px){.i3-tools{left:60px}.i3-hud{font-size:.72rem;margin-top:2px}}
+/* 3D 群島（three.js）：上層 canvas、工具列、時間軸、主題索引、島民日誌 */
+.i3>.i3-ov{position:absolute;inset:0;pointer-events:none;z-index:0}
+.i3>.i3-idx,.i3>.i3-res{z-index:2}
+.i3-tb .pen{min-width:3.6em}
+.i3-clock{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.92);border:1.5px solid #101a2e;border-radius:999px;padding:5px 8px 5px 14px;box-shadow:3px 3px 0 rgba(16,26,46,.22);font-size:.82rem;width:min(460px,46vw);box-sizing:border-box}
+.i3-clock input{flex:1;accent-color:#101a2e;min-width:60px}.i3-ck-t{font-weight:700;font-variant-numeric:tabular-nums;min-width:3em}.i3-ck-e{color:#5a6680;font-size:.75rem}
+.i3-log{position:absolute;right:16px;bottom:16px;width:min(300px,30vw);background:rgba(16,26,46,.86);color:#eef3ff;border-radius:14px;padding:6px 10px 8px;font-size:.8rem;box-shadow:3px 3px 0 rgba(16,26,46,.25)}
+.i3-log-h{all:unset;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:700;font-size:.82rem;width:100%}.i3-log-h b{background:#e5484d;color:#fff;border-radius:4px;padding:0 5px;font-size:.68rem;letter-spacing:.05em}
+.i3-live{width:8px;height:8px;border-radius:50%;background:#ff5a5f;box-shadow:0 0 0 0 rgba(255,90,95,.7);animation:i3pulse 1.6s infinite}
+@keyframes i3pulse{0%{box-shadow:0 0 0 0 rgba(255,90,95,.7)}70%{box-shadow:0 0 0 7px rgba(255,90,95,0)}100%{box-shadow:0 0 0 0 rgba(255,90,95,0)}}
+@media (prefers-reduced-motion:reduce){.i3-live{animation:none}}
+.i3-log ol{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}.i3-log li{display:flex;gap:6px;line-height:1.4;animation:i3in .35s ease-out}.i3-log li:not(:first-child){opacity:.72}.i3-log time{color:#9fb2d8;font-variant-numeric:tabular-nums;flex:none}
+@keyframes i3in{from{opacity:0;transform:translateY(-4px)}}
+.i3-log.shut ol{display:none}
+.i3:has(.i3-panel:not([hidden])) .i3-log{display:none}
+.i3-idx{position:absolute;left:16px;top:14px;bottom:70px;width:min(270px,80vw);overflow:auto;background:#fffdf7;border:1.5px solid #101a2e;border-radius:16px;padding:10px 12px;box-shadow:4px 4px 0 rgba(16,26,46,.25)}
+.i3-idx-h{display:flex;align-items:center;justify-content:space-between;position:relative;margin-bottom:4px}.i3-idx-h .i3-x{position:static}
+.i3-idx-d{margin-top:8px}.i3-idx-d>div{display:flex;flex-direction:column;margin-top:4px}
+.i3-idx-i{display:flex;justify-content:space-between;gap:8px;background:none;border:0;border-bottom:1px dashed #d4d9e3;padding:5px 4px;font:inherit;font-size:.9rem;color:#101a2e;cursor:pointer;text-align:left}.i3-idx-i small{color:#5a6680}.i3-idx-i:hover,.i3-idx-i:focus{background:#eef4ff}.i3-idx-i.on{background:#101a2e;color:#fff;border-radius:6px}.i3-idx-i.on small{color:#cfd8ea}
+.i3.idx-on .i3-resume,.i3.idx-on .i3-intro{display:none}
+@media (max-width:900px){.i3-log{width:min(260px,40vw);bottom:72px}.i3-clock{width:min(420px,60vw)}}
+@media (max-width:640px){
+ .i3-clock{left:8px;right:8px;transform:none;top:92px;bottom:auto;width:auto;padding:3px 6px 3px 10px;font-size:.75rem}.i3-ck-e{display:none}
+ .i3-log{right:8px;top:132px;bottom:auto;width:auto;max-width:72vw;font-size:.74rem;padding:4px 8px}
+ .i3-idx{left:0;right:0;top:auto;bottom:0;width:auto;max-height:62%;border-radius:16px 16px 0 0;z-index:3}
+ .i3-tb{flex-wrap:nowrap;overflow-x:auto}}
+/* 群島日誌分頁、導覽播放列、領域複選 */
+.i3-log[hidden],.i3-play[hidden],.i3-clock[hidden]{display:none}
+.i3-log-top{display:flex;align-items:center;gap:6px}.i3-log-top .i3-x{position:static;color:#cfd8ea;font-size:1.3rem;margin-left:auto}
+.i3-log-tabs{display:flex;gap:4px;margin:6px 0 4px}.i3-log-tabs button{flex:1;background:transparent;border:1px solid rgba(255,255,255,.35);color:#cfd8ea;border-radius:999px;padding:2px 8px;font:inherit;font-size:.76rem;cursor:pointer}.i3-log-tabs button.on{background:#fff;color:#101a2e;border-color:#fff}
+.i3-log.shut .i3-log-tabs,.i3-log.shut .i3-log-sum,.i3-log.shut .i3-log-l{display:none}
+.i3-log-sum[hidden],.i3-log-l[hidden]{display:none}
+.i3-guide{display:flex;gap:8px;align-items:center;margin:4px 0 6px;line-height:1.45}
+.i3-gface{flex:none;width:30px;height:26px;background:#ffcf5a;border:2px solid #fff;border-radius:50% 50% 42% 42%;position:relative}.i3-gface:before,.i3-gface:after{content:"";position:absolute;top:8px;width:5px;height:5px;border-radius:50%;background:#101a2e}.i3-gface:before{left:7px}.i3-gface:after{right:7px}
+.i3-tours{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.i3-tours button{all:unset;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;column-gap:8px;width:100%;box-sizing:border-box;padding:5px 8px;border-radius:10px;background:rgba(255,255,255,.08)}.i3-tours button:hover,.i3-tours button:focus-visible{background:rgba(255,255,255,.18)}
+.i3-tn{grid-row:1/3;align-self:center;font-weight:700;color:#ffd65a;font-variant-numeric:tabular-nums}.i3-tours b{font-size:.84rem}.i3-tours small{grid-column:2;color:#9fb2d8;font-size:.72rem}.i3-tp{grid-row:1/3;grid-column:3;align-self:center;width:24px;height:24px;border-radius:50%;background:#ffd65a;color:#101a2e;display:grid;place-items:center;font-size:.7rem}
+.i3-play{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;width:min(620px,60vw);box-sizing:border-box;background:rgba(255,255,255,.95);border:1.5px solid #101a2e;border-radius:16px;padding:8px 12px;box-shadow:3px 3px 0 rgba(16,26,46,.22)}
+.i3-pl-cap{margin:0 0 6px;font-size:.95rem;font-weight:700;line-height:1.5;min-height:1.5em}
+.i3-pl-c{display:flex;align-items:center;gap:5px;flex-wrap:wrap}.i3-pl-n{font-variant-numeric:tabular-nums;font-size:.82rem}.i3-pl-bar{flex:1;min-width:50px;height:6px;border-radius:4px;background:#dfe4ee;overflow:hidden}.i3-pl-bar i{display:block;height:100%;background:#101a2e;transition:width .4s}
+.i3.touring .i3-grades,.i3.touring .i3-find{opacity:.5;pointer-events:none}
+.i3-idx-s{font-size:.8rem;margin:2px 0 6px}.i3-idx-f{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px}.i3-idx-f button{cursor:pointer;font:inherit;font-size:.76rem;color:#101a2e;opacity:.6}.i3-idx-f button.sel{opacity:1;box-shadow:0 0 0 2px #101a2e;font-weight:700}
+@media (max-width:900px){.i3-play{width:min(560px,70vw)}}
+@media (max-width:640px){.i3-play{left:8px;right:8px;top:92px;bottom:auto;transform:none;width:auto;padding:6px 8px}.i3-pl-cap{font-size:.82rem}.i3-play .pen{padding:2px 6px}.i3-pl-skip{display:none}
+ .i3-log-tabs button{font-size:.72rem}}
+@media (max-width:640px){.i3.touring .i3-log{display:none}}
