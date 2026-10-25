@@ -10,7 +10,8 @@ function pct(c,n){return n?Math.round(c/n*100):null}
 function shell(notabs){app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="member.html">← 回到學員專區</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));app.appendChild(h('<h1 class="title"><mark>老師後台</mark>'+(M.U?'<small class="subj-now">・'+(M.SUBJ[M.subj]||M.subj)+"</small>":"")+'</h1>'));
  /* 科目切換：帳號開通兩科（老師、管理員預設都有）才顯示；切換後整頁重新載入，名單、題庫、派卷、紀錄都只看那一科 */
  var ss=M.U&&M.U.subjects||[];if(ss.length>1){var sw=h('<div class="ctl subj-sw"><span class="meta">目前科目：</span></div>');ss.forEach(function(k){if(!M.SUBJ[k])return;var b=h('<button class="pen'+(k===M.subj?" go":"")+'"></button>');b.textContent=M.SUBJ[k];b.onclick=function(){if(k===M.subj)return;M.setSubj(k);location.reload()};sw.appendChild(b)});app.appendChild(sw)}
- var tabs=h('<div class="tabs"></div>');TABS.forEach(function(t){var b=h('<button class="pen'+(t[0]===TAB?" go":"")+'">'+t[1]+"</button>");b.onclick=function(){tab(t[0])};tabs.appendChild(b)});if(!notabs)app.appendChild(tabs)}
+ var tabs=h('<div class="tabs"></div>');TABS.forEach(function(t){var b=h('<button class="pen'+(t[0]===TAB?" go":"")+'">'+t[1]+"</button>");b.onclick=function(){tab(t[0])};tabs.appendChild(b)});if(!notabs)app.appendChild(tabs);
+ if(M.catErr)app.appendChild(h('<div class="fb no">讀不到見微理畫（國中理化網站）的單元目錄，所以這裡看不到理化的冊、章、節。請確認 science-illustration 已經推上 GitHub 並完成部署，再重新整理。</div>'))}
 function sheet(tag,sub){var s=h('<section class="sheet"><h2><span class="tag">'+tag+'</span>'+(sub||"")+'</h2></section>');app.appendChild(s);return s}
 function msg(t,btn){shell(1);var s=sheet("提示","");s.appendChild(h("<p>"+t+'</p>'+(btn||'<a class="pen go" href="member.html">前往登入</a>')))}
 /* 老師帳號過期：說明到期日、要找管理員延長；延長後重新整理就能用（/api/me 的過期狀態在 acct 裡） */

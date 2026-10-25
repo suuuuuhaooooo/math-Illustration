@@ -23,8 +23,13 @@ M.SITE={math:"https://suuuuuhaooooo.github.io/math-Illustration/",sci:"https://s
 M.TEACH=/teacher\.html$/.test(location.pathname);
 M.subj=(function(){var q=/[?&]s=(math|sci)\b/.exec(location.search);if(q)return q[1];var t=M.TEACH&&ls("nb-subj");if(t==="math"||t==="sci")return t;return CFG.subject==="sci"?"sci":"math"})();
 /* 理化的目錄：從見微理畫（同一個網域）讀 catalog.js，換掉這一頁的目錄（NB.cat、NB.flat），單元名稱、冊別、章節就都對了；讀不到就只顯示單元代號 */
-M.loadCat=function(){if(M.subj!=="sci"||M.catDone)return Promise.resolve();var url=(CFG.sciRoot||"/science-illustration/site/")+"assets/js/catalog.js";
- return fetch(url).then(function(r){return r.ok?r.text():""}).then(function(t){if(!t)return;var C=new Function(t+"\n;return typeof CATALOG!=='undefined'?CATALOG:[]")(),flat=[],cat=[];
+/* 見微理畫的網址：GitHub Pages 的路徑分大小寫，repo 叫 science-illustration 或 science-Illustration 都試；設定檔可用 sciRoot 指定 */
+M.sciRoot=CFG.sciRoot||"/science-illustration/site/";
+function sciFetch(path){var roots=[CFG.sciRoot,"/science-illustration/site/","/science-Illustration/site/"].filter(function(x,i,a){return x&&a.indexOf(x)===i}),k=0;
+ function next(){if(k>=roots.length)return Promise.resolve("");var r=roots[k++];return fetch(r+path).then(function(x){return x.ok?x.text().then(function(t){M.sciRoot=r;M.SITE.sci=location.origin+r+"island.html";return t}):next()},next)}return next()}
+M.sciFetch=sciFetch;
+M.loadCat=function(){if(M.subj!=="sci"||M.catDone)return Promise.resolve();
+ return sciFetch("assets/js/catalog.js").then(function(t){if(!t){M.catErr=true;NB.flat.length=0;NB.cat.length=0;return} /* 讀不到理化目錄：清空，不要拿數學的單元充數 */var C=new Function(t+"\n;return typeof CATALOG!=='undefined'?CATALOG:[]")(),flat=[],cat=[];
   C.forEach(function(S){var n=S.start===undefined?1:S.start,o2={sem:S.sem,label:S.label,id:S.id,grade:S.grade,chs:[]};cat.push(o2);
    S.ch.forEach(function(row){var a=row.split("|"),x=/^跨科[:：]/.test(a[0]),key=x?"x":String(n),c={no:x?"跨科":n,cross:x,key:key,name:a[0].replace(/^跨科[:：]/,""),secs:[]};if(!x)n++;o2.chs.push(c);
     a.slice(1).forEach(function(tl,j){var o={id:S.id+"-"+key+"."+(j+1),num:x?(a.length>2?"跨科"+(j+1):"跨科"):key+"-"+(j+1),title:tl,sem:S.sem,ch:c};c.secs.push(o);flat.push(o)})})});

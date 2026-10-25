@@ -47,6 +47,7 @@ function shell(){
  app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="'+(SCI?M.SITE.sci:"island.html")+'">← '+(SCI?"回到見微理畫":"回到目錄")+'</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));
  app.appendChild(h('<h1 class="title"><mark>學員專區</mark><small class="subj-now">・'+(M.SUBJ[M.subj]||"")+'</small></h1>'));
  var u=user();if(!u){login();return false}
+ if(M.catErr)app.appendChild(h('<div class="fb no">讀不到見微理畫（國中理化網站）的單元目錄，單元名稱暫時無法顯示，請稍後再重新整理。</div>'));
  /* 兩科都開通：可以切換（同一個帳號、各科資料分開） */
  if((u.subjects||[]).length>1){var sw=h('<div class="ctl subj-sw"><span class="meta">科目：</span></div>');u.subjects.forEach(function(k){if(!M.SUBJ[k])return;var a=h('<a class="pen'+(k===M.subj?" go":"")+'"></a>');a.textContent=M.SUBJ[k];a.href=location.pathname+(k==="math"?"":"?s="+k);sw.appendChild(a)});app.appendChild(sw)}
  who=h('<div class="who"><b></b><span></span><button class="pen">登出</button></div>');
@@ -63,7 +64,7 @@ function boot(){
  app.innerHTML="";app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
  M.boot().catch(function(e){M.U=null;M.err=(e&&e.code)||"net"}).then(function(){booted=true;booting=false;route()})}
 /* 理化小工具：從見微理畫（同一個網域）載入 */
-function sciTools(cb){if(window.SciTools)return cb(window.SciTools);var sc=document.createElement("script");sc.src=((window.NB_CONFIG||{}).sciRoot||"/science-illustration/site/")+"assets/js/scitools.js";sc.onload=function(){if(window.SciTools)cb(window.SciTools)};document.head.appendChild(sc)}
+function sciTools(cb){if(window.SciTools)return cb(window.SciTools);var sc=document.createElement("script");sc.src=(M.sciRoot||"/science-illustration/site/")+"assets/js/scitools.js";sc.onload=function(){if(window.SciTools)cb(window.SciTools)};document.head.appendChild(sc)}
 function route(){clearInterval(TM);if(window.SciTools)SciTools.remove();if(XG){XG();XG=null}if(!booted){boot();return}var p=(location.hash||"#home").slice(1).split("/");if(p[0]==="print"&&PS&&PS.alive()){PS.go(p[1]);return}/* 出卷的步驟只切換顯示，不重畫整個頁面，設定與已出的卷子才不會遺失 */if(!shell()){if(NB.tour)NB.tour.off();return}if(M.acct&&M.acct.expired&&["home","progress","stickers"].indexOf(p[0])<0)p=["expired"];(V[p[0]]||V.home)(p[1]);window.scrollTo(0,0);tourFor(p[0]||"home")}
 
 /* ---- 鎂光燈導覽（第一次進入每個分頁會自動帶一遍，之後按右下角的 i 可以再看） ---- */
