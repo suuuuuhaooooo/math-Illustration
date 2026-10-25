@@ -7,7 +7,7 @@ function mark(){var n=Date.now();if(n-last<1500)return;last=n;ls(String(n));if(b
 function busy(){return/#mock/.test(location.hash)&&document.querySelector(".clock")}
 function hide(){if(box){box.remove();box=null}}
 function show(sec){if(!box){box=document.createElement("div");box.setAttribute("role","alertdialog");box.style.cssText="position:fixed;left:0;right:0;bottom:0;z-index:99;padding:14px;text-align:center;background:var(--paper);border-top:2px solid var(--ink);color:var(--ink)";document.body.appendChild(box)}
- box.innerHTML="";var t=document.createElement("span");t.textContent="閒置太久，"+sec+" 秒後自動登出　";var b=document.createElement("button");b.className="pen go";b.textContent="繼續使用";b.onclick=function(){last=0;mark()};box.appendChild(t);box.appendChild(b)}
+ box.innerHTML="";var t=document.createElement("span");t.textContent="閒置過久，"+sec+" 秒後自動登出　";var b=document.createElement("button");b.className="pen go";b.textContent="繼續使用";b.onclick=function(){last=0;mark()};box.appendChild(t);box.appendChild(b)}
 setInterval(function(){
  var M=window.NB&&NB.member;if(!M||!M.U)return;if(busy()){last=Date.now();return}
  var a=Math.max(last,ls()),idle=Date.now()-a;
