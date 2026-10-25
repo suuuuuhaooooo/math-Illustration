@@ -4,25 +4,8 @@ var app=document.getElementById("app"),CN="一二三四五六七八九十",probe
 try{var sg=parseInt(localStorage.getItem("currentGrade"));if([1,2,3,4,5,6].indexOf(sg)>=0)grade=sg}catch(e){}
 function chapText(c){return"共 "+c.secs.length+" 小節"}
 function semText(S){var t=0,n=0,u=NB.trail.all();S.chs.forEach(function(c){t+=c.secs.length;c.secs.forEach(function(o){if(u[o.id]&&u[o.id].v)n++})});return"共 "+t+" 小節"+(n?"・已玩 "+n:"")}
-function showNotice(el){
- var api=(window.NB_CONFIG&&NB_CONFIG.api)||"";if(!api||!window.fetch)return;
- function dstr(ts){if(!ts)return"";var d=new Date(ts+8*36e5);return d.getUTCFullYear()+"-"+("0"+(d.getUTCMonth()+1)).slice(-2)+"-"+("0"+d.getUTCDate()).slice(-2)}
- function item(a){var n=document.createElement("div");n.className="notice "+(a.level==="warn"?"warn":"info");
-  var t=document.createElement("b");t.textContent=(a.pin?"置頂｜":"")+(a.title||(a.level==="warn"?"注意":"公告"));n.appendChild(t);
-  var p=document.createElement("span");p.textContent=a.text;n.appendChild(p);
-  var m=[];if(a.ts)m.push("發布 "+dstr(a.ts));if(a.until)m.push("公告至 "+a.until);
-  if(m.length){var sm=document.createElement("small");sm.textContent=m.join("・");n.appendChild(sm)}
-  return n}
- fetch(api+"/api/announce").then(function(r){return r.ok?r.json():null}).then(function(j){
-  var L=j&&(j.list||(j.a?[j.a]:[]));if(!L||!L.length)return;
-  el.hidden=false;var SHOW=3;
-  L.slice(0,SHOW).forEach(function(a){el.appendChild(item(a))});
-  if(L.length>SHOW){var lk=document.createElement("a");lk.className="lnk noticemore";lk.href="announcements.html";lk.textContent="查看全部公告（共 "+L.length+" 則）";el.appendChild(lk)}
- }).catch(function(){})}
-/* ---- 數光群島（3D）：預設畫面；「清單模式」是原本的年級目錄 ---- */
-var MODE_KEY="nb-isle-mode",ISLE=null;
-function mode(){try{return localStorage.getItem(MODE_KEY)==="list"?"list":"3d"}catch(e){return"3d"}}
-function setMode(m){try{localStorage.setItem(MODE_KEY,m)}catch(e){}if(ISLE){ISLE.destroy();ISLE=null}render();window.scrollTo(0,0)}
+/* ---- 數光群島（3D）：單元目錄就是群島；只有瀏覽器畫不出 canvas 時，才退回原本的年級清單 ---- */
+var ISLE=null;
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function topBar(){var bar=NB.h('<nav class="bar"><a class="brand" href="../" title="回到導覽頁" style="text-decoration:none;color:inherit">'+NB.deco.logo()+'數光島筆記本</a></nav>');if(NB.member)bar.appendChild(NB.member.chip());bar.appendChild(NB.h('<a class="lnk maplink" href="map.html">學習地圖</a>'));bar.appendChild(NB.themeBar());return bar}
 function render3d(){
@@ -32,9 +15,9 @@ function render3d(){
   '<ul class="i3-leg"><li><i style="background:#76ba78"></i>數與量</li><li><i style="background:#60b6c4"></i>空間與形狀</li><li><i style="background:#b296de"></i>關係</li><li><i style="background:#f0b060"></i>資料與不確定性</li></ul></div>'+
   '<div class="i3-tools"><div class="i3-find"><input type="search" placeholder="找單元，例如：分數、面積、時鐘" aria-label="搜尋單元"><div class="i3-res" hidden></div></div>'+
   '<div class="i3-row i3-grades" role="group" aria-label="只看某個年級"></div>'+
-  '<div class="i3-row"><button type="button" class="pen i3-links" aria-pressed="true">先備線：開</button><button type="button" class="pen i3-time"></button><button type="button" class="pen i3-list">清單模式</button></div></div>'+
+  '<div class="i3-row"><button type="button" class="pen i3-links" aria-pressed="true">先備線：開</button><button type="button" class="pen i3-time"></button></div></div>'+
   '<aside class="i3-panel" hidden aria-live="polite"></aside>'+
-  '<div class="i3-sr"><p>用鍵盤或螢幕閱讀器：選一座島，或切換到清單模式。</p><ul></ul></div></section>');
+  '<div class="i3-sr"><p>用鍵盤或螢幕閱讀器：選一座島，就會列出這座島的章節。</p><ul></ul></div></section>');
  app.appendChild(st);
  var panel=st.querySelector(".i3-panel"),srl=st.querySelector(".i3-sr ul");
  ISLE=NB.isle3d.mount(st,{onPick:function(t,cid){show(t,cid)}});
@@ -45,7 +28,6 @@ function render3d(){
  var GSEL=function(){var on=gr.querySelector(".on");return on?Array.prototype.indexOf.call(gr.children,on):0};
  var lk=st.querySelector(".i3-links");lk.onclick=function(){var on=!ISLE.links();ISLE.setLinks(on);lk.textContent="先備線："+(on?"開":"關");lk.setAttribute("aria-pressed",on)};
  var TM=["auto","dawn","day","dusk","night"],ti=0,tb=st.querySelector(".i3-time");function tl(){tb.textContent="天空："+ISLE.timeLabel()}tl();setInterval(tl,60000);tb.onclick=function(){ti=(ti+1)%TM.length;ISLE.setTime(TM[ti]);tl()};
- st.querySelector(".i3-list").onclick=function(){setMode("list")};
  /* 搜尋 */
  var inp=st.querySelector(".i3-find input"),res=st.querySelector(".i3-res"),tmr=0;
  inp.addEventListener("input",function(){clearTimeout(tmr);tmr=setTimeout(function(){var r=ISLE.search(inp.value);res.innerHTML="";if(!inp.value.trim()){res.hidden=true;return}
@@ -75,20 +57,17 @@ function render3d(){
   panel.scrollTop=0}
  /* 繼續上次 */
  var lt=NB.trail.last();if(lt){var li=NB.info(lt),rs=NB.h('<a class="i3-resume"><small>繼續上次</small><b></b></a>');rs.href=NB.link(NB.flat.filter(function(o){return o.id===lt})[0]);rs.querySelector("b").textContent=li.title;st.appendChild(rs)}
- var nt=NB.h('<div class="notices i3-notices" hidden></div>');app.appendChild(nt);showNotice(nt);
  if(NB.tour)NB.tour.setup("isle3d",[{title:"歡迎來到數光群島",text:"每座島是一條主題線（分數、面積、時間⋯），島上的小房子是各年級的章。想再看一次，按右下角的 i 圓形按鈕。"},
   {sel:".i3-cv",title:"轉一轉、點一點",text:"拖曳可以轉動群島，滾輪或雙指可以縮放。點一座島，就會看到這座島上的章節。"},
   {sel:".i3-find",title:"找單元",text:"輸入關鍵字，例如「分數」「時鐘」，相關的島和房子會亮起來。"},
   {sel:".i3-grades",title:"只看某個年級",text:"選年級後，其他年級的房子會變矮變灰。"},
-  {sel:".i3-links",title:"先備線",text:"島與島之間的光弧代表學習順序：先學那座島，才接得上這座島。點選一座島時，藍色是要先學的、黃色是接著學的。"},
-  {sel:".i3-list",title:"清單模式",text:"喜歡原本的年級目錄，按這裡切換。"}])}
+  {sel:".i3-links",title:"先備線",text:"島與島之間的光弧代表學習順序：先學那座島，才接得上這座島。點選一座島時，藍色是要先學的、黃色是接著學的。"}])}
 
-function render(){if(mode()==="3d"&&NB.isle3d&&window.NB_MAP&&document.createElement("canvas").getContext)return render3d();renderList()}
+function render(){if(NB.isle3d&&window.NB_MAP&&document.createElement("canvas").getContext)return render3d();renderList()}
 function renderList(){
  app.innerHTML="";app.classList.remove("i3page");rows={};
  var bar=NB.h('<nav class="bar"><a class="brand" href="../" title="回到導覽頁" style="text-decoration:none;color:inherit">'+NB.deco.logo()+'數光島筆記本</a></nav>');if(NB.member)bar.appendChild(NB.member.chip());var ml=NB.h('<a class="lnk maplink" href="map.html">學習地圖</a>');bar.appendChild(ml);bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(NB.h('<div class="ruler"></div>'));
  var hero=NB.h('<section class="hero"><div><p class="eyebrow">國小數學・圖解與互動</p><h1 class="title">看懂數學，<mark>動手玩一玩</mark></h1><p class="lead">從例題出發，拖拉、旋轉、疊一疊，把算式變成看得見的圖形。適用國小一至六年級。</p></div></section>');hero.appendChild(NB.deco.hero());app.appendChild(hero);
- var nt=NB.h('<div class="notices" hidden></div>');app.appendChild(nt);showNotice(nt);
  app.appendChild(NB.h('<section class="feats" aria-label="特色"><div class="feat"><b>01</b><h3>看懂</h3><p>每個單元從一個例題出發，用手繪圖解一步一步拆開算式，先理解，再計算。</p></div><div class="feat"><b>02</b><h3>動手</h3><p>拖拉、旋轉、疊一疊，自己操作圖形，從錯誤中修正想法。</p></div><div class="feat"><b>03</b><h3>練習</h3><p>班級學員可使用小測驗、每日一題、錯題本與模擬卷，累積積分與勳章，並可列印練習卷。</p></div></section>'));
  app.appendChild(NB.deco.rule());
  var lt=NB.trail.last();
@@ -96,7 +75,6 @@ function renderList(){
  var tabs=NB.h('<div class="tabs"></div>');
  [1,2,3,4,5,6].forEach(function(g){var b=NB.h('<button class="pen'+(grade===g?" on":"")+'">'+"一二三四五六"[g-1]+'年級</button>');b.onclick=function(){grade=g;try{localStorage.setItem("currentGrade",g)}catch(e){}renderList()};tabs.appendChild(b)});
  app.appendChild(tabs);
- if(NB.isle3d&&window.NB_MAP){var sw=NB.h('<div class="ctl i3-back"><button type="button" class="pen go">切換到 3D 數光群島</button></div>');sw.firstChild.onclick=function(){setMode("3d")};app.insertBefore(sw,tabs)}
  var list=NB.cat.filter(function(S){return S.grade===grade});
  list.forEach(function(S,k){
   var d=NB.h('<details class="sheet"><summary><span class="tag">'+S.sem+'</span><small></small></summary></details>'),sum=d.querySelector("small");sum.textContent=semText(S);
@@ -108,7 +86,7 @@ function renderList(){
  app.appendChild(NB.h('<p class="meta" style="text-align:center">選擇年級後展開學期，點小節即可開始</p>'));
 }
 render();
-if(NB.tour&&mode()==="list")NB.tour.setup("home",[{title:"歡迎來到數光島筆記本",text:"花一分鐘看看怎麼找單元、怎麼玩。想再看一次，隨時按右下角的 i 圓形按鈕。"},
+if(NB.tour&&!ISLE)NB.tour.setup("home",[{title:"歡迎來到數光島筆記本",text:"花一分鐘看看怎麼找單元、怎麼玩。想再看一次，隨時按右下角的 i 圓形按鈕。"},
  {sel:".tabs",title:"選年級",text:"各年級的目錄都在這裡，按一下就切換。"},
  {sel:"details.sheet summary",title:"展開學期",text:"每個學期是一張紙，點一下展開，會看到章與小節。"},
  {sel:".secs .lnk",title:"選一個小節",text:"每個小節都是一頁：先看例題，再動手拖拉，接著看解法，最後挑戰一題。"},

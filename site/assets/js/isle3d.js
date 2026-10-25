@@ -72,7 +72,7 @@
     var D = buildData(), P = layout(D), reduce = window.matchMedia && matchMedia("(prefers-reduced-motion:reduce)").matches;
     var cv = document.createElement("canvas"); cv.className = "i3-cv"; cv.setAttribute("aria-hidden", "true"); box.insertBefore(cv, box.firstChild);
     var g = cv.getContext("2d"), W = 0, H = 0, DPR = 1;
-    var cam = { yaw: -0.5, pitch: 0.62, dist: 17, tx: 0, tz: 0 }, goal = null, idle = 0, t0 = performance.now();
+    var cam = { yaw: -0.5, pitch: 0.62, dist: 17, tx: 0, tz: 0 }, goal = null, idle = 0, t0 = performance.now(), touched = false; /* touched：使用者轉過／縮放過／點過 */
     var state = { grade: 0, time: "auto", links: true, sel: null, hover: null, hits: [], q: "", match: null };
     var info = {}; D.themes.forEach(function (t) { info[t] = D.chs[t].map(chapterInfo).filter(Boolean).sort(function (a, b) { return a.grade - b.grade || a.id.localeCompare(b.id); }); });
     /* 每座島的房子與樹，位置固定（用主題名稱當種子） */
@@ -330,7 +330,12 @@
       });
       ring(now); arcs(now); sparks(dt); labels(now);
     }
-    function resize() { var r = box.getBoundingClientRect(); W = Math.max(280, r.width); H = Math.max(320, r.height); DPR = Math.min(2, window.devicePixelRatio || 1); cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + "px"; cv.style.height = H + "px"; if (!goal && !moved) { var port = W < 640 && H > W; cam.dist = port ? 15.5 : W < 640 ? 19 : 17; cam.pitch = port ? .98 : .62; if (port && !resize.done) cam.yaw = -Math.PI / 2 - .25; } resize.done = 1; }
+    function resize() { var r = box.getBoundingClientRect(); W = Math.max(280, r.width); H = Math.max(320, r.height); DPR = Math.min(2, window.devicePixelRatio || 1); cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + "px"; cv.style.height = H + "px"; 
+      /* 起始視角只設一次；之後只有「版型真的變了」（例如手機轉向）而且使用者還沒動過畫面，才重設。
+         手機網址列伸縮、捲軸出現等小變化只更新畫布大小，不動鏡頭（不然會像整頁重新整理） */
+      var port = W < 640 && H > W, kind = port ? "p" : W < 640 ? "s" : "w";
+      if (kind !== resize.kind && !touched && !state.sel) { cam.dist = port ? 15.5 : W < 640 ? 19 : 17; cam.pitch = port ? .98 : .62; cam.yaw = port ? -Math.PI / 2 - .25 : -.5; if (resize.kind && goal) goal = null; }
+      resize.kind = kind; }
     var ro = window.ResizeObserver ? new ResizeObserver(resize) : null; if (ro) ro.observe(box); else window.addEventListener("resize", resize); resize();
     /* 開場：鏡頭從高空飛進來（像遊戲的開場） */
     if (!reduce) { var g0 = { yaw: cam.yaw, pitch: cam.pitch, dist: cam.dist, tx: 0, tz: 0 }; cam.yaw += 1.3; cam.pitch = 1.3; cam.dist = cam.dist * 2.1; goal = g0; }
@@ -345,7 +350,7 @@
     }
     var drag = null, moved = false, pinch = null;
     function pos(e) { var r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
-    cv.addEventListener("pointerdown", function (e) { cv.setPointerCapture(e.pointerId); drag = { x: e.clientX, y: e.clientY, yaw: cam.yaw, pitch: cam.pitch, id: e.pointerId }; moved = false; goal = null; idle = performance.now(); });
+    cv.addEventListener("pointerdown", function (e) { touched = true; cv.setPointerCapture(e.pointerId); drag = { x: e.clientX, y: e.clientY, yaw: cam.yaw, pitch: cam.pitch, id: e.pointerId }; moved = false; goal = null; idle = performance.now(); });
     cv.addEventListener("pointermove", function (e) {
       idle = performance.now();
       if (drag && drag.id === e.pointerId && !pinch) { var dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 4) moved = true; cam.yaw = drag.yaw - dx * .006; cam.pitch = Math.max(.32, Math.min(1.25, drag.pitch + dy * .004)); return; }
@@ -353,7 +358,7 @@
     });
     cv.addEventListener("pointerup", function (e) { if (drag && !moved && !pinch) { var p = pos(e), h = pick(p[0], p[1]); if (h && h.folk) poke(h.folk); else select(h ? h.t : null, h && h.c); } drag = null; });
     cv.addEventListener("pointerleave", function () { state.hover = null; });
-    cv.addEventListener("wheel", function (e) { e.preventDefault(); goal = null; cam.dist = Math.max(8, Math.min(30, cam.dist * (1 + e.deltaY * .0012))); idle = performance.now(); }, { passive: false });
+    cv.addEventListener("wheel", function (e) { e.preventDefault(); touched = true; goal = null; cam.dist = Math.max(8, Math.min(30, cam.dist * (1 + e.deltaY * .0012))); idle = performance.now(); }, { passive: false });
     cv.addEventListener("touchstart", function (e) { if (e.touches.length === 2) { var a = e.touches[0], b = e.touches[1]; pinch = { d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), dist: cam.dist }; moved = true; } }, { passive: true });
     cv.addEventListener("touchmove", function (e) { if (pinch && e.touches.length === 2) { var a = e.touches[0], b = e.touches[1], d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); cam.dist = Math.max(8, Math.min(30, pinch.dist * pinch.d / d)); } }, { passive: true });
     cv.addEventListener("touchend", function (e) { if (e.touches.length < 2) pinch = null; }, { passive: true });
@@ -364,7 +369,7 @@
       while (yaw - cam.yaw > Math.PI) yaw -= TAU; while (yaw - cam.yaw < -Math.PI) yaw += TAU;
       goal = { yaw: yaw, pitch: .7, dist: keepDist ? cam.dist : (W < 640 ? 13 : 11), tx: p.wx * .55, tz: p.wz * .55 };
     }
-    function select(t, cid) { if (t && t !== state.sel) { var p0 = P[t], sp0 = proj(p0.wx, islandY(t, performance.now()) + .3, p0.wz); burst(sp0[0], sp0[1], 26, ["#ffd65a", "#fff3b0", "#ff9f6e", "#9fe3ff"]); } state.sel = t; if (t) focus(t); else goal = { tx: 0, tz: 0, dist: W < 640 && H > W ? 15.5 : W < 640 ? 19 : 17, yaw: cam.yaw, pitch: W < 640 && H > W ? .98 : .62 }; if (opt.onPick) opt.onPick(t, cid); }
+    function select(t, cid) { touched = true; if (t && t !== state.sel) { var p0 = P[t], sp0 = proj(p0.wx, islandY(t, performance.now()) + .3, p0.wz); burst(sp0[0], sp0[1], 26, ["#ffd65a", "#fff3b0", "#ff9f6e", "#9fe3ff"]); } state.sel = t; if (t) focus(t); else goal = { tx: 0, tz: 0, dist: W < 640 && H > W ? 15.5 : W < 640 ? 19 : 17, yaw: cam.yaw, pitch: W < 640 && H > W ? .98 : .62 }; if (opt.onPick) opt.onPick(t, cid); }
     function search(q) {
       q = String(q || "").trim(); state.q = q; if (!q) { state.match = null; return []; }
       var res = [], m = {};
@@ -380,6 +385,7 @@
       focus: function (t) { state.sel = t; focus(t); }, select: select, search: search,
       setGrade: function (gr) { state.grade = gr; }, setTime: function (m) { state.time = m; }, timeLabel: function () { return (state.time === "auto" ? "自動・" : "") + SKIES[state.time === "auto" ? autoTime() : state.time].label; },
       setLinks: function (on) { state.links = on; }, links: function () { return state.links; },
+      camera: function () { return { yaw: cam.yaw, pitch: cam.pitch, dist: cam.dist }; },
       folks: function () { return folks.map(function (f) { return { t: f.t, x: f.sx, y: f.sy - (f.sr || 0) * .45, r: f.sr }; }); },
       poke: function (i) { var f = folks[(i === undefined ? Math.floor(Math.random() * folks.length) : i) % folks.length]; poke(f); return f.say; },
       progress: function () { var ti = 0, ci = 0, cn = 0; D.themes.forEach(function (t) { if (explored(t)) ti++; }); var seen = {}; D.themes.forEach(function (t) { info[t].forEach(function (c) { if (seen[c.id]) return; seen[c.id] = 1; cn++; if (visited(c)) ci++; }); }); return { islands: ti, total: D.themes.length, chapters: ci, chTotal: cn }; },
