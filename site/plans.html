@@ -41,9 +41,9 @@
 <div class="ctl" id="cyc" role="tablist" aria-label="繳費週期"><button class="pen on" data-c="m" type="button">月繳</button><button class="pen" data-c="s" type="button">學期（6 個月）</button><button class="pen" data-c="y" type="button">年繳（最划算）</button></div>
 <p class="meta" id="subjnote"></p>
 <div class="plans" id="plans"></div>
-<p class="meta">價格為新台幣。學期方案約為 5.3 個月的月費，年繳約為 9.3 個月的月費。國中理化為國小數學價格加 5%（四捨五入到元）；兩科都開為兩科價格相加。實際方案與價格以 LINE 洽詢時的書面報價為準。</p></section>
+<p class="meta">價格為新台幣。學期方案約為 5.3 個月的月費，年繳約為 9.3 個月的月費。實際方案與價格以 LINE 洽詢時的書面報價為準。</p></section>
 <section class="sheet"><h2><span class="tag">免費</span>不用付費就能用的</h2>
-<div class="plans"><div class="plan"><h3>國小數學（數光島筆記本）</h3><ul><li>三～六年級全部單元的圖解與互動練習</li><li>數光群島 3D 目錄、學習地圖（領域、學習內容、認知層次、知識類型、主題線）</li><li>每節的「挑戰」題</li></ul></div>
+<div class="plans"><div class="plan"><h3>國小數學（數光島筆記本）</h3><ul><li>ㄧ～六年級全部單元的圖解與互動練習</li><li>數光群島 3D 目錄</li><li>學習地圖（領域、學習內容、認知層次、知識類型、主題線）</li><li>每節的「挑戰」題</li></ul></div>
 <div class="plan"><h3>國中理化（見微理畫）</h3><ul><li>第三～六冊 70 節的圖解與模擬實驗</li><li>3D 實驗室（透鏡、面鏡、電流磁效應、電磁感應、串並聯電路等）</li><li>每節的「鑑往知來」：歷屆會考怎麼考、易錯陷阱、仿題</li><li>小工具：週期表、公式卡、單位換算；學習地圖</li></ul></div></div></section>
 <section class="sheet"><h2><span class="tag">試算</span>班級費用試算</h2>
 <p>老師想幫整個班級開通：老師後台按人頭計、學生席位按人數計；科目與繳費週期依上方的選擇。</p>
@@ -63,8 +63,7 @@
 <p class="meta">經營者：蘇昊數理　聯絡：官方 LINE（<a href="https://line.me/ti/p/~@000gwomo" target="_blank" rel="noopener">@000gwomo</a>）。訂購、發票或收據、退款與任何問題，都請在 LINE 洽詢。</p></section>
 </main>
 <script>
-/* 價格與文字都在這裡改（單位：新台幣）。m＝月繳、s＝學期（6 個月）、y＝年繳；null 顯示「洽詢報價」。
-   國小數學的價格寫在 PLANS；國中理化＝國小數學 × SCI_RATE（四捨五入到元），要改漲幅只改 SCI_RATE；也可以在 SCI_FIX 直接指定某一格的理化價格 */
+
 var LINE="https://line.me/ti/p/~@000gwomo",SCI_RATE=1.05,SCI_FIX={};
 var PLANS=[
  {id:"stu",name:"學生／家長",who:"個人使用，一個帳號",m:149,s:790,y:1390,items:{all:["單元小測驗、每日一題、模擬卷","錯題本（間隔複習）、學習進度與勳章","列印練習卷（題目卷＋答案卷）","排行榜（班級內只顯示座號）"],math:["數學題目產生器：同一單元可以一直練新題"],sci:["理化專屬勳章；作答可寫單位、科學記號、化學式","依老師設定使用週期表、公式卡、單位換算"]}},
@@ -75,7 +74,7 @@ var PLANS=[
 var CY={m:"月",s:"學期",y:"年"},SJ={math:"國小數學",sci:"國中理化",both:"兩科都開"},cyc="m",subj=/sci/.test(location.hash+location.search)?"sci":"math",box=document.getElementById("plans");
 function fmt(n){return"NT$ "+Math.round(n).toLocaleString("en-US")}
 function price(p,c,sj){var v=p[c];if(v==null)return null;if(sj==="math")return v;var s=SCI_FIX[p.id+"."+c]!=null?SCI_FIX[p.id+"."+c]:Math.round(v*SCI_RATE);return sj==="sci"?s:v+s}
-function draw(){box.innerHTML="";document.getElementById("subjnote").textContent=subj==="math"?"國小數學：數光島筆記本的學員專區與老師後台。":subj==="sci"?"國中理化：見微理畫（第三～六冊）的學員專區與老師後台，為國小數學價格加 5%。":"兩科都開：同一個帳號切換使用，價格為兩科相加。";
+function draw(){box.innerHTML="";document.getElementById("subjnote").textContent=subj==="math"?"數光島筆記本":subj==="sci"?"見微理畫":"同一個帳號可切換使用";
  PLANS.forEach(function(p){var v=price(p,cyc,subj),d=document.createElement("div");d.className="plan"+(p.hot?" hot":"");
  d.innerHTML='<h3></h3><p class="who"></p><p class="price"></p><ul></ul>';d.querySelector("h3").textContent=p.name;d.querySelector(".who").textContent=p.who+"・"+SJ[subj];
  d.querySelector(".price").innerHTML=v==null?"<b>洽詢報價</b>":"<b>"+fmt(v)+"</b> <small>／"+CY[cyc]+"</small>"+(cyc!=="m"?"<br><small>平均每月約 "+fmt(v/(cyc==="s"?6:12))+"</small>":"")+(subj==="both"&&v!=null?"<br><small>數學 "+fmt(price(p,cyc,"math"))+" ＋ 理化 "+fmt(price(p,cyc,"sci"))+"</small>":"");
