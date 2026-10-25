@@ -10,7 +10,9 @@ function pct(c,n){return n?Math.round(c/n*100):null}
 function shell(notabs){app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="member.html">← 回到學員專區</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));app.appendChild(h('<h1 class="title"><mark>老師後台</mark></h1>'));
  var tabs=h('<div class="tabs"></div>');TABS.forEach(function(t){var b=h('<button class="pen'+(t[0]===TAB?" go":"")+'">'+t[1]+"</button>");b.onclick=function(){tab(t[0])};tabs.appendChild(b)});if(!notabs)app.appendChild(tabs)}
 function sheet(tag,sub){var s=h('<section class="sheet"><h2><span class="tag">'+tag+'</span>'+(sub||"")+'</h2></section>');app.appendChild(s);return s}
-function msg(t){shell(1);var s=sheet("提示","");s.appendChild(h("<p>"+t+'</p><a class="pen go" href="member.html">前往登入</a>'))}
+function msg(t,btn){shell(1);var s=sheet("提示","");s.appendChild(h("<p>"+t+'</p>'+(btn||'<a class="pen go" href="member.html">前往登入</a>')))}
+/* 老師帳號過期：說明到期日、要找管理員延長；延長後重新整理就能用（/api/me 的過期狀態在 acct 裡） */
+function expiredMsg(){var a=M.acct||{};msg("你的老師帳號使用期限"+(a.expires?"已於 <b>"+esc(a.expires)+"</b> 到期":"已到期")+"，老師後台暫時無法使用。<br>請聯絡管理員延長使用期限；延長後重新整理這一頁就能繼續使用。",'<div class="ctl"><button class="pen go" onclick="location.reload()">已延長，重新整理</button><a class="pen" href="member.html">回到學員專區</a></div>')}
 function tab(t){if(location.hash==="#"+t){TAB=t;go();return}location.hash=t}
 window.addEventListener("hashchange",function(){if(!READY)return;TAB=decodeURIComponent(location.hash.slice(1))||"overview";go()});
 /* 鎂光燈導覽：第一次進後台自動帶一遍，之後按右下角的 i 可以再看 */
@@ -38,7 +40,7 @@ function bars(vals,labels,opt){opt=opt||{};var bw=Math.min(44,Math.max(12,560/va
 function meterRow(label,p,right){return'<div class="urow"><span>'+label+'</span><div class="meter"><i style="width:'+(p||0)+'%"></i></div><span>'+right+"</span></div>"}
 
 function load(cls){
- M.api("GET","/api/admin/overview"+(cls?"?cls="+encodeURIComponent(cls):"")).then(render,function(e){msg(e.code==="forbidden"?"只有名單裡設定為 teacher 的帳號可以使用老師後台。":"載入失敗（"+esc(e.code||"未知")+"），請稍後再試。")})}
+ M.api("GET","/api/admin/overview"+(cls?"?cls="+encodeURIComponent(cls):"")).then(render,function(e){if(e.code==="expired")return expiredMsg();msg(e.code==="forbidden"?"只有名單裡設定為 teacher 的帳號可以使用老師後台。":"載入失敗（"+esc(e.code||"未知")+"），請稍後再試。")})}
 function render(r){
  CLS=r.cls;shell();var S=r.summary,rows=r.students,today=M.today(),limit=M.today(new Date(Date.now()-7*864e5));
  var s=sheet("班級",""),sel=h("<select></select>");r.classes.forEach(function(c){var o=h("<option></option>");o.value=c;o.textContent=c+" 班";if(c===r.cls)o.selected=true;sel.appendChild(o)});sel.onchange=function(){CLS=sel.value;load(CLS)};s.appendChild(sel);
@@ -98,5 +100,5 @@ function detail(cls,no){
   s.appendChild(close);close.firstChild.onclick=function(){s.remove()};var old=app.querySelector(".sheet.prof");if(old)old.remove();s.classList.add("prof");app.insertBefore(s,app.querySelector(".sheet:nth-of-type(1)"));s.scrollIntoView()},function(e){alert("載入失敗："+(e.code||"未知"))})}
 
 shell(1);app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
-M.boot().then(function(){if(M.U&&!M.U.admin){TABS=TABS_ALL.filter(function(t){return t[0]!=="bank"&&t[0]!=="settings"&&t[0]!=="data"&&t[0]!=="reports"});if(TAB==="bank"||TAB==="settings"||TAB==="data"||TAB==="reports")TAB="overview"}if(!M.U)return msg("請先用老師的 Google 帳號登入學員專區。");if(M.U.expired)return msg("你的老師帳號使用期限已到，請聯絡管理員延長。");if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");READY=true;go()});
+M.boot().then(function(){if(M.U&&!M.U.admin){TABS=TABS_ALL.filter(function(t){return t[0]!=="bank"&&t[0]!=="settings"&&t[0]!=="data"&&t[0]!=="reports"});if(TAB==="bank"||TAB==="settings"||TAB==="data"||TAB==="reports")TAB="overview"}if(!M.U)return msg("請先用老師的 Google 帳號登入學員專區。");if(M.U.expired||(M.acct&&M.acct.expired))return expiredMsg();if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");READY=true;go()});
 })();

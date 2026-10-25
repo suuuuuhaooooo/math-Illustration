@@ -3,7 +3,7 @@
 "use strict";
 var M=NB.member,h=NB.h;
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-var ERRMAP={bad_HINT_COST:"看一次提示扣的分數要是 0～10000 的整數",bad_LEVEL_STEP:"每幾分升一級要在 10～100000 之間",bad_DAILY_Q_CAP:"每天最多計分的題數要在 10～5000 之間",bad_DAILY_MOCK_CAP:"每天可領獎勵的模擬卷份數要在 0～50 之間",bad_POINTS_BY_LEVEL:"答對積分要填 3 個 1～1000 的數字，用逗號分開（例：10,15,20）",bad_REVIEW_DAYS:"錯題複習間隔要填 1～6 個 1～90 的整數，用逗號分開（例：1,3,7）",forbidden:"沒有這個權限（這項功能只有管理員能用）"};
+var ERRMAP={bad_HINT_COST:"看一次提示扣的分數要是 0～10000 的整數",bad_LEVEL_STEP:"每幾分升一級要在 10～100000 之間",bad_DAILY_Q_CAP:"每天最多計分的題數要在 10～5000 之間",bad_DAILY_MOCK_CAP:"每天可領獎勵的模擬卷份數要在 0～50 之間",bad_POINTS_BY_LEVEL:"答對積分要填 3 個 1～1000 的數字，用逗號分開（例：10,15,20）",bad_REVIEW_DAYS:"錯題複習間隔要填 1～6 個 1～90 的整數，用逗號分開（例：1,3,7）",forbidden:"沒有這個權限（這項功能只有管理員能用）",expired:"你的老師帳號使用期限已到期，請聯絡管理員延長；延長後重新整理頁面",bad_PURGE_DAYS:"舊紀錄保留天數只能選清單裡的選項"};
 function errs(e){return e&&e.code?(ERRMAP[e.code]||"失敗（"+e.code+"）"):"連線失敗"}
 function csvEsc(v){v=String(v==null?"":v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function parseCSV(t){var rows=[],r=[],f="",q=false,i,c;t=t.replace(/^﻿/,"");
@@ -231,7 +231,7 @@ var SYS_DOCS=[
 var SYS_LIM=[
  ["printRange","每份練習卷題數（快速出卷）","5～40 題"],["planTeacher","自訂大題：老師每份卷最多","50 題、8 個大題（管理員不限）"],["planStudent","自訂大題：學生每份卷最多","30 題、4 個大題"],
  ["poolPer10minTeacher","挑題查詢：老師每 10 分鐘最多","20 次（每次最多 30 題；學生 10 次；管理員不限）"],["announceMax","公告最多存","30 則"],["bankImportRows","題庫單次匯入","2000 題一批（大檔會自動分批）"],
- ["groupMax","一個題組最多","10 個小題"],["cacheSeconds","題庫與名單的記憶體快取","10 秒檢查一次有沒有更新"],["printKeepDays","列印紀錄保留","180 天（自動清理）"]
+ ["groupMax","一個題組最多","10 個小題"],["cacheSeconds","題庫與名單的記憶體快取","10 秒檢查一次有沒有更新"],["printKeepDays","舊紀錄保留天數","天（0＝不自動清除；在「設定」裡改）"]
 ];
 var SYS_NOTES=[
  ["免費額度（以 Cloudflare 官方文件為準）","<ul><li><b>D1 資料庫（免費）</b>：每天讀取 500 萬列、寫入 10 萬列、容量 5 GB；每天 UTC 00:00（台灣 08:00）歸零。</li><li><b>Workers（免費）</b>：每天 10 萬次請求；每次請求的 CPU 時間約 10 毫秒。</li><li>「讀取列數」算的是<b>掃描過的列數</b>，不是回傳的列數；「寫入列數」是新增、修改、刪除的列數（索引也會多算）。一列不論多大都只算一列。</li></ul>"],
@@ -240,7 +240,7 @@ var SYS_NOTES=[
  ["讀取量最大的是什麼","<ul><li>每個 Worker 伺服器實例第一次需要題庫時，會把整張題庫、名單、屬性表、題組表讀進記憶體：<b>讀取列數≈題庫題數＋名單人數＋屬性與題組列數</b>（題庫 4,700 題時，一次約 5,000～10,000 列）。</li><li>之後 10 秒檢查一次「版本號」，沒有改動就不會重讀。<b>只要有人改題庫、名單、設定，版本號就會變，所有實例都會重讀一次</b>。</li><li>所以：<b>不要在上課時間頻繁改題庫</b>；一天改很多次，讀取量會成倍增加。</li><li>挑題、題目清單都是讀記憶體裡的快取，不會多讀資料庫。</li></ul>"],
  ["不要這樣做","<ul><li>不要把圖片放進資料庫（後台上傳圖片會存進 D1，量大會佔容量）；圖片請放在網站的 <code>assets/q/</code>，用檔名引用。</li><li>不要把 RESEND_API_KEY、Firebase 金鑰貼到聊天、截圖或程式碼裡；密鑰只用 <code>npx wrangler secret put 名稱</code> 設定。</li><li>不要開 ALLOW_LOCALHOST 後忘記關。</li><li>不要同時從多個瀏覽器分頁一直按「匯入」，一份一份來。</li></ul>"],
  ["要改參數時","<ul><li><b>遊戲類</b>（積分、升級、每日題數、提示扣分…）：直接在上面「遊戲設定」改，立刻生效。</li><li><b>wrangler.toml 的參數</b>：改檔案 → commit、push 後端 repo → 等 GitHub Actions 出現 ✓ 才會生效。</li><li><b>密鑰</b>：在後端資料夾執行 <code>npx wrangler secret put RESEND_API_KEY</code>，貼上後 Enter（不用 push）。</li><li>這一頁只能看，不能改，避免誤按。</li></ul>"],
- ["額度快用完時","<ul><li>先看「資料表筆數與用量」，確認是哪一張表最大。</li><li>列印紀錄會自動保留 180 天；問題回報、舊的作答紀錄可以到「資料管理」清理。</li><li>超過免費額度時，API 會開始失敗，到隔天 UTC 00:00 才恢復；若常常超過，再考慮升級付費方案（門檻比免費高很多）。</li><li>資料庫備份：Cloudflare 後台的 D1 有「Time Travel」可以還原到過去某個時間點（保留天數依方案而定），重大匯入或刪除前，也可以先匯出題庫與名單 CSV 留一份。</li></ul>"]
+ ["額度快用完時","<ul><li>先看「資料表筆數與用量」，確認是哪一張表最大。</li><li>列印紀錄、作答紀錄、模擬考紀錄、QR 線上作答，會依「設定」裡的「舊紀錄自動清除」保留天數清理（也可以選不自動清除）；問題回報、舊的作答紀錄可以到「資料管理」手動清理。</li><li>超過免費額度時，API 會開始失敗，到隔天 UTC 00:00 才恢復；若常常超過，再考慮升級付費方案（門檻比免費高很多）。</li><li>資料庫備份：Cloudflare 後台的 D1 有「Time Travel」可以還原到過去某個時間點（保留天數依方案而定），重大匯入或刪除前，也可以先匯出題庫與名單 CSV 留一份。</li></ul>"]
 ];
 /* ---------- Cloudflare 用量儀表板（管理員）：讀 Cloudflare 的統計，不讀自己的資料庫 ---------- */
 function usage(ctx){
@@ -310,8 +310,8 @@ function settings(ctx){
  ann(ctx);
  var s=ctx.sheet("遊戲設定","改完按儲存，全班立刻套用；空白＝用預設值");
  M.api("GET","/api/admin/settings").then(function(r){var e=r.effective,F={
-  POINTS_BY_LEVEL:inp(e.pts.join(",")),LEVEL_STEP:inp(e.step,"","number"),DAILY_Q_CAP:inp(e.capQ,"","number"),DAILY_MOCK_CAP:inp(e.capMock,"","number"),REVIEW_DAYS:inp(e.review.join(",")),HINT_COST:inp(e.hint,"","number"),QR_ON:h('<select><option value="0">關閉</option><option value="1">開放</option></select>')};F.QR_ON.value=e.qr?"1":"0";
-  s.appendChild(field("答對一題的積分（基礎,應用,挑戰）",F.POINTS_BY_LEVEL));s.appendChild(field("每幾分升一級",F.LEVEL_STEP));s.appendChild(field("每天最多計分的題數（防刷）",F.DAILY_Q_CAP));s.appendChild(field("每天可領獎勵的模擬卷份數",F.DAILY_MOCK_CAP));s.appendChild(field("看一次提示扣幾分（0＝不扣；看過提示的題目答對只拿一半積分）",F.HINT_COST));s.appendChild(field("錯題複習間隔（幾天後，用逗號分隔）",F.REVIEW_DAYS));s.appendChild(field("QR code 線上作答（總開關：開放後，老師出卷時才能勾選「印 QR code 線上作答」；關閉時學生掃描也不能作答）",F.QR_ON));
+  POINTS_BY_LEVEL:inp(e.pts.join(",")),LEVEL_STEP:inp(e.step,"","number"),DAILY_Q_CAP:inp(e.capQ,"","number"),DAILY_MOCK_CAP:inp(e.capMock,"","number"),REVIEW_DAYS:inp(e.review.join(",")),HINT_COST:inp(e.hint,"","number"),QR_ON:h('<select><option value="0">關閉</option><option value="1">開放</option></select>'),PURGE_DAYS:h('<select><option value="0">不自動清除（由管理員手動清）</option><option value="90">保留 90 天</option><option value="180">保留 180 天</option><option value="365">保留 1 年</option><option value="730">保留 2 年</option></select>')};F.QR_ON.value=e.qr?"1":"0";F.PURGE_DAYS.value=String(e.purge===undefined?180:e.purge);
+  s.appendChild(field("答對一題的積分（基礎,應用,挑戰）",F.POINTS_BY_LEVEL));s.appendChild(field("每幾分升一級",F.LEVEL_STEP));s.appendChild(field("每天最多計分的題數（防刷）",F.DAILY_Q_CAP));s.appendChild(field("每天可領獎勵的模擬卷份數",F.DAILY_MOCK_CAP));s.appendChild(field("看一次提示扣幾分（0＝不扣；看過提示的題目答對只拿一半積分）",F.HINT_COST));s.appendChild(field("錯題複習間隔（幾天後，用逗號分隔）",F.REVIEW_DAYS));s.appendChild(field("舊紀錄自動清除（列印紀錄、作答紀錄、模擬考紀錄、QR 線上作答；超過保留天數會自動刪掉。選「不自動清除」就只能由管理員手動清）",F.PURGE_DAYS));s.appendChild(field("QR code 線上作答（總開關：開放後，老師出卷時才能勾選「印 QR code 線上作答」；關閉時學生掃描也不能作答）",F.QR_ON));
   var fb=h('<div class="fb"></div>'),b=h('<div class="ctl"><button class="pen go">儲存設定</button></div>');s.appendChild(b);s.appendChild(fb);
   b.firstChild.onclick=function(){var o={};Object.keys(F).forEach(function(k){o[k]=F[k].value});M.api("POST","/api/admin/settings",o).then(function(){msg(fb,"已儲存",1)},function(er){msg(fb,errs(er),0)})}},function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))});
  if(M.U&&M.U.admin){usage(ctx);sysinfo(ctx)}}
@@ -403,10 +403,13 @@ function assign(ctx){
   M.api("GET","/api/admin/assigns").then(function(q){
    if(!q.rows.length){ls.appendChild(h("<p>還沒有派過卷。</p>"));return}
    var t='<table class="tb"><tr><th>派出時間</th><th>標題</th><th>班級</th><th>對象</th><th>題數</th><th>時限</th><th>截止</th><th>完成</th><th>平均</th><th></th></tr>';
-   q.rows.forEach(function(a){t+="<tr><td>"+when(a.ts)+"</td><td>"+esc(a.title)+"</td><td>"+esc(a.classes.join("、"))+"</td><td>"+(a.part?"部分 "+a.part+" 人":"整班")+"</td><td>"+a.n+"</td><td>"+(a.mins?a.mins+" 分":"每題2分")+"</td><td>"+(a.due?new Date(a.due+288e5).toISOString().slice(5,10):"—")+"</td><td>"+a.done+" / "+a.total+(a.started>a.done?"（"+(a.started-a.done)+" 人作答中）":"")+"</td><td>"+(a.avg===null?"—":a.avg)+'</td><td><button class="pen" data-v="'+esc(a.id)+'">看狀況</button> <button class="pen" data-x="'+esc(a.id)+'">刪除</button></td></tr>'});
+   q.rows.forEach(function(a){t+="<tr><td>"+when(a.ts)+"</td><td>"+esc(a.title)+"</td><td>"+esc(a.classes.join("、"))+"</td><td>"+(a.part?"部分 "+a.part+" 人":"整班")+"</td><td>"+a.n+"</td><td>"+(a.mins?a.mins+" 分":"每題2分")+"</td><td>"+(a.closed?'<b class="no">已結束</b>':a.due?new Date(a.due+288e5).toISOString().slice(5,10):"—")+"</td><td>"+a.done+" / "+a.total+(a.started>a.done?"（"+(a.started-a.done)+" 人作答中）":"")+"</td><td>"+(a.avg===null?"—":a.avg)+'</td><td><button class="pen" data-v="'+esc(a.id)+'">看狀況</button>'+(a.mine||(M.U&&M.U.admin)?' <button class="pen" data-c="'+esc(a.id)+'" data-st="'+(a.closed?"1":"0")+'">'+(a.closed?"重新開放":"結束派卷")+"</button>":"")+(M.U&&M.U.admin?' <button class="pen" data-x="'+esc(a.id)+'">刪除</button>':"")+"</td></tr>"});
    var tb=h(t+"</table>");ls.appendChild(tb);ls.appendChild(det);
-   tb.addEventListener("click",function(e){var x=e.target.closest("button[data-x]");
-    if(x){if(!confirm("確定刪除這份派卷？學生的待測清單會消失，已交的成績紀錄也會一併刪除（學生本身的積分和錯題本不受影響）。"))return;x.disabled=true;M.api("POST","/api/admin/assign/delete",{id:x.dataset.x}).then(ctx.go,function(){x.disabled=false;alert("刪除失敗（只有派卷的老師或管理員可以刪）")});return}
+   tb.addEventListener("click",function(e){
+    /* 結束派卷：學生不能再開始作答（已經在寫的可以寫完），成績紀錄都保留；要刪紀錄請找管理員 */
+    var c=e.target.closest("button[data-c]");if(c){var off=c.dataset.st==="1";if(!confirm(off?"重新開放這份派卷？還沒寫的學生又可以開始作答。":"結束這份派卷？還沒開始的學生就不能再作答了（正在寫的可以寫完），已交的成績都會保留。"))return;c.disabled=true;M.api("POST","/api/admin/assign/close",{id:c.dataset.c,closed:!off}).then(ctx.go,function(){c.disabled=false;alert("操作失敗（只有派卷的老師或管理員可以結束）")});return}
+    var x=e.target.closest("button[data-x]");
+    if(x){if(!confirm("確定刪除這份派卷？學生的待測清單會消失，已交的成績紀錄也會一併刪除（學生本身的積分和錯題本不受影響）。"))return;x.disabled=true;M.api("POST","/api/admin/assign/delete",{id:x.dataset.x}).then(ctx.go,function(){x.disabled=false;alert("刪除失敗（派卷紀錄只有管理員可以刪）")});return}
     var v=e.target.closest("button[data-v]");if(!v)return;v.disabled=true;
     M.api("GET","/api/admin/assign?id="+encodeURIComponent(v.dataset.v)).then(function(d){v.disabled=false;det.hidden=false;
      var tt='<p><b>'+esc(d.title)+"</b>　"+d.n+" 題</p><table class=\"tb\"><tr><th>班</th><th>號</th><th>姓名</th><th>狀態</th><th>成績</th><th>答對</th><th>用時</th><th>離開次數</th><th>離開秒數</th></tr>";

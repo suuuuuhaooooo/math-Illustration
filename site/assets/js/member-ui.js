@@ -13,7 +13,7 @@ function stkSvg(s,i,on){var t=(s.t||1)-1,c=TC[t],pips="",k;for(k=0;k<=t;k++)pips
  return'<svg viewBox="0 0 64 64" class="stk" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="'+(on?c:"var(--paper2)")+'" fill-opacity="'+(on?.28:1)+'" stroke="'+(on?c:"var(--ink)")+'" stroke-width="'+(on?3.4:2.4)+'"'+(on?"":' stroke-dasharray="4 4"')+'/><circle cx="32" cy="32" r="23" fill="none" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 4" opacity=".5"/><g transform="translate(17 14) scale(1.2)" fill="none" stroke="var(--ink)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"'+(on?"":' opacity=".28"')+'><path d="'+s.g+'"/></g>'+pips+'</svg>'}
 /* Firebase 登入錯誤 → 看得懂的說明（一定把代碼附上，方便回報） */
 function authMsg(c){var m={"auth/popup-closed-by-user":"登入視窗被關閉了，再按一次登入。","auth/network-request-failed":"網路不穩，連不上 Google 登入服務，請檢查網路後再試。","auth/unauthorized-domain":"這個網址還沒加進 Firebase 的「授權網域」，請管理員到 Firebase 設定。","auth/popup-blocked":"瀏覽器擋掉了登入視窗，請允許這個網站的彈出視窗後再試。","auth/operation-not-supported-in-this-environment":"這個瀏覽器不支援 Google 登入，請改用 Chrome 或 Safari 開啟。","auth/web-storage-unsupported":"瀏覽器關閉了網站儲存功能（或無痕模式限制），請改用一般視窗，並允許 Cookie。","auth/internal-error":"登入服務發生內部錯誤，請稍後再試。","auth/user-disabled":"這個 Google 帳號已被停用。"}[c];return(m||"登入沒有成功，請再試一次。")+(c?"（"+c+"）":"")}
-function errMsg(e){var c=e&&e.code;return{qr_off:"老師目前沒有開放 QR code 線上作答。",paper_closed:"這份卷已經關閉線上作答。",already_done:"你已經交過這份卷了。",bad_qr:"QR code 作答資料有問題，請重新出卷。",not_found:"找不到這份卷，請確認 QR code 是不是完整的。",plan_too_big:"題數超過上限了，請減少題數。",bad_plan:"大題設定有誤，請檢查後再試。",preview_limit:"審題預覽太頻繁了，請等幾分鐘再試（為了節省資源，預覽每 10 分鐘有次數上限）。",pool_limit:"挑題查得太頻繁了，請等幾分鐘再試。",rate_limit:"操作太快了，請等一分鐘再試。",no_units:"請先勾選單元。",print_limit:"今天出的練習卷已經到上限了，明天再來，或請管理員調整。",net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請管理員完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",expired:"你的正式學員授權已到期，請找管理員延期。",forbidden:"沒有權限。",no_questions:"這個範圍（或篩選條件）沒有可以出的題目。",closed:"這份卷子已經截止了。",not_found:"找不到這份卷子，可能已被老師刪除。",server:"伺服器忙碌中，請稍後再試。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
+function errMsg(e){var c=e&&e.code;if(c==="expired"&&M.U&&M.U.role==="teacher")return"你的老師帳號使用期限已到期，請聯絡管理員延長；延長後重新整理頁面就能繼續使用。";return{qr_off:"老師目前沒有開放 QR code 線上作答。",paper_closed:"這份卷已經關閉線上作答。",already_done:"你已經交過這份卷了。",bad_qr:"QR code 作答資料有問題，請重新出卷。",not_found:"找不到這份卷，請確認 QR code 是不是完整的。",plan_too_big:"題數超過上限了，請減少題數。",bad_plan:"大題設定有誤，請檢查後再試。",preview_limit:"審題預覽太頻繁了，請等幾分鐘再試（為了節省資源，預覽每 10 分鐘有次數上限）。",pool_limit:"挑題查得太頻繁了，請等幾分鐘再試。",rate_limit:"操作太快了，請等一分鐘再試。",no_units:"請先勾選單元。",print_limit:"今天出的練習卷已經到上限了，明天再來，或請管理員調整。",net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請管理員完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",expired:"你的正式學員授權已到期，請找管理員延期。",forbidden:"沒有權限。",no_questions:"這個範圍（或篩選條件）沒有可以出的題目。",closed:"這份卷子已經截止，或老師已經結束這份派卷。",not_found:"找不到這份卷子，可能已被老師刪除。",server:"伺服器忙碌中，請稍後再試。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
 /* 題組的共用題幹：每一小題上方都顯示一次（學生一題一題作答，不用往上翻）；只有一小題（例如錯題本單獨練習）就不寫「第幾小題」 */
 function gstem(g,s,im,k,n){return s?'<div class="gstem">'+(n>1?'<small class="gtag">題組・第 '+k+"／"+n+" 小題</small>":'<small class="gtag">題組</small>')+"<div>"+tx(s)+"</div>"+qimg(im)+"</div>":""}
 function qimg(p,c){return p?'<img class="qimg'+(c?" "+c:"")+'" alt="附圖" src="'+esc(M.img(p))+'">':""}
@@ -189,7 +189,7 @@ V.assign=function(){
  function load(){M.api("GET","/api/assigns").then(function(r){box.remove();box=h("<div></div>");s.appendChild(box);
   if(!r.rows.length){box.appendChild(h("<p>目前沒有老師派的卷子。</p>"));return}
   r.rows.forEach(function(a){
-   var info=a.n+" 題・限時 "+a.mins+" 分鐘"+(a.due?"・截止 "+ymd(a.due):""),st={new:"還沒寫",open:"作答中（可以繼續）",done:a.late?"已交（逾時，沒有計分）":"已完成："+a.sc+" 分（答對 "+a.c+" / "+a.n+"）",closed:"已截止"}[a.st],
+   var info=a.n+" 題・限時 "+a.mins+" 分鐘"+(a.due?"・截止 "+ymd(a.due):""),st={new:"還沒寫",open:"作答中（可以繼續）",done:a.late?"已交（逾時，沒有計分）":"已完成："+a.sc+" 分（答對 "+a.c+" / "+a.n+"）",closed:"已截止（或老師已結束）"}[a.st],
    row=h('<div class="wi"><div><b>'+esc(a.title)+"</b></div><small>"+esc(info)+"</small><div class=\"meta\">"+esc(st)+"</div></div>");
    if(a.st==="new"||a.st==="open"){var b=h('<button class="pen go">'+(a.st==="open"?"繼續作答":"開始作答")+"</button>");b.onclick=function(){if(a.st==="new"&&!confirm("開始後就會計時（"+a.mins+" 分鐘），而且只能作答一次。確定開始？"))return;
     begin({kind:"assign",id:a.id},function(r){var note=[];if(r.resumed)note.push("接續上次還沒交的卷子。");if(r.short)note.push("可出的題目不足，這份只有 "+r.qs.length+" 題。");run({tag:"派卷",title:r.title||a.title,sess:r,note:note.join(" ")})})};row.appendChild(h('<div class="ctl"></div>')).appendChild(b)}
@@ -526,7 +526,7 @@ function printWiz(arg){
 
 /* ---- QR code 線上作答（學生）：#ans/卷號-卷別 ---- */
 var ZHV="甲乙丙丁",CNS="一二三四五六七八九十",TYZ={choice:"選擇題",tf:"是非題",num:"填充題",text:"填充題",multi:"勾選題",match:"連連看",group:"題組",any:"綜合題"};
-function askBox(ttl,msg,okT,cb){var ov=h('<div class="pkov" role="alertdialog" aria-modal="true"><div class="pkbox pkmsg"><h3></h3><p></p><div class="ctl"><button type="button" class="pen go"></button><button type="button" class="pen">再檢查一下</button></div></div></div>');ov.querySelector("h3").textContent=ttl;ov.querySelector("p").textContent=msg;var b=ov.querySelectorAll("button");b[0].textContent=okT;b[0].onclick=function(){ov.remove();cb()};b[1].onclick=function(){ov.remove()};document.body.appendChild(ov);b[1].focus()}
+function askBox(ttl,msg,okT,cb,noT){var ov=h('<div class="pkov" role="alertdialog" aria-modal="true"><div class="pkbox pkmsg"><h3></h3><p></p><div class="ctl"><button type="button" class="pen go"></button><button type="button" class="pen"></button></div></div></div>');ov.querySelector("h3").textContent=ttl;ov.querySelector("p").textContent=msg;var b=ov.querySelectorAll("button");b[0].textContent=okT;b[1].textContent=noT||"再檢查一下";b[0].onclick=function(){ov.remove();cb()};b[1].onclick=function(){ov.remove()};document.body.appendChild(ov);b[1].focus()}
 function hm(ts){var d=new Date(ts);return(d.getMonth()+1)+"/"+d.getDate()+" "+pad(d.getHours())+":"+pad(d.getMinutes())}
 V.ans=function(arg){
  var a=String(arg||""),k=a.lastIndexOf("-"),pid=k>0?a.slice(0,k):a,v=k>0?+a.slice(k+1)||0:0,s=sheet("線上作答","照著紙本卷，把答案填在這裡，按「交卷」就會自動改分");view.appendChild(s);
@@ -559,6 +559,7 @@ V.ans=function(arg){
  },function(e){box.innerHTML='<div class="fb no">'+esc(errMsg(e))+"</div>"})};
 
 /* ---- QR code 線上作答（老師）：#qr＝我出的卷、#qr/卷號＝成績與每題答對率 ---- */
+function qrDel(pid,what,id,done){M.api("POST","/api/paper/delete",{pid:pid,what:what,id:id}).then(done,function(e){popup("刪除失敗",errMsg(e))})}
 V.qr=function(arg){
  var u=user();if(!u||u.role!=="teacher"){var s0=sheet("線上作答成績","");s0.appendChild(h('<p>這一頁只有老師可以看。</p>'));view.appendChild(s0);return}
  var s=sheet("線上作答成績",arg?"這份卷的作答情形":"用 QR code 出的卷子"),box=h('<div><p class="meta">載入中…</p></div>');s.appendChild(box);view.appendChild(s);
@@ -566,15 +567,20 @@ V.qr=function(arg){
   if(!r.on)box.appendChild(h('<div class="fb no">QR code 線上作答的總開關目前是關的，學生掃描後不能作答。管理員可以到老師後台「遊戲設定」打開。</div>'));
   if(!r.rows.length){box.appendChild(h('<p>還沒有用 QR code 出過卷。到「列印練習卷」第 4 步勾選「印 QR code 線上作答」，進行出卷後就會出現在這裡。</p>'));return}
   var t=h('<table class="pvst qrt"><tr><th>出卷時間</th><th>卷名</th><th>卷號</th><th>交卷人數</th><th>狀態</th><th></th></tr></table>');
-  r.rows.forEach(function(x){var tr=h("<table><tr><td>"+hm(x.ts)+"</td><td>"+esc(x.title||"")+(u.admin&&x.name?'<br><small class="meta">'+esc(x.name)+"</small>":"")+"</td><td>"+esc(x.pid)+"</td><td>"+x.subs+"</td><td>"+(x.open?"開放作答":"已關閉")+'</td><td><a class="pen" href="#qr/'+esc(x.pid)+'">看成績</a></td></tr></table>').querySelector("tr");t.querySelector("tbody").appendChild(tr)});box.appendChild(t)},function(e){box.innerHTML='<div class="fb no">'+esc(errMsg(e))+"</div>"});return}
+  r.rows.forEach(function(x){var tr=h("<table><tr><td>"+hm(x.ts)+"</td><td>"+esc(x.title||"")+(u.admin&&x.name?'<br><small class="meta">'+esc(x.name)+"</small>":"")+"</td><td>"+esc(x.pid)+"</td><td>"+x.subs+"</td><td>"+(x.open?"開放作答":"已關閉")+'</td><td><a class="pen" href="#qr/'+esc(x.pid)+'">看成績</a>'+(u.admin?' <button type="button" class="pen qdel">刪除</button>':"")+"</td></tr></table>").querySelector("tr");
+   if(u.admin)tr.querySelector(".qdel").onclick=function(){askBox("刪除這份卷？","卷號 "+x.pid+" 的 "+x.subs+" 筆作答會一起刪掉，紙本上的 QR code 之後也掃不到了。這個動作不能復原。","刪除",function(){qrDel(x.pid,"paper","",route)},"取消")};
+   t.querySelector("tbody").appendChild(tr)});box.appendChild(t);box.appendChild(h('<p class="meta">'+(r.purge?"超過 "+r.purge+" 天的 QR 卷和作答會自動清除（管理員可在「設定」改成不自動清除）。":"目前設定為不自動清除，只能由管理員手動刪除。")+(u.admin?"刪除作答不會動到學生錯題本裡已經放進去的題目。":"要刪除作答請找管理員。")+"</p>"))},function(e){box.innerHTML='<div class="fb no">'+esc(errMsg(e))+"</div>"});return}
  function load(){M.api("GET","/api/paper/results?pid="+encodeURIComponent(arg)).then(function(r){box.innerHTML="";
   var n=r.subs.length,avg=n?Math.round(r.subs.reduce(function(a,x){return a+x.score},0)/n*10)/10:0,tot=n?r.subs[0].total:"";
   box.appendChild(h('<p><b>'+esc(r.title||"")+'</b>　<span class="meta">卷號 '+esc(r.pid)+"・"+hm(r.ts)+"出卷</span></p>"));
   box.appendChild(h('<div class="tiles qrsum"><div class="tile"><b>'+n+'</b><small>交卷人數</small></div><div class="tile"><b>'+(n?avg:"—")+'</b><small>平均分數'+(tot!==""?"（滿分 "+tot+"）":"")+'</small></div><div class="tile"><b>'+(r.open?"開放中":"已關閉")+"</b><small>線上作答</small></div></div>"));
-  var ctl=h('<div class="ctl"><button type="button" class="pen go"></button><button type="button" class="pen">重新整理</button><a class="pen" href="#qr">回到清單</a></div>');ctl.children[0].textContent=r.open?"關閉作答（不再收卷）":"重新開放作答";
+  var ctl=h('<div class="ctl"><button type="button" class="pen go"></button><button type="button" class="pen">重新整理</button><a class="pen" href="#qr">回到清單</a>'+(u.admin?'<button type="button" class="pen qclr">清空所有作答</button><button type="button" class="pen qdelp">刪除這份卷</button>':"")+'</div>');
+  if(u.admin)ctl.querySelector(".qclr").onclick=function(){if(!n){popup("沒有作答","這份卷還沒有人交卷。");return}askBox("清空所有作答？",n+" 位學生的作答和分數會刪掉，學生可以重新作答（卷子保留、QR code 照樣能用）。這個動作不能復原。","清空",function(){qrDel(r.pid,"subs","",load)},"取消")};
+  if(u.admin)ctl.querySelector(".qdelp").onclick=function(){askBox("刪除這份卷？","這份卷和 "+n+" 筆作答會一起刪掉，紙本上的 QR code 之後也掃不到了。這個動作不能復原。","刪除",function(){qrDel(r.pid,"paper","",function(){location.hash="#qr"})},"取消")};ctl.children[0].textContent=r.open?"關閉作答（不再收卷）":"重新開放作答";
   ctl.children[0].onclick=function(){M.api("POST","/api/paper/open",{pid:r.pid,open:!r.open}).then(load,function(e){popup("失敗",errMsg(e))})};ctl.children[1].onclick=load;box.appendChild(ctl);
-  if(n){var t=h('<table class="pvst"><tr><th>班級</th><th>座號</th><th>姓名</th>'+(r.nv>1?"<th>卷別</th>":"")+"<th>分數</th><th>答對</th><th>交卷時間</th></tr></table>");
-   r.subs.forEach(function(x){t.querySelector("tbody").appendChild(h("<table><tr><td>"+esc(x.cls||"")+"</td><td>"+(x.role==="student"?esc(x.no):"老師")+"</td><td>"+esc(x.name||"")+"</td>"+(r.nv>1?"<td>"+ZHV[x.v]+"</td>":"")+"<td><b>"+esc(x.score)+"</b></td><td>"+x.c+"／"+x.n+"</td><td>"+hm(x.ts)+"</td></tr></table>").querySelector("tr"))});
+  if(n){var t=h('<table class="pvst"><tr><th>班級</th><th>座號</th><th>姓名</th>'+(r.nv>1?"<th>卷別</th>":"")+"<th>分數</th><th>答對</th><th>交卷時間</th>"+(u.admin?"<th></th>":"")+"</tr></table>");
+   r.subs.forEach(function(x){t.querySelector("tbody").appendChild(h("<table><tr><td>"+esc(x.cls||"")+"</td><td>"+(x.role==="student"?esc(x.no):"老師")+"</td><td>"+esc(x.name||"")+"</td>"+(r.nv>1?"<td>"+ZHV[x.v]+"</td>":"")+"<td><b>"+esc(x.score)+"</b></td><td>"+x.c+"／"+x.n+"</td><td>"+hm(x.ts)+"</td>"+(u.admin?'<td><button type="button" class="pen qsub">刪除（可重交）</button></td>':"")+"</tr></table>").querySelector("tr"));
+    if(u.admin)t.querySelector("tbody").lastChild.querySelector(".qsub").onclick=function(){askBox("刪除 "+(x.name||"")+" 的作答？","刪掉後這位學生可以重新掃描作答。這個動作不能復原。","刪除",function(){qrDel(r.pid,"sub",x.id,load)},"取消")}});
    box.appendChild(h("<h4>學生成績</h4>"));box.appendChild(t);
    var it=h('<table class="pvst qrrate"><tr><th>題號</th><th>題型</th><th>題目</th><th>答對率</th></tr></table>');
    r.items.forEach(function(x){var p=x.of?Math.round(x.ok/x.of*100):0;it.querySelector("tbody").appendChild(h("<table><tr><td>"+esc(x.lab)+"</td><td>"+(TYZ[x.ty]||"")+'</td><td class="qtx"></td><td><span class="rbar"><i style="width:'+p+'%"></i></span> '+p+"%（"+x.ok+"／"+x.of+"）</td></tr></table>").querySelector("tr"));it.querySelector("tbody").lastChild.querySelector(".qtx").innerHTML=tx(esc(x.q))});
@@ -583,7 +589,9 @@ V.qr=function(arg){
  load()};
 
 V.expired=function(){
- var a=M.acct||{},s=sheet("授權已到期","正式學員功能暫停");s.appendChild(h("<p>你的正式學員授權已於 <b>"+esc(a.expires||"")+"</b> 到期。目前只能查看自己的首頁、學習進度與勳章；小測驗、模擬卷、錯題本、列印與排行榜需要老師延長授權後才能使用。</p>"));
+ var a=M.acct||{},u=user();
+ if(u&&u.role==="teacher"){var t=sheet("使用期限已到期","老師功能暫停");t.appendChild(h("<p>你的老師帳號使用期限已於 <b>"+esc(a.expires||"")+"</b> 到期。目前只能查看首頁、學習進度與勳章；出卷、派卷、老師後台等功能需要管理員延長期限後才能使用。</p><p>請聯絡管理員延長使用期限，延長後重新整理頁面就能繼續使用。</p>"));t.appendChild(h('<div class="ctl"><button class="pen go" onclick="location.reload()">已延長，重新整理</button><a class="pen" href="#home">回首頁</a></div>'));view.appendChild(t);return}
+ var s=sheet("授權已到期","正式學員功能暫停");s.appendChild(h("<p>你的正式學員授權已於 <b>"+esc(a.expires||"")+"</b> 到期。目前只能查看自己的首頁、學習進度與勳章；小測驗、模擬卷、錯題本、列印與排行榜需要老師延長授權後才能使用。</p>"));
  s.appendChild(h('<div class="ctl"><a class="pen go" href="#home">回首頁</a><a class="pen" href="#progress">學習進度</a></div>'));view.appendChild(s)};
 
 window.addEventListener("hashchange",route);route();
