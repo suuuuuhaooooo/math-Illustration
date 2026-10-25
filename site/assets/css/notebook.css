@@ -523,3 +523,7 @@ body.zyfont .psheet li{line-height:2.1}
 .qrsum{display:flex;gap:10px;flex-wrap:wrap}.qrsum .tile{flex:1;min-width:8em;text-align:center;padding:8px;border:1.5px solid var(--line);border-radius:10px}.qrsum .tile b{display:block;font-size:1.5rem}
 .rbar{display:inline-block;width:80px;height:10px;border:1px solid var(--line);border-radius:6px;vertical-align:middle;overflow:hidden}.rbar i{display:block;height:100%;background:#3c9d5d}
 table.qrrate td.qtx{text-align:left;max-width:22em}table.qrt td{vertical-align:middle}
+
+/* 一鍵刪除某個人的資料：危險區塊 */
+.pdanger{margin-top:10px;padding:10px 12px;border:2px solid var(--margin,#c0392b);border-radius:10px}.pdanger .pdel{background:var(--margin,#c0392b)!important;color:#fff!important;border-color:var(--margin,#c0392b)!important}.pdanger .pdel:disabled{opacity:.45}
+.pinp,.pdanger input{padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:inherit;font:inherit}
