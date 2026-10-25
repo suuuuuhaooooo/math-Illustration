@@ -317,3 +317,12 @@ body.lp{--sans:"Huninn","Noto Sans TC",system-ui,sans-serif;font-family:var(--sa
   overflow-wrap: anywhere;
   text-wrap: balance;
 }
+/* 統一兩個進入按鈕的字體 */
+.hero2 .btn2,
+.fin .btn2,
+.fg > .btn2 {
+  font-family: "MantouSans LP", "GenRyuMin TW", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: .14em;
+}
