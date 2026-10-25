@@ -3,7 +3,7 @@
 "use strict";
 var M=NB.member,h=NB.h;
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-var ERRMAP={bad_HINT_COST:"看一次提示扣的分數要是 0～10000 的整數",bad_LEVEL_STEP:"每幾分升一級要在 10～100000 之間",bad_DAILY_Q_CAP:"每天最多計分的題數要在 10～5000 之間",bad_DAILY_MOCK_CAP:"每天可領獎勵的模擬卷份數要在 0～50 之間",bad_POINTS_BY_LEVEL:"答對積分要填 3 個 1～1000 的數字，用逗號分開（例：10,15,20）",bad_REVIEW_DAYS:"錯題複習間隔要填 1～6 個 1～90 的整數，用逗號分開（例：1,3,7）",forbidden:"沒有這個權限（這項功能只有管理員能用）",expired:"你的老師帳號使用期限已到期，請聯絡管理員延長；延長後重新整理頁面",bad_PURGE_DAYS:"舊紀錄保留天數只能選清單裡的選項",bad_email:"Email 格式不對",confirm_mismatch:"確認欄的 Email 和上面查詢的不一樣，沒有刪除",cannot_delete_self:"不能刪除自己的帳號"};
+var ERRMAP={bad_HINT_COST:"看一次提示扣的分數要是 0～10000 的整數",bad_LEVEL_STEP:"每幾分升一級要在 10～100000 之間",bad_DAILY_Q_CAP:"每天最多計分的題數要在 10～5000 之間",bad_DAILY_MOCK_CAP:"每天可領獎勵的模擬卷份數要在 0～50 之間",bad_POINTS_BY_LEVEL:"答對積分要填 3 個 1～1000 的數字，用逗號分開（例：10,15,20）",bad_REVIEW_DAYS:"錯題複習間隔要填 1～6 個 1～90 的整數，用逗號分開（例：1,3,7）",forbidden:"沒有這個權限（這項功能只有管理員能用）",expired:"你的老師帳號使用期限已到期，請聯絡管理員延長；延長後重新整理頁面",bad_PURGE_DAYS:"舊紀錄保留天數只能選清單裡的選項",bad_email:"Email 格式不對",confirm_mismatch:"確認欄的 Email 和上面查詢的不一樣，沒有刪除",cannot_delete_self:"不能刪除自己的帳號",bad_parts:"勾選的項目不正確，請重新查詢"};
 function errs(e){return e&&e.code?(ERRMAP[e.code]||"失敗（"+e.code+"）"):"連線失敗"}
 function csvEsc(v){v=String(v==null?"":v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function parseCSV(t){var rows=[],r=[],f="",q=false,i,c;t=t.replace(/^﻿/,"");
@@ -328,25 +328,36 @@ function data(ctx){
 /* ---- 一鍵刪除某個人的所有資料（只有管理員）：先查各項筆數，再輸入一次 Email 確認 ---- */
 function purgePerson(ctx){
  var s=ctx.sheet("一鍵刪除某個人的所有資料","學生、老師都可以；已經從名單移除、但資料還留著的人也可以");
- s.appendChild(h('<p>會刪掉這個人的<b>所有</b>相關資料：名單（之後不能登入）、積分與錯題本、作答紀錄、模擬考紀錄、派卷作答、列印紀錄、問題回報（含附件）、QR 線上作答。老師的話，他出的 QR 卷和派的卷，連同學生在上面的作答也會一起刪。<b>刪除後無法復原</b>，需要的話請先下載成績 CSV。</p>'));
+ s.appendChild(h('<p>會刪掉這個人的<b>所有</b>相關資料：名單（之後不能登入）、積分與錯題本、作答紀錄、模擬考紀錄、派卷作答、列印紀錄、問題回報（含附件）、QR 線上作答。老師的話，他出的 QR 卷和派的卷，連同學生在上面的作答也會一起刪。<b>查詢後可以在表格左邊勾選，只刪某幾項；都不勾就是全部刪除。</b>管理員的帳號一律保留。<b>刪除後無法復原</b>，需要的話請先下載成績 CSV。</p>'));
  var q=h('<div class="ctl"><input class="pinp" type="email" placeholder="輸入 Email，或從名單挑選" list="pp-people" style="min-width:18em"><button class="pen">查詢</button></div>'),dl=h('<datalist id="pp-people"></datalist>'),out=h("<div></div>"),fb=h('<div class="fb"></div>');
  s.appendChild(q);s.appendChild(dl);s.appendChild(out);s.appendChild(fb);
  M.api("GET","/api/admin/roster").then(function(r){(r.rows||[]).forEach(function(x){var o=document.createElement("option");o.value=x.email;o.label=(x.class||"")+" "+(x.no||"")+" "+(x.name||"")+"（"+({student:"學生",teacher:"老師",admin:"管理員"}[x.role]||x.role)+"）";dl.appendChild(o)})},function(){});
  var inp=q.querySelector("input");
- function look(){var em=inp.value.trim();out.innerHTML="";fb.textContent="";fb.className="fb";if(!em)return;q.lastChild.disabled=true;
-  M.api("GET","/api/admin/person?email="+encodeURIComponent(em)).then(function(r){q.lastChild.disabled=false;
+ function look(note){var em=inp.value.trim();out.innerHTML="";fb.textContent="";fb.className="fb";if(!em)return;q.lastChild.disabled=true;
+  M.api("GET","/api/admin/person?email="+encodeURIComponent(em)).then(function(r){q.lastChild.disabled=false;if(typeof note==="string")msg(fb,note,1);
    var w=r.who,RO={student:"學生",teacher:"老師",admin:"管理員"};
    out.appendChild(h("<p><b>"+esc(r.email)+"</b>　"+(w?esc((w.cls||"")+" 班 "+(w.no||"")+" 號 "+(w.name||"")+"（"+(RO[w.role]||w.role||"")+"）")+(w.inRoster?"":'　<span class="meta">已不在名單上，只剩資料</span>'):'<span class="meta">名單和個人資料裡都找不到這個人</span>')+"</p>"));
-   out.appendChild(h('<table class="tb"><tr><th>資料</th><th>筆數</th></tr>'+r.counts.map(function(c){return"<tr><td>"+esc(c.label)+'</td><td style="text-align:right">'+c.n+"</td></tr>"}).join("")+"</table>"));out.appendChild(h('<p>合計 <b>'+r.total+"</b> 筆資料。</p>"));
+   /* 每一列可以勾選；沒勾＝全部刪。刪 QR 卷／派卷時，學生在上面的作答會自動一起勾（不然會變成沒有卷子的作答）；管理員的帳號那一列不能勾 */
+   var DEP={papers:"papersSubs",assigns:"assignsStates"};
+   var tw=h('<div data-nofx="1"><table class="tb pptb"><tr><th style="width:3em">刪除</th><th>資料</th><th>筆數</th></tr>'+r.counts.map(function(c){var lock=c.k==="roster"&&r.isAdmin;return'<tr><td style="text-align:center"><input type="checkbox" data-k="'+esc(c.k)+'" data-n="'+c.n+'"'+(lock?" disabled":"")+'></td><td>'+esc(c.label)+'</td><td style="text-align:right">'+c.n+"</td></tr>"}).join("")+"</table></div>");out.appendChild(tw);
+   var sumP=h('<p class="ppsum"></p>');out.appendChild(sumP);
+   function boxes(){return Array.prototype.slice.call(tw.querySelectorAll("input[data-k]"))}
+   function picked(){return boxes().filter(function(b){return b.checked}).map(function(b){return b.dataset.k})}
+   function upd(){
+    boxes().forEach(function(b){var parent=Object.keys(DEP).filter(function(p){return DEP[p]===b.dataset.k})[0];if(parent){var pb=tw.querySelector('input[data-k="'+parent+'"]');if(pb.checked){b.checked=true;b.disabled=true;b.title="刪除上面那一項時一定要一起刪"}else{b.disabled=false;b.title=""}}});
+    var ks=picked(),n=boxes().filter(function(b){return b.checked&&!(b.dataset.k==="roster"&&r.isAdmin)}).reduce(function(a,b){return a+(+b.dataset.n)},0);
+    sumP.innerHTML=ks.length?"已勾選 <b>"+ks.length+"</b> 項，共 <b>"+n+"</b> 筆資料會被刪除；沒勾的保留。":"沒有勾選＝<b>全部刪除</b>，共 <b>"+r.total+"</b> 筆資料"+(r.isAdmin?"（帳號保留）":"")+"。想只刪某幾項，請在左邊勾選。";
+    if(go)go.textContent=ks.length?"刪除勾選的 "+ks.length+" 項":(r.isAdmin?"永久刪除這個人的資料（保留帳號）":"永久刪除這個人的所有資料")}
+   tw.addEventListener("change",upd);var go=null;
    if(r.legacy)out.appendChild(h('<p class="fb no">注意：學生名單目前還在舊的試算表同步資料裡，這裡刪不到名單，這個人可能還能登入。請先按上方「檢查是否有舊資料可搬移」把名單搬進資料庫。</p>'));
    if(r.isAdmin)out.appendChild(h('<p class="fb ok">'+(r.self?"這是你自己的帳號。":"這是管理員帳號。")+'管理員的帳號會保留（不然會進不了後台），只刪除他的其他資料。</p>'));
-   if(!r.total){out.appendChild(h('<p class="meta">這個人沒有任何資料，不需要刪除。</p>'));return}
-   var z=h('<div class="pdanger"><p>確定要刪除，請在下面再輸入一次 Email：</p><div class="ctl"><input type="email" style="min-width:18em" autocomplete="off">'+(r.isAdmin?'<button class="pen pdel" disabled>永久刪除這個人的資料（保留帳號）</button>':'<button class="pen pdel" disabled>永久刪除這個人的所有資料</button>')+'</div></div>'),ci=z.querySelector("input"),go=z.querySelector("button");out.appendChild(z);
+   if(!r.total){upd();out.appendChild(h('<p class="meta">這個人沒有任何資料，不需要刪除。</p>'));return}
+   var z=h('<div class="pdanger"><p>確定要刪除，請在下面再輸入一次 Email：</p><div class="ctl"><input type="email" style="min-width:18em" autocomplete="off"><button class="pen pdel" disabled></button></div></div>'),ci=z.querySelector("input");go=z.querySelector("button");out.appendChild(z);upd();
    ci.oninput=function(){go.disabled=!ci.value.trim()};
-   go.onclick=function(){if(!confirm("最後確認：刪除 "+r.email+" 的全部 "+r.total+" 筆資料？刪除後無法復原。"))return;go.disabled=true;
-    M.api("POST","/api/admin/person/purge",{email:r.email,confirm:ci.value.trim()}).then(function(x){out.innerHTML="";inp.value="";msg(fb,"已刪除 "+esc(r.email)+" 的 "+x.total+" 筆資料。"+(x.keptAccount?"帳號已保留。":""),1)},function(e){go.disabled=false;msg(fb,errs(e),0)})}},
+   go.onclick=function(){var ks=picked();if(!confirm("最後確認："+(ks.length?"刪除 "+r.email+" 勾選的 "+ks.length+" 項資料？":"刪除 "+r.email+" 的全部 "+r.total+" 筆資料？")+"刪除後無法復原。"))return;go.disabled=true;
+    M.api("POST","/api/admin/person/purge",{email:r.email,confirm:ci.value.trim(),parts:ks}).then(function(x){out.innerHTML="";var em=r.email,t="已刪除 "+esc(em)+" 的 "+x.total+" 筆資料。"+(x.all?"":"只刪了勾選的項目，其他保留（下面是刪除後剩下的資料）。")+(x.keptAccount?"帳號已保留。":"");if(!x.all){inp.value=em;look(t)}else{inp.value="";msg(fb,t,1)}},function(e){go.disabled=false;msg(fb,errs(e),0)})}},
    function(e){q.lastChild.disabled=false;msg(fb,errs(e),0)})}
- q.lastChild.onclick=look;inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();look()}})}
+ q.lastChild.onclick=function(){look()};inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();look()}})}
 
 /* ---- 問題回報（只有管理員）---- */
 function reports(ctx){
