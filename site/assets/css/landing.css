@@ -318,6 +318,7 @@ body.lp{--sans:"Huninn","Noto Sans TC",system-ui,sans-serif;font-family:var(--sa
   text-wrap: balance;
 }
 .fg > .btn2 {
-  display: table;
+  display: block;
+  width: fit-content;
   margin: 24px auto 0;
 }
