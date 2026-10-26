@@ -123,7 +123,7 @@ table.tb{width:100%;border-collapse:collapse}.tb th,.tb td{padding:7px 8px;borde
 .psheet h3{margin:0 0 6px;font-size:1.3rem}.pinfo{display:flex;gap:6px 22px;flex-wrap:wrap;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:12px}
 .psheet ol{columns:2;column-gap:36px;margin:0;padding-left:1.7em}.psheet li{break-inside:avoid;margin:0 0 20px;line-height:1.9}.psheet .ln{display:block;margin-top:6px}
 .psheet.key{page-break-before:always}.psheet.key ol{columns:3}.psheet,.psheet *{color:#000}
-@media print{:root{--ink:#000;--soft:#444}body{background:#fff!important;font-size:12pt}.bar,.ruler,.bgdeco,.foot,.tabs,.who,h1.title,.noprint,.meta{display:none!important}.wrap{max-width:none;padding:0}.psheet{border:0;padding:0;margin:0}}
+@media print{:root{--ink:#000;--soft:#444}body{background:#fff!important;font-size:12pt}.bar,.ruler,.bgdeco,.foot,.tabs,.who,h1.title,.noprint,.meta,.subj-sw,.stbtn{display:none!important}.wrap{max-width:none;padding:0}.psheet{border:0;padding:0;margin:0}}
 
 /* ---- 登入按鈕、錯因診斷、老師後台 ---- */
 .gbtn{display:inline-flex;align-items:center;gap:.5em}
@@ -602,7 +602,12 @@ body:has(.i3page){overflow-x:hidden}
  .i3-log-tabs button{font-size:.72rem}}
 @media (max-width:640px){.i3.touring .i3-log{display:none}}
 /* 老師後台的科目切換與名單的科目欄 */
-h1.title .subj-now{font-size:.55em;color:var(--soft);font-weight:normal}
-.subj-sw{justify-content:center;margin:-.4em 0 .8em}.subj-sw .meta{align-self:center}
+h1.title .subj-now{font-size:.55em;color:var(--soft);font-weight:normal;white-space:nowrap}
+/* 科目切換：放在標題下方、靠左，像一組分段按鈕；手機上不會跟標題重疊 */
+.subj-sw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;justify-content:flex-start;margin:10px 0 14px;clear:both}
+.subj-sw .meta{margin:0 2px 0 0;font-size:.9rem}
+.subj-sw .pen{padding:2px 14px;font-size:.95rem;line-height:1.5}
+@media (max-width:640px){h1.title .subj-now{display:block;font-size:.5em;margin-top:2px}.subj-sw{margin:8px 0 12px}.subj-sw .pen{padding:2px 12px;font-size:.9rem}}
 .sjf{display:inline-flex;align-items:center;gap:4px;margin:6px 8px 6px 0;padding:2px 6px;border:1px dashed var(--soft);border-radius:6px}.sjf label{white-space:nowrap}
 .num.sci{width:15em;max-width:100%}.sci-tip{flex-basis:100%;margin-top:2px}
+h1.title .subj-now::before{content:"・"}@media (max-width:640px){h1.title .subj-now::before{content:none}}

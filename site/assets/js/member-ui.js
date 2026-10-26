@@ -45,11 +45,11 @@ function ymdT(){return M.T||M.today()}
 /* ---- 外框與路由 ---- */
 function shell(){
  app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="'+(SCI?M.SITE.sci:"island.html")+'">← '+(SCI?"回到見微理畫":"回到目錄")+'</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));
- app.appendChild(h('<h1 class="title"><mark>學員專區</mark><small class="subj-now">・'+(M.SUBJ[M.subj]||"")+'</small></h1>'));
+ app.appendChild(h('<h1 class="title"><mark>學員專區</mark><small class="subj-now">'+(M.SUBJ[M.subj]||"")+'</small></h1>'));
  var u=user();if(!u){login();return false}
  if(M.catErr)app.appendChild(h('<div class="fb no">讀不到見微理畫（國中理化網站）的單元目錄，單元名稱暫時無法顯示，請稍後再重新整理。</div>'));
  /* 兩科都開通：可以切換（同一個帳號、各科資料分開） */
- if((u.subjects||[]).length>1){var sw=h('<div class="ctl subj-sw"><span class="meta">科目：</span></div>');u.subjects.forEach(function(k){if(!M.SUBJ[k])return;var a=h('<a class="pen'+(k===M.subj?" go":"")+'"></a>');a.textContent=M.SUBJ[k];a.href=location.pathname+(k==="math"?"":"?s="+k);sw.appendChild(a)});app.appendChild(sw)}
+ if((u.subjects||[]).length>1){var sw=h('<div class="ctl subj-sw noprint"><span class="meta">科目：</span></div>');u.subjects.forEach(function(k){if(!M.SUBJ[k])return;var a=h('<a class="pen'+(k===M.subj?" go":"")+'"></a>');a.textContent=M.SUBJ[k];a.href=location.pathname+(k==="math"?"":"?s="+k);sw.appendChild(a)});app.appendChild(sw)}
  who=h('<div class="who"><b></b><span></span><button class="pen">登出</button></div>');
  who.querySelector("b").textContent=u.role==="teacher"?"老師　"+u.name:u.cls+" 班　"+u.no+" 號　"+u.name;
  who.querySelector("button").onclick=function(){M.logout().then(function(){location.hash="#login";route()})};app.appendChild(who);updWho();
