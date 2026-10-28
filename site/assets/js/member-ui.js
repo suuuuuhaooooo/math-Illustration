@@ -3,7 +3,7 @@
 (function(){
 "use strict";
 var M=NB.member,app=document.getElementById("app"),h=NB.h,tx=NB.tx,view,who,TM=null,XG=null,PS=null,qg=null,booted=false;
-var TABS=[["home","首頁"],["daily","每日一題"],["quiz","單元小測驗"],["assign","待測清單"],["mock","模擬卷"],["wrong","錯題本"],["progress","學習進度"],["stickers","勳章"],["board","排行榜"],["print","列印練習卷"]];
+var TABS=[["home","首頁"],["daily","每日一題"],["quiz","單元小測驗"],["assign","待測清單"],["mock","模擬卷"],["wrong","錯題本"],["progress","學習進度"],["stickers","勳章"],["board","排行榜"],["books","卷類專區"],["print","列印練習卷"]];
 function pad(n){return("0"+n).slice(-2)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function sheet(tag,sub){return h('<section class="sheet"><h2><span class="tag">'+tag+'</span>'+(sub||"")+'</h2></section>')}
@@ -309,6 +309,8 @@ function popup(ttl,msg,after){
 function fq(P){var o="";if(P.fd&&P.fd.length)o+="&d="+encodeURIComponent(P.fd.join(","));if(P.fg&&P.fg.length)o+="&cg="+encodeURIComponent(P.fg.join(","));if(P.fk)o+="&kw="+encodeURIComponent(P.fk);if(P.fp)o+="&pf="+encodeURIComponent(P.fp);return o}
 function ansOf(q){return(q.al?"("+q.al+") ":"")+(q.ty==="match"?"":q.a)}
 
+/* 卷類專區：列表與閱讀器在 books.js */
+V.books=function(arg){return NB.books.member(arg,view)};
 V.print=function(arg){return user().role==="student"?printStudent():printWiz(arg)};
 
 /* ---- 學生：陽春版 ---- */

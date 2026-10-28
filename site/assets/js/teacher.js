@@ -3,7 +3,7 @@
 "use strict";
 var M=NB.member,app=document.getElementById("app"),h=NB.h,TAB="overview",CLS=null;document.body.classList.add("tpage");
 var READY=false;TAB=decodeURIComponent(location.hash.slice(1))||TAB; /* 頁籤記在網址的 # 後面，例如 teacher.html#assign，上一頁與分享網址都能用 */
-var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["assign","派卷"],["bank","題庫"],["settings","設定"],["data","資料管理"],["prints","列印紀錄"],["mocks","模擬考紀錄"],["reports","問題回報"]],TABS=TABS_ALL;/* 老師看不到題庫／設定／資料管理，這三項只有管理員能改 */
+var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["assign","派卷"],["bank","題庫"],["settings","設定"],["data","資料管理"],["prints","列印紀錄"],["mocks","模擬考紀錄"],["reports","問題回報"],["books","卷類專區"]],TABS=TABS_ALL;/* 老師看不到題庫／設定／資料管理，這三項只有管理員能改 */
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function title(id){var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
 function pct(c,n){return n?Math.round(c/n*100):null}
@@ -119,6 +119,6 @@ var swapped=false;
 function after(){if(!M.U&&M.err==="no_subject"&&!swapped){var ok=(M.errX&&M.errX.subjects||[]).filter(function(k){return M.SUBJ[k]&&k!==M.subj});if(ok.length){swapped=true;M.setSubj(ok[0]);return M.boot().then(after)}}
  start()}
 shell(1);app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
-function start(){if(M.U&&!M.U.admin){TABS=TABS_ALL.filter(function(t){return t[0]!=="bank"&&t[0]!=="settings"&&t[0]!=="data"&&t[0]!=="reports"});if(TAB==="bank"||TAB==="settings"||TAB==="data"||TAB==="reports")TAB="overview"}if(!M.U&&M.err==="no_subject")return msg("你的帳號沒有開通可以在這裡使用的科目，請聯絡管理員。");if(!M.U)return msg("請先用老師的 Google 帳號登入學員專區。");if(M.U.expired||(M.acct&&M.acct.expired))return expiredMsg();if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");READY=true;go()}
+function start(){if(M.U&&!M.U.admin){TABS=TABS_ALL.filter(function(t){return t[0]!=="bank"&&t[0]!=="settings"&&t[0]!=="data"&&t[0]!=="reports"&&t[0]!=="books"});if(TAB==="bank"||TAB==="settings"||TAB==="data"||TAB==="reports"||TAB==="books")TAB="overview"}if(!M.U&&M.err==="no_subject")return msg("你的帳號沒有開通可以在這裡使用的科目，請聯絡管理員。");if(!M.U)return msg("請先用老師的 Google 帳號登入學員專區。");if(M.U.expired||(M.acct&&M.acct.expired))return expiredMsg();if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");READY=true;go()}
 M.boot().then(after);
 })();

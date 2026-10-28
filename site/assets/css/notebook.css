@@ -611,3 +611,48 @@ h1.title .subj-now{font-size:.55em;color:var(--soft);font-weight:normal;white-sp
 .sjf{display:inline-flex;align-items:center;gap:4px;margin:6px 8px 6px 0;padding:2px 6px;border:1px dashed var(--soft);border-radius:6px}.sjf label{white-space:nowrap}
 .num.sci{width:15em;max-width:100%}.sci-tip{flex-basis:100%;margin-top:2px}
 h1.title .subj-now::before{content:"・"}@media (max-width:640px){h1.title .subj-now::before{content:none}}
+
+/* ---- 科目切換：選中的科目改成灰色，不跟「老師後台／主要按鈕」的橘色搶 ---- */
+.subj-sw .pen.go{background:var(--line);border-color:var(--soft);color:var(--ink)}
+
+/* ---- 卷類專區（學員） ---- */
+.bkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:12px}
+.bkcard{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.bkcard h3{margin:0;font-size:1.05rem}
+.bkcard .meta{margin:0;font-size:.85rem}
+.bkcard button{margin-top:auto;align-self:flex-start}
+.bknav{justify-content:center;margin-top:14px}
+.bkback{margin:0 0 6px;font-size:.9rem}
+.bkwrap{position:relative;margin:12px 0}
+.bkstage{position:relative;transition:filter .2s}
+.bkbook{position:relative;display:flex;perspective:1800px;background:var(--paper2);border-radius:10px;box-shadow:0 18px 40px -26px var(--shadow);min-height:50vh}
+.bkslot{flex:1 1 50%;min-width:0;display:flex;align-items:center;justify-content:center;background:var(--paper);position:relative;overflow:hidden}
+.bkslot.empty{background:transparent}
+.bkslot + .bkslot{border-left:1px solid var(--line)}
+.bkp{width:100%;min-height:50vh;display:flex;align-items:center;justify-content:center;color:var(--soft);font-size:.95rem;padding:20px;text-align:center}
+.bkp.err{color:var(--margin)}
+.bkc{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+.bkleaf{position:absolute;top:0;bottom:0;right:0;width:50%;transform-origin:left center;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.4,.1,.3,1);z-index:3;pointer-events:none}
+.bkleaf.one{left:0;right:0;width:auto}
+.bkleaf.go{transform:rotateY(-180deg)}
+.bkleaf .f,.bkleaf .bk2{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--paper)}
+.bkleaf .bk2{transform:rotateY(180deg)}
+.bkleaf .bkc{height:100%;object-fit:contain}
+.bkcover{display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:var(--bg);color:var(--ink);font-size:1.1rem;letter-spacing:.1em;z-index:5;border-radius:10px}
+.bk-off .bkstage{filter:blur(22px)}
+.bk-off .bkcover{display:flex}
+.bkbar{justify-content:center;gap:12px;margin-top:6px}
+.bkbar .meta{margin:0;min-width:7em;text-align:center}
+@media print{.bkv{display:none!important}}
+.bkback a{color:var(--soft);text-decoration:none;border-bottom:1px solid var(--line)}
+.bkform{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:10px}
+.bkform > .meta{flex-basis:100%;margin:0}
+.bkform .bkf{display:flex;align-items:center;gap:6px}
+.bkform .bkf > span{white-space:nowrap;color:var(--soft);font-size:.92rem}
+.bkform input[type=text],.bkform select{padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:inherit;min-width:0}
+.bkform input[type=text]{width:16em}
+.bkform input[placeholder="五年級"],.bkform input[placeholder="上學期"]{width:7em}
+.bkform .ctl{margin:0}
+.bkform > p.meta:last-child{flex-basis:100%}
+.bkadm table{margin-top:12px}
+@media (max-width:640px){.bkform input[type=text]{width:100%}.bkform .bkf{flex-basis:100%;flex-wrap:wrap}}
