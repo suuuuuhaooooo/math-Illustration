@@ -659,3 +659,19 @@ h1.title .subj-now::before{content:"・"}@media (max-width:640px){h1.title .subj
 .bkadm2{margin-top:22px;border-top:1px dashed var(--line);padding-top:12px}
 .bkh{margin:0 0 6px;font-size:1.05rem}
 .bklist{margin-top:10px}
+/* ---- 卷類專區：放大與全螢幕 ---- */
+.bkwrap{overflow:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+.bktools{justify-content:center;gap:10px;margin-top:4px}
+.bktools .meta{margin:0;min-width:3.6em;text-align:center}
+.bktools .bkfs{margin-left:8px}
+.bkbook{transition:width .15s}
+.bk-full{position:fixed;inset:0;z-index:3000;margin:0;max-width:none;width:100%;height:100%;border-radius:0;background:#0b0f18;padding:10px 14px;overflow:auto;box-shadow:none;border:0}
+.bk-full .bkback,.bk-full h2,.bk-full .bkmsg{display:none}
+.bk-full .bkwrap{margin:4px 0;max-height:calc(100vh - 90px);overflow:auto}
+.bk-full .bkbook{min-height:calc(100vh - 150px);background:#0b0f18;box-shadow:none}
+.bk-full .bkc{max-height:calc(100vh - 150px);width:auto;max-width:100%;margin:0 auto;display:block}
+.bk-full .bkslot{background:#0b0f18}
+.bk-full .bkbar .meta{color:#c9cbd2}
+.bk-full .bkbar button,.bk-full .bktools button{background:#1c2636;color:#f3efe3;border-color:#5d6b82}
+.bk-full .bkbar button.go{background:#d9a93c;color:#1c2635}
+.bk-full .bktools .meta{color:#c9cbd2}

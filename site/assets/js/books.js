@@ -10,7 +10,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;
 function bytesOf(s){var bin=atob(s),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u}
 var offs=[]; /* 離開閱讀頁時要拿掉的全域監聽 */
 function clearGuards(){offs.forEach(function(f){f()});offs=[]}
-function on(target,ev,fn){target.addEventListener(ev,fn);offs.push(function(){target.removeEventListener(ev,fn)})}
+function on(target,ev,fn,opt){target.addEventListener(ev,fn,opt);offs.push(function(){target.removeEventListener(ev,fn,opt)})}
 
 NB.books={};
 
@@ -51,7 +51,7 @@ NB.books.list=function(view){
 /* ---- 閱讀 ---- */
 NB.books.open=function(view,id){
  clearGuards();
- var s=h('<section class="sheet bkv"><p class="bkback"><a href="#books">← 回到卷類列表</a></p><h2><span class="tag">卷類專區</span><span class="bkt">開卷中…</span></h2><p class="meta bkmsg"></p><div class="bkwrap"><div class="bkstage"><div class="bkbook"><div class="bkslot bkl"></div><div class="bkslot bkr"></div></div><div class="bkcover">切回視窗後繼續閱讀</div></div></div><div class="ctl bkbar"><button type="button" class="pen">上一頁</button><span class="bkpos meta"></span><button type="button" class="pen go">下一頁</button></div></section>');
+ var s=h('<section class="sheet bkv"><p class="bkback"><a href="#books">← 回到卷類列表</a></p><h2><span class="tag">卷類專區</span><span class="bkt">開卷中…</span></h2><p class="meta bkmsg"></p><div class="bkwrap"><div class="bkstage"><div class="bkbook"><div class="bkslot bkl"></div><div class="bkslot bkr"></div></div><div class="bkcover">切回視窗後繼續閱讀</div></div></div><div class="ctl bkbar"><button type="button" class="pen">上一頁</button><span class="bkpos meta"></span><button type="button" class="pen go">下一頁</button></div><div class="ctl bktools"><button type="button" class="pen" data-z="-1" aria-label="縮小">－</button><span class="bkzv meta">100%</span><button type="button" class="pen" data-z="1" aria-label="放大">＋</button><button type="button" class="pen bkfs">全螢幕</button></div></section>');
  view.appendChild(s);
  var msgEl=s.querySelector(".bkmsg");
  M.api("POST","/api/book/open",{id:id}).then(function(b){
@@ -135,10 +135,13 @@ function reader(root,b,key){
  function go(dir){flip(dir)}
  root.querySelectorAll(".bkbar button")[0].onclick=function(){go(-1)};
  root.querySelectorAll(".bkbar button")[1].onclick=function(){go(1)};
- on(document,"keydown",function(e){if(!root.isConnected)return;if(e.key==="ArrowRight"||e.key==="PageDown"){go(1);e.preventDefault()}if(e.key==="ArrowLeft"||e.key==="PageUp"){go(-1);e.preventDefault()}});
- var sx=null;
- on(stage,"touchstart",function(e){sx=e.touches[0].clientX});
- on(stage,"touchend",function(e){if(sx===null)return;var dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)>40)go(dx<0?1:-1)});
+ on(document,"keydown",function(e){if(!root.isConnected)return;if(e.key==="ArrowRight"||e.key==="PageDown"){go(1);e.preventDefault()}if(e.key==="ArrowLeft"||e.key==="PageUp"){go(-1);e.preventDefault()}if(e.key==="+"||e.key==="="){zoom(Z+0.25)}if(e.key==="-"){zoom(Z-0.25)}if(e.key==="Escape"&&root.classList.contains("bk-full"))setFull(false)});
+ var sx=null,pd0=0,z0=1,pinch=false;
+ function dist(t){return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY)}
+ on(stage,"touchstart",function(e){if(e.touches.length===2){pinch=true;pd0=dist(e.touches);z0=Z;sx=null}else if(e.touches.length===1&&!pinch){sx=e.touches[0].clientX}});
+ on(stage,"touchmove",function(e){if(pinch&&e.touches.length===2&&pd0){e.preventDefault();zoom(z0*dist(e.touches)/pd0)}},{passive:false});
+ on(stage,"touchend",function(e){if(e.touches.length===0){if(pinch){pinch=false;sx=null;return}if(sx===null)return;var dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)>40)go(dx<0?1:-1)}});
+ on(stage,"wheel",function(e){if(!e.ctrlKey)return;e.preventDefault();zoom(Z*(e.deltaY<0?1.1:0.9))},{passive:false});
  /* 切走視窗、按截圖鍵、列印時，整頁模糊遮住（能擋的只有這些一般情況；截圖工具本身無法阻止） */
  function hide(on){root.classList.toggle("bk-off",!!on)}
  on(document,"visibilitychange",function(){hide(document.hidden)});
@@ -146,6 +149,20 @@ function reader(root,b,key){
  on(window,"focus",function(){hide(false)});
  on(window,"beforeprint",function(){hide(true)});
  on(window,"afterprint",function(){hide(false)});
+ /* 放大：1～3 倍，每次 0.25；寬度變大後可以在閱讀區裡左右、上下捲動 */
+ var Z=1,zv=root.querySelector(".bkzv");
+ function zoom(z){Z=Math.max(1,Math.min(3,Math.round(z*4)/4));book.style.width=(Z*100)+"%";zv.textContent=Math.round(Z*100)+"%"}
+ root.querySelectorAll(".bktools [data-z]").forEach(function(b){b.onclick=function(){zoom(Z+(+b.dataset.z)*0.25)}});
+ /* 全螢幕：支援的瀏覽器用原生全螢幕；不支援（iPhone Safari）就用整頁覆蓋。全螢幕不會重新開卷，也不會扣次數 */
+ var fsBtn=root.querySelector(".bkfs");
+ function setFull(on){
+  root.classList.toggle("bk-full",!!on);fsBtn.textContent=on?"離開全螢幕":"全螢幕";
+  var rq=root.requestFullscreen||root.webkitRequestFullscreen;
+  if(on&&rq&&!document.fullscreenElement){try{var p=rq.call(root);if(p&&p.catch)p.catch(function(){})}catch(e){}}
+  if(!on&&document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(function(){});
+ }
+ fsBtn.onclick=function(){setFull(!root.classList.contains("bk-full"))};
+ on(document,"fullscreenchange",function(){if(!document.fullscreenElement&&root.classList.contains("bk-full"))setFull(false)});
  render();
 }
 
