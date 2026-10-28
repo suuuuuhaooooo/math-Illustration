@@ -278,6 +278,15 @@ function usage(ctx){
   var T=r.today,L=r.limits,ok=r.ok||{},g=h('<div class="ugrid"></div>');
   g.innerHTML=(ok.workers?meter("Workers 請求數",T.requests,L.reqDay,"次",T.errors?"錯誤 "+num(T.errors)+" 次":""):"")+(ok.d1?meter("資料庫讀取",T.rowsRead,L.rowsReadDay,"列","讀取查詢 "+num(T.readQueries)+" 次")+meter("資料庫寫入",T.rowsWritten,L.rowsWrittenDay,"列","寫入查詢 "+num(T.writeQueries)+" 次"):"")+(ok.workers?meter("CPU 時間 P99",Math.round(T.cpuP99Ms*10)/10,L.cpuMs,"ms","P50 約 "+(Math.round(T.cpuP50Ms*10)/10)+" ms（每次請求上限）"):"")+(r.storage!=null?meter("資料庫容量",Math.round(r.storage/1048576),Math.round(L.storageBytes/1048576),"MB","整個帳號共用 5 GB"):"");
   box.appendChild(g);
+  /* 卷類專區的 R2：讀取次數（每月）、容量。讀取會在學員翻頁時發生，但翻頁不經過 Worker，只算 R2 */
+  if(r.r2&&r.r2.ok&&(r.r2.ok.ops||r.r2.ok.store)){
+   var R=r.r2,RL=R.limits||{},rg=h('<div class="ugrid"></div>');
+   rg.innerHTML=(R.ok.ops?meter("R2 本月讀取",R.month.b,RL.classB,"次","今天 "+num(R.today.b)+" 次・本月上傳（寫入）"+num(R.month.a)+" 次"):"")+(R.storage?meter("R2 容量",Math.round(R.storage.bytes/1048576),Math.round(RL.storageBytes/1048576),"MB","共 "+num(R.storage.objects)+" 個檔案（每頁一個檔）"):"");
+   box.appendChild(h('<p class="meta"><b>卷類專區（R2 儲存）</b>　bucket：'+esc(R.bucket||"")+"</p>"));
+   box.appendChild(rg);
+   if(R.ok.ops){var rr=h('<div class="utr"></div>');rr.innerHTML=spark("近 7 天 R2 讀取次數",R.days,"b",0);box.appendChild(rr)}
+   box.appendChild(h('<p class="meta">R2 的讀取會在學員翻頁時發生，但翻頁不經過 Worker，所以不會增加 Worker 請求數或 D1 讀寫。R2 免費額度以 Cloudflare 官方為準；統計約有 1～2 分鐘延遲。</p>'));
+  }
   var tr=h('<div class="utr"></div>');tr.innerHTML=(ok.workersDays?spark("近 7 天請求數",r.days,"requests",L.reqDay):"")+(ok.d1?spark("近 7 天讀取列數",r.days,"rowsRead",L.rowsReadDay)+spark("近 7 天寫入列數",r.days,"rowsWritten",L.rowsWrittenDay):"");if(tr.innerHTML)box.appendChild(tr);
   var ad=h('<div class="uad"><b>建議</b></div>');(r.advice||[]).forEach(function(a){ad.appendChild(h('<div class="ua '+esc(a.level)+'"><span class="ul">'+(LV[a.level]||"")+"</span><div><b>"+esc(a.title)+"</b><br><small>"+esc(a.text)+"</small></div></div>"))});box.appendChild(ad);
   var er=Object.keys(r.errors||{}).filter(function(k){return r.errors[k]&&r.errors[k]!=="token"});if(er.length)box.appendChild(h('<p class="meta">有 '+er.length+" 項統計讀不到（"+esc(er.join("、"))+"），其餘照常顯示。可能是 Cloudflare 尚未提供該項統計。</p>"));
