@@ -1,2 +1,0 @@
-/* 3d-7.3 */
-NB.unit(NB.kit?NB.kit.model({"q":"□ ÷ 4 = 7，被除數是多少？","steps":["除法的相反是乘法","□ = 7 × 4","□ = 28"],"ch":{"q":"□ ÷ 5 = 8，□ = ？","a":40,"h":"8 × 5。"},"S":[{"k":"x","label":"商","min":2,"max":12,"val":7,"unit":""},{"k":"k","label":"除數","min":2,"max":9,"val":4,"unit":""}],"rows":q=>[{name:"□",segs:Array(q.k).fill(q.x),cols:Array(q.k).fill("var(--p2)")}],"brace":q=>q.x*q.k,"eq":q=>`□ ÷ ${q.k} = ${q.x} → □ = ${q.x} × ${q.k} = <b>${q.x*q.k}</b>`}):{});

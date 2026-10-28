@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="380" height="126" viewBox="0 0 380 126">
-<rect x="0" y="0" width="380" height="126" fill="#ffffff"/>
-<rect x="6" y="6" width="368" height="110" fill="#ffffff" stroke="#555555" stroke-width="2"/>
-<text x="190.0" y="39.0" font-family="sans-serif" font-size="20" text-anchor="middle" font-weight="bold" fill="#000000">舊書換新書</text>
-<line x1="18" y1="54" x2="362" y2="54" stroke="#777777" stroke-dasharray="6 4"/>
-<text x="22.0" y="75.0" font-family="sans-serif" font-size="17" text-anchor="start" font-weight="normal" fill="#000000">換法 A：8 本舊書可換 3 本新書</text>
-<text x="22.0" y="105.0" font-family="sans-serif" font-size="17" text-anchor="start" font-weight="normal" fill="#000000">換法 B：25 本舊書可換 10 本新書</text>
-</svg>

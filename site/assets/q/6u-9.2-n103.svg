@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="332" height="184" viewBox="0 0 332 184">
-<rect x="0" y="0" width="332" height="184" fill="#ffffff"/>
-<path d="M26.0,157.2 L236.0,157.2 L306.0,26.0 L96.0,26.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
-<path d="M96.0,157.2 L96.0,26.0" fill="none" stroke="#000000" stroke-width="1.6" stroke-dasharray="5 4"/>
-<path d="M105.0,157.2 L105.0,148.2 L96.0,148.2" fill="none" stroke="#000000" stroke-width="1.2"/>
-<text x="131.0" y="175.5" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">24cm</text>
-<text x="102.0" y="96.9" font-family="sans-serif" font-size="15" text-anchor="start" fill="#000000">15cm</text>
-</svg>

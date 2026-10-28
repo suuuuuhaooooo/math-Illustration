@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="260" height="230" viewBox="0 0 260 230">
-<rect x="0" y="0" width="260" height="230" fill="#ffffff"/>
-<circle cx="130" cy="115" r="90" fill="#ffffff" stroke="#000000" stroke-width="2"/>
-<circle cx="130" cy="115" r="3" fill="#000000"/>
-<line x1="40.0" y1="115.0" x2="220.0" y2="115.0" stroke="#000000" stroke-width="2"/>
-<text x="130.0" y="107.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">6 公分</text>
-</svg>
