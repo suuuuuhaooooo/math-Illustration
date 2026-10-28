@@ -1,0 +1,2 @@
+/* 2u-3.4 */
+NB.unit(NB.kit?NB.kit.model({"q":"兩條緞帶接起來，或剪掉一段，長度怎麼算？","steps":["接起來用加法","剪掉一段用減法","畫線段圖幫助思考"],"ch":{"q":"緞帶 45 公分，剪掉 18 公分，剩幾公分？","a":27,"h":"45 − 18。"},"S":[{"k":"a","label":"第一條","min":5,"max":60,"val":45,"unit":"公分"},{"k":"b","label":"第二條","min":5,"max":40,"val":18,"unit":"公分"}],"rows":q=>[{name:"接起來",segs:[q.a,q.b],cols:["var(--p1)","var(--p2)"]},{name:"剪掉",segs:[q.a-Math.min(q.b,q.a-1),Math.min(q.b,q.a-1)],cols:["var(--p3)","var(--p4)"]}],"brace":q=>"共 "+(q.a+q.b),"eq":q=>`${q.a} + ${q.b} = <b>${q.a+q.b}</b>；${q.a} − ${q.b} = <b>${q.a-q.b}</b>`}):{});

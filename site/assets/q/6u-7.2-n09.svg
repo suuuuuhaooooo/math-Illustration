@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="332" height="216" viewBox="0 0 332 216">
+<rect x="0" y="0" width="332" height="216" fill="#ffffff"/>
+<path d="M306.0,166.0 A140.0,140.0 0 0 0 26.0,166.0 L306.0,166.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path d="M226.0,166.0 A60.0,60.0 0 0 0 106.0,166.0 L226.0,166.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M26.0,166.0 L306.0,166.0" fill="none" stroke="#000000" stroke-width="1.6"/>
+<circle cx="166.0" cy="166.0" r="3" fill="#000000"/>
+<path d="M106.0,166.0 L226.0,166.0" fill="none" stroke="#000000" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="166.0" y="186.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">6</text>
+<text x="266.0" y="186.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">4</text>
+<text x="166.0" y="204.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（單位：公尺）</text>
+</svg>

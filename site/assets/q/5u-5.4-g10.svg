@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="230" viewBox="0 0 300 230">
+<rect x="0" y="0" width="300" height="230" fill="#ffffff"/>
+<g transform="translate(0,0.0)"><path d="M150.0,200.0 L27.1,114.0 A150,150 0 0 1 272.9,114.0 Z" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<line x1="27.1" y1="114.0" x2="272.9" y2="114.0" stroke="#000000" stroke-width="2"/>
+<path d="M254.9,126.6 A22,22 0 0 1 250.9,114.0" fill="none" stroke="#000000" stroke-width="1.5"/>
+<text x="230.9" y="132.8" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">35°</text>
+<path d="M136.9,190.8 A16,16 0 0 1 163.1,190.8" fill="none" stroke="#000000" stroke-width="1.5"/>
+<text x="150.0" y="174.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">∠A</text>
+</g></svg>

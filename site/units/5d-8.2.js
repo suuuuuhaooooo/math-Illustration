@@ -1,0 +1,2 @@
+/* 5d-8.2 */
+NB.unit(NB.kit?NB.kit.free({"h":240,"q":"百分率：把基準量當 100，比較量佔多少。","steps":["百分率 = 比率 × 100%","0.35 = 35%","10 × 10 方格塗幾格，就是幾 %"],"ch":{"q":"0.6 = ？%","a":60,"h":"0.6 × 100。"},"S":[{"k":"p","label":"百分率","min":0,"max":100,"val":35,"unit":"%"}],"draw":(v,q)=>{const u=18;for(let i=0;i<100;i++){const x=i%10,y=Math.floor(i/10);NB.mk("rect",{x:50+x*u,y:20+y*u,width:u,height:u,fill:i<q.p?"var(--p1)":"none","fill-opacity":.55,stroke:"var(--soft)"},v,.7)}NB.t(v,400,110,q.p+"%",{z:44,b:1,c:"var(--p1)"})},"eq":q=>`<b>${q.p}%</b> = ${q.p}/100 = ${q.p/100}`}):{});

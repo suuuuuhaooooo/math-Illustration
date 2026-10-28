@@ -1,0 +1,2 @@
+/* 4d-8.1 */
+NB.unit(NB.kit?NB.kit.model({"q":"簡化計算：298 + 99 可以想成 300 + 100 − 3。","steps":["把數字湊成整百整十","多加了就減回去","少減了就加回去"],"ch":{"q":"498 + 205 = ？","a":703,"h":"500 + 205 − 2。"},"S":[{"k":"a","label":"第一個數","min":100,"max":900,"val":298,"unit":""},{"k":"b","label":"第二個數","min":10,"max":300,"val":99,"unit":""}],"rows":q=>[{name:"湊整",segs:[q.a,q.b],cols:["var(--p1)","var(--p2)"]}],"brace":q=>q.a+q.b,"eq":q=>{const r=Math.ceil(q.a/100)*100;return `${q.a} + ${q.b} = (${r} + ${q.b}) − ${r-q.a} = <b>${q.a+q.b}</b>`}}):{});

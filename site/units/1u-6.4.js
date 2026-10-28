@@ -1,0 +1,2 @@
+/* 1u-6.4 */
+NB.unit(NB.kit?NB.kit.free({"h":210,"q":"在 1 到 30 的表格中，找出第幾個。","steps":["一排 10 個，從左到右數","數到的那一個就是第幾個","向下一排就是多 10"],"ch":{"q":"第 12 個，是第 2 排的第幾個？","a":2,"h":"第 11 個是第 2 排第 1 個。"},"S":[{"k":"k","label":"第幾個","min":1,"max":30,"val":12,"unit":""}],"draw":(v,q)=>{for(let i=0;i<30;i++){const x=34+(i%10)*50,y=36+Math.floor(i/10)*60;NB.mk("rect",{x:x,y:y,width:44,height:44,rx:8,fill:i+1===q.k?"var(--p1)":"none","fill-opacity":.4},v,1.6);NB.t(v,x+22,y+29,String(i+1),{z:16,b:i+1===q.k?1:0})}},"eq":q=>`第 <b>${q.k}</b> 個在第 <b>${Math.ceil(q.k/10)}</b> 排`}):{});

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="382" height="300" viewBox="0 0 382 300">
+<rect x="0" y="0" width="382" height="300" fill="#ffffff"/>
+<path d="M174.5,125.0 L26.0,125.0 A148.5,148.5 0 0 0 323.0,125.0 L174.5,125.0 Z" fill="#cdeee0" stroke="#000000" stroke-width="1.6" stroke-dasharray="6 4"/>
+<path d="M92.0,125.0 L92.0,59.0 A66.0,66.0 0 0 0 26.0,125.0 L92.0,125.0 Z" fill="#cdeee0" stroke="#000000" stroke-width="1.6" stroke-dasharray="6 4"/>
+<path d="M92.0,125.0 L356.0,125.0 L356.0,26.0 L92.0,26.0 Z" fill="#bdbdbd" stroke="#000000" stroke-width="1.6"/>
+<text x="224.0" y="81.1" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">牛舍</text>
+<path d="M174.5,125.0 L248.8,253.6" fill="none" stroke="#000000" stroke-width="1.6"/>
+<circle cx="174.5" cy="125.0" r="3" fill="#000000"/>
+<circle cx="248.8" cy="253.6" r="4" fill="#000000"/>
+<text x="256.8" y="265.2" font-family="sans-serif" font-size="16" text-anchor="start" fill="#000000">牛</text>
+<text x="224.0" y="19.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">16m</text>
+<text x="86.0" y="80.8" font-family="sans-serif" font-size="15" text-anchor="end" fill="#000000">6m</text>
+<text x="205.6" y="194.6" font-family="sans-serif" font-size="15" text-anchor="end" fill="#000000">9m</text>
+<text x="133.2" y="118.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">5m</text>
+<text x="265.2" y="118.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">11m</text>
+</svg>
