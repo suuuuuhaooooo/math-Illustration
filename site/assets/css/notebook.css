@@ -656,3 +656,6 @@ h1.title .subj-now::before{content:"・"}@media (max-width:640px){h1.title .subj
 .bkform > p.meta:last-child{flex-basis:100%}
 .bkadm table{margin-top:12px}
 @media (max-width:640px){.bkform input[type=text]{width:100%}.bkform .bkf{flex-basis:100%;flex-wrap:wrap}}
+.bkadm2{margin-top:22px;border-top:1px dashed var(--line);padding-top:12px}
+.bkh{margin:0 0 6px;font-size:1.05rem}
+.bklist{margin-top:10px}

@@ -488,63 +488,111 @@ function assign(ctx){
    每一頁在這台電腦上縮圖、加上「僅供線上閱讀」的浮水印、用隨機金鑰 AES-GCM 加密後才上傳。
    伺服器只看得到密文；金鑰跟著卷建立時送出，之後只在學員「開卷」時發放。 */
 var BERR={open_limit:"已達上限",not_draft:"這本卷已經完成上傳，不能再換頁（要改的話請刪除後重傳）",missing_pages:"有頁面沒有上傳成功，請重傳",no_pages:"還沒有頁面，不能上架",bad_key:"金鑰格式不對",need_title:"請填寫卷名",bad_subject:"科目不對",page_too_big:"這一頁太大，請把圖片的解析度調低後再試",no_r2:"伺服器的頁面儲存（R2）還沒綁定",not_finished:"這本卷還沒完成上傳，不能上架",bad_page:"頁碼不對",bad_pages:"頁數不對"};
-function bErr(e){return e&&e.code&&BERR[e.code]?BERR[e.code]:errs(e)}
+function bErr(e){if(e&&e.code&&BERR[e.code])return BERR[e.code];if(e&&e.code)return errs(e);return e&&e.message?"讀取 PDF 失敗："+e.message:"未知錯誤"}
 function b64u8(u){var s="",CH=0x8000;for(var i=0;i<u.length;i+=CH)s+=String.fromCharCode.apply(null,u.subarray(i,i+CH));return btoa(s)}
 function encPage(ck,bytes){var iv=crypto.getRandomValues(new Uint8Array(12));return crypto.subtle.encrypt({name:"AES-GCM",iv:iv},ck,bytes).then(function(ct){var o=new Uint8Array(12+ct.byteLength);o.set(iv,0);o.set(new Uint8Array(ct),12);return o})}
-function pageBytes(file,q){return createImageBitmap(file).then(function(bmp){
+/* 一頁的來源可以是圖片檔（File）或已經畫好的 canvas（PDF 拆出來的頁）；統一縮到 1200 寬、加浮水印、轉 WebP */
+function pageBytes(src,q){return (src instanceof Blob?createImageBitmap(src):Promise.resolve(src)).then(function(bmp){
   var W=Math.min(1200,bmp.width),k=W/bmp.width,c=document.createElement("canvas");c.width=W;c.height=Math.round(bmp.height*k);
   var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(bmp,0,0,c.width,c.height);
   g.save();g.globalAlpha=.07;g.fillStyle="#000";g.font=Math.round(c.width/18)+"px 'Noto Sans TC',sans-serif";g.translate(c.width/2,c.height/2);g.rotate(-Math.PI/7);
   for(var y=-c.height;y<c.height;y+=c.height/3)for(var x=-c.width;x<c.width;x+=c.width/1.2)g.fillText("數光島筆記本・僅供線上閱讀",x,y);
   g.restore();
   return new Promise(function(res){c.toBlob(function(b){res(b)},"image/webp",q)})}).then(function(b){return b.arrayBuffer()}).then(function(ab){return new Uint8Array(ab)})}
+/* PDF.js（Apache 2.0，放在 assets/vendor/pdfjs）：只在管理員上傳 PDF 時才載入 */
+var PDFJS=null;function pdfjs(){if(!PDFJS){var root=new URL((NB.root||"")+"assets/vendor/pdfjs/",location.href).href;PDFJS=import(root+"pdf.mjs").then(function(m){m.GlobalWorkerOptions.workerSrc=root+"pdf.worker.mjs";return m})}return PDFJS}
+function pdfPage(doc,i){return doc.getPage(i).then(function(pg){var v0=pg.getViewport({scale:1}),vp=pg.getViewport({scale:1200/v0.width}),c=document.createElement("canvas");c.width=Math.round(vp.width);c.height=Math.round(vp.height);return pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise.then(function(){return c})})}
 function books(ctx){
  var s=ctx.sheet("卷類專區","段考卷等電子書。學員在網頁上翻頁閱讀，不能下載整份檔案。");
- var box=h('<div class="bkadm"></div>');
+ var box=h('<div class="bkadm"></div>'),lim=h('<div class="bkadm2"></div>'),ROWS=[];
  var title=h('<input type="text" maxlength="60" placeholder="卷名，例如：113 上 第一次段考">'),subj=h('<select><option value="math">國小數學</option><option value="sci">國中理化</option></select>'),
   grade=h('<input type="text" maxlength="10" placeholder="五年級">'),term=h('<input type="text" maxlength="10" placeholder="上學期">'),
-  fl=h('<input type="file" accept="image/*" multiple>'),chk=h('<input type="checkbox">'),btn=h('<button type="button" class="pen go">上傳</button>'),prog=h('<p class="meta"></p>');
- var form=h('<div class="bkform"><p class="meta">一次選好所有頁面的圖片（按檔名排序，例如 01.png、02.png…）。上傳期間請不要關閉這個頁面。</p></div>');
- [["卷名",title],["科目",subj],["年級",grade],["學期",term],["頁面圖片",fl]].forEach(function(p){var l=h('<label class="bkf"><span></span></label>');l.querySelector("span").textContent=p[0];l.appendChild(p[1]);form.appendChild(l)});
+  cls=h('<input type="text" maxlength="60" placeholder="可看的班級，例如 701,702（留空＝全部）">'),eml=h('<input type="text" maxlength="300" placeholder="另外指定的學生 email（逗號分隔，可留空）">'),
+  fl=h('<input type="file" accept="application/pdf,image/*" multiple>'),chk=h('<input type="checkbox">'),btn=h('<button type="button" class="pen go">上傳</button>'),prog=h('<p class="meta"></p>');
+ var form=h('<div class="bkform"><p class="meta">可以選一個 PDF（會自動拆成每一頁），或選多張頁面圖片（按檔名排序，例如 01.png、02.png…）。上傳期間請不要關閉這個頁面。</p></div>');
+ [["卷名",title],["科目",subj],["年級",grade],["學期",term],["可看的班級",cls],["指定學生",eml],["PDF 或圖片",fl]].forEach(function(p){var l=h('<label class="bkf"><span></span></label>');l.querySelector("span").textContent=p[0];l.appendChild(p[1]);form.appendChild(l)});
  var cl=h('<label class="bkf"><span>完成後直接上架</span></label>');cl.appendChild(chk);form.appendChild(cl);
  form.appendChild(h('<div class="ctl"></div>')).appendChild(btn);form.appendChild(prog);
- s.appendChild(form);s.appendChild(box);
+ s.appendChild(form);s.appendChild(box);s.appendChild(lim);
  function upload(){
-  var files=[].slice.call(fl.files||[]).sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true})});
+  var all=[].slice.call(fl.files||[]),pdfs=all.filter(function(f){return /pdf$/i.test(f.type)||/\.pdf$/i.test(f.name)}),imgs=all.filter(function(f){return pdfs.indexOf(f)<0}).sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true})});
   if(!title.value.trim())return alert("請填寫卷名");
-  if(!files.length)return alert("請選擇頁面圖片");
-  if(!confirm("上傳 "+files.length+" 頁到「"+title.value.trim()+"」？"))return;
-  btn.disabled=true;var id=null,key=crypto.getRandomValues(new Uint8Array(32)),ck=null;
-  M.api("POST","/api/admin/book",{title:title.value.trim(),subj:subj.value,grade:grade.value.trim(),term:term.value.trim(),k:b64u8(key)}).then(function(r){
+  if(pdfs.length>1)return alert("一次只能上傳一個 PDF 檔");
+  if(pdfs.length&&imgs.length)return alert("PDF 和圖片不能混在一起，請選一種");
+  if(!all.length)return alert("請選擇 PDF 或頁面圖片");
+  if(!confirm("上傳「"+title.value.trim()+"」？"))return;
+  btn.disabled=true;var id=null,key=crypto.getRandomValues(new Uint8Array(32)),ck=null,total=0,doc=null;
+  prog.textContent=pdfs.length?"讀取 PDF…":"";
+  (pdfs.length?pdfjs().then(function(m){return pdfs[0].arrayBuffer().then(function(ab){return m.getDocument({data:new Uint8Array(ab)}).promise})}).then(function(d){doc=d;total=d.numPages;if(total>500)throw{code:"bad_pages"};}):Promise.resolve(total=imgs.length)).then(function(){
+   return M.api("POST","/api/admin/book",{title:title.value.trim(),subj:subj.value,grade:grade.value.trim(),term:term.value.trim(),classes:cls.value,emails:eml.value,k:b64u8(key)});
+  }).then(function(r){
    id=r.id;return crypto.subtle.importKey("raw",key,{name:"AES-GCM"},false,["encrypt"])
   }).then(function(c){ck=c;
-   var n=0;function next(){if(n>=files.length)return Promise.resolve();var i=n++;prog.textContent="第 "+(i+1)+" / "+files.length+" 頁：處理中…";
-    return pageBytes(files[i],.85).then(function(bytes){if(bytes.length>640000)return pageBytes(files[i],.6).then(function(b2){if(b2.length>640000)throw{code:"page_too_big"};return b2});return bytes})
+   var n=0;function next(){if(n>=total)return Promise.resolve();var i=n++;prog.textContent="第 "+(i+1)+" / "+total+" 頁：處理中…";
+    var src=doc?pdfPage(doc,i+1):Promise.resolve(imgs[i]);
+    return src.then(function(s){return pageBytes(s,.85).then(function(bytes){if(bytes.length>640000)return pageBytes(s,.6).then(function(b2){if(b2.length>640000)throw{code:"page_too_big"};return b2});return bytes})})
      .then(function(bytes){return encPage(ck,bytes)}).then(function(enc){return M.api("POST","/api/admin/book/page",{id:id,n:i+1,b64:b64u8(enc)})}).then(next)}
    return next();
-  }).then(function(){return M.api("POST","/api/admin/book/finish",{id:id,pages:files.length})})
+  }).then(function(){return M.api("POST","/api/admin/book/finish",{id:id,pages:total})})
   .then(function(){if(chk.checked)return M.api("POST","/api/admin/book/status",{id:id,status:"on"})})
-  .then(function(){prog.textContent="完成，共 "+files.length+" 頁"+(chk.checked?"，已上架":"（下方可以上架）");title.value="";fl.value="";chk.checked=false;btn.disabled=false;load()},
+  .then(function(){prog.textContent="完成，共 "+total+" 頁"+(chk.checked?"，已上架":"（下方可以上架）");title.value="";fl.value="";cls.value="";eml.value="";chk.checked=false;btn.disabled=false;load()},
    function(e){prog.textContent="上傳失敗："+bErr(e)+"（"+(id?"卷號 "+id+" 還是草稿，可以在下方刪除後重傳":"還沒有建立卷")+"）";btn.disabled=false;load()});
  }
  btn.onclick=upload;
  var ST={draft:"草稿（未完成）",on:"上架中",off:"已下架"};
+ function scopeTxt(sc){var c=(sc&&sc.c)||[],e=(sc&&sc.e)||[];if(!c.length&&!e.length)return"全部學生";return[c.length?c.join("、")+" 班":"",e.length?e.length+" 位指定學生":""].filter(Boolean).join("＋")}
  function load(){box.textContent="讀取中…";M.api("GET","/api/admin/books").then(function(r){
-  box.innerHTML="";
+  box.innerHTML="";ROWS=r.rows;
   if(!r.base)box.appendChild(h('<p class="fb no">還沒設定卷的頁面網域（wrangler.toml 的 BOOK_BASE）。設定好之前學員無法開卷。</p>'));
-  if(!r.rows.length){box.appendChild(h("<p>還沒有卷。</p>"));return}
-  var tb='<table class="tb"><tr><th>卷名</th><th>科目</th><th>年級・學期</th><th class="pc">頁數</th><th>狀態</th><th class="pc">開卷次數</th><th></th></tr>';
-  r.rows.forEach(function(b){tb+='<tr><td>'+esc(b.title)+'</td><td>'+(M.SUBJ[b.subj]||b.subj)+'</td><td>'+esc([b.grade,b.term].filter(Boolean).join("・"))+'</td><td class="pc">'+b.pages+'</td><td>'+ST[b.status]+'</td><td class="pc">'+b.opens+'</td><td><span class="ctl">'
+  if(!r.rows.length)box.appendChild(h("<p>還沒有卷。</p>"));
+  else{
+  var tb='<table class="tb"><tr><th>卷名</th><th>科目</th><th>年級・學期</th><th class="pc">頁數</th><th>狀態</th><th>可看的人</th><th class="pc">開卷次數</th><th></th></tr>';
+  r.rows.forEach(function(b){var sc=null;try{sc=JSON.parse(b.scope||"{}")}catch(e){}tb+='<tr><td>'+esc(b.title)+'</td><td>'+(M.SUBJ[b.subj]||b.subj)+'</td><td>'+esc([b.grade,b.term].filter(Boolean).join("・"))+'</td><td class="pc">'+b.pages+'</td><td>'+ST[b.status]+'</td><td>'+esc(scopeTxt(sc))+'</td><td class="pc">'+b.opens+'</td><td><span class="ctl">'
    +(b.status==="on"?'<button class="pen" data-a="off" data-id="'+b.id+'">下架</button>':"")
    +(b.status==="off"&&b.pages?'<button class="pen go" data-a="on" data-id="'+b.id+'">上架</button>':"")
+   +(b.status!=="draft"?'<button class="pen" data-a="scope" data-id="'+b.id+'" data-t="'+esc(b.title)+'">範圍</button>':"")
    +'<button class="pen" data-a="del" data-id="'+b.id+'" data-t="'+esc(b.title)+'">刪除</button></span></td></tr>'});
-  box.innerHTML=tb+"</table>";
+  box.appendChild(h(tb+"</table>"));
   box.querySelectorAll("button[data-a]").forEach(function(x){x.onclick=function(){
    var a=x.dataset.a,id=x.dataset.id;
+   if(a==="scope"){var row=ROWS.filter(function(q){return q.id===id})[0],sc={c:[],e:[]};try{sc=JSON.parse(row.scope||"{}")}catch(e){}
+    var c=prompt("可看的班級（逗號分隔，例如 701,702；留空＝全部學生）：",(sc.c||[]).join(","));if(c===null)return;
+    var e=prompt("另外指定的學生 email（逗號分隔，留空＝不指定）：",(sc.e||[]).join(","));if(e===null)return;
+    M.api("POST","/api/admin/book/scope",{id:id,classes:c,emails:e}).then(load,function(er){alert(bErr(er));load()});return}
    if(a==="del"){if(!confirm("刪除「"+x.dataset.t+"」？所有頁面與開卷紀錄會一起刪掉，不能復原。"))return;x.disabled=true;
     M.api("POST","/api/admin/book/delete",{id:id}).then(load,function(e){alert(bErr(e));load()});return}
    x.disabled=true;M.api("POST","/api/admin/book/status",{id:id,status:a}).then(load,function(e){alert(bErr(e));load()})}})
+  }
+  limitsBox(r);
  },function(e){box.textContent=bErr(e)})}
+ /* 學生閱讀次數：可以單獨設某位學生對某本卷（或全部卷）的次數，也能今天歸零 */
+ function limitsBox(r){
+  lim.innerHTML="";
+  lim.appendChild(h('<h3 class="bkh">學生閱讀次數</h3>'));
+  lim.appendChild(h('<p class="meta">全站預設每人每本卷每天 '+r.limit+' 次。這裡可以針對一位學生調整：選「全部卷」就套用到他看得到的所有卷；特定卷的設定優先。次數填 0＝不能開；留空按「還原預設」＝刪掉這位學生的設定。</p>'));
+  var em=h('<input type="text" maxlength="120" placeholder="學生的 email">'),bk=h('<select><option value="*">全部卷</option></select>'),nm=h('<input type="number" min="0" max="50" placeholder="次數">');
+  ROWS.forEach(function(b){bk.appendChild(h('<option value="'+esc(b.id)+'">'+esc(b.title)+"</option>"))});
+  var f=h('<div class="bkform"></div>');
+  [["學生",em],["範圍",bk],["每天次數",nm]].forEach(function(p){var l=h('<label class="bkf"><span></span></label>');l.querySelector("span").textContent=p[0];l.appendChild(p[1]);f.appendChild(l)});
+  var bs=h('<div class="ctl"></div>'),set=h('<button type="button" class="pen go">設定</button>'),rst=h('<button type="button" class="pen">還原預設</button>'),zero=h('<button type="button" class="pen">今天歸零</button>');
+  bs.appendChild(set);bs.appendChild(rst);bs.appendChild(zero);f.appendChild(bs);lim.appendChild(f);
+  var ms=h('<p class="meta"></p>');lim.appendChild(ms);
+  function doSet(lv){var mail=em.value.trim();if(!mail)return alert("請填學生的 email");
+   M.api("POST","/api/admin/book/limit",{email:mail,book:bk.value,lim:lv}).then(function(){ms.textContent="已更新";showList()},function(e){alert(bErr(e))})}
+  set.onclick=function(){var v=nm.value;if(v==="")return alert("請填次數（0～50）");doSet(+v)};
+  rst.onclick=function(){doSet(null)};
+  zero.onclick=function(){var mail=em.value.trim();if(!mail)return alert("請填學生的 email");
+   M.api("POST","/api/admin/book/reset",{email:mail,book:bk.value}).then(function(){ms.textContent="今天的次數已歸零"},function(e){alert(bErr(e))})};
+  var ls=h('<div class="bklist"></div>');lim.appendChild(ls);
+  function showList(){M.api("GET","/api/admin/book/limits").then(function(q){
+   if(!q.rows.length){ls.innerHTML='<p class="meta">目前沒有特別設定的學生。</p>';return}
+   var t='<table class="tb"><tr><th>學生</th><th>範圍</th><th class="pc">每天次數</th><th></th></tr>';
+   q.rows.forEach(function(x){t+='<tr><td>'+esc((x.name||"")+"　"+(x.class?x.class+" 班 ":"")+(x.no?x.no+" 號":""))+'<br><small class="soft">'+esc(x.email)+'</small></td><td>'+esc(x.title)+'</td><td class="pc">'+x.lim+'</td><td><button class="pen" data-e="'+esc(x.email)+'" data-b="'+esc(x.book)+'">清除</button></td></tr>'});
+   ls.innerHTML=t+"</table>";
+   ls.querySelectorAll("button[data-e]").forEach(function(bt){bt.onclick=function(){M.api("POST","/api/admin/book/limit",{email:bt.dataset.e,book:bt.dataset.b,lim:null}).then(showList,function(e){alert(bErr(e))})}})
+  },function(e){ls.textContent=bErr(e)})}
+  showList();
+ }
  load();
 }
 NB.tadmin={roster:roster,bank:bank,settings:settings,data:data,reports:reports,prints:prints,mocks:mocks,assign:assign,books:books};
