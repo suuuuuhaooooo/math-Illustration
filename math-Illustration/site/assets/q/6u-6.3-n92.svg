@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="292" height="239" viewBox="0 0 292 239">
+<rect x="0" y="0" width="292" height="239" fill="#ffffff"/>
+<path d="M146.0,212.7 L266.0,92.7 A169.7,169.7 0 0 0 26.0,92.7 L146.0,212.7 Z" fill="#e6e6e6" stroke="#000000" stroke-width="1.6"/>
+<circle cx="146.0" cy="212.7" r="3" fill="#000000"/>
+<text x="146.0" y="31.9" font-family="sans-serif" font-size="17" text-anchor="middle" fill="#000000">甲</text>
+<text x="214.0" y="158.6" font-family="sans-serif" font-size="17" text-anchor="start" fill="#000000">乙</text>
+<text x="146.0" y="234.6" font-family="sans-serif" font-size="17" text-anchor="middle" fill="#000000">丙</text>
+</svg>

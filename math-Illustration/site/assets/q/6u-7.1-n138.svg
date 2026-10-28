@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="417" height="187" viewBox="0 0 417 187">
+<rect x="0" y="0" width="417" height="187" fill="#ffffff"/>
+<path transform="translate(24.4,0)" d="M26.0,125.5 L150.4,125.5 L150.4,76.3 L26.0,76.3 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path transform="translate(24.4,0)" d="M35.0,125.5 L35.0,116.5 L26.0,116.5" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path transform="translate(24.4,0)" d="M141.4,125.5 L141.4,116.5 L150.4,116.5" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path transform="translate(24.4,0)" d="M141.4,76.3 L141.4,85.3 L150.4,85.3" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path transform="translate(24.4,0)" d="M35.0,76.3 L35.0,85.3 L26.0,85.3" fill="none" stroke="#000000" stroke-width="1.2"/>
+<text transform="translate(24.4,0)" x="88.2" y="147.1" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">90</text>
+<text transform="translate(24.4,0)" x="18.0" y="106.5" font-family="sans-serif" font-size="16" text-anchor="end" fill="#000000">35.6</text>
+<path transform="translate(24.4,0)" d="M366.0,81.3 A55.3,55.3 0 0 0 255.4,81.3 A55.3,55.3 0 0 0 366.0,81.3 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<circle transform="translate(24.4,0)" cx="310.7" cy="81.3" r="3" fill="#000000"/>
+<text transform="translate(24.4,0)" x="196.0" y="174.6" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（單位：公分）</text>
+</svg>

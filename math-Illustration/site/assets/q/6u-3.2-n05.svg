@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="303" height="110" viewBox="0 0 303 110">
+<rect x="0" y="0" width="303" height="110" fill="#ffffff"/>
+<rect x="1" y="1" width="132.8" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="67.4" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">商品</text>
+<rect x="133.8" y="1" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="161.8" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">牛奶</text>
+<rect x="189.8" y="1" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="217.8" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">果汁</text>
+<rect x="245.8" y="1" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="273.8" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">麵包</text>
+<rect x="1" y="37" width="132.8" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="67.4" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">第 1 件（元）</text>
+<rect x="133.8" y="37" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="161.8" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">30</text>
+<rect x="189.8" y="37" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="217.8" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">40</text>
+<rect x="245.8" y="37" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="273.8" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">25</text>
+<rect x="1" y="73" width="132.8" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="67.4" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">第 2 件（元）</text>
+<rect x="133.8" y="73" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="161.8" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">24</text>
+<rect x="189.8" y="73" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="217.8" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">34</text>
+<rect x="245.8" y="73" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="273.8" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">19</text>
+</svg>

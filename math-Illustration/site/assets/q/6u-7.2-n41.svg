@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="288" height="306" viewBox="0 0 288 306">
+<rect x="0" y="0" width="288" height="306" fill="#ffffff"/>
+<path d="M26.0,256.0 L256.0,256.0 L256.0,26.0 L26.0,26.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path d="M26.0,256.0 L256.0,256.0 A230.0,230.0 0 0 0 26.0,26.0 L26.0,256.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M256.0,26.0 L26.0,26.0 A230.0,230.0 0 0 0 256.0,256.0 L256.0,26.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M26.0,256.0 L256.0,256.0 L256.0,26.0 L26.0,26.0 Z" fill="none" stroke="#000000" stroke-width="1.6"/>
+<path d="M35.0,256.0 L35.0,247.0 L26.0,247.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M247.0,256.0 L247.0,247.0 L256.0,247.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M247.0,26.0 L247.0,35.0 L256.0,35.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M35.0,26.0 L35.0,35.0 L26.0,35.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<text x="141.0" y="277.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">30</text>
+<text x="264.0" y="146.6" font-family="sans-serif" font-size="16" text-anchor="start" fill="#000000">30</text>
+<text x="141.0" y="294.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（單位：公分）</text>
+</svg>

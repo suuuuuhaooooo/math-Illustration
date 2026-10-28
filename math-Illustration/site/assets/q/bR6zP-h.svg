@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- 由 Microsoft Visio, SVG Export 產生 bR6zP-h.svg Page-1 -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"
+		xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/" width="2.61111in" height="1.5in" viewBox="0 0 188 108"
+		xml:space="preserve" color-interpolation-filters="sRGB" class="st4">
+	<v:documentProperties v:langID="1028" v:metric="true" v:viewMarkup="false">
+		<v:userDefs>
+			<v:ud v:nameU="msvNoAutoConnect" v:val="VT0(1):26"/>
+		</v:userDefs>
+	</v:documentProperties>
+
+	<style type="text/css">
+	<![CDATA[
+		.st1 {fill:none;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st2 {fill:#000000;font-family:Gen Jyuu Gothic Medium;font-size:4.99999em}
+		.st3 {fill:none;stroke:#ff0000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.5}
+		.st4 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}
+	]]>
+	</style>
+
+	<g v:mID="0" v:index="1" v:groupContext="foregroundPage">
+		<title>頁-1</title>
+		<v:pageProperties v:drawingScale="0.0393701" v:pageScale="0.0393701" v:drawingUnits="24" v:shadowOffsetX="8.50394"
+				v:shadowOffsetY="-8.50394"/>
+		<g id="group23-1" transform="translate(70.108,-45.5829)" v:mID="23" v:groupContext="group">
+			<title>工作表.23</title>
+		</g>
+		<g id="group25-2" transform="translate(18,-57.2106)" v:mID="25" v:groupContext="group">
+			<title>工作表.25</title>
+		</g>
+		<g id="shape26-3" v:mID="26" v:groupContext="shape" transform="translate(70.108,-19.809)">
+			<title>工作表.26</title>
+			<desc>K</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="25.5118" cy="79.2992" width="51.03" height="57.4016"/>
+			<rect x="0" y="50.5984" width="51.0236" height="57.4016" class="st1"/>
+			<text x="5.65" y="97.3" class="st2" v:langID="1028"><v:paragraph v:horizAlign="1"/><v:tabList/>K</text>		</g>
+		<g id="shape28-6" v:mID="28" v:groupContext="shape" transform="translate(82.4882,-51.0236)">
+			<title>工作表.28</title>
+			<ellipse cx="5.52756" cy="102.472" rx="5.52756" ry="5.52756" class="st3"/>
+		</g>
+		<g id="shape29-8" v:mID="29" v:groupContext="shape" transform="translate(82.4882,-37.1339)">
+			<title>工作表.29</title>
+			<ellipse cx="5.52756" cy="102.472" rx="5.52756" ry="5.52756" class="st3"/>
+		</g>
+		<g id="shape30-10" v:mID="30" v:groupContext="shape" transform="translate(90.9921,-44.0787)">
+			<title>工作表.30</title>
+			<ellipse cx="5.52756" cy="102.472" rx="5.52756" ry="5.52756" class="st3"/>
+		</g>
+		<g id="shape31-12" v:mID="31" v:groupContext="shape" transform="translate(96.6614,-54)">
+			<title>工作表.31</title>
+			<ellipse cx="5.52756" cy="102.472" rx="5.52756" ry="5.52756" class="st3"/>
+		</g>
+	</g>
+</svg>

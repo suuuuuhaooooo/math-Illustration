@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="445" height="114" viewBox="0 0 445 114">
+<rect x="0" y="0" width="445" height="114" fill="#ffffff"/>
+<rect x="1.0" y="1" width="83.2" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="42.6" y="19.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">數</text>
+<rect x="84.2" y="1" width="36.0" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="102.2" y="19.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">31</text>
+<rect x="120.2" y="1" width="36.0" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="138.2" y="19.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">32</text>
+<rect x="156.2" y="1" width="36.0" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="174.2" y="19.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">33</text>
+<rect x="192.2" y="1" width="36.0" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="210.2" y="19.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">34</text>
+<rect x="228.2" y="1" width="36.0" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="246.2" y="19.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">35</text>
+<rect x="264.2" y="1" width="36.0" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="282.2" y="19.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">36</text>
+<rect x="300.2" y="1" width="36.0" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="318.2" y="19.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">37</text>
+<rect x="336.2" y="1" width="36.0" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="354.2" y="19.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">38</text>
+<rect x="372.2" y="1" width="36.0" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="390.2" y="19.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">39</text>
+<rect x="408.2" y="1" width="36.0" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="426.2" y="19.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">40</text>
+<rect x="1.0" y="29" width="83.2" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="42.6" y="47.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">2 的倍數</text>
+<rect x="84.2" y="29" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="120.2" y="29" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="156.2" y="29" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="192.2" y="29" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="228.2" y="29" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="264.2" y="29" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="300.2" y="29" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="336.2" y="29" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="372.2" y="29" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="408.2" y="29" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="1.0" y="57" width="83.2" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="42.6" y="75.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">5 的倍數</text>
+<rect x="84.2" y="57" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="120.2" y="57" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="156.2" y="57" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="192.2" y="57" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="228.2" y="57" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="264.2" y="57" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="300.2" y="57" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="336.2" y="57" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="372.2" y="57" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="408.2" y="57" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="1.0" y="85" width="83.2" height="28" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="42.6" y="103.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">10 的倍數</text>
+<rect x="84.2" y="85" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="120.2" y="85" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="156.2" y="85" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="192.2" y="85" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="228.2" y="85" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="264.2" y="85" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="300.2" y="85" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="336.2" y="85" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="372.2" y="85" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="408.2" y="85" width="36.0" height="28" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+</svg>

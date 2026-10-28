@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="347" height="252" viewBox="0 0 347 252">
+<rect x="0" y="0" width="347" height="252" fill="#ffffff"/>
+<path d="M26.0,226.0 L320.1,226.0 L320.1,202.5 L26.0,202.5 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M26.0,202.5 L26.0,218.2" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M45.6,202.5 L45.6,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M65.2,202.5 L65.2,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M84.8,202.5 L84.8,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<text x="84.8" y="231.0" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">3</text>
+<path d="M104.4,202.5 L104.4,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M124.0,202.5 L124.0,218.2" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M143.6,202.5 L143.6,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M163.3,202.5 L163.3,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M182.9,202.5 L182.9,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M202.5,202.5 L202.5,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M222.1,202.5 L222.1,218.2" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M241.7,202.5 L241.7,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<text x="241.7" y="231.0" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">11</text>
+<path d="M261.3,202.5 L261.3,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M280.9,202.5 L280.9,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M300.5,202.5 L300.5,212.3" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M320.1,202.5 L320.1,218.2" fill="none" stroke="#000000" stroke-width="1"/>
+<path d="M241.7,124.0 A78.4,78.4 0 0 0 84.8,124.0 A78.4,78.4 0 0 0 241.7,124.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M84.8,202.5 L84.8,26.0 L41.7,202.5 Z" fill="#eeeeee" stroke="#000000" stroke-width="1.6"/>
+<path d="M241.7,202.5 L241.7,26.0 L284.8,202.5 Z" fill="#eeeeee" stroke="#000000" stroke-width="1.6"/>
+</svg>

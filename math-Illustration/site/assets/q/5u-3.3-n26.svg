@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="383" height="246" viewBox="0 0 383 246">
+<rect x="0" y="0" width="383" height="246" fill="#ffffff"/>
+<rect x="50.0" y="40.0" width="106.7" height="80.0" fill="#dddddd" stroke="#000000" stroke-width="1.5"/>
+<rect x="50.0" y="120.0" width="106.7" height="80.0" fill="#dddddd" stroke="#000000" stroke-width="1.5"/>
+<rect x="156.7" y="40.0" width="106.7" height="80.0" fill="#dddddd" stroke="#000000" stroke-width="1.5"/>
+<rect x="156.7" y="120.0" width="106.7" height="80.0" fill="#dddddd" stroke="#000000" stroke-width="1.5"/>
+<path d="M53.0,34 Q103.3,18 153.7,34" fill="none" stroke="#000000"/>
+<text x="103.3" y="18.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">16</text>
+<path d="M159.7,34 Q210.0,18 260.3,34" fill="none" stroke="#000000"/>
+<text x="210.0" y="18.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">16</text>
+<path d="M44,43.0 Q28,80.0 44,117.0" fill="none" stroke="#000000"/>
+<text x="20.0" y="86.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">12</text>
+<path d="M44,123.0 Q28,160.0 44,197.0" fill="none" stroke="#000000"/>
+<text x="20.0" y="166.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">12</text>
+<text x="293.3" y="126.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">……</text>
+<text x="156.7" y="226.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">⋮</text>
+<text x="303.3" y="230.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">（單位：公分）</text>
+</svg>

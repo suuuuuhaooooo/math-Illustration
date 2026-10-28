@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="329" height="182" viewBox="0 0 329 182">
+<rect x="0" y="0" width="329" height="182" fill="#ffffff"/>
+<rect x="1" y="1" width="84.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="43.0" y="24.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">原來的數</text>
+<rect x="85.0" y="1" width="84.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="127.0" y="24.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">取到個位</text>
+<rect x="169.0" y="1" width="159.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="248.5" y="24.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">取到小數點後第一位</text>
+<rect x="1" y="37" width="84.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="43.0" y="60.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">691.85</text>
+<rect x="85.0" y="37" width="84.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="127.0" y="60.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000"></text>
+<rect x="169.0" y="37" width="159.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="248.5" y="60.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000"></text>
+<rect x="1" y="73" width="84.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="43.0" y="96.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">519.93</text>
+<rect x="85.0" y="73" width="84.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="127.0" y="96.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000"></text>
+<rect x="169.0" y="73" width="159.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="248.5" y="96.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000"></text>
+<rect x="1" y="109" width="84.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="43.0" y="132.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">78.98</text>
+<rect x="85.0" y="109" width="84.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="127.0" y="132.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000"></text>
+<rect x="169.0" y="109" width="159.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="248.5" y="132.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000"></text>
+<rect x="1" y="145" width="84.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="43.0" y="168.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">299.97</text>
+<rect x="85.0" y="145" width="84.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="127.0" y="168.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000"></text>
+<rect x="169.0" y="145" width="159.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="248.5" y="168.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000"></text>
+</svg>

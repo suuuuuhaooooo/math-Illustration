@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="465" height="92" viewBox="0 0 465 92">
+<rect x="0" y="0" width="465" height="92" fill="#ffffff"/>
+<rect x="1" y="1" width="52.0" height="36" fill="#e6e6e6" stroke="#000000"/><text x="27.0" y="25.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">項目</text>
+<rect x="53.0" y="1" width="102.8" height="36" fill="#e6e6e6" stroke="#000000"/><text x="104.4" y="25.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">舊衣</text>
+<rect x="155.8" y="1" width="102.8" height="36" fill="#e6e6e6" stroke="#000000"/><text x="207.2" y="25.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">舊書</text>
+<rect x="258.6" y="1" width="102.8" height="36" fill="#e6e6e6" stroke="#000000"/><text x="310.0" y="25.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">玩具</text>
+<rect x="361.4" y="1" width="102.8" height="36" fill="#e6e6e6" stroke="#000000"/><text x="412.8" y="25.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">家電</text>
+<rect x="1" y="37" width="52.0" height="54" fill="#e6e6e6" stroke="#000000"/><text x="27.0" y="70.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">重量</text>
+<rect x="53.0" y="37" width="102.8" height="54" fill="#ffffff" stroke="#000000"/><text x="88.5" y="59.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">17</text>
+<text x="88.5" y="77.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">3</text>
+<line x1="78.1" y1="63.0" x2="98.9" y2="63.0" stroke="#000000" stroke-width="1.4"/>
+<text x="101.9" y="67.6" font-family="sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#000000">公斤</text>
+<rect x="155.8" y="37" width="102.8" height="54" fill="#ffffff" stroke="#000000"/><text x="185.1" y="67.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">2</text>
+<text x="197.1" y="59.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">1</text>
+<text x="197.1" y="77.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">2</text>
+<line x1="190.9" y1="63.0" x2="203.3" y2="63.0" stroke="#000000" stroke-width="1.4"/>
+<text x="206.3" y="67.6" font-family="sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#000000">公斤</text>
+<rect x="258.6" y="37" width="102.8" height="54" fill="#ffffff" stroke="#000000"/><text x="287.9" y="67.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">6</text>
+<text x="299.9" y="59.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">3</text>
+<text x="299.9" y="77.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<line x1="293.7" y1="63.0" x2="306.1" y2="63.0" stroke="#000000" stroke-width="1.4"/>
+<text x="309.1" y="67.6" font-family="sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#000000">公斤</text>
+<rect x="361.4" y="37" width="102.8" height="54" fill="#ffffff" stroke="#000000"/><text x="386.5" y="67.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">7</text>
+<text x="402.7" y="59.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">1</text>
+<text x="402.7" y="77.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">10</text>
+<line x1="392.3" y1="63.0" x2="413.1" y2="63.0" stroke="#000000" stroke-width="1.4"/>
+<text x="416.1" y="67.6" font-family="sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#000000">公斤</text>
+</svg>
