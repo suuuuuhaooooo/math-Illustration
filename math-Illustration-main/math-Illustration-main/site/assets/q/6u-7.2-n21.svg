@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="303" height="326" viewBox="0 0 303 326">
+<rect x="0" y="0" width="303" height="326" fill="#ffffff"/>
+<path transform="translate(1.0,0)" d="M26.0,276.0 L276.0,276.0 A250.0,250.0 0 0 0 26.0,26.0 L26.0,276.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path transform="translate(1.0,0)" d="M26.0,276.0 L176.0,276.0 L176.0,76.0 L26.0,76.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path transform="translate(1.0,0)" d="M26.0,276.0 L176.0,76.0" fill="none" stroke="#000000" stroke-width="1.6" stroke-dasharray="5 4"/>
+<circle transform="translate(1.0,0)" cx="26.0" cy="276.0" r="3" fill="#000000"/>
+<path transform="translate(1.0,0)" d="M35.0,276.0 L35.0,267.0 L26.0,267.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<text transform="translate(1.0,0)" x="180.0" y="73.2" font-family="sans-serif" font-size="15" text-anchor="start" fill="#000000">C</text>
+<text transform="translate(1.0,0)" x="22.0" y="281.2" font-family="sans-serif" font-size="15" text-anchor="end" fill="#000000">A</text>
+<text transform="translate(1.0,0)" x="176.0" y="293.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">B</text>
+<text transform="translate(1.0,0)" x="22.0" y="81.2" font-family="sans-serif" font-size="15" text-anchor="end" fill="#000000">D</text>
+<text transform="translate(1.0,0)" x="101.0" y="293.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">6</text>
+<text transform="translate(1.0,0)" x="12.0" y="181.2" font-family="sans-serif" font-size="15" text-anchor="end" fill="#000000">8</text>
+<text transform="translate(1.0,0)" x="109.0" y="173.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">10</text>
+<text transform="translate(1.0,0)" x="151.0" y="314.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（單位：公分）</text>
+</svg>

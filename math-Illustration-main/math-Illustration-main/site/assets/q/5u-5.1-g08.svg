@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="132" viewBox="0 0 320 132">
+<rect x="0" y="0" width="320" height="132" fill="#ffffff"/>
+<polygon points="60.0,22.0 92.9,79.0 27.1,79.0" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<text x="60.0" y="124.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">甲</text>
+<polygon points="169.6,28.9 182.4,41.8 180.6,75.7 160.1,95.9 136.4,77.2 126.3,48.5" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<text x="160.0" y="124.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">乙</text>
+<polygon points="260.0,22.0 286.9,33.1 298.0,60.0 286.9,86.9 260.0,98.0 233.1,86.9 222.0,60.0 233.1,33.1" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<text x="260.0" y="124.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">丙</text>
+</svg>

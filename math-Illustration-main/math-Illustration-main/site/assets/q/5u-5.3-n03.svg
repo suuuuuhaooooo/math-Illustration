@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="470" height="260" viewBox="0 0 470 260">
+<rect x="0" y="0" width="470" height="260" fill="#ffffff"/>
+<polygon points="184.0,226.0 286.0,226.0 184.0,34.0" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<polyline points="184.0,214.0 196.0,214.0 196.0,226.0" fill="none" stroke="#000000" stroke-width="1.5"/>
+<path d="M268.0,226.0 A18,18 0 0 1 277.6,210.1" fill="none" stroke="#000000" stroke-width="1.5"/>
+<path d="M196.2,57.0 A26,26 0 0 1 184.0,60.0" fill="none" stroke="#000000" stroke-width="1.5"/>
+<text x="246.6" y="208.3" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">62°</text>
+<text x="199.0" y="100.1" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">★</text>
+</svg>
