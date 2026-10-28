@@ -2,7 +2,7 @@
 (function(){
 var NS="http://www.w3.org/2000/svg",$=function(s){return document.querySelector(s)};
 var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches,INK="#101a2e";
-function sv(tag,a,p){var e=document.createElementNS(NS,tag);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function sv(tag,a,p){var e=document.createElementNS(NS,tag);for(var k in a){if(k==="fill"&&/^var\(/.test(a[k]))e.style.fill=a[k];else e.setAttribute(k,a[k])}if(p)p.appendChild(e);return e}
 function wave(y,amp,w,fill,cls,p){var d="M-1400 "+y,n=Math.ceil((w+1400)/100);for(var i=0;i<n;i++)d+="q25 "+(-amp)+" 50 0t50 0";d+="V400H-1400Z";return sv("path",{d:d,fill:fill,"class":cls},p)}
 function eye(p,cx,cy,r){var g=sv("g",{"class":"eye","data-r":r},p);sv("circle",{cx:cx,cy:cy,r:r,fill:"#fff",stroke:INK,"stroke-width":2.4},g);sv("circle",{"class":"pu",cx:cx,cy:cy,r:r*.45,fill:INK},g);return g}
 function blob(p,x,y,sc,col,rl,rr,mood){
@@ -22,11 +22,11 @@ sv("polygon",{points:"640,108 1500,30 1500,118","class":"beam b1",fill:"url(#bea
 sv("polygon",{points:"640,108 -300,30 -300,118","class":"beam b2",fill:"url(#beam2)"},s);
 var hg=sv("radialGradient",{id:"hglow",cx:"50%",cy:"100%",r:"60%"},df);sv("stop",{offset:0,"stop-color":"#e9b85a","stop-opacity":.28},hg);sv("stop",{offset:1,"stop-color":"#e9b85a","stop-opacity":0},hg);
 sv("rect",{x:0,y:120,width:1200,height:200,fill:"url(#hglow)"},s);
-sv("path",{d:"M-20 262C40 236 90 226 140 244C170 222 214 214 252 240C290 232 330 246 360 262Z",fill:"#142340"},s);
-sv("path",{d:"M980 262C1010 232 1060 214 1110 230C1150 218 1190 236 1230 262Z",fill:"#142340"},s);
-sv("path",{d:"M150 266C200 250 250 246 300 262Z",fill:"#0f1b33"},s);
-sv("path",{d:"M900 266C930 252 980 248 1020 266Z",fill:"#0f1b33"},s);
-wave(262,10,2600,"#16294a","wv w1",s);
+sv("path",{d:"M-20 262C40 236 90 226 140 244C170 222 214 214 252 240C290 232 330 246 360 262Z",fill:"var(--lp-hill,#142340)"},s);
+sv("path",{d:"M980 262C1010 232 1060 214 1110 230C1150 218 1190 236 1230 262Z",fill:"var(--lp-hill,#142340)"},s);
+sv("path",{d:"M150 266C200 250 250 246 300 262Z",fill:"var(--lp-hill2,#0f1b33)"},s);
+sv("path",{d:"M900 266C930 252 980 248 1020 266Z",fill:"var(--lp-hill2,#0f1b33)"},s);
+wave(262,10,2600,"var(--lp-wv1,#16294a)","wv w1",s);
 /* 小船 */
 var bt=sv("g",{"class":"boat"},s);sv("path",{d:"M990 266h62l-10 18h-42z",fill:"#9a6b3c",stroke:INK,"stroke-width":3,"stroke-linejoin":"round"},bt);sv("path",{d:"M1022 262V206L1060 262z",fill:"#f6f0e2",stroke:INK,"stroke-width":3,"stroke-linejoin":"round"},bt);sv("path",{d:"M1022 206v-12",stroke:INK,"stroke-width":3},bt);
 /* 島 */
@@ -43,13 +43,13 @@ sv("rect",{x:619,y:96,width:44,height:28,rx:3,fill:"#ecc566",stroke:INK,"stroke-
 sv("circle",{cx:641,cy:110,r:16,"class":"lamp",fill:"#fff3c4","fill-opacity":.75},lh);
 /* 島民 */
 var bl=[blob(s,530,236,.95,"#78a9e0",12,8,"w"),blob(s,742,230,.82,"#e58a73",8,12,"o"),blob(s,858,246,.72,"#7fc3a0",11,11,"s")];
-wave(284,12,2600,"#1b3560","wv w2",s);
+wave(284,12,2600,"var(--lp-wv2,#1b3560)","wv w2",s);
 /* 月亮（一隻大眼睛）*/
 var mo=document.createElement("div");mo.className="moon";hero.appendChild(mo);
-var ms=sv("svg",{viewBox:"0 0 120 120","aria-hidden":"true"},mo);sv("path",{d:"M78 14C46 12 20 38 22 68C24 98 54 112 80 104C52 96 46 56 62 36C68 28 74 20 78 14Z",fill:"#f3e3a6",stroke:INK,"stroke-width":3,"stroke-linejoin":"round"},ms);eye(ms,52,60,10);sv("path",{d:"M44 82q8 5 18-2",fill:"none",stroke:INK,"stroke-width":2.6,"stroke-linecap":"round"},ms);
+var ms=sv("svg",{viewBox:"0 0 120 120","aria-hidden":"true"},mo);sv("path",{d:"M78 14C46 12 20 38 22 68C24 98 54 112 80 104C52 96 46 56 62 36C68 28 74 20 78 14Z",fill:"var(--lp-moon,#f3e3a6)",stroke:INK,"stroke-width":3,"stroke-linejoin":"round"},ms);eye(ms,52,60,10);sv("path",{d:"M44 82q8 5 18-2",fill:"none",stroke:INK,"stroke-width":2.6,"stroke-linecap":"round"},ms);
 /* ---- 結尾的島民 ---- */
 var fin=$("#finisle");
-if(fin){var fs=sv("svg",{viewBox:"0 -70 520 220",preserveAspectRatio:"xMidYMax meet","aria-hidden":"true"},fin);wave(122,8,1400,"#1b3560","wv w2",fs);blob(fs,150,118,1.1,"#78a9e0",12,8,"w");blob(fs,270,114,1.25,"#e58a73",9,13,"o");blob(fs,390,118,1.05,"#7fc3a0",11,11,"s");wave(138,9,1400,"#16294a","wv w1",fs)}
+if(fin){var fs=sv("svg",{viewBox:"0 -70 520 220",preserveAspectRatio:"xMidYMax meet","aria-hidden":"true"},fin);wave(122,8,1400,"var(--lp-wv2,#1b3560)","wv w2",fs);blob(fs,150,118,1.1,"#78a9e0",12,8,"w");blob(fs,270,114,1.25,"#e58a73",9,13,"o");blob(fs,390,118,1.05,"#7fc3a0",11,11,"s");wave(138,9,1400,"var(--lp-wv1,#16294a)","wv w1",fs)}
 /* ---- 說話與點擊 ---- */
 var lines=["路過的，進來玩玩吧！","拖一下，我就懂了","數學不可怕，我才可怕","按下面的按鈕上島","燈塔是為你亮的","你的眼睛在看我嗎","一二三，點我一下"],li=0;
 function say(g,text,ms){if(!g.ownerSVGElement||g.parentNode!==s)return;var old=s.querySelector(".say");if(old)old.remove();
