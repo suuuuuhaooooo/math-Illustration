@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="302" height="302" viewBox="0 0 302 302">
-<rect x="0" y="0" width="302" height="302" fill="#ffffff"/>
-<path d="M213.5,88.5 A62.5,62.5 0 0 0 88.5,88.5 L213.5,88.5 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
-<path d="M213.5,213.5 A62.5,62.5 0 0 0 213.5,88.5 L213.5,213.5 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
-<path d="M88.5,213.5 A62.5,62.5 0 0 0 213.5,213.5 L88.5,213.5 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
-<path d="M88.5,88.5 A62.5,62.5 0 0 0 88.5,213.5 L88.5,88.5 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
-<path d="M88.5,213.5 L213.5,213.5 L213.5,88.5 L88.5,88.5 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6" stroke-dasharray="5 4"/>
-<text x="151.0" y="146.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">40m</text>
-</svg>
