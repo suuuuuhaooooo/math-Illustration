@@ -1,2 +1,0 @@
-/* 4d-5.1 */
-NB.unit(NB.kit?NB.kit.line({"min":0,"max":60,"tick":1,"lab":10,"div":10,"round":1,"q":"一位小數 × 整數：0.4 × 3。","steps":["0.4 是 4 個 0.1","4 × 3 = 12 個 0.1","= 1.2"],"ch":{"q":"0.6 × 5 = ？","a":3,"h":"6 × 5 = 30 個 0.1。"},"S":[{"k":"a","label":"0.1 的個數","min":1,"max":20,"val":4,"unit":""},{"k":"k","label":"倍數","min":2,"max":5,"val":3,"unit":"倍"}],"marks":(v,px,q,y)=>{NB.mk("circle",{cx:px(Math.min(60,q.a*q.k)),cy:y,r:7,fill:"var(--p1)"},v,2)},"eq":q=>`${(q.a/10).toFixed(1)} × ${q.k} = <b>${(q.a*q.k/10).toFixed(1)}</b>`}):{});

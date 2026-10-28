@@ -1,2 +1,0 @@
-/* 5d-2.2 */
-NB.unit(NB.kit?NB.kit.frac({"mode":"mul","q":"分數 × 分數：2/3 × 3/4，用面積圖看。","steps":["分母 × 分母","分子 × 分子","約分到最簡"],"ch":{"q":"1/2 × 2/3 = 1/？，填分母。","a":3,"h":"2/6 = 1/3。"},"S":[{"k":"n1","label":"第一個分子","min":1,"max":5,"val":2,"unit":""},{"k":"d1","label":"第一個分母","min":2,"max":6,"val":3,"unit":""},{"k":"n2","label":"第二個分子","min":1,"max":5,"val":3,"unit":""},{"k":"d2","label":"第二個分母","min":2,"max":6,"val":4,"unit":""}],"eq":q=>{const a=Math.min(q.n1,q.d1),b=Math.min(q.n2,q.d2);return `${a}/${q.d1} × ${b}/${q.d2} = <b>${a*b}/${q.d1*q.d2}</b>`}}):{});

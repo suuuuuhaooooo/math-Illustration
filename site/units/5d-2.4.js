@@ -1,2 +1,0 @@
-/* 5d-2.4 */
-NB.unit(NB.kit?NB.kit.frac({"mode":"div","q":"分數 ÷ 整數：3/4 ÷ 2，平分成 2 份。","steps":["分母乘整數","分子不變","3/4 ÷ 2 = 3/8"],"ch":{"q":"2/5 ÷ 3 = 2/？，填分母。","a":15,"h":"5 × 3。"},"S":[{"k":"n","label":"分子","min":1,"max":6,"val":3,"unit":""},{"k":"d","label":"分母","min":2,"max":8,"val":4,"unit":""},{"k":"k","label":"除以","min":2,"max":5,"val":2,"unit":""}],"eq":q=>`${Math.min(q.n,q.d)}/${q.d} ÷ ${q.k} = <b>${Math.min(q.n,q.d)}/${q.d*q.k}</b>`}):{});

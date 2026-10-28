@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="280" height="250" viewBox="0 0 280 250">
-<rect x="0" y="0" width="280" height="250" fill="#ffffff"/>
-<rect x="20" y="30" width="16" height="190" fill="#bbbbbb"/><line x1="36.0" y1="200.0" x2="196.0" y2="200.0" stroke="#555555" stroke-width="5"/>
-<line x1="36.0" y1="200.0" x2="149.0" y2="87.0" stroke="#000000" stroke-width="3" stroke-dasharray="8 5"/>
-<circle cx="36" cy="200" r="5" fill="#000000"/><text x="60.0" y="230.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">門軸</text>
-<text x="150.0" y="225.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">關上的門</text>
-<text x="170.0" y="80.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">打開後的門</text>
-<path d="M196,200 A160,160 0 0 0 149,87" fill="none" stroke="#000000" stroke-width="1.5" stroke-dasharray="3 4"/></svg>

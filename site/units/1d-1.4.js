@@ -1,2 +1,0 @@
-/* 1d-1.4 */
-NB.unit(NB.kit?NB.kit.free({"h":200,"q":"在 1 到 50 的表中，找第幾個。","steps":["一排 10 個，從左到右","第 11 個在第二排第一個","向下一排多 10"],"ch":{"q":"第 35 個在第幾排？","a":4,"h":"31 到 40 在第 4 排。"},"S":[{"k":"k","label":"第幾個","min":1,"max":50,"val":23,"unit":""}],"draw":(v,q)=>{for(let i=0;i<50;i++){const x=30+(i%10)*52,y=14+Math.floor(i/10)*36,on=i+1===q.k;NB.mk("rect",{x:x,y:y,width:46,height:30,rx:6,fill:on?"var(--p1)":"none","fill-opacity":.45},v,1.2);NB.t(v,x+23,y+21,String(i+1),{z:14,b:on?1:0})}},"eq":q=>`第 <b>${q.k}</b> 個在第 <b>${Math.ceil(q.k/10)}</b> 排第 <b>${(q.k-1)%10+1}</b> 個`}):{});

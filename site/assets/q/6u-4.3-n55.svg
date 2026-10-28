@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="380" height="150" viewBox="0 0 380 150">
-<rect x="0" y="0" width="380" height="150" fill="#ffffff"/>
-<rect x="80" y="15" width="130" height="120" rx="10" fill="#eeeeee" stroke="#000000" stroke-width="1.5"/>
-<text x="145.0" y="65.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="bold" fill="#000000">糙米</text>
-<text x="145.0" y="95.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">1.8 公斤</text>
-<rect x="230" y="60" width="90" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
-<text x="275.0" y="84.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">245 元</text>
-</svg>
