@@ -1,2 +1,0 @@
-/* 3u-9.1 */
-NB.unit(NB.kit?NB.kit.frac({"mode":"unit","q":"一個圖形平分成 5 份，取 3 份是幾分之幾？","steps":["平分成幾份，分母就是幾","取了幾份，分子就是幾","3/5 讀作五分之三"],"ch":{"q":"把一個圓平分成 8 份，塗色 5 份，分子是多少？","a":5,"h":"塗色幾份，分子就是幾。"},"S":[{"k":"d","label":"平分成","min":2,"max":12,"val":5,"unit":"份"},{"k":"n","label":"取","min":1,"max":12,"val":3,"unit":"份","maxOf":v=>v.d}],"eq":q=>`<b>${Math.min(q.n,q.d)}/${q.d}</b> 讀作 ${NB.kit.zh(q.d)}分之${NB.kit.zh(Math.min(q.n,q.d))}`}):{});

@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="452" height="117" viewBox="0 0 452 117">
-<rect x="0" y="0" width="452" height="117" fill="#ffffff"/>
-<path d="M39.3,79.3 L79.3,79.3 L92.7,66.0 L26.0,66.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
-<path d="M212.7,79.3 L372.7,79.3 L426.0,26.0 L159.3,26.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
-<text x="59.3" y="95.4" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">1.5cm</text>
-<text x="292.7" y="95.4" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">6cm</text>
-<text x="59.3" y="78.3" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">A</text>
-<text x="292.7" y="58.3" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">B</text>
-</svg>
