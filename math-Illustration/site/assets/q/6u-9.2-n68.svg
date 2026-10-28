@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="327" height="252" viewBox="0 0 327 252">
+<rect x="0" y="0" width="327" height="252" fill="#ffffff"/>
+<path d="M76.0,126.0 A25.0,25.0 0 0 0 26.0,126.0 A25.0,25.0 0 0 0 76.0,126.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M301.0,126.0 A100.0,100.0 0 0 0 101.0,126.0 A100.0,100.0 0 0 0 301.0,126.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<circle cx="51.0" cy="126.0" r="3" fill="#000000"/>
+<circle cx="201.0" cy="126.0" r="3" fill="#000000"/>
+<path d="M51.0,126.0 L76.0,126.0" fill="none" stroke="#000000" stroke-width="1.6"/>
+<path d="M201.0,126.0 L301.0,126.0" fill="none" stroke="#000000" stroke-width="1.6"/>
+<text x="63.5" y="118.9" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">2cm</text>
+<text x="251.0" y="119.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">8cm</text>
+<text x="51.0" y="92.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">甲</text>
+<text x="201.0" y="17.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">乙</text>
+</svg>

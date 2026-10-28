@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="82" viewBox="0 0 240 82">
+<rect x="0" y="0" width="240" height="82" fill="#ffffff"/>
+<rect x="11.0" y="1" width="57.0" height="40" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="39.5" y="26.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">個位</text>
+<rect x="68.0" y="1" width="57.0" height="40" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="96.5" y="26.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">十分位</text>
+<rect x="125.0" y="1" width="57.0" height="40" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="153.5" y="26.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">百分位</text>
+<rect x="182.0" y="1" width="57.0" height="40" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="210.5" y="26.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">千分位</text>
+<rect x="11.0" y="41" width="57.0" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="39.5" y="68.0" font-family="sans-serif" font-size="20" text-anchor="middle" font-weight="normal" fill="#000000">0</text>
+<rect x="68.0" y="41" width="57.0" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="96.5" y="68.0" font-family="sans-serif" font-size="20" text-anchor="middle" font-weight="normal" fill="#000000">?</text>
+<rect x="125.0" y="41" width="57.0" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="153.5" y="68.0" font-family="sans-serif" font-size="20" text-anchor="middle" font-weight="normal" fill="#000000">7</text>
+<rect x="182.0" y="41" width="57.0" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="210.5" y="68.0" font-family="sans-serif" font-size="20" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<circle cx="68.0" cy="73" r="3.5" fill="#000000"/>
+</svg>

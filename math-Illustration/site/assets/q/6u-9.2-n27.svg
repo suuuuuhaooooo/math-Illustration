@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="427" height="326" viewBox="0 0 427 326">
+<rect x="0" y="0" width="427" height="326" fill="#ffffff"/>
+<path d="M26.0,276.0 L26.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M88.5,276.0 L88.5,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M151.0,276.0 L151.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M213.5,276.0 L213.5,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M276.0,276.0 L276.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M338.5,276.0 L338.5,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M401.0,276.0 L401.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,276.0 L401.0,276.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,213.5 L401.0,213.5" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,151.0 L401.0,151.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,88.5 L401.0,88.5" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,26.0 L401.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M88.5,213.5 L213.5,213.5 L213.5,151.0 L276.0,151.0 L276.0,88.5 L151.0,88.5 L151.0,151.0 L88.5,151.0 Z" fill="#cfe8f7" stroke="#000000" stroke-width="1.8"/>
+<text x="213.5" y="314.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（每一小格的邊長是 1 公分）</text>
+</svg>

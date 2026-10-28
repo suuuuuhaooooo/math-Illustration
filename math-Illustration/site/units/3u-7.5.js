@@ -1,0 +1,2 @@
+/* 3u-7.5 */
+NB.unit(NB.kit?NB.kit.model({"q":"72 個糖果，每 8 個裝一袋，可以裝幾袋？","steps":["全部 ÷ 每袋 = 袋數","72 ÷ 8 = 9","驗算 9 × 8 = 72"],"ch":{"q":"45 本書平分給 9 人，每人幾本？","a":5,"h":"45 ÷ 9。"},"S":[{"k":"u","label":"每袋","min":2,"max":9,"val":8,"unit":"個"},{"k":"k","label":"袋數","min":2,"max":9,"val":9,"unit":"袋"}],"rows":q=>[{name:"全部",segs:Array(q.k).fill(q.u),cols:Array(q.k).fill("var(--p1)")}],"brace":q=>q.u*q.k,"eq":q=>`${q.u*q.k} ÷ ${q.u} = <b>${q.k}</b> 袋`}):{});

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297" height="74" viewBox="0 0 297 74">
+<rect x="0" y="0" width="297" height="74" fill="#ffffff"/>
+<rect x="1" y="1" width="136.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="69.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">數量（本）</text>
+<rect x="137.0" y="1" width="52.8" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="163.4" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<rect x="189.8" y="1" width="52.8" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="216.2" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">6</text>
+<rect x="242.60000000000002" y="1" width="52.8" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="269.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">10</text>
+<rect x="1" y="37" width="136.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="69.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">總重量（公克）</text>
+<rect x="137.0" y="37" width="52.8" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="163.4" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">100</text>
+<rect x="189.8" y="37" width="52.8" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="216.2" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">150</text>
+<rect x="242.60000000000002" y="37" width="52.8" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="269.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">250</text>
+</svg>

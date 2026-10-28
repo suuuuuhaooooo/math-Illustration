@@ -1,0 +1,2 @@
+/* 2d-6.2 */
+NB.unit(NB.kit?NB.kit.model({"q":"每盒 7 顆，買 5 盒，吃掉 6 顆，還剩幾顆？","steps":["先算乘法：7 × 5 = 35","再算減法：35 − 6","還剩 29 顆"],"ch":{"q":"每袋 8 個，3 袋，送人 5 個，還剩幾個？","a":19,"h":"8 × 3 − 5。"},"S":[{"k":"u","label":"每盒","min":2,"max":9,"val":7,"unit":"顆"},{"k":"k","label":"盒數","min":2,"max":9,"val":5,"unit":"盒"},{"k":"e","label":"吃掉","min":0,"max":20,"val":6,"unit":"顆"}],"rows":q=>[{name:"全部",segs:Array(q.k).fill(q.u),cols:Array(q.k).fill("var(--p1)")}],"brace":q=>q.u*q.k+" 顆","eq":q=>`${q.u} × ${q.k} − ${q.e} = ${q.u*q.k} − ${q.e} = <b>${q.u*q.k-q.e}</b>`}):{});

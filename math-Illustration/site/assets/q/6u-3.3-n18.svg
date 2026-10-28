@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="74" viewBox="0 0 240 74">
+<rect x="0" y="0" width="240" height="74" fill="#ffffff"/>
+<rect x="1" y="1" width="56.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="29.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">甲數</text>
+<rect x="57.0" y="1" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="79.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">2</text>
+<rect x="101.0" y="1" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="123.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">5</text>
+<rect x="145.0" y="1" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="167.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">9</text>
+<rect x="189.0" y="1" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="211.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">12</text>
+<rect x="1" y="37" width="56.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="29.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">乙數</text>
+<rect x="57.0" y="37" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="79.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">12</text>
+<rect x="101.0" y="37" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="123.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">30</text>
+<rect x="145.0" y="37" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="167.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">？</text>
+<rect x="189.0" y="37" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="211.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">72</text>
+</svg>

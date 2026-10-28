@@ -1,0 +1,2 @@
+/* 5d-9.2 */
+NB.unit(NB.kit?NB.kit.model({"q":"每天讀 1 時 20 分，連續 3 天，共讀多久？","steps":["80 分 × 3 = 240 分","= 4 時","時、分分別乘再進位也可以"],"ch":{"q":"1 時 30 分 × 4 = 幾時？","a":6,"h":"90 分 × 4 = 360 分。"},"S":[{"k":"u","label":"每次（分）","min":10,"max":180,"val":80,"unit":"分","step":5},{"k":"k","label":"次數","min":2,"max":7,"val":3,"unit":"次"}],"rows":q=>[{name:"全部",segs:Array(q.k).fill(q.u),cols:Array(q.k).fill("var(--p1)")}],"brace":q=>q.u*q.k+" 分","eq":q=>`${q.u} × ${q.k} = ${q.u*q.k} 分 = <b>${Math.floor(q.u*q.k/60)} 時 ${q.u*q.k%60} 分</b>`}):{});

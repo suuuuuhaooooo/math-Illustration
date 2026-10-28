@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="298" height="316" viewBox="0 0 298 316">
+<rect x="0" y="0" width="298" height="316" fill="#ffffff"/>
+<path d="M26.0,266.0 L266.0,266.0 L266.0,26.0 L26.0,26.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path d="M26.0,266.0 A120.0,120.0 0 0 0 26.0,26.0 L26.0,266.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M266.0,26.0 A120.0,120.0 0 0 0 266.0,266.0 L266.0,26.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M26.0,266.0 L266.0,266.0 L266.0,26.0 L26.0,26.0 Z" fill="none" stroke="#000000" stroke-width="1.6" stroke-dasharray="5 4"/>
+<path d="M35.0,266.0 L35.0,257.0 L26.0,257.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M257.0,266.0 L257.0,257.0 L266.0,257.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M257.0,26.0 L257.0,35.0 L266.0,35.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M35.0,26.0 L35.0,35.0 L26.0,35.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<text x="146.0" y="287.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">14</text>
+<text x="274.0" y="151.6" font-family="sans-serif" font-size="16" text-anchor="start" fill="#000000">14</text>
+<text x="146.0" y="304.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（單位：公分）</text>
+</svg>
