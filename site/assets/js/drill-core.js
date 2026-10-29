@@ -78,12 +78,18 @@
   DR.CMP = [">", "<", "="];
 
   /* ---------- 登記 ---------- */
-  DR.def = function (ids, fn, o) { (Array.isArray(ids) ? ids : [ids]).forEach(function (id) { if (!DR.G[id]) DR.ids.push(id); DR.G[id] = { f: fn, o: o || {} }; }); };
+  DR.def = function (ids, fn, o) { (Array.isArray(ids) ? ids : [ids]).forEach(function (id) { if (!DR.G[id]) DR.ids.push(id); DR.G[id] = { f: fn, o: o || {}, v: [{ f: fn, t: (o && o.t) || "基本題" }] }; }); };
+  /* 同一個小節的其他題型：DR.more("5u-6.1", "應用題", function (R, lv) {…}) */
+  DR.more = function (ids, t, fn) { (Array.isArray(ids) ? ids : [ids]).forEach(function (id) { if (DR.G[id]) DR.G[id].v.push({ f: fn, t: t }); }); };
+  DR.types = function (id) { var g = DR.G[id]; return g ? g.v.map(function (x) { return x.t; }) : []; };
   DR.has = function (id) { return !!DR.G[id]; };
-  DR.make = function (id, seed, lv) {
+  /* allow：只出哪幾種題型（題型的索引）；沒給就全部輪流 */
+  DR.make = function (id, seed, lv, allow) {
     var g = DR.G[id]; if (!g) return null;
-    var R = DR.rng(DR.hash(id + "|" + seed + "|" + lv)), Q = g.f(R, lv || 2);
-    if (!Q.b) Q.b = []; Q.id = id; Q.seed = seed; Q.lv = lv || 2;
+    var vs = g.v.map(function (x, i) { return i; }).filter(function (i) { return !allow || !allow.length || allow.indexOf(i) >= 0; }); if (!vs.length) vs = [0];
+    var vi = vs.length > 1 ? vs[Math.floor(DR.rng(DR.hash(id + "|" + seed + "|v")).f() * vs.length)] : vs[0];
+    var R = DR.rng(DR.hash(id + "|" + seed + "|" + lv)), Q = g.v[vi].f(R, lv || 2);
+    if (!Q.b) Q.b = []; Q.id = id; Q.seed = seed; Q.lv = lv || 2; Q.vt = g.v[vi].t; Q.vi = vi;
     if (Q.q.indexOf("[?]") < 0 && Q.b.length && Q.b[0].k !== "c") Q.q += Q.b.map(function () { return "[?]"; }).join("　");
     return Q;
   };
