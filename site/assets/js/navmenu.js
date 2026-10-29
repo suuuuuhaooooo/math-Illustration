@@ -10,6 +10,7 @@
     print: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
     pen: '<path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M13 7l4 4"/>',
     log: '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
+    game: '<rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/>',
     tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
     cup: '<path d="M6 8h12l-1.5 12a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2z"/><path d="M5 8h14M14 3l-2 5"/><circle cx="10" cy="17" r="1"/><circle cx="13.5" cy="15.5" r="1"/>',
     home: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>'
@@ -20,6 +21,7 @@
     { g: "學習", id: "map", href: "map.html", t: "學習地圖", d: "單元之間怎麼連起來", ic: "map" },
     { g: "免費工具・不用登入", id: "drill", href: "drill.html#print", t: "無限出題", d: "自動排版的 A4 練習卷，附答案卷", ic: "print" },
     { g: "免費工具・不用登入", id: "online", href: "drill.html#online", t: "線上練習", d: "一題一題作答，馬上批改", ic: "pen" },
+    { g: "免費工具・不用登入", id: "games", href: "games.html", t: "遊戲場", d: "六個小遊戲：改考卷、修計算機、反應賽", ic: "game" },
     { g: "免費工具・不用登入", id: "log", href: "drill.html#log", t: "練習紀錄", d: "答對率、錯題再練（存在這台裝置）", ic: "log" },
     { g: "其他", id: "intro", href: "../", t: "島覽頁", d: "數光島筆記本介紹", ic: "home" },
     { g: "其他", id: "plans", href: "plans.html", t: "方案與價格", d: "班級與個人方案", ic: "tag" },
