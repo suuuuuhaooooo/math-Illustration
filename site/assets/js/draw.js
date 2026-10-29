@@ -20,7 +20,7 @@
   /* ---------- 預設樣式與調色盤 ---------- */
   var PAL = ["#1c2635", "#bf5b43", "#35639a", "#4f8c6e", "#d9a93c", "#7a68a6", "#9aa1ab", "#ffffff"];
   var FONTS = [["KaTeX_Main", "Computer Modern（LaTeX）"], ["sans-serif", "黑體"], ["serif", "明體"], ["'LXGW WenKai TC', cursive", "手寫"], ["monospace", "等寬"]];
-  var DEF = { sc: "#1c2635", sw: 2, sd: "", fc: "none", fo: 1, fs: 18, fw: 400, fa: "middle", ff: "sans-serif", a1: 0, a2: 0, r: 0 };
+  var DEF = { sc: "#1c2635", sw: 2, sd: "", fc: "none", fo: 1, fs: 18, fw: 400, fi: 0, fa: "middle", ff: "sans-serif", a1: 0, a2: 0, r: 0 };
   /* 題目附圖常用的尺寸：照題庫 assets/q/ 裡現有 5000 多張圖的實際大小抓的 */
   var PRE = [["題目小圖", 284, 112], ["題目中圖", 420, 200], ["題目寬圖", 600, 160], ["題目大圖", 560, 300], ["投影片", 960, 540], ["A4 橫", 1123, 794]];
 
@@ -139,6 +139,22 @@
     for (var i = 0; i < n; i++) { var a = -Math.PI / 2 + (i * 2 * Math.PI) / n; p.push(rd(cx + rx * Math.cos(a)) + "," + rd(cy + ry * Math.sin(a))); }
     return p.join(" ");
   }
+  /* 題庫圖形：函式吐回來的是一支完整的 <svg>，這裡重設它的位置與大小，
+     並把 currentColor 換成實際顏色（不然匯出去會變黑或不見） */
+  function libSvg(o, col) {
+    var t = String(o.d.svg || ""); if (!t) return "";
+    t = t.replace(/currentColor/g, col);
+    return t.replace(/^<svg([^>]*)>/, function (m, at) {
+      at = at.replace(/\s(width|height|x|y|preserveAspectRatio)="[^"]*"/g, "");
+      return '<svg' + at + ' x="' + rd(o.x) + '" y="' + rd(o.y) + '" width="' + rd(o.w) + '" height="' + rd(o.h) + '" preserveAspectRatio="none">';
+    });
+  }
+  function libSize(t) {
+    var w = /width="([\d.]+)"/.exec(t), h = /height="([\d.]+)"/.exec(t);
+    if (w && h) return [+w[1], +h[1]];
+    var vb = /viewBox="[\d.\-]+ [\d.\-]+ ([\d.]+) ([\d.]+)"/.exec(t);
+    return vb ? [+vb[1], +vb[2]] : [120, 90];
+  }
   function objSvg(o) {
     var s = o.s, b = bbox(o), inner = "";
     switch (o.t) {
@@ -146,13 +162,13 @@
       case "ellipse": inner = '<ellipse cx="' + rd(o.x + o.w / 2) + '" cy="' + rd(o.y + o.h / 2) + '" rx="' + rd(o.w / 2) + '" ry="' + rd(o.h / 2) + '" ' + sAttr(s) + "/>"; break;
       case "poly": inner = '<polygon points="' + polyPts(o) + '" ' + sAttr(s) + "/>"; break;
       case "line": case "arrow": inner = lineWithHeads(o.x, o.y, o.x2, o.y2, s, s.a1, s.a2); break;
-      case "text": inner = '<text font-size="' + s.fs + '" font-weight="' + s.fw + '" font-family="' + s.ff + '" text-anchor="' + s.fa + '" fill="' + s.sc + '">' + tspans(o) + "</text>"; break;
+      case "text": inner = '<text font-size="' + s.fs + '" font-weight="' + s.fw + '"' + (s.fi ? ' font-style="italic"' : "") + ' font-family="' + s.ff + '" text-anchor="' + s.fa + '" fill="' + s.sc + '">' + tspans(o) + "</text>"; break;
       case "nline": inner = nlineSvg(o); break;
       case "axes": inner = axesSvg(o); break;
       case "grid": inner = gridSvg(o); break;
       case "table": inner = tableSvg(o); break;
       case "math": inner = o.d.svg ? '<g transform="translate(' + rd(o.x) + " " + rd(o.y) + ") scale(" + rd(o.w / (o.d.w0 || 1), 4) + " " + rd(o.h / (o.d.h0 || 1), 4) + ')">' + String(o.d.svg).replace(/currentColor/g, s.sc) + "</g>" : ""; break;
-      case "lib": inner = '<g transform="translate(' + rd(o.x) + " " + rd(o.y) + ") scale(" + rd(o.w / (o.d.w || 100), 4) + " " + rd(o.h / (o.d.h || 100), 4) + ')">' + (o.d.svg || "") + "</g>"; break;
+      case "lib": inner = libSvg(o, s.sc); break;
     }
     var tr = o.rot ? ' transform="rotate(' + o.rot + " " + rd(b.x + b.w / 2) + " " + rd(b.y + b.h / 2) + ')"' : "";
     return '<g data-id="' + o.id + '"' + tr + (o.op != null && o.op < 1 ? ' opacity="' + o.op + '"' : "") + ">" + inner + "</g>";
@@ -217,6 +233,7 @@
       });
       top.appendChild(g2);
       var g3 = h('<div class="dw-grp"></div>');
+      var lb = h('<button type="button" class="pen dw-b">圖庫</button>'); lb.onclick = libDlg; g3.appendChild(lb);
       var ex = h('<button type="button" class="pen go dw-b">匯出</button>'); ex.onclick = exportDlg; g3.appendChild(ex);
       var im = h('<button type="button" class="pen dw-b">備份／還原</button>'); im.onclick = backupDlg; g3.appendChild(im);
       top.appendChild(g3);
@@ -530,6 +547,7 @@
       if (o.t === "text") {
         propsBox.appendChild(selRow("對齊", [["start", "靠左"], ["middle", "置中"], ["end", "靠右"]], o.s.fa, function (v) { set(function (x) { x.s.fa = v; }); }));
         propsBox.appendChild(chkRow("粗體", o.s.fw >= 700, function (v) { set(function (x) { x.s.fw = v ? 700 : 400; }); }));
+        propsBox.appendChild(chkRow("斜體", o.s.fi, function (v) { set(function (x) { x.s.fi = v ? 1 : 0; }); }));
         var eb = h('<button type="button" class="pen dw-b dw-full">改文字</button>'); eb.onclick = function () { editText(o); }; propsBox.appendChild(eb);
       }
       if (o.t === "nline") {
@@ -553,6 +571,27 @@
         propsBox.appendChild(numRow("字級", o.s.fs, 8, 120, 1, function (v) { set(function (x) { x.s.fs = v; x.d.fit = 0; remath(x); }); }));
         var mb = h('<button type="button" class="pen dw-b dw-full">改式子</button>'); mb.onclick = function () { editMath(o); }; propsBox.appendChild(mb);
         if (o.d.err) propsBox.appendChild(h('<p class="dw-note dw-err">' + esc(o.d.err) + "</p>"));
+      }
+      if (o.t === "lib") {
+        var LB = NB.drawLib, sp = LB && LB.byName(o.d.f);
+        if (sp) {
+          sp.a.forEach(function (a) {
+            var cb = function (v) { push(); list.forEach(function (x) { if (x.t === "lib" && x.d.f === o.d.f) { x.d.v[a.k] = v; remlib(x); } }); render(); store(); };
+            var cv = o.d.v[a.k];
+            if (a.t === "num") propsBox.appendChild(numRow(a.n, cv, a.min, a.max, a.step, cb));
+            else if (a.t === "bool") propsBox.appendChild(chkRow(a.n, cv, function (v) { cb(v ? 1 : 0); }));
+            else if (a.t === "sel") propsBox.appendChild(selRow(a.n, a.o.map(function (x) { return x.push ? x : [x, x]; }), cv, cb));
+            else if (a.t === "grid" || a.t === "segs") {
+              var ta = h('<textarea class="dw-in dw-mono" rows="3">' + esc(String(cv)) + "</textarea>");
+              ta.onchange = function () { cb(ta.value); };
+              propsBox.appendChild(row(a.n, ta));
+            } else propsBox.appendChild(txtRow(a.n, String(cv), cb));
+          });
+        }
+        if (o.d.err) propsBox.appendChild(h('<p class="dw-note dw-err">' + esc(o.d.err) + "</p>"));
+        var rb = h('<button type="button" class="pen dw-b dw-full">回到原始大小</button>');
+        rb.onclick = function () { push(); list.forEach(function (x) { if (x.t === "lib") { x.w = x.d.w0; x.h = x.d.h0; } }); render(); store(); };
+        propsBox.appendChild(rb);
       }
       if (o.t === "table") {
         propsBox.appendChild(numRow("列數", o.d.r, 1, 20, 1, function (v) { set(function (x) { x.d.r = v; }); }));
@@ -663,6 +702,53 @@
       dlg("填表格內容", g, [["確定", function () { push(); o.d.cells = ins.map(function (x) { return x.value; }); closeDlg(); render(); store(); }, 1], ["取消", closeDlg]]);
     }
 
+    /* ---- 題庫圖庫 ---- */
+    function remlib(o) {
+      var t = NB.drawLib ? NB.drawLib.render(o.d.f, o.d.v) : null;
+      if (!t) { o.d.err = "這個圖畫不出來，請檢查參數"; return; }
+      o.d.err = ""; o.d.svg = t;
+      var sz = libSize(t), k = o.d.w0 && o.w ? o.w / o.d.w0 : 1;
+      o.d.w0 = sz[0]; o.d.h0 = sz[1];
+      if (!o.w || o.d.fresh) { o.w = sz[0]; o.h = sz[1]; o.d.fresh = 0; }
+      else { o.w = sz[0] * k; o.h = sz[1] * k; }
+    }
+    function addLib(f) {
+      var LB = NB.drawLib; if (!LB) return;
+      var o = { id: uid(), t: "lib", x: snap(40), y: snap(40), w: 0, h: 0, rot: 0, s: clone(DEF), d: { f: f, v: LB.defaults(f), fresh: 1 } };
+      remlib(o);
+      if (o.d.err) { status("這個圖現在畫不出來。"); return; }
+      push(); D.objs.push(o); sel = [o.id]; setTool("sel"); render(); store(); closeDlg();
+    }
+    function libDlg() {
+      var LB = NB.drawLib;
+      if (!LB) { ask("圖庫沒載入", "找不到 draw-lib.js，請確認檔案有放上去。", "知道了", null); return; }
+      var body = h('<div class="dw-lib"></div>');
+      var tabs = h('<div class="dw-ltabs"></div>'), list = h('<div class="dw-lgrid"></div>');
+      body.appendChild(tabs); body.appendChild(list);
+      var gs = LB.groups(), cur = gs[0];
+      function draw() {
+        tabs.querySelectorAll("button").forEach(function (b) { b.classList.toggle("on", b.textContent === cur); });
+        list.innerHTML = "";
+        LB.SPECS.filter(function (x) { return x.g === cur; }).forEach(function (sp) {
+          var t = LB.render(sp.f, LB.defaults(sp.f)) || "";
+          var sz = libSize(t), k = Math.min(1, 96 / Math.max(sz[0], 1), 72 / Math.max(sz[1], 1));
+          var pv = t.replace(/^<svg([^>]*)>/, function (m, at) {
+            return '<svg' + at.replace(/\s(width|height)="[^"]*"/g, "") + ' width="' + rd(sz[0] * k) + '" height="' + rd(sz[1] * k) + '">';
+          });
+          var b = h('<button type="button" class="dw-lc"><span class="dw-lpv">' + pv + "</span><small>" + esc(sp.n) + "</small></button>");
+          b.onclick = function () { addLib(sp.f); };
+          list.appendChild(b);
+        });
+      }
+      gs.forEach(function (g) {
+        var b = h('<button type="button" class="pen dw-b">' + esc(g) + "</button>");
+        b.onclick = function () { cur = g; draw(); };
+        tabs.appendChild(b);
+      });
+      draw();
+      dlg("圖庫（題庫現成的圖）", body, [["關閉", closeDlg]]);
+    }
+
     /* ---- 匯出 ---- */
     /* 匯出範圍：整張畫布／只要內容（自動裁切）／只要選取的 */
     function exObjs(range) { return range === "sel" && sel.length ? selObjs() : D.objs; }
@@ -678,7 +764,7 @@
       var k = {};
       exObjs(range).forEach(function (o) {
         if (o.t === "math" && o.d.fonts) o.d.fonts.forEach(function (f) { k[f] = 1; });
-        else if (/KaTeX_/.test(o.s.ff || "")) k[o.s.ff.replace(/['"]/g, "") + "|normal|" + (o.s.fw >= 700 ? 700 : 400)] = 1;
+        else if (/KaTeX_/.test(o.s.ff || "")) k[o.s.ff.replace(/['"]/g, "") + "|" + (o.s.fi ? "italic" : "normal") + "|" + (o.s.fw >= 700 ? 700 : 400)] = 1;
       });
       return Object.keys(k);
     }
