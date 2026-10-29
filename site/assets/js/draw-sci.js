@@ -82,7 +82,8 @@
       var cx = x0 + step * (i + 0.5), f = EL[k];
       if (!f) return;
       s += '<rect x="' + (cx - 23) + '" y="' + (yT - 15) + '" width="46" height="30" fill="#fff" stroke="none"/>';
-      s += f(cx, yT, lab[i] || "");
+      /* 開關要把「打開／閉合」傳下去，不然畫出來永遠是打開的 */
+      s += k === "sw" ? f(cx, yT, lab[i] || "", +open ? 1 : 0) : f(cx, yT, lab[i] || "");
     });
     return svg(W, H, s, 0.9);
   };

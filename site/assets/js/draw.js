@@ -36,7 +36,26 @@
     if (o.t === "line" || o.t === "arrow") {
       return { x: Math.min(o.x, o.x2), y: Math.min(o.y, o.y2), w: Math.abs(o.x2 - o.x), h: Math.abs(o.y2 - o.y) };
     }
+    if (o.t === "path") { var b = ptsBox(o.d.pts); return b || { x: o.x, y: o.y, w: 2, h: 2 }; }
     return { x: o.x, y: o.y, w: o.w, h: o.h };
+  }
+  function ptsBox(pts) {
+    if (!pts || !pts.length) return null;
+    var x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9;
+    pts.forEach(function (p) { if (p[0] < x1) x1 = p[0]; if (p[0] > x2) x2 = p[0]; if (p[1] < y1) y1 = p[1]; if (p[1] > y2) y2 = p[1]; });
+    return { x: x1, y: y1, w: Math.max(1, x2 - x1), h: Math.max(1, y2 - y1) };
+  }
+  /* 自由筆：用二次貝茲把相鄰點串起來，線條才不會一節一節的 */
+  function pathD(pts) {
+    if (!pts || !pts.length) return "";
+    if (pts.length < 3) return "M" + pts.map(function (p) { return rd(p[0]) + " " + rd(p[1]); }).join("L");
+    var d = "M" + rd(pts[0][0]) + " " + rd(pts[0][1]);
+    for (var i = 1; i < pts.length - 1; i++) {
+      var mx = (pts[i][0] + pts[i + 1][0]) / 2, my = (pts[i][1] + pts[i + 1][1]) / 2;
+      d += "Q" + rd(pts[i][0]) + " " + rd(pts[i][1]) + " " + rd(mx) + " " + rd(my);
+    }
+    var L2 = pts[pts.length - 1];
+    return d + "L" + rd(L2[0]) + " " + rd(L2[1]);
   }
   function unionBox(list) {
     if (!list.length) return null;
@@ -125,11 +144,12 @@
     var d = o.d, s = o.s, R = Math.max(1, d.r || 2), C = Math.max(1, d.c || 2), out = "", i;
     var cw = o.w / C, chh = o.h / R;
     out += '<rect x="' + rd(o.x) + '" y="' + rd(o.y) + '" width="' + rd(o.w) + '" height="' + rd(o.h) + '" fill="' + (s.fc || "none") + '"' + (s.fc !== "none" ? ' fill-opacity="' + s.fo + '"' : "") + ' stroke="' + s.sc + '" stroke-width="' + s.sw + '"/>';
+    if (d.head) out += '<rect x="' + rd(o.x) + '" y="' + rd(o.y) + '" width="' + rd(o.w) + '" height="' + rd(chh) + '" fill="' + s.sc + '" fill-opacity=".14" stroke="none"/>';
     for (i = 1; i < C; i++) out += '<path d="M' + rd(o.x + cw * i) + " " + rd(o.y) + "V" + rd(o.y + o.h) + '" stroke="' + s.sc + '" stroke-width="' + Math.max(.6, s.sw - .6) + '" fill="none"/>';
     for (i = 1; i < R; i++) out += '<path d="M' + rd(o.x) + " " + rd(o.y + chh * i) + "H" + rd(o.x + o.w) + '" stroke="' + s.sc + '" stroke-width="' + Math.max(.6, s.sw - .6) + '" fill="none"/>';
     (d.cells || []).forEach(function (t, k) {
       if (!t) return; var r = Math.floor(k / C), c2 = k % C;
-      out += '<text x="' + rd(o.x + cw * c2 + cw / 2) + '" y="' + rd(o.y + chh * r + chh / 2 + s.fs * .35) + '" text-anchor="middle" font-size="' + s.fs + '" font-family="' + s.ff + '" fill="' + s.sc + '">' + esc(t) + "</text>";
+      out += '<text x="' + rd(o.x + cw * c2 + cw / 2) + '" y="' + rd(o.y + chh * r + chh / 2 + s.fs * .35) + '" text-anchor="middle" font-size="' + s.fs + '" font-family="' + s.ff + '" fill="' + s.sc + '"' + (d.head && r === 0 ? ' font-weight="700"' : "") + ">" + esc(t) + "</text>";
     });
     return out;
   }
@@ -167,6 +187,7 @@
       case "axes": inner = axesSvg(o); break;
       case "grid": inner = gridSvg(o); break;
       case "table": inner = tableSvg(o); break;
+      case "path": inner = '<path d="' + pathD(o.d.pts) + '" ' + (o.d.close ? sAttr(s) : 'stroke="' + s.sc + '" stroke-width="' + s.sw + '"' + (s.sd ? ' stroke-dasharray="' + s.sd + '"' : "") + ' fill="none" stroke-linecap="round" stroke-linejoin="round"') + (o.d.close ? ' ' : "") + "/>"; break;
       case "math": inner = o.d.svg ? '<g transform="translate(' + rd(o.x) + " " + rd(o.y) + ") scale(" + rd(o.w / (o.d.w0 || 1), 4) + " " + rd(o.h / (o.d.h0 || 1), 4) + ')">' + String(o.d.svg).replace(/currentColor/g, s.sc) + "</g>" : ""; break;
       case "lib": inner = libSvg(o, s.sc); break;
     }
@@ -191,7 +212,7 @@
       ["rect", "矩形", "M4 6h16v12H4z"], ["ellipse", "橢圓", "M12 6a8 6 0 1 0 .01 0"], ["poly", "多邊形", "M12 4l8 6-3 9H7l-3-9z"],
       ["line", "直線", "M4 19L20 5"], ["arrow", "箭頭", "M4 19L20 5M20 5h-6M20 5v6"],
       ["nline", "數線", "M3 12h18M7 9v6M12 9v6M17 9v6"], ["axes", "座標軸", "M5 3v16h16M5 19L19 7"],
-      ["grid", "方格", "M4 4h16v16H4zM10 4v16M16 4v16M4 10h16M4 16h16"], ["table", "表格", "M4 5h16v14H4zM4 10h16M12 5v14"], ["math", "數學式", "M4 6h7l-3 12M14 9l6 6M20 9l-6 6"]];
+      ["grid", "方格", "M4 4h16v16H4zM10 4v16M16 4v16M4 10h16M4 16h16"], ["table", "表格", "M4 5h16v14H4zM4 10h16M12 5v14"], ["math", "數學式", "M4 6h7l-3 12M14 9l6 6M20 9l-6 6"], ["path", "自由筆", "M3 18c4-10 7 4 10-4s4 6 8 2"]];
     var tbar = h('<div class="dw-tools" role="toolbar" aria-label="工具"></div>');
     TOOLS.forEach(function (t) {
       var b = h('<button type="button" class="dw-t" data-t="' + t[0] + '" title="' + t[1] + '" aria-label="' + t[1] + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="' + t[2] + '"/></svg></button>');
@@ -373,10 +394,12 @@
 
     /* ---- 滑鼠／觸控 ---- */
     function bindCanvas() {
-      var mode = null, st = null;
+      var mode = null, st = null, pre = null;
       svg.addEventListener("pointerdown", function (e) {
         if (e.button === 2) return;
         svg.setPointerCapture(e.pointerId);
+        /* 復原要存「動作之前」的樣子，所以在這裡先拍一張，放開滑鼠才收進堆疊 */
+        pre = clone(D.objs);
         var p = pt(e);
         if (tool !== "sel") { mode = "new"; st = startNew(p); return; }
         var hk = e.target.closest ? e.target.closest(".dw-h") : null;
@@ -406,8 +429,9 @@
           else { sel = [st.o.id]; }
           setTool("sel");
         }
-        if (mode) { push(); render(); store(); }
-        mode = null; st = null;
+        if (mode && mode !== "marq" && pre) { undo.push(pre); if (undo.length > 60) undo.shift(); redo = []; }
+        if (mode) { render(); store(); }
+        mode = null; st = null; pre = null;
       });
       svg.addEventListener("dblclick", function (e) {
         var o = hitAt(pt(e)); if (!o) return;
@@ -420,7 +444,11 @@
       st.snap.forEach(function (s0) {
         var o = byId(s0.id); if (!o) return;
         if (o.t === "line" || o.t === "arrow") { o.x = snap(s0.x + dx); o.y = snap(s0.y + dy); o.x2 = snap(s0.x2 + dx); o.y2 = snap(s0.y2 + dy); }
-        else { o.x = snap(s0.x + dx); o.y = snap(s0.y + dy); }
+        else if (o.t === "path") {
+          var ddx = snap(s0.x + dx) - s0.x, ddy = snap(s0.y + dy) - s0.y;
+          o.d.pts = s0.d.pts.map(function (p) { return [rd(p[0] + ddx), rd(p[1] + ddy)]; });
+          o.x = s0.x + ddx; o.y = s0.y + ddy;
+        } else { o.x = snap(s0.x + dx); o.y = snap(s0.y + dy); }
       });
       live();
     }
@@ -437,6 +465,9 @@
         if (o.t === "line" || o.t === "arrow") {
           o.x = nx + (s0.x - b.x) * sx; o.y = ny + (s0.y - b.y) * sy;
           o.x2 = nx + (s0.x2 - b.x) * sx; o.y2 = ny + (s0.y2 - b.y) * sy;
+        } else if (o.t === "path") {
+          o.d.pts = s0.d.pts.map(function (p) { return [rd(nx + (p[0] - b.x) * sx), rd(ny + (p[1] - b.y) * sy)]; });
+          var nb = ptsBox(o.d.pts); if (nb) { o.x = nb.x; o.y = nb.y; o.w = nb.w; o.h = nb.h; }
         } else {
           o.x = nx + (s0.x - b.x) * sx; o.y = ny + (s0.y - b.y) * sy;
           o.w = Math.max(2, s0.w * sx); o.h = Math.max(2, s0.h * sy);
@@ -459,6 +490,13 @@
     function growNew(st, p, keep) {
       var o = st.o, x = snap(p.x), y = snap(p.y);
       if (o.t === "math") return;   /* 大小由式子本身決定，放下去再用把手縮放 */
+      if (o.t === "path") {
+        /* 自由筆不吸附格線，而且太近的點不收，免得筆跡抖動 */
+        var ps = o.d.pts, last = ps[ps.length - 1];
+        if (Math.abs(p.x - last[0]) + Math.abs(p.y - last[1]) > 1.6) ps.push([rd(p.x), rd(p.y)]);
+        var b = ptsBox(ps); if (b) { o.x = b.x; o.y = b.y; o.w = b.w; o.h = b.h; }
+        live(); return;
+      }
       if (o.t === "line" || o.t === "arrow") {
         o.x2 = x; o.y2 = y;
         if (keep) { if (Math.abs(x - o.x) > Math.abs(y - o.y)) o.y2 = o.y; else o.x2 = o.x; }
@@ -497,9 +535,10 @@
       if (t === "nline") { o.w = 300; o.h = 46; o.d = { min: 0, max: 10, step: 1, lab: 1, a2: 1, a1: 0 }; s.fs = 13; }
       if (t === "axes") { o.w = 240; o.h = 200; o.d = { gx: 8, gy: 8, grid: 1, xl: "x", yl: "y" }; s.fs = 13; }
       if (t === "grid") { o.w = 240; o.h = 180; o.d = { cell: 24, dash: 0 }; }
-      if (t === "table") { o.w = 260; o.h = 100; o.d = { r: 2, c: 3, cells: [] }; s.fs = 15; }
+      if (t === "table") { o.w = 260; o.h = 100; o.d = { r: 3, c: 3, cells: [], head: 1 }; s.fs = 15; }
       if (t === "line" || t === "arrow") { o.x2 = x; o.y2 = y; }
       if (t === "math") { o.d = { tex: "\\frac{3}{4}" }; s.fs = 28; remath(o); }
+      if (t === "path") { o.d = { pts: [[x, y]], close: 0 }; }
       return o;
     }
 
@@ -567,6 +606,14 @@
         propsBox.appendChild(numRow("格子大小", o.d.cell, 4, 120, 1, function (v) { set(function (x) { x.d.cell = v; }); }));
         propsBox.appendChild(chkRow("虛線", o.d.dash, function (v) { set(function (x) { x.d.dash = v ? 1 : 0; }); }));
       }
+      if (o.t === "path") {
+        propsBox.appendChild(chkRow("封閉並填色", o.d.close, function (v) { set(function (x) { x.d.close = v ? 1 : 0; }); }));
+        if (o.d.close) {
+          propsBox.appendChild(colorRow("填色", o.s.fc, function (c) { set(function (x) { x.s.fc = c; }); }, true));
+          propsBox.appendChild(numRow("填色濃度", o.s.fo, 0, 1, .05, function (v) { set(function (x) { x.s.fo = v; }); }));
+        }
+        propsBox.appendChild(h('<p class="dw-note meta">共 ' + (o.d.pts || []).length + " 個點。拖曳可以搬動，拉把手可以整筆縮放。</p>"));
+      }
       if (o.t === "math") {
         propsBox.appendChild(numRow("字級", o.s.fs, 8, 120, 1, function (v) { set(function (x) { x.s.fs = v; x.d.fit = 0; remath(x); }); }));
         var mb = h('<button type="button" class="pen dw-b dw-full">改式子</button>'); mb.onclick = function () { editMath(o); }; propsBox.appendChild(mb);
@@ -596,6 +643,7 @@
       if (o.t === "table") {
         propsBox.appendChild(numRow("列數", o.d.r, 1, 20, 1, function (v) { set(function (x) { x.d.r = v; }); }));
         propsBox.appendChild(numRow("欄數", o.d.c, 1, 20, 1, function (v) { set(function (x) { x.d.c = v; }); }));
+        propsBox.appendChild(chkRow("第一列當表頭", o.d.head, function (v) { set(function (x) { x.d.head = v ? 1 : 0; }); }));
         var tb2 = h('<button type="button" class="pen dw-b dw-full">填內容</button>'); tb2.onclick = function () { editTable(o); }; propsBox.appendChild(tb2);
       }
       propsBox.appendChild(numRow("旋轉", o.rot || 0, -180, 180, 1, function (v) { set(function (x) { x.rot = v; }); }));
@@ -622,7 +670,7 @@
       if (list.length > 1) { propsBox.appendChild(h('<p class="dw-ph">對齊</p>')); propsBox.appendChild(ab); }
     }
     function tName(t) {
-      return { sel: "選取", rect: "矩形", ellipse: "橢圓", poly: "多邊形", line: "直線", arrow: "箭頭", text: "文字", nline: "數線", axes: "座標軸", grid: "方格", table: "表格", math: "數學式", lib: "圖形" }[t] || t;
+      return { sel: "選取", rect: "矩形", ellipse: "橢圓", poly: "多邊形", line: "直線", arrow: "箭頭", text: "文字", nline: "數線", axes: "座標軸", grid: "方格", table: "表格", math: "數學式", path: "自由筆", lib: "圖形" }[t] || t;
     }
     function align(k) {
       var list = selObjs(); if (list.length < 2) return;
@@ -923,7 +971,7 @@
       if (m && e.key.toLowerCase() === "d") {
         e.preventDefault(); if (!sel.length) return;
         push();
-        var add = selObjs().map(function (o) { var c = clone(o); c.id = uid(); c.x += 12; c.y += 12; if (c.x2 != null) { c.x2 += 12; c.y2 += 12; } return c; });
+        var add = selObjs().map(function (o) { var c = clone(o); c.id = uid(); c.x += 12; c.y += 12; if (c.x2 != null) { c.x2 += 12; c.y2 += 12; } if (c.t === "path") c.d.pts = c.d.pts.map(function (p) { return [p[0] + 12, p[1] + 12]; }); return c; });
         add.forEach(function (c) { D.objs.push(c); });
         sel = add.map(function (c) { return c.id; });
         render(); store(); return;
@@ -934,7 +982,7 @@
       if (/^Arrow/.test(e.key) && sel.length) {
         e.preventDefault();
         var d = e.shiftKey ? 10 : 1, dx = e.key === "ArrowLeft" ? -d : e.key === "ArrowRight" ? d : 0, dy = e.key === "ArrowUp" ? -d : e.key === "ArrowDown" ? d : 0;
-        selObjs().forEach(function (o) { o.x += dx; o.y += dy; if (o.x2 != null) { o.x2 += dx; o.y2 += dy; } });
+        selObjs().forEach(function (o) { o.x += dx; o.y += dy; if (o.x2 != null) { o.x2 += dx; o.y2 += dy; } if (o.t === "path") o.d.pts = o.d.pts.map(function (p) { return [p[0] + dx, p[1] + dy]; }); });
         live(); store();
       }
     }
