@@ -599,6 +599,22 @@
         var tb2 = h('<button type="button" class="pen dw-b dw-full">填內容</button>'); tb2.onclick = function () { editTable(o); }; propsBox.appendChild(tb2);
       }
       propsBox.appendChild(numRow("旋轉", o.rot || 0, -180, 180, 1, function (v) { set(function (x) { x.rot = v; }); }));
+      /* 位置與大小直接打數字，不必用拖的（要對齊到小數點的時候很有用） */
+      propsBox.appendChild(h('<p class="dw-ph">位置與大小</p>'));
+      var bb = bbox(o);
+      if (o.t === "line" || o.t === "arrow") {
+        propsBox.appendChild(numRow("起點 X", rd(o.x), -9999, 9999, 1, function (v) { push(); o.x = v; render(); store(); }));
+        propsBox.appendChild(numRow("起點 Y", rd(o.y), -9999, 9999, 1, function (v) { push(); o.y = v; render(); store(); }));
+        propsBox.appendChild(numRow("終點 X", rd(o.x2), -9999, 9999, 1, function (v) { push(); o.x2 = v; render(); store(); }));
+        propsBox.appendChild(numRow("終點 Y", rd(o.y2), -9999, 9999, 1, function (v) { push(); o.y2 = v; render(); store(); }));
+        var len = Math.round(Math.sqrt((o.x2 - o.x) * (o.x2 - o.x) + (o.y2 - o.y) * (o.y2 - o.y)) * 10) / 10;
+        propsBox.appendChild(h('<p class="dw-note meta">長度 ' + len + " px・角度 " + Math.round((Math.atan2(o.y2 - o.y, o.x2 - o.x) * 180) / Math.PI) + "°</p>"));
+      } else {
+        propsBox.appendChild(numRow("X", rd(bb.x), -9999, 9999, 1, function (v) { push(); var d = v - bbox(o).x; list.forEach(function (x) { x.x += d; if (x.x2 != null) x.x2 += d; }); render(); store(); }));
+        propsBox.appendChild(numRow("Y", rd(bb.y), -9999, 9999, 1, function (v) { push(); var d = v - bbox(o).y; list.forEach(function (x) { x.y += d; if (x.y2 != null) x.y2 += d; }); render(); store(); }));
+        propsBox.appendChild(numRow("寬", rd(bb.w), 1, 9999, 1, function (v) { push(); list.forEach(function (x) { x.w = v; }); render(); store(); }));
+        propsBox.appendChild(numRow("高", rd(bb.h), 1, 9999, 1, function (v) { push(); list.forEach(function (x) { x.h = v; }); render(); store(); }));
+      }
       var ab = h('<div class="dw-arr"></div>');
       [["靠左", "l"], ["置中", "c"], ["靠右", "r"], ["靠上", "t"], ["中線", "m"], ["靠下", "b"]].forEach(function (a) {
         var b = h('<button type="button" class="pen dw-b">' + a[0] + "</button>"); b.onclick = function () { align(a[1]); }; ab.appendChild(b);
