@@ -11,5 +11,5 @@ var NB_CONFIG = {
     hd: "",
     /* 小額贊助（BobaMe）：把網址換成你自己的頁面，例如 "https://你的帳號.bobaboba.me/"。
        空字串＝不顯示。設定後，漢堡選單、頁尾、島覽頁最後一區都會出現「請島民喝珍奶」按鈕。 */
-    donate: { url: "https://suuuuuhaooooo.bobaboba.me", label: "請島民喝珍奶" }
+    donate: { url: "https://suuuuuhaooooo.bobaboba.me", label: "贊助島民" }
 };
