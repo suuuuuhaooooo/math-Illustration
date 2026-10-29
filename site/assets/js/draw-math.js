@@ -45,16 +45,25 @@
 
       if (n.nodeName.toLowerCase() === "svg") {                /* 根號那種 KaTeX 自己畫的線 */
         var inner = n.innerHTML, vb = n.getAttribute("viewBox") || "";
+        /* KaTeX 的 <path> 沒有寫 fill，是靠 CSS 上色；匯出去沒有那份 CSS，
+           所以這裡補在外層讓它繼承，不然根號會變黑或整個不見 */
         out.push('<svg x="' + rd(r.left - base.left) + '" y="' + rd(r.top - base.top) + '" width="' + rd(r.width) + '" height="' + rd(r.height) + '"' +
-          (vb ? ' viewBox="' + vb + '"' : "") + ' preserveAspectRatio="none">' + inner + "</svg>");
+          (vb ? ' viewBox="' + vb + '"' : "") + ' preserveAspectRatio="none" fill="currentColor" stroke="none">' + inner + "</svg>");
         continue;
       }
 
       var cs = getComputedStyle(n);
-      /* 分數線、根號橫槓、上下劃線：KaTeX 用 border 畫的 */
-      var bw = parseFloat(cs.borderTopWidth) || 0;
-      if (bw > 0 && r.width > 0) {
-        out.push('<rect x="' + rd(r.left - base.left) + '" y="' + rd(r.top - base.top) + '" width="' + rd(r.width) + '" height="' + rd(Math.max(bw, 0.6)) + '" fill="currentColor" stroke="none"/>');
+      /* 分數線、根號橫槓、上下劃線：KaTeX 用 border 畫的。
+         注意 .frac-line 和 .overline-line 用的是 border-bottom（不是 top），
+         只看 border-top 的話分數的那一槓就會整條不見。 */
+      var bt = parseFloat(cs.borderTopWidth) || 0, bb = parseFloat(cs.borderBottomWidth) || 0;
+      if (r.width > 0) {
+        if (bt > 0 && cs.borderTopStyle !== "none") {
+          out.push('<rect x="' + rd(r.left - base.left) + '" y="' + rd(r.top - base.top) + '" width="' + rd(r.width) + '" height="' + rd(Math.max(bt, 0.6)) + '" fill="currentColor" stroke="none"/>');
+        }
+        if (bb > 0 && cs.borderBottomStyle !== "none") {
+          out.push('<rect x="' + rd(r.left - base.left) + '" y="' + rd(r.bottom - bb - base.top) + '" width="' + rd(r.width) + '" height="' + rd(Math.max(bb, 0.6)) + '" fill="currentColor" stroke="none"/>');
+        }
       }
       /* 有背景色的小方塊（例如 \colorbox、刪節線） */
       var bg = cs.backgroundColor;
@@ -68,7 +77,9 @@
       if (txt && txt.trim()) {
         var fam = cs.fontFamily.replace(/"/g, "'"), fs = parseFloat(cs.fontSize) || 12;
         var y = baseline(n) - base.top;
-        (fam.match(/KaTeX_[A-Za-z]+/g) || []).forEach(function (f) { used[f + "|" + cs.fontStyle + "|" + cs.fontWeight] = 1; });
+        /* 字族名稱後面可能帶數字（KaTeX_Size1～Size4 是大括號、∑、∫ 用的），
+           數字不能漏，不然匯出時會找不到字型檔，那些大符號就會變成系統字 */
+        (fam.match(/KaTeX_[A-Za-z]+\d*/g) || []).forEach(function (f) { used[f + "|" + cs.fontStyle + "|" + cs.fontWeight] = 1; });
         out.push('<text x="' + rd(r.left - base.left) + '" y="' + rd(y) + '" font-family="' + esc(fam) + '" font-size="' + rd(fs) + '"' +
           (cs.fontStyle !== "normal" ? ' font-style="' + cs.fontStyle + '"' : "") +
           (cs.fontWeight && cs.fontWeight !== "400" && cs.fontWeight !== "normal" ? ' font-weight="' + cs.fontWeight + '"' : "") +

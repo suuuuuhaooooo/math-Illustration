@@ -341,7 +341,13 @@
   };
 
   /* ================================================================
-     三、立體圖（斜二測投影：正面照實畫，深度往右上退）
+     三、立體圖
+     這一塊是真的 3D：每種形狀先建出頂點與面，再照視角投影下來，
+     哪一面看得到、哪一條邊要畫虛線，都是算出來的。
+     所以同一個形狀可以轉任意角度，也可以直接切前視／後視／俯視／仰視／側視。
+     圓柱、圓錐、球這類曲面用很多段的多邊形近似，
+     面與面之間夾角很小的「平滑邊」平常不畫，只有剛好在輪廓上才畫，
+     這樣曲面看起來就是滑順的，底面的圓也會自動前半實線、後半虛線。
      ================================================================ */
   function mix(hex, to, amt) {
     var m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "#ffffff"));
@@ -352,183 +358,392 @@
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
   DP.mix = mix;
-  /* 橢圓的上半弧（背面）與下半弧（正面）：圓柱、圓錐的底面要分開畫 */
-  function arcHalf(cx, cy, rx, ry, upper) {
-    var y = upper ? -1 : 1;
-    return "M" + rd(cx - rx) + " " + rd(cy) + "A" + rd(rx) + " " + rd(ry) + " 0 0 " + (upper ? 1 : 0) + " " + rd(cx + rx) + " " + rd(cy);
-  }
   function pth(d, st, w, dash, fill) {
-    return '<path d="' + d + '" fill="' + (fill || "none") + '" stroke="' + st + '" stroke-width="' + w + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + ' stroke-linecap="round" stroke-linejoin="round"/>';
+    return '<path d="' + d + '" fill="' + (fill || "none") + '" stroke="' + (st || "none") + '" stroke-width="' + (w || 0) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : "") + ' stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+
+  /* ---- 建模：回傳 { V 頂點, F 面, sm 平滑邊, gd 輔助線 } ---- */
+  function ring(n, r, y, rot) {
+    var a = [];
+    for (var i = 0; i < n; i++) { var t = rot + i * 2 * Math.PI / n; a.push([r * Math.cos(t), y, r * Math.sin(t)]); }
+    return a;
+  }
+  function mBox(w, h, dp) {
+    var V = [[-w / 2, -h / 2, dp / 2], [w / 2, -h / 2, dp / 2], [w / 2, -h / 2, -dp / 2], [-w / 2, -h / 2, -dp / 2],
+      [-w / 2, h / 2, dp / 2], [w / 2, h / 2, dp / 2], [w / 2, h / 2, -dp / 2], [-w / 2, h / 2, -dp / 2]];
+    return { V: V, F: [[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]], sm: {},
+      /* 長、寬、高要標在哪一條邊上，還有頂點字母的順序 */
+      le: { w: [0, 1], d: [1, 2], h: [1, 5] }, vn: ["A", "B", "C", "D", "E", "F", "G", "H"] };
+  }
+  function mPrism(n, r, h, rot) {
+    var V = ring(n, r, -h / 2, rot).concat(ring(n, r, h / 2, rot)), F = [], sm = {};
+    var bot = [], top = [];
+    for (var i = 0; i < n; i++) { bot.push(i); top.push(n + i); }
+    F.push(bot); F.push(top);
+    for (var j = 0; j < n; j++) {
+      var k = (j + 1) % n;
+      F.push([j, k, n + k, n + j]);
+      if (n >= 16) sm[ek(k, n + k)] = 1;      /* 段數多＝曲面，側面之間的直邊不畫 */
+    }
+    return { V: V, F: F, sm: sm, round: n >= 16, le: { w: [0, Math.floor(n / 2)], h: [0, n] } };
+  }
+  function mPyr(n, r, h, rot) {
+    var V = ring(n, r, -h / 2, rot); V.push([0, h / 2, 0]);
+    var F = [], sm = {}, bot = [];
+    for (var i = 0; i < n; i++) bot.push(i);
+    F.push(bot);
+    for (var j = 0; j < n; j++) { var k = (j + 1) % n; F.push([j, k, n]); if (n >= 16) sm[ek(k, n)] = 1; }
+    return { V: V, F: F, sm: sm, round: n >= 16, le: { w: [0, Math.floor(n / 2)] } };
+  }
+  function mFrus(n, r1, r2, h, rot) {
+    var V = ring(n, r1, -h / 2, rot).concat(ring(n, r2, h / 2, rot)), F = [], sm = {}, bot = [], top = [];
+    for (var i = 0; i < n; i++) { bot.push(i); top.push(n + i); }
+    F.push(bot); F.push(top);
+    for (var j = 0; j < n; j++) { var k = (j + 1) % n; F.push([j, k, n + k, n + j]); if (n >= 16) sm[ek(k, n + k)] = 1; }
+    return { V: V, F: F, sm: sm, round: n >= 16, le: { w: [0, Math.floor(n / 2)] } };
+  }
+  /* 球：一圈一圈疊起來，所有邊都算平滑（只有輪廓線會被畫出來） */
+  function mSphere(lat, lon, r) {
+    var V = [], F = [], sm = {}, i, j;
+    V.push([0, r, 0]);                                        /* 北極 */
+    for (i = 1; i < lat; i++) {
+      var ph = Math.PI * i / lat;
+      for (j = 0; j < lon; j++) {
+        var th = 2 * Math.PI * j / lon;
+        V.push([r * Math.sin(ph) * Math.cos(th), r * Math.cos(ph), r * Math.sin(ph) * Math.sin(th)]);
+      }
+    }
+    V.push([0, -r, 0]);                                       /* 南極 */
+    var S = 1, last = V.length - 1;
+    for (j = 0; j < lon; j++) F.push([0, S + j, S + (j + 1) % lon]);
+    for (i = 0; i < lat - 2; i++) for (j = 0; j < lon; j++) {
+      var a = S + i * lon + j, b = S + i * lon + (j + 1) % lon;
+      F.push([a, b, b + lon, a + lon]);
+    }
+    var L = S + (lat - 2) * lon;
+    for (j = 0; j < lon; j++) F.push([last, L + (j + 1) % lon, L + j]);
+    F.forEach(function (f) { for (var q = 0; q < f.length; q++) sm[ek(f[q], f[(q + 1) % f.length])] = 1; });
+    return { V: V, F: F, sm: sm, round: 1, ball: r, noObl: 1, gd: [ring(96, r, 0, 0).concat([[r, 0, 0]])] };
+  }
+  /* 半球：圓頂＋底面的圓（底面那一圈是硬邊，所以會畫出前實後虛的底圓） */
+  function mHemi(lat, lon, r) {
+    var V = [], F = [], sm = {}, i, j;
+    V.push([0, r, 0]);
+    for (i = 1; i <= lat; i++) {
+      var ph = Math.PI / 2 * i / lat;
+      for (j = 0; j < lon; j++) {
+        var th = 2 * Math.PI * j / lon;
+        V.push([r * Math.sin(ph) * Math.cos(th), r * Math.cos(ph), r * Math.sin(ph) * Math.sin(th)]);
+      }
+    }
+    var S = 1;
+    for (j = 0; j < lon; j++) F.push([0, S + j, S + (j + 1) % lon]);
+    for (i = 0; i < lat - 1; i++) for (j = 0; j < lon; j++) {
+      var a = S + i * lon + j, b = S + i * lon + (j + 1) % lon;
+      F.push([a, b, b + lon, a + lon]);
+    }
+    var rimS = S + (lat - 1) * lon, rim = [];
+    for (j = 0; j < lon; j++) rim.push(rimS + j);
+    F.forEach(function (f) { for (var q = 0; q < f.length; q++) sm[ek(f[q], f[(q + 1) % f.length])] = 1; });
+    F.push(rim.slice().reverse());                            /* 底面，它和圓頂之間是硬邊 */
+    for (j = 0; j < lon; j++) delete sm[ek(rimS + j, rimS + (j + 1) % lon)];
+    return { V: V, F: F, sm: sm, round: 1, noObl: 1 };
+  }
+  /* 正四面體 */
+  function mTetra(r, h) {
+    var b = ring(3, r, -h / 2, -Math.PI / 2);
+    var V = b.concat([[0, h / 2, 0]]);
+    return { V: V, F: [[0, 1, 2], [0, 1, 3], [1, 2, 3], [2, 0, 3]], sm: {}, vn: ["A", "B", "C", "D"], le: { w: [0, 1] } };
+  }
+  function ek(a, b) { return a < b ? a + "_" + b : b + "_" + a; }
+  /* 一堆首尾相接的線段 → 一圈一圈的封閉頂點序列 */
+  function chain(segs) {
+    var adj = {}, used = {}, loops = [];
+    segs.forEach(function (sg, i) {
+      (adj[sg[0]] || (adj[sg[0]] = [])).push([sg[1], i]);
+      (adj[sg[1]] || (adj[sg[1]] = [])).push([sg[0], i]);
+    });
+    segs.forEach(function (sg, i) {
+      if (used[i]) return;
+      var lp = [sg[0]], cur = sg[1], prev = sg[0];
+      used[i] = 1;
+      for (var guard = 0; guard < segs.length + 2; guard++) {
+        lp.push(cur);
+        var nx = null, list = adj[cur] || [];
+        for (var q = 0; q < list.length; q++) if (!used[list[q][1]] && list[q][0] !== prev) { nx = list[q]; break; }
+        if (!nx) break;
+        used[nx[1]] = 1; prev = cur; cur = nx[0];
+        if (cur === lp[0]) break;
+      }
+      if (lp.length >= 3) loops.push(lp);
+    });
+    return loops;
   }
 
   var SOLIDS = [["cuboid", "長方體"], ["cube", "正方體"], ["cyl", "圓柱"], ["cone", "圓錐"], ["sphere", "球"],
     ["hemi", "半球"], ["prism3", "三角柱"], ["prism6", "六角柱"], ["pyr4", "四角錐"], ["pyr3", "三角錐"], ["frus", "圓錐台"]];
+  function build(k) {
+    switch (k) {
+      case "cube": return mBox(1, 1, 1);
+      case "cyl": return mPrism(64, .5, 1, 0);
+      case "cone": return mPyr(64, .5, 1, 0);
+      case "sphere": return mSphere(24, 72, .5);
+      case "hemi": return mHemi(18, 72, .5);
+      case "prism3": return mPrism(3, .58, 1, -Math.PI / 2);
+      case "prism6": return mPrism(6, .55, 1, 0);
+      case "pyr4": return mPyr(4, .62, 1, Math.PI / 4);
+      case "pyr3": return mTetra(.6, 1);
+      case "frus": return mFrus(64, .5, .28, 1, 0);
+      default: return mBox(1, .82, .72);
+    }
+  }
+
+  /* ---- 視角 ---- */
+  var VIEWS = [["obl", "斜二測（課本）"], ["iso", "等角"], ["free", "自由角度"], ["front", "前視"], ["back", "後視"],
+    ["right", "右側視"], ["left", "左側視"], ["top", "俯視"], ["bottom", "仰視"], ["three", "三視圖"]];
+  var ANG = { front: [0, 0], back: [180, 0], right: [90, 0], left: [-90, 0], top: [0, 90], bottom: [0, -90], iso: [35, 30] };
+  /* 回傳 { p:投影函式, W:看向物體的方向（算哪一面看得到用的） } */
+  function camera(mode, d) {
+    if (mode === "obl") {
+      var a = num(d.ang, 40) * Math.PI / 180, kk = num(d.dep, .5);
+      var cxk = kk * Math.cos(a), cyk = kk * Math.sin(a);
+      var W = norm([cxk, cyk, 1]);
+      /* 往後退的那一側（z 比較小）要往右上移，正面才會是照實畫的那一面 */
+      return { p: function (v) { return [v[0] - v[2] * cxk, -(v[1] - v[2] * cyk)]; }, W: W };
+    }
+    var ya, pi;
+    if (mode === "ballObl") { ya = 0; pi = Math.min(38, num(d.ang, 40) * .55); }
+    else if (mode === "free") { ya = num(d.yaw, 35); pi = num(d.pitch, 25); }
+    else { var A = ANG[mode] || [35, 30]; ya = A[0]; pi = A[1]; }
+    var cy = Math.cos(ya * Math.PI / 180), sy = Math.sin(ya * Math.PI / 180);
+    var cp = Math.cos(pi * Math.PI / 180), sp = Math.sin(pi * Math.PI / 180);
+    /* 先繞 y 軸轉（左右），再繞 x 軸轉（上下） */
+    function rot(v) {
+      var x = v[0] * cy + v[2] * sy, z = -v[0] * sy + v[2] * cy;
+      return [x, v[1] * cp - z * sp, v[1] * sp + z * cp];
+    }
+    return { p: function (v) { var r = rot(v); return [r[0], -r[1]]; }, W: null, rot: rot };
+  }
+  function norm(v) { var L = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) || 1; return [v[0] / L, v[1] / L, v[2] / L]; }
+  /* Newell 法算面的法向量，再用「從中心指向這個面」的方向把它翻成朝外 */
+  function fnorm(V, f) {
+    var nx = 0, ny = 0, nz = 0, cx = 0, cy = 0, cz = 0;
+    for (var i = 0; i < f.length; i++) {
+      var a = V[f[i]], b = V[f[(i + 1) % f.length]];
+      nx += (a[1] - b[1]) * (a[2] + b[2]); ny += (a[2] - b[2]) * (a[0] + b[0]); nz += (a[0] - b[0]) * (a[1] + b[1]);
+      cx += a[0]; cy += a[1]; cz += a[2];
+    }
+    var L = f.length, c = [cx / L, cy / L, cz / L];
+    var n = norm([nx, ny, nz]);
+    if (n[0] * c[0] + n[1] * c[1] + n[2] * c[2] < 0) n = [-n[0], -n[1], -n[2]];
+    return { n: n, c: c };
+  }
 
   DP.types.solid = {
     n: "立體圖",
-    w: 220, h: 180,
+    w: 230, h: 200,
     a: [
       { k: "k", n: "形狀", t: "sel", o: SOLIDS },
-      { k: "dep", n: "深度比", t: "num", min: .05, max: .8, step: .02 },
-      { k: "ang", n: "傾斜角", t: "num", min: 10, max: 75, step: 1 },
+      { k: "view", n: "視角", t: "sel", o: VIEWS },
+      { k: "yaw", n: "左右轉（自由角度用）", t: "num", min: -180, max: 180, step: 5 },
+      { k: "pitch", n: "上下轉（自由角度用）", t: "num", min: -90, max: 90, step: 5 },
+      { k: "dep", n: "深度比（斜二測用）", t: "num", min: .1, max: 1, step: .05 },
+      { k: "ang", n: "傾斜角（斜二測用）", t: "num", min: 10, max: 75, step: 1 },
       { k: "hid", n: "看不到的邊", t: "sel", o: [["dash", "畫成虛線"], ["none", "不畫"], ["solid", "全部實線"]] },
-      { k: "er", n: "圓面扁度", t: "num", min: .05, max: .45, step: .01 },
       { k: "shade", n: "各面不同深淺", t: "bool" },
+      { k: "guide", n: "球畫出赤道線", t: "bool" },
       { k: "lw", n: "長（底邊）標示", t: "txt" },
       { k: "ld", n: "寬（深度）標示", t: "txt" },
       { k: "lh", n: "高標示", t: "txt" },
-      { k: "vn", n: "頂點字母 A B C…", t: "bool" }
+      { k: "vn", n: "頂點字母 A B C…", t: "bool" },
+      { k: "labs", n: "三視圖加標題", t: "bool" }
     ],
     init: function (o) {
-      o.w = 220; o.h = 180;
-      o.d = { k: "cuboid", dep: .32, ang: 40, hid: "dash", er: .16, shade: 1, lw: "", ld: "", lh: "", vn: 0 };
+      o.w = 230; o.h = 200;
+      o.d = { k: "cuboid", view: "obl", yaw: 35, pitch: 25, dep: .5, ang: 40, hid: "dash", shade: 1, guide: 1, lw: "", ld: "", lh: "", vn: 0, labs: 1 };
       o.s.fc = "#cfe0ef"; o.s.fo = 1; o.s.fs = 13;
     },
     svg: function (o) {
-      var d = o.d, s = o.s, X = o.x, Y = o.y, W = o.w, H = o.h;
+      var d = o.d, s = o.s;
       var col = s.sc || "#1c2635", lw = s.sw || 2, fs = s.fs || 13, ff = s.ff || "sans-serif";
       var base = s.fc && s.fc !== "none" ? s.fc : "none";
       var fo = s.fo == null ? 1 : s.fo;
-      var hid = d.hid || "dash", dash = hid === "dash" ? rd(lw * 2.6) + " " + rd(lw * 2.2) : "";
-      var drawHid = hid !== "none";
-      var a = num(d.ang, 40) * Math.PI / 180, kd = num(d.dep, .32);
-      var out = "";
-      function face(pts, tone) {
-        var f = base === "none" ? "none" : d.shade ? mix(base, tone < 0 ? "k" : "w", Math.abs(tone)) : base;
-        return poly(pts, f, col, lw, "");
-      }
-      function fo_() { return base === "none" ? "" : ' fill-opacity="' + fo + '"'; }
-      function lab(x, y, t, anchor) { return t ? tx(x, y, t, { fs: fs, ff: ff, c: col, a: anchor || "middle" }) : ""; }
+      var hid = d.hid || "dash", dash = rd(lw * 2.6) + " " + rd(lw * 2.2);
+      var M = build(d.k || "cuboid");
+      var view = d.view || "obl";
+      var hasLab = !!(d.lw || d.ld || d.lh || (d.vn && M.vn));
+      var modes = view === "three" ? [["front", "前視圖"], ["top", "上視圖"], ["right", "右側視圖"]] : [[view, ""]];
+      /* 斜二測是把圖「推斜」，球被推斜就不是正圓了，赤道線也會跑到球外面。
+         球和半球改用等效的旋轉視角：球本來從每個方向看都一樣，只有赤道的傾斜度會變。 */
+      if (M.noObl) modes = modes.map(function (mm) { return mm[0] === "obl" ? ["ballObl", mm[1]] : mm; });
+      var th = view === "three" && d.labs ? fs + 6 : 0;
+      var pad = hasLab ? fs * 1.9 : lw * .8;
+      var gap = fs * 1.8;
 
-      var k = d.k || "cuboid", hidden = "";   /* 看不到的邊最後才畫，蓋在填色上面才看得見 */
-      if (k === "cuboid" || k === "cube" || k === "prism3" || k === "prism6" || k === "pyr4" || k === "pyr3") {
-        var dx = W * kd * Math.cos(a), dy = W * kd * Math.sin(a);
-        var fw = W - dx, fh = H - dy, x0 = X, y0 = Y + dy;
-        if (k === "cube") { var m0 = Math.min(fw, fh); fw = m0; fh = m0; }
-        var F = [[x0, y0 + fh], [x0 + fw, y0 + fh], [x0 + fw, y0], [x0, y0]];      /* 左下 右下 右上 左上 */
-        var Bk = F.map(function (p) { return [p[0] + dx, p[1] - dy]; });
-        if (k === "cuboid" || k === "cube") {
-          if (drawHid) {                                           /* 後面左下角看不到 */
-            hidden += pth("M" + rd(Bk[0][0]) + " " + rd(Bk[0][1]) + "L" + rd(Bk[1][0]) + " " + rd(Bk[1][1]) + "M" + rd(Bk[0][0]) + " " + rd(Bk[0][1]) + "L" + rd(Bk[3][0]) + " " + rd(Bk[3][1]) + "M" + rd(F[0][0]) + " " + rd(F[0][1]) + "L" + rd(Bk[0][0]) + " " + rd(Bk[0][1]), col, lw * .85, dash);
-          }
-          out += '<g' + fo_() + ">";
-          out += face([F[3], Bk[3], Bk[2], F[2]], .18);            /* 上面 */
-          out += face([F[1], Bk[1], Bk[2], F[2]], -.12);           /* 右面 */
-          out += face(F, 0);                                       /* 正面 */
-          out += "</g>";
-          out += lab((F[0][0] + F[1][0]) / 2, F[0][1] + fs + 4, d.lw);
-          out += lab(F[1][0] + dx / 2 + 5, F[1][1] - dy / 2 + fs * .9, d.ld, "start");
-          out += lab(F[1][0] + 6, (F[1][1] + F[2][1]) / 2 + fs * .35, d.lh, "start");
-          if (d.vn) {
-            var N = ["A", "B", "C", "D", "E", "F", "G", "H"];
-            [[F[0], -1, 1], [F[1], 1, 1], [F[2], 1, -1], [F[3], -1, -1]].forEach(function (p, i) {
-              out += tx(p[0][0] + p[1] * 7, p[0][1] + p[2] * (p[2] > 0 ? fs : -3), N[i], { fs: fs, ff: ff, c: col, it: 1 });
-            });
-            [[Bk[0], -1, 1], [Bk[1], 1, 1], [Bk[2], 1, -1], [Bk[3], -1, -1]].forEach(function (p, i) {
-              out += tx(p[0][0] + p[1] * 7, p[0][1] + p[2] * (p[2] > 0 ? fs : -3), N[i + 4], { fs: fs, ff: ff, c: col, it: 1 });
-            });
-          }
-        } else if (k === "prism3") {
-          var T = [[x0, y0 + fh], [x0 + fw, y0 + fh], [x0 + fw / 2, y0]];
-          var T2 = T.map(function (p) { return [p[0] + dx, p[1] - dy]; });
-          if (drawHid) hidden += pth("M" + rd(T2[0][0]) + " " + rd(T2[0][1]) + "L" + rd(T2[1][0]) + " " + rd(T2[1][1]) + "L" + rd(T2[2][0]) + " " + rd(T2[2][1]) + "M" + rd(T[0][0]) + " " + rd(T[0][1]) + "L" + rd(T2[0][0]) + " " + rd(T2[0][1]), col, lw * .85, dash);
-          out += "<g" + fo_() + ">";
-          /* 左邊那片斜面在傾斜角大的時候才看得到，法向量朝上的分量夠大才畫 */
-          var nlx = -(T[2][1] - T[0][1]), nly = (T[2][0] - T[0][0]), nl = Math.sqrt(nlx * nlx + nly * nly) || 1;
-          if ((nlx / nl) * Math.cos(a) + (-nly / nl) * Math.sin(a) > .02) out += face([T[0], T2[0], T2[2], T[2]], .1);
-          out += face([T[2], T2[2], T2[1], T[1]], .18);
-          out += face(T, 0);
-          out += "</g>";
-          out += lab((T[0][0] + T[1][0]) / 2, T[0][1] + fs + 4, d.lw);
-          out += lab(T[1][0] + dx / 2 + 5, T[1][1] - dy / 2 + fs * .9, d.ld, "start");
-        } else if (k === "prism6") {
-          var hx = fw / 2, hy = fh / 2, cx0 = x0 + hx, cy0 = y0 + hy, HP = [];
-          for (var i6 = 0; i6 < 6; i6++) { var an = Math.PI / 6 + i6 * Math.PI / 3; HP.push([cx0 + hx * Math.cos(an), cy0 + hy * Math.sin(an)]); }
-          var HB = HP.map(function (p) { return [p[0] + dx, p[1] - dy]; });
-          if (drawHid) {
-            var hd = "";
-            [[0, 1], [1, 2], [2, 3]].forEach(function (e) { hd += "M" + rd(HB[e[0]][0]) + " " + rd(HB[e[0]][1]) + "L" + rd(HB[e[1]][0]) + " " + rd(HB[e[1]][1]); });
-            hd += "M" + rd(HP[2][0]) + " " + rd(HP[2][1]) + "L" + rd(HB[2][0]) + " " + rd(HB[2][1]);
-            hidden += pth(hd, col, lw * .85, dash);
-          }
-          out += "<g" + fo_() + ">";
-          [[5, 0], [4, 5], [3, 4]].forEach(function (e, ii) {
-            out += face([HP[e[0]], HB[e[0]], HB[e[1]], HP[e[1]]], ii === 0 ? .18 : -.1);
-          });
-          out += face(HP, 0);
-          out += "</g>";
-        } else if (k === "pyr4") {
-          /* 底面是個平行四邊形（俯視的正方形），頂點在正上方 */
-          var bh = H * .3, by = Y + H, bw = W - dx;
-          var P0 = [X, by], P1 = [X + bw, by], P2 = [X + bw + dx, by - dy], P3 = [X + dx, by - dy];
-          var apex = [(P0[0] + P2[0]) / 2, Y];
-          if (drawHid) hidden += pth("M" + rd(P3[0]) + " " + rd(P3[1]) + "L" + rd(P0[0]) + " " + rd(P0[1]) + "M" + rd(P3[0]) + " " + rd(P3[1]) + "L" + rd(P2[0]) + " " + rd(P2[1]) + "M" + rd(P3[0]) + " " + rd(P3[1]) + "L" + rd(apex[0]) + " " + rd(apex[1]), col, lw * .85, dash);
-          out += "<g" + fo_() + ">";
-          out += face([P1, P2, apex], -.12);
-          out += face([P0, P1, apex], 0);
-          out += "</g>";
-          out += lab((P0[0] + P1[0]) / 2, by + fs + 4, d.lw);
-          out += lab(apex[0] + 6, (apex[1] + by) / 2, d.lh, "start");
-        } else {   /* pyr3 三角錐 */
-          var by3 = Y + H, bw3 = W - dx;
-          /* 後面那個頂點放在底邊中間偏後，三個面才不會擠成一條線 */
-          var Q0 = [X, by3], Q1 = [X + bw3, by3], Q2 = [X + bw3 * .2 + dx, by3 - dy];
-          var ap3 = [(Q0[0] + Q1[0] + Q2[0]) / 3, Y];
-          if (drawHid) hidden += pth("M" + rd(Q2[0]) + " " + rd(Q2[1]) + "L" + rd(Q0[0]) + " " + rd(Q0[1]), col, lw * .85, dash);
-          out += "<g" + fo_() + ">";
-          out += face([Q1, Q2, ap3], -.12);
-          out += face([Q0, Q1, ap3], 0);
-          out += "</g>";
-          out += pth("M" + rd(Q1[0]) + " " + rd(Q1[1]) + "L" + rd(Q2[0]) + " " + rd(Q2[1]), col, lw, "");
-          out += lab((Q0[0] + Q1[0]) / 2, by3 + fs + 4, d.lw);
-        }
-      } else {
-        /* 圓柱、圓錐、球、半球、圓錐台 */
-        var ry = Math.max(3, H * num(d.er, .16)), rx = W / 2, cx = X + W / 2;
-        if (k === "cyl") {
-          var ty = Y + ry, byy = Y + H - ry;
-          out += "<g" + fo_() + ">";
-          out += '<rect x="' + rd(X) + '" y="' + rd(ty) + '" width="' + rd(W) + '" height="' + rd(byy - ty) + '" fill="' + (base === "none" ? "none" : base) + '" stroke="none"/>';
-          out += '<ellipse cx="' + rd(cx) + '" cy="' + rd(ty) + '" rx="' + rd(rx) + '" ry="' + rd(ry) + '" fill="' + (base === "none" ? "none" : mix(base, "w", .22)) + '" stroke="none"/>';
-          out += "</g>";
-          out += ln(X, ty, X, byy, col, lw, ""); out += ln(X + W, ty, X + W, byy, col, lw, "");
-          out += '<ellipse cx="' + rd(cx) + '" cy="' + rd(ty) + '" rx="' + rd(rx) + '" ry="' + rd(ry) + '" fill="none" stroke="' + col + '" stroke-width="' + lw + '"/>';
-          out += pth(arcHalf(cx, byy, rx, ry, false), col, lw, "");
-          if (drawHid) out += pth(arcHalf(cx, byy, rx, ry, true), col, lw * .85, dash);
-          out += lab(cx, byy + ry + fs + 4, d.lw);
-          out += lab(X + W + 6, (ty + byy) / 2, d.lh, "start");
-        } else if (k === "cone") {
-          var byc = Y + H - ry, apx = cx, apy = Y;
-          out += "<g" + fo_() + ">" + poly([[X, byc], [X + W, byc], [apx, apy]], base === "none" ? "none" : base, "none", 0, "") + "</g>";
-          out += ln(X, byc, apx, apy, col, lw, ""); out += ln(X + W, byc, apx, apy, col, lw, "");
-          out += pth(arcHalf(cx, byc, rx, ry, false), col, lw, "");
-          if (drawHid) out += pth(arcHalf(cx, byc, rx, ry, true), col, lw * .85, dash);
-          if (d.lh) { out += ln(apx, apy, apx, byc, col, lw * .7, rd(lw * 2) + " " + rd(lw * 2)); out += lab(apx + 6, (apy + byc) / 2, d.lh, "start"); }
-          out += lab(cx, byc + ry + fs + 4, d.lw);
-        } else if (k === "sphere") {
-          var R = Math.min(W, H) / 2, scx = X + W / 2, scy = Y + H / 2;
-          out += '<circle cx="' + rd(scx) + '" cy="' + rd(scy) + '" r="' + rd(R) + '" fill="' + (base === "none" ? "none" : base) + '"' + fo_() + ' stroke="' + col + '" stroke-width="' + lw + '"/>';
-          out += pth(arcHalf(scx, scy, R, R * num(d.er, .16) * 2.2, false), col, lw * .9, "");
-          if (drawHid) out += pth(arcHalf(scx, scy, R, R * num(d.er, .16) * 2.2, true), col, lw * .8, dash);
-          if (d.lh) { out += ln(scx, scy, scx + R, scy, col, lw * .7, rd(lw * 2) + " " + rd(lw * 2)); out += lab(scx + R / 2, scy - 5, d.lh); }
-        } else if (k === "hemi") {
-          var Rh = Math.min(W / 2, H), hcx = X + W / 2, hcy = Y + H - ry;
-          out += '<path d="M' + rd(hcx - Rh) + " " + rd(hcy) + "A" + rd(Rh) + " " + rd(Rh) + ' 0 0 1 ' + rd(hcx + Rh) + " " + rd(hcy) + 'Z" fill="' + (base === "none" ? "none" : base) + '"' + fo_() + ' stroke="' + col + '" stroke-width="' + lw + '"/>';
-          out += pth(arcHalf(hcx, hcy, Rh, ry, false), col, lw, "");
-          if (drawHid) out += pth(arcHalf(hcx, hcy, Rh, ry, true), col, lw * .85, dash);
-        } else { /* frus 圓錐台 */
-          var topR = rx * .5, tyf = Y + ry, byf = Y + H - ry;
-          out += "<g" + fo_() + ">" + poly([[cx - topR, tyf], [cx + topR, tyf], [cx + rx, byf], [cx - rx, byf]], base === "none" ? "none" : base, "none", 0, "") + "</g>";
-          out += ln(cx - topR, tyf, cx - rx, byf, col, lw, ""); out += ln(cx + topR, tyf, cx + rx, byf, col, lw, "");
-          out += '<ellipse cx="' + rd(cx) + '" cy="' + rd(tyf) + '" rx="' + rd(topR) + '" ry="' + rd(ry * topR / rx) + '" fill="' + (base === "none" ? "none" : mix(base, "w", .22)) + '"' + fo_() + ' stroke="' + col + '" stroke-width="' + lw + '"/>';
-          out += pth(arcHalf(cx, byf, rx, ry, false), col, lw, "");
-          if (drawHid) out += pth(arcHalf(cx, byf, rx, ry, true), col, lw * .85, dash);
-        }
+      /* 先只算投影點，量出每一張圖在「模型單位」下的大小，
+         再回頭算一個共用的縮放倍率，最後才把點乘上去 ——
+         這樣線粗和字級都還是使用者設定的 px，不會跟著形狀一起被放大。 */
+      var pre = modes.map(function (mm) {
+        var cam = camera(mm[0], d), P = M.V.map(cam.p);
+        var x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9;
+        P.forEach(function (p) { if (p[0] < x1) x1 = p[0]; if (p[0] > x2) x2 = p[0]; if (p[1] < y1) y1 = p[1]; if (p[1] > y2) y2 = p[1]; });
+        return { cam: cam, P: P, x1: x1, y1: y1, w: Math.max(1e-6, x2 - x1), h: Math.max(1e-6, y2 - y1), title: mm[1], mode: mm[0] };
+      });
+      var sumW = 0, maxH = 0;
+      pre.forEach(function (q) { sumW += q.w; if (q.h > maxH) maxH = q.h; });
+      var fixedW = pad * 2 * pre.length + gap * (pre.length - 1);
+      var sc = Math.min((o.w - fixedW) / sumW, (o.h - pad * 2 - th) / maxH);
+      if (!isFinite(sc) || sc <= 0) sc = 1;
+      /* 三視圖的標題可能比圖還寬，寬度不夠就再縮一次 */
+      if (th) {
+        var need = 0;
+        pre.forEach(function (q) { need += Math.max(q.w * sc + pad * 2, q.title.length * fs * 1.14 + 4); });
+        need += gap * (pre.length - 1);
+        if (need > o.w) sc *= o.w / need;
       }
-      return out + hidden;
+
+      function draw(q) {
+        var cam = q.cam, P = q.P.map(function (p) { return [(p[0] - q.x1) * sc + pad, (p[1] - q.y1) * sc + pad]; });
+        var W = cam.W, rot = cam.rot;
+        function depth(v) { return W ? v[0] * W[0] + v[1] * W[1] + v[2] * W[2] : rot(v)[2]; }
+        function sp(v) { var p = cam.p(v); return [(p[0] - q.x1) * sc + pad, (p[1] - q.y1) * sc + pad]; }
+        var info = M.F.map(function (f) {
+          var g = fnorm(M.V, f);
+          return { dot: W ? (g.n[0] * W[0] + g.n[1] * W[1] + g.n[2] * W[2]) : rot(g.n)[2], c: g.c, n: g.n };
+        });
+        var EPS = 1e-6, em = {};
+        M.F.forEach(function (f, fi) {
+          for (var i = 0; i < f.length; i++) {
+            var a = f[i], b = f[(i + 1) % f.length], key = ek(a, b);
+            (em[key] || (em[key] = { a: a, b: b, f: [] })).f.push(fi);
+          }
+        });
+        /* 填色不是一片一片塗的——曲面被切成幾十片，一片一片塗會在接縫留下淺淺的條紋，
+           球那種斜著切過網格的還會變成鋸齒。
+           所以先把「輪廓」這一圈連起來整個填滿，再只把平面（像長方體的六個面、
+           圓柱的頂面）照明暗補上去，曲面本身就保持一整片乾淨的顏色。 */
+        var isSmoothFace = M.F.map(function (f) {
+          for (var i = 0; i < f.length; i++) if (M.sm[ek(f[i], f[(i + 1) % f.length])]) return true;
+          return false;
+        });
+        var body = "";
+        if (base !== "none") {
+          if (M.ball) {
+            /* 球不管從哪個角度看，輪廓都剛好是一個圓，直接畫圓最準也最漂亮 */
+            var c0 = sp([0, 0, 0]);
+            body += '<circle cx="' + rd(c0[0], 3) + '" cy="' + rd(c0[1], 3) + '" r="' + rd(M.ball * sc, 3) + '" fill="' + base + '" stroke="none"/>';
+          } else {
+            /* 把輪廓邊串成一圈一圈的封閉線 */
+            var loops = chain(Object.keys(em).filter(function (key) {
+              var e = em[key], f0 = e.f[0], f1 = e.f.length > 1 ? e.f[1] : f0;
+              return (info[f0].dot > EPS) !== (info[f1].dot > EPS);
+            }).map(function (key) { return [em[key].a, em[key].b]; }));
+            loops.forEach(function (lp) {
+              if (lp.length < 3) return;
+              body += '<polygon points="' + lp.map(function (vi) { return rd(P[vi][0], 3) + "," + rd(P[vi][1], 3); }).join(" ") +
+                '" fill="' + base + '" stroke="' + base + '" stroke-width="1" stroke-linejoin="round"/>';
+            });
+          }
+          /* 平面再照明暗補一層 */
+          var flat = [];
+          M.F.forEach(function (f, fi) { if (info[fi].dot > EPS && !isSmoothFace[fi]) flat.push(fi); });
+          flat.sort(function (x, y) { return depth(info[x].c) - depth(info[y].c); });
+          flat.forEach(function (fi) {
+            var nn = info[fi].n;
+            var tone = d.shade ? (nn[1] > .5 ? .2 : nn[1] < -.5 ? -.18 : nn[0] > .35 ? -.12 : 0) : 0;
+            var fill = tone ? mix(base, tone < 0 ? "k" : "w", Math.abs(tone)) : base;
+            body += '<polygon points="' + M.F[fi].map(function (vi) { return rd(P[vi][0], 3) + "," + rd(P[vi][1], 3); }).join(" ") +
+              '" fill="' + fill + '" stroke="' + fill + '" stroke-width="0.7" stroke-linejoin="round"/>';
+          });
+        }
+        /* 硬邊：有一面看得到就實線，兩面都背對就虛線。
+           平滑邊（曲面內部）只有剛好一面朝前一面朝後，也就是落在輪廓上時才畫。 */
+        var sol = [], hd = [];
+        Object.keys(em).forEach(function (key) {
+          var e = em[key], f0 = e.f[0], f1 = e.f.length > 1 ? e.f[1] : f0;
+          var a0 = info[f0].dot > EPS, a1 = info[f1].dot > EPS;
+          if (M.sm[key]) { if (a0 !== a1) sol.push([P[e.a], P[e.b]]); return; }
+          (a0 || a1 ? sol : hd).push([P[e.a], P[e.b]]);
+        });
+        /* 正前方、正上方這種角度，背面的邊會剛好疊在輪廓上，疊著畫很醜，去掉 */
+        function k2(g) {
+          var a = rd(g[0][0], 1) + "," + rd(g[0][1], 1), b = rd(g[1][0], 1) + "," + rd(g[1][1], 1);
+          return a < b ? a + "|" + b : b + "|" + a;
+        }
+        var have = {}; sol.forEach(function (g) { have[k2(g)] = 1; });
+        hd = hd.filter(function (g) { return !have[k2(g)]; });
+        /* 球的輪廓用網格去找會變成鋸齒，但它本來就一定是正圓，直接畫圓 */
+        if (M.ball) { sol = []; hd = []; }
+        function ds(list) { return list.map(function (g) { return "M" + rd(g[0][0], 3) + " " + rd(g[0][1], 3) + "L" + rd(g[1][0], 3) + " " + rd(g[1][1], 3); }).join(""); }
+        var out = base !== "none" ? '<g fill-opacity="' + fo + '">' + body + "</g>" : "";
+        if (M.ball) {
+          var cb = sp([0, 0, 0]);
+          out += '<circle cx="' + rd(cb[0], 3) + '" cy="' + rd(cb[1], 3) + '" r="' + rd(M.ball * sc, 3) + '" fill="none" stroke="' + col + '" stroke-width="' + lw + '"/>';
+        }
+        if (sol.length) out += pth(ds(sol), col, lw, "");
+        if (hd.length) {
+          if (hid === "solid") out += pth(ds(hd), col, lw, "");
+          else if (hid === "dash") out += pth(ds(hd), col, lw * .85, dash);
+        }
+        /* 輔助線（球的赤道）：前半實線、後半虛線 */
+        if (d.guide && M.gd) M.gd.forEach(function (cv) {
+          var sv = [], sh = [];
+          for (var i = 0; i + 1 < cv.length; i++) {
+            var m0 = [(cv[i][0] + cv[i + 1][0]) / 2, (cv[i][1] + cv[i + 1][1]) / 2, (cv[i][2] + cv[i + 1][2]) / 2];
+            (depth(m0) >= 0 ? sv : sh).push([sp(cv[i]), sp(cv[i + 1])]);
+          }
+          if (sv.length) out += pth(ds(sv), col, lw * .9, "");
+          if (sh.length && hid !== "none") out += pth(ds(sh), col, lw * .8, hid === "solid" ? "" : dash);
+        });
+        /* 標示與頂點字母：往遠離中心的方向推出去 */
+        var cx = 0, cy = 0;
+        P.forEach(function (p) { cx += p[0]; cy += p[1]; });
+        cx /= P.length; cy /= P.length;
+        function out3(p, dist) {
+          var vx = p[0] - cx, vy = p[1] - cy, L = Math.sqrt(vx * vx + vy * vy) || 1;
+          return [p[0] + vx / L * dist, p[1] + vy / L * dist + fs * .34];
+        }
+        if (!th) {
+          if (M.round || M.ball) {
+            /* 圓柱、圓錐這種：底邊標示放在整張圖正下方，高放在右邊，
+               不然「直徑」兩個字會壓在底面的橢圓上 */
+            var bx1 = 1e9, by1 = 1e9, bx2 = -1e9, by2 = -1e9;
+            P.forEach(function (p) { if (p[0] < bx1) bx1 = p[0]; if (p[0] > bx2) bx2 = p[0]; if (p[1] < by1) by1 = p[1]; if (p[1] > by2) by2 = p[1]; });
+            if (d.lw) out += tx((bx1 + bx2) / 2, by2 + fs * 1.15, d.lw, { fs: fs, ff: ff, c: col });
+            if (d.lh) out += tx(bx2 + fs * .5, (by1 + by2) / 2 + fs * .34, d.lh, { fs: fs, ff: ff, c: col, a: "start" });
+          } else if (M.le) {
+            [[M.le.w, d.lw], [M.le.d, d.ld], [M.le.h, d.lh]].forEach(function (pr) {
+              if (!pr[1] || !pr[0]) return;
+              var p = P[pr[0][0]], r = P[pr[0][1]]; if (!p || !r) return;
+              var t = out3([(p[0] + r[0]) / 2, (p[1] + r[1]) / 2], fs * .95);
+              out += tx(t[0], t[1], pr[1], { fs: fs, ff: ff, c: col });
+            });
+          }
+        }
+        if (d.vn && M.vn && !th) M.vn.forEach(function (nm, vi) {
+          if (!P[vi]) return;
+          var t = out3(P[vi], fs * .8);
+          out += tx(t[0], t[1], nm, { fs: fs, ff: ff, c: col, it: 1 });
+        });
+        return { svg: out, w: q.w * sc + pad * 2, h: q.h * sc + pad * 2, title: q.title };
+      }
+
+      var parts = pre.map(draw);
+      parts.forEach(function (p) { p.cw = Math.max(p.w, th ? p.title.length * fs * 1.14 + 4 : 0); });
+      var nh = 0, inner = "", cur = 0;
+      parts.forEach(function (p) { if (p.h + th > nh) nh = p.h + th; });
+      parts.forEach(function (p, i) {
+        inner += '<g transform="translate(' + rd(cur + (p.cw - p.w) / 2) + " " + rd(th + (nh - th - p.h) / 2) + ')">' + p.svg + "</g>";
+        if (th) inner += tx(cur + p.cw / 2, fs, p.title, { fs: fs, ff: ff, c: col });
+        cur += p.cw + (i < parts.length - 1 ? gap : 0);
+      });
+      var nw = Math.max(1, cur);
+      nh = Math.max(1, nh);
+      o.d.w0 = rd(nw); o.d.h0 = rd(nh);
+      /* 已經照 px 算好大小了，這裡只要置中 */
+      return '<g transform="translate(' + rd(o.x + (o.w - nw) / 2) + " " + rd(o.y + (o.h - nh) / 2) + ')">' + inner + "</g>";
     }
   };
-
   /* ================================================================
      四、積木（小方塊堆疊）與三視圖
      高度表一行一排，第一行是最後排、最後一行是最前排。

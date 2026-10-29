@@ -388,16 +388,49 @@
     if (lab) s += T(W / 2, H - 10, lab, { z: 12 });
     return svg(W, H, s, 0.95);
   };
-  F.sciCoil = function (n, lab) {
-    var W = 250, H = 150, s = "", k = Math.max(3, Math.min(10, +n)), x0 = 60, y = 60, w = 130, hh = 44;
-    s += L(24, y + hh / 2, x0, y + hh / 2, { w: 1.6 });
-    for (var i = 0; i < k; i++) {
-      var cx = x0 + (w * (i + 0.5)) / k;
-      s += '<ellipse cx="' + cx.toFixed(1) + '" cy="' + (y + hh / 2) + '" rx="' + (w / k / 2.6).toFixed(1) + '" ry="' + hh / 2 + '" stroke-width="1.6"/>';
+  /* 螺線管：導線是一條真的螺旋線。
+     一圈分成「繞到前面」和「繞到後面」兩段，先畫後面那一段，
+     再把鐵芯（不透明）蓋上去，最後畫前面那一段 ——
+     這樣導線才會一下子在芯的前面、一下子被芯擋住，看起來是真的纏上去的。
+     線圈半徑比芯大一點，後面那半在上下兩端會露出來，繞的感覺就出來了。 */
+  F.sciCoil = function (n, core, pole, cur, lab) {
+    var W = 250, H = 150, s = "", k = Math.max(3, Math.min(14, +n || 5));
+    var x0 = 52, xe = W - 52, w = xe - x0, cy = 70;
+    var rc = 21, ry = rc * 1.22, rx = Math.min(13, w / k / 2.1);   /* 芯半徑、線圈半徑、一圈的橫向半徑 */
+    var SEG = 26;
+    function pt(t) {                      /* t 以「圈」為單位 */
+      var a = t * 2 * Math.PI;
+      return [x0 + rx + (w - 2 * rx) * t / k + rx * Math.sin(a), cy - ry * Math.cos(a), Math.sin(a + Math.PI / 2)];
     }
-    s += L(x0 + w, y + hh / 2, W - 24, y + hh / 2, { w: 1.6 });
-    s += T(x0 - 10, y - 10, "N", { z: 13, w: 700, c: TN.r }) + T(x0 + w + 10, y - 10, "S", { z: 13, w: 700, c: TN.b });
-    s += arw(x0, y + hh + 22, x0 + w, y + hh + 22, { c: TN.g, w: 1.6 }) + T(x0 + w / 2, y + hh + 34, "電流", { z: 11, c: TN.g });
+    /* 把螺旋線切成前段與後段 */
+    var frontD = "", backD = "", open = null, side = null;
+    for (var i = 0; i <= k * SEG; i++) {
+      var t = i / SEG, p = pt(t), inFront = (Math.cos(t * 2 * Math.PI + Math.PI / 2) >= 0);
+      /* 用橫向位移判斷前後：sin 為正的那半圈在前面 */
+      inFront = Math.sin(t * 2 * Math.PI) >= 0;
+      var d = (open === inFront ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1);
+      if (inFront) frontD += d; else backD += d;
+      open = inFront;
+      if (side !== inFront && i > 0) {     /* 換邊時兩段都補上同一點，線才不會斷開 */
+        if (inFront) backD += "L" + p[0].toFixed(1) + " " + p[1].toFixed(1);
+        else frontD += "L" + p[0].toFixed(1) + " " + p[1].toFixed(1);
+      }
+      side = inFront;
+    }
+    var wire = 1.9;
+    /* 引線 */
+    s += L(18, cy, x0 + rx * 0.3, cy - ry * 0.9, { w: wire }) + L(xe - rx * 0.3, cy + ry * 0.9, W - 18, cy, { w: wire });
+    if (backD) s += '<path d="' + backD + '" stroke-width="' + wire + '" fill="none"/>';
+    if (core) {
+      /* 鐵芯：不透明，才擋得住後面那半圈 */
+      var cl = x0 - 6, cr = xe + 6, er = 7;
+      s += '<path d="M' + cl + " " + (cy - rc) + "H" + cr + "A" + er + " " + rc + " 0 0 1 " + cr + " " + (cy + rc) +
+        "H" + cl + "A" + er + " " + rc + " 0 0 1 " + cl + " " + (cy - rc) + 'Z" fill="var(--paper,#fff)" stroke="currentColor" stroke-width="1.4"/>';
+      s += '<path d="M' + cr + " " + (cy - rc) + "A" + er + " " + rc + " 0 0 0 " + cr + " " + (cy + rc) + '" stroke-width="1.1" stroke-dasharray="3 3" fill="none"/>';
+    }
+    if (frontD) s += '<path d="' + frontD + '" stroke-width="' + wire + '" fill="none"/>';
+    if (pole) s += T(x0 - 16, cy - rc - 12, "N", { z: 13, w: 700, c: TN.r }) + T(xe + 16, cy - rc - 12, "S", { z: 13, w: 700, c: TN.b });
+    if (cur) s += arw(x0, cy + rc + 26, xe, cy + rc + 26, { c: TN.g, w: 1.6 }) + T((x0 + xe) / 2, cy + rc + 38, "電流", { z: 11, c: TN.g });
     if (lab) s += T(W / 2, 18, lab, { z: 12 });
     return svg(W, H, s, 0.95);
   };
@@ -405,6 +438,7 @@
   /* ---------- 登記到圖庫 ---------- */
   function N(k, n, v, min, max, step) { return { t: "num", k: k, n: n, v: v, min: min == null ? 0 : min, max: max == null ? 999 : max, step: step || 1 }; }
   function TT(k, n, v) { return { t: "txt", k: k, n: n, v: v }; }
+  function BB(k, n, v) { return { t: "bool", k: k, n: n, v: v == null ? 1 : v }; }
   function NS(k, n, v) { return { t: "nums", k: k, n: n, v: v }; }
   function TS(k, n, v) { return { t: "txts", k: k, n: n, v: v }; }
   function SE(k, n, v, o) { return { t: "sel", k: k, n: n, v: v, o: o }; }
@@ -414,7 +448,7 @@
     { f: "sciSeries", g: "理化・電與磁", n: "串聯電路", a: [TS("items", "元件（逗號分隔）", "cell,sw,lamp"), TS("labs", "每個的標示", ""), N("open", "開關打開", 1, 0, 1)] },
     { f: "sciParallel", g: "理化・電與磁", n: "並聯電路", a: [SE("a", "上支路", "lamp", ELOPTS), SE("b", "下支路", "lamp", ELOPTS), SE("src", "電源", "cell", ELOPTS)] },
     { f: "sciMagnet", g: "理化・電與磁", n: "條形磁鐵與磁力線", a: [TT("lab", "標示", "")] },
-    { f: "sciCoil", g: "理化・電與磁", n: "螺線管", a: [N("n", "線圈數", 5, 3, 10), TT("lab", "標示", "")] },
+    { f: "sciCoil", g: "理化・電與磁", n: "螺線管", a: [N("n", "匝數", 6, 3, 14), BB("core", "畫出鐵芯", 1), BB("pole", "標 N、S 極", 1), BB("cur", "畫電流箭頭", 1), TT("lab", "標示", "")] },
 
     { f: "sciForce", g: "理化・力與運動", n: "力的箭頭（自由體圖）", a: [TS("labs", "每個力的名稱", "F1,F2"), NS("degs", "方向（度）", "0,90"), NS("mags", "長度", "60,50")] },
     { f: "sciIncline", g: "理化・力與運動", n: "斜面", a: [N("deg", "傾角", 30, 5, 60), TT("lab", "標示", "")] },
