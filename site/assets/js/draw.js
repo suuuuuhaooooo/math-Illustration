@@ -19,8 +19,10 @@
 
   /* ---------- 預設樣式與調色盤 ---------- */
   var PAL = ["#1c2635", "#bf5b43", "#35639a", "#4f8c6e", "#d9a93c", "#7a68a6", "#9aa1ab", "#ffffff"];
-  var FONTS = [["sans-serif", "黑體"], ["serif", "明體"], ["'LXGW WenKai TC', cursive", "手寫"], ["monospace", "等寬"]];
+  var FONTS = [["KaTeX_Main", "Computer Modern（LaTeX）"], ["sans-serif", "黑體"], ["serif", "明體"], ["'LXGW WenKai TC', cursive", "手寫"], ["monospace", "等寬"]];
   var DEF = { sc: "#1c2635", sw: 2, sd: "", fc: "none", fo: 1, fs: 18, fw: 400, fa: "middle", ff: "sans-serif", a1: 0, a2: 0, r: 0 };
+  /* 題目附圖常用的尺寸：照題庫 assets/q/ 裡現有 5000 多張圖的實際大小抓的 */
+  var PRE = [["題目小圖", 284, 112], ["題目中圖", 420, 200], ["題目寬圖", 600, 160], ["題目大圖", 560, 300], ["投影片", 960, 540], ["A4 橫", 1123, 794]];
 
   /* ---------- 文件 ---------- */
   function blank(name) {
@@ -149,6 +151,7 @@
       case "axes": inner = axesSvg(o); break;
       case "grid": inner = gridSvg(o); break;
       case "table": inner = tableSvg(o); break;
+      case "math": inner = o.d.svg ? '<g transform="translate(' + rd(o.x) + " " + rd(o.y) + ") scale(" + rd(o.w / (o.d.w0 || 1), 4) + " " + rd(o.h / (o.d.h0 || 1), 4) + ')">' + String(o.d.svg).replace(/currentColor/g, s.sc) + "</g>" : ""; break;
       case "lib": inner = '<g transform="translate(' + rd(o.x) + " " + rd(o.y) + ") scale(" + rd(o.w / (o.d.w || 100), 4) + " " + rd(o.h / (o.d.h || 100), 4) + ')">' + (o.d.svg || "") + "</g>"; break;
     }
     var tr = o.rot ? ' transform="rotate(' + o.rot + " " + rd(b.x + b.w / 2) + " " + rd(b.y + b.h / 2) + ')"' : "";
@@ -172,7 +175,7 @@
       ["rect", "矩形", "M4 6h16v12H4z"], ["ellipse", "橢圓", "M12 6a8 6 0 1 0 .01 0"], ["poly", "多邊形", "M12 4l8 6-3 9H7l-3-9z"],
       ["line", "直線", "M4 19L20 5"], ["arrow", "箭頭", "M4 19L20 5M20 5h-6M20 5v6"],
       ["nline", "數線", "M3 12h18M7 9v6M12 9v6M17 9v6"], ["axes", "座標軸", "M5 3v16h16M5 19L19 7"],
-      ["grid", "方格", "M4 4h16v16H4zM10 4v16M16 4v16M4 10h16M4 16h16"], ["table", "表格", "M4 5h16v14H4zM4 10h16M12 5v14"]];
+      ["grid", "方格", "M4 4h16v16H4zM10 4v16M16 4v16M4 10h16M4 16h16"], ["table", "表格", "M4 5h16v14H4zM4 10h16M12 5v14"], ["math", "數學式", "M4 6h7l-3 12M14 9l6 6M20 9l-6 6"]];
     var tbar = h('<div class="dw-tools" role="toolbar" aria-label="工具"></div>');
     TOOLS.forEach(function (t) {
       var b = h('<button type="button" class="dw-t" data-t="' + t[0] + '" title="' + t[1] + '" aria-label="' + t[1] + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="' + t[2] + '"/></svg></button>');
@@ -392,6 +395,7 @@
       svg.addEventListener("dblclick", function (e) {
         var o = hitAt(pt(e)); if (!o) return;
         if (o.t === "text") editText(o);
+        else if (o.t === "math") editMath(o);
         else if (o.t === "table") editTable(o);
       });
     }
@@ -437,6 +441,7 @@
     }
     function growNew(st, p, keep) {
       var o = st.o, x = snap(p.x), y = snap(p.y);
+      if (o.t === "math") return;   /* 大小由式子本身決定，放下去再用把手縮放 */
       if (o.t === "line" || o.t === "arrow") {
         o.x2 = x; o.y2 = y;
         if (keep) { if (Math.abs(x - o.x) > Math.abs(y - o.y)) o.y2 = o.y; else o.x2 = o.x; }
@@ -455,6 +460,16 @@
     function live() { layer.innerHTML = D.objs.map(objSvg).join(""); overlay(); }
     function byId(id) { for (var i = 0; i < D.objs.length; i++) if (D.objs[i].id === id) return D.objs[i]; return null; }
 
+    /* 數學式重新排版：KaTeX 排好以後換算成 SVG，順便記下自然大小與用到的字型 */
+    function remath(o) {
+      if (!NB.drawMath) { o.d.err = "數學式模組沒載入"; return; }
+      var r = NB.drawMath.toSvg(o.d.tex, o.s.fs, false);
+      if (r.err) { o.d.err = r.err; return; }
+      o.d.err = ""; o.d.svg = r.svg; o.d.w0 = r.w; o.d.h0 = r.h; o.d.fonts = r.fonts;
+      if (!o.w || o.w < 3 || o.d.fit !== 0) { o.w = r.w; o.h = r.h; o.d.fit = 0; }
+      else { var k = o.h / (o.d.h0 || 1); o.w = r.w * k; o.h = r.h * k; }
+    }
+
     /* ---- 新物件 ---- */
     function mk(t, x, y) {
       var s = clone(DEF), o = { id: uid(), t: t, x: x, y: y, w: 2, h: 2, rot: 0, s: s, d: {} };
@@ -467,6 +482,7 @@
       if (t === "grid") { o.w = 240; o.h = 180; o.d = { cell: 24, dash: 0 }; }
       if (t === "table") { o.w = 260; o.h = 100; o.d = { r: 2, c: 3, cells: [] }; s.fs = 15; }
       if (t === "line" || t === "arrow") { o.x2 = x; o.y2 = y; }
+      if (t === "math") { o.d = { tex: "\\frac{3}{4}" }; s.fs = 28; remath(o); }
       return o;
     }
 
@@ -533,6 +549,11 @@
         propsBox.appendChild(numRow("格子大小", o.d.cell, 4, 120, 1, function (v) { set(function (x) { x.d.cell = v; }); }));
         propsBox.appendChild(chkRow("虛線", o.d.dash, function (v) { set(function (x) { x.d.dash = v ? 1 : 0; }); }));
       }
+      if (o.t === "math") {
+        propsBox.appendChild(numRow("字級", o.s.fs, 8, 120, 1, function (v) { set(function (x) { x.s.fs = v; x.d.fit = 0; remath(x); }); }));
+        var mb = h('<button type="button" class="pen dw-b dw-full">改式子</button>'); mb.onclick = function () { editMath(o); }; propsBox.appendChild(mb);
+        if (o.d.err) propsBox.appendChild(h('<p class="dw-note dw-err">' + esc(o.d.err) + "</p>"));
+      }
       if (o.t === "table") {
         propsBox.appendChild(numRow("列數", o.d.r, 1, 20, 1, function (v) { set(function (x) { x.d.r = v; }); }));
         propsBox.appendChild(numRow("欄數", o.d.c, 1, 20, 1, function (v) { set(function (x) { x.d.c = v; }); }));
@@ -546,7 +567,7 @@
       if (list.length > 1) { propsBox.appendChild(h('<p class="dw-ph">對齊</p>')); propsBox.appendChild(ab); }
     }
     function tName(t) {
-      return { sel: "選取", rect: "矩形", ellipse: "橢圓", poly: "多邊形", line: "直線", arrow: "箭頭", text: "文字", nline: "數線", axes: "座標軸", grid: "方格", table: "表格", lib: "圖形" }[t] || t;
+      return { sel: "選取", rect: "矩形", ellipse: "橢圓", poly: "多邊形", line: "直線", arrow: "箭頭", text: "文字", nline: "數線", axes: "座標軸", grid: "方格", table: "表格", math: "數學式", lib: "圖形" }[t] || t;
     }
     function align(k) {
       var list = selObjs(); if (list.length < 2) return;
@@ -561,6 +582,7 @@
     }
     function docPanel() {
       var d = h('<div><p class="dw-ph">畫布</p></div>');
+      d.appendChild(preRow());
       d.appendChild(numRow("寬", D.w, 100, 4000, 10, function (v) { D.w = v; build(); store(); }));
       d.appendChild(numRow("高", D.h, 100, 4000, 10, function (v) { D.h = v; build(); store(); }));
       d.appendChild(colorRow("底色", D.bg, function (c) { D.bg = c; build(); store(); }, true));
@@ -568,8 +590,19 @@
       d.appendChild(chkRow("顯示格線", S.grid, function (v) { S.grid = v ? 1 : 0; sv(SETK, S); gridLines(); }));
       d.appendChild(chkRow("吸附格線", S.snap, function (v) { S.snap = v ? 1 : 0; sv(SETK, S); }));
       d.appendChild(numRow("格線間距", S.cell, 2, 50, 1, function (v) { S.cell = v; sv(SETK, S); gridLines(); }));
+      d.appendChild(h('<p class="dw-ph">題目附圖</p>'));
+      d.appendChild(txtRow("題目 ID", D.qid || "", function (v) { D.qid = v.trim(); store(); props(); }));
+      d.appendChild(h('<p class="dw-note meta">填了題目 ID（例如 <code>3u-5.3-n08</code>），匯出的 SVG 就會直接取名 <code>' + esc((D.qid || "題目ID") + ".svg") + '</code>，放進 <code>assets/q/</code> 就能被那一題引用（題庫 CSV 的 img 欄填同一個檔名）。</p>'));
       d.appendChild(h('<p class="dw-note meta">快速鍵：Delete 刪除、Ctrl+Z 復原、Ctrl+Shift+Z 重做、Ctrl+D 複製、方向鍵微調、按住 Shift 畫正方形或正圓、拉把手時按 Shift 等比例。</p>'));
       return d;
+    }
+
+    function preRow() {
+      var sl = h('<select class="dw-in"><option value="">自訂…</option>' + PRE.map(function (p, i) {
+        return '<option value="' + i + '"' + (D.w === p[1] && D.h === p[2] ? " selected" : "") + ">" + esc(p[0]) + "（" + p[1] + "×" + p[2] + "）</option>";
+      }).join("") + "</select>");
+      sl.onchange = function () { var p = PRE[+sl.value]; if (!p) return; D.w = p[1]; D.h = p[2]; build(); store(); };
+      return row("常用尺寸", sl);
     }
 
     /* ---- 小元件 ---- */
@@ -605,6 +638,22 @@
       dlg("改文字", ta, [["確定", function () { push(); o.d.tx = ta.value; closeDlg(); render(); store(); }, 1], ["取消", closeDlg]]);
       setTimeout(function () { ta.focus(); }, 30);
     }
+    function editMath(o) {
+      var ta = h('<textarea class="dw-ta dw-mono" rows="3">' + esc(o.d.tex || "") + "</textarea>");
+      var pv = h('<div class="dw-mpv" aria-live="polite"></div>');
+      var tip = h('<p class="dw-note meta">用 LaTeX 寫，例如 <code>\\frac{3}{4}</code>、<code>x^2</code>、<code>\\sqrt{2}</code>、<code>\\times</code>、<code>\\div</code>、<code>\\angle ABC</code>、<code>\\overline{AB}</code>。排版和字型跟 LaTeX 一樣（Computer Modern）。</p>');
+      function upd() {
+        var r = NB.drawMath ? NB.drawMath.toSvg(ta.value, 34, false) : { err: "沒載入" };
+        pv.innerHTML = r.err ? '<span class="dw-err">' + esc(r.err) + "</span>"
+          : '<svg viewBox="0 0 ' + r.w + " " + r.h + '" width="' + Math.min(420, r.w) + '" height="' + Math.min(420, r.w) / (r.w / r.h) + '" style="color:var(--ink)">' + r.svg + "</svg>";
+      }
+      ta.oninput = upd; upd();
+      var body = h("<div></div>"); body.appendChild(ta); body.appendChild(pv); body.appendChild(tip);
+      dlg("數學式", body, [["確定", function () {
+        push(); o.d.tex = ta.value; o.d.fit = 0; remath(o); closeDlg(); render(); store();
+      }, 1], ["取消", closeDlg]]);
+      setTimeout(function () { ta.focus(); }, 30);
+    }
     function editTable(o) {
       var R = o.d.r, C = o.d.c, g = h('<div class="dw-tg" style="grid-template-columns:repeat(' + C + ',1fr)"></div>'), ins = [];
       for (var i = 0; i < R * C; i++) {
@@ -615,20 +664,44 @@
     }
 
     /* ---- 匯出 ---- */
-    function cleanSvg(scale) {
-      /* 匯出用的 SVG：只要物件，不要格線、選取框、畫布底以外的東西 */
-      var w = D.w, hh = D.h;
-      var body = D.objs.map(objSvg).join("");
-      return '<svg xmlns="http://www.w3.org/2000/svg" width="' + rd(w * (scale || 1)) + '" height="' + rd(hh * (scale || 1)) + '" viewBox="0 0 ' + w + " " + hh + '">' +
-        (D.bg && D.bg !== "none" ? '<rect x="0" y="0" width="' + w + '" height="' + hh + '" fill="' + D.bg + '"/>' : "") +
-        body + "</svg>";
+    /* 匯出範圍：整張畫布／只要內容（自動裁切）／只要選取的 */
+    function exObjs(range) { return range === "sel" && sel.length ? selObjs() : D.objs; }
+    function exBox(range) {
+      var PAD = 10;
+      if (range === "canvas") return { x: 0, y: 0, w: D.w, h: D.h };
+      var list = exObjs(range); if (!list.length) return { x: 0, y: 0, w: D.w, h: D.h };
+      var b = unionBox(list);
+      return { x: rd(b.x - PAD), y: rd(b.y - PAD), w: rd(b.w + PAD * 2), h: rd(b.h + PAD * 2) };
+    }
+    /* 這份要匯出的東西用到哪些 KaTeX 字型（數學式，還有選了 Computer Modern 的文字） */
+    function exFonts(range) {
+      var k = {};
+      exObjs(range).forEach(function (o) {
+        if (o.t === "math" && o.d.fonts) o.d.fonts.forEach(function (f) { k[f] = 1; });
+        else if (/KaTeX_/.test(o.s.ff || "")) k[o.s.ff.replace(/['"]/g, "") + "|normal|" + (o.s.fw >= 700 ? 700 : 400)] = 1;
+      });
+      return Object.keys(k);
+    }
+    /* 回傳 Promise<string>：embed 為真時把字型 base64 嵌進檔案 */
+    function buildSvg(range, embed) {
+      /* 跟題庫現有的圖同一種寫法：viewBox 從 0 0 起算、寬高寫出來、底色一張 rect */
+      var b = exBox(range), inner = exObjs(range).map(objSvg).join("");
+      var body = b.x || b.y ? '<g transform="translate(' + rd(-b.x) + " " + rd(-b.y) + ')">' + inner + "</g>" : inner;
+      var head = '<svg xmlns="http://www.w3.org/2000/svg" width="' + b.w + '" height="' + b.h + '" viewBox="0 0 ' + b.w + " " + b.h + '">';
+      var bg = D.bg && D.bg !== "none" ? '<rect width="' + b.w + '" height="' + b.h + '" fill="' + D.bg + '"/>' : "";
+      var keys = exFonts(range);
+      if (!embed || !keys.length || !NB.drawMath) return Promise.resolve(head + bg + body + "</svg>");
+      return NB.drawMath.fontCss(keys).then(function (css) { return head + css + bg + body + "</svg>"; });
     }
     function dl(blob, name) {
       var a = document.createElement("a"), u = URL.createObjectURL(blob);
       a.href = u; a.download = name; document.body.appendChild(a); a.click();
       setTimeout(function () { URL.revokeObjectURL(u); a.remove(); }, 1000);
     }
-    function fname(ext) { return (D.name || "圖").replace(/[\\/:*?"<>|]/g, "_") + "." + ext; }
+    function fname(ext) {
+      if (D.qid) return D.qid.replace(/[\\/:*?"<>|\s]/g, "") + "." + ext;   /* 題目附圖：檔名就是題目 ID */
+      return (D.name || "圖").replace(/[\\/:*?"<>|]/g, "_") + "." + ext;
+    }
     function exportDlg() {
       if (!D || !D.objs.length) { ask("還沒有東西可以匯出", "畫布上還是空的，先畫一點東西再匯出。", "知道了", null); return; }
       var body = h('<div class="dw-ex"></div>');
@@ -636,33 +709,59 @@
       var fmt = h('<div class="dw-exf"><label><input type="radio" name="dwfmt" value="svg" checked> SVG（向量，不失真）</label>' +
         '<label><input type="radio" name="dwfmt" value="png"> PNG（圖片）</label></div>');
       body.appendChild(fmt);
-      var scl = h('<div class="dw-exs"><span>PNG 解析度</span><select class="dw-in"><option value="1">1 倍（' + D.w + "×" + D.h + '）</option><option value="2" selected>2 倍</option><option value="4">4 倍（印刷用）</option></select></div>');
+      var rng = h('<div class="dw-exs"><span>範圍</span><select class="dw-in"><option value="content">只要內容（自動裁切）</option><option value="canvas">整張畫布</option>' +
+        (sel.length ? '<option value="sel">只要選取的 ' + sel.length + " 個</option>" : "") + "</select></div>");
+      body.appendChild(rng);
+      var scl = h('<div class="dw-exs"><span>PNG 解析度</span><select class="dw-in"><option value="1">1 倍</option><option value="2" selected>2 倍</option><option value="4">4 倍（印刷用）</option></select></div>');
       body.appendChild(scl);
-      var note = h('<p class="dw-note meta">SVG 裡的文字會記成字體名稱。如果對方電腦沒有那套字，文字會換成別的字體；要完全一樣，請改用 PNG，或在文字上改用「黑體／明體」這類通用字體。</p>');
+      var emb = h('<label class="dw-exe"><input type="checkbox" checked> 把數學式的字型（Computer Modern）嵌進檔案</label>');
+      body.appendChild(emb);
+      var note = h('<p class="dw-note meta"></p>');
       body.appendChild(note);
-      function upd() { var v = fmt.querySelector("input:checked").value; scl.style.display = v === "png" ? "" : "none"; note.style.display = v === "svg" ? "" : "none"; }
+      var fn = h('<p class="dw-note meta"></p>');
+      body.appendChild(fn);
+      function upd() {
+        var v = fmt.querySelector("input:checked").value, nf = exFonts(rng.querySelector("select").value).length;
+        fn.innerHTML = "檔名：<code>" + esc(fname(v)) + "</code>" + (D.qid && v === "svg" ? "，放進 <code>assets/q/</code> 即可被題目引用。" : "");
+        scl.style.display = v === "png" ? "" : "none";
+        emb.style.display = v === "svg" && nf ? "" : "none";
+        note.innerHTML = v === "png" ? "PNG 是圖片，看到什麼就是什麼，貼到哪裡都一樣。"
+          : nf ? "嵌了字型，數學式在沒裝字型的電腦上也會長得一模一樣（檔案會大幾十 KB）。中文字仍然會用對方電腦的字體，所以中文建議用「黑體／明體」。"
+            : "這份沒有用到數學式。SVG 裡的中文會記成字體名稱，對方沒裝那套字就會換字；中文建議用「黑體／明體」這類通用字體。";
+      }
       fmt.querySelectorAll("input").forEach(function (i) { i.onchange = upd; });
+      rng.querySelector("select").onchange = upd;
       upd();
       dlg("匯出", body, [["下載", function () {
-        var v = fmt.querySelector("input:checked").value;
-        if (v === "svg") { dl(new Blob([cleanSvg(1)], { type: "image/svg+xml;charset=utf-8" }), fname("svg")); closeDlg(); return; }
+        var v = fmt.querySelector("input:checked").value, range = rng.querySelector("select").value;
+        var btn = dlgEl.querySelector(".dw-mact .go"); btn.disabled = true; btn.textContent = "產生中…";
+        if (v === "svg") {
+          buildSvg(range, emb.querySelector("input").checked).then(function (txt) {
+            dl(new Blob([txt], { type: "image/svg+xml;charset=utf-8" }), fname("svg")); closeDlg();
+          });
+          return;
+        }
         var k = parseInt(scl.querySelector("select").value, 10) || 2;
-        pngBlob(k, function (b) { if (b) dl(b, fname("png")); closeDlg(); });
+        pngBlob(range, k, function (b) { if (b) dl(b, fname("png")); closeDlg(); });
       }, 1], ["取消", closeDlg]]);
     }
-    function pngBlob(scale, cb) {
-      var src = cleanSvg(1), img = new Image();
-      img.onload = function () {
-        var c = document.createElement("canvas");
-        c.width = Math.round(D.w * scale); c.height = Math.round(D.h * scale);
-        var g = c.getContext("2d");
-        g.fillStyle = D.bg && D.bg !== "none" ? D.bg : "#ffffff";
-        g.fillRect(0, 0, c.width, c.height);
-        g.drawImage(img, 0, 0, c.width, c.height);
-        c.toBlob(function (b) { cb(b); }, "image/png");
-      };
-      img.onerror = function () { cb(null); status("PNG 轉檔失敗，請改用 SVG。"); };
-      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(src);
+    /* PNG：把 SVG 畫到 canvas 再輸出。字型一定要嵌，不然轉出來會掉字 */
+    function pngBlob(range, scale, cb) {
+      var b = exBox(range);
+      buildSvg(range, true).then(function (src) {
+        var img = new Image();
+        img.onload = function () {
+          var c = document.createElement("canvas");
+          c.width = Math.max(1, Math.round(b.w * scale)); c.height = Math.max(1, Math.round(b.h * scale));
+          var g = c.getContext("2d");
+          g.fillStyle = D.bg && D.bg !== "none" ? D.bg : "#ffffff";
+          g.fillRect(0, 0, c.width, c.height);
+          g.drawImage(img, 0, 0, c.width, c.height);
+          c.toBlob(function (x) { cb(x); }, "image/png");
+        };
+        img.onerror = function () { cb(null); status("PNG 轉檔失敗，請改用 SVG。"); };
+        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(src);
+      });
     }
     /* 備份：把這台電腦上的所有圖匯成一個 .json，或從 .json 還原 */
     function backupDlg() {

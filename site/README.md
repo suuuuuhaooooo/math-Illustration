@@ -82,7 +82,7 @@
 
 ## 製圖（老師後台的「製圖」分頁）
 自由畫布的向量編輯器，只有老師和管理員進得去（跟著 `teacher.html` 的權限走，學生看不到）。
-- 檔案：`assets/js/draw.js`、`assets/css/draw.css`；在 `teacher.js` 的 `TABS_ALL` 加一筆 `["draw","製圖"]`，派送那行是 `NB.draw.open(ctx)`
+- 檔案：`assets/js/draw.js`、`assets/js/draw-math.js`、`assets/css/draw.css`；在 `teacher.js` 的 `TABS_ALL` 加一筆 `["draw","製圖"]`，派送那行是 `NB.draw.open(ctx)`
 - 畫布本身就是 SVG，所以**匯出 SVG 等於把畫布序列化出來**，是真的向量、放大不糊。顏色一律存實際色碼（不用 CSS 變數），檔案在別的軟體打開才不會變色
 - 箭頭是直接畫成實心三角形，不用 `<marker>`：marker 搭 `context-stroke` 在 Chrome 沒問題，但 Word、Illustrator 常常不吃，箭頭會不見或變黑
 - 物件：矩形、橢圓、正多邊形、直線、箭頭、文字、數線、座標軸、方格、表格。數線可調最小值、最大值、刻度間隔與要不要標數字；座標軸可調格數、格線、軸名；表格可填內容
@@ -90,7 +90,10 @@
 - 快速鍵：Delete 刪除、Ctrl+Z 復原、Ctrl+Shift+Z 重做、Ctrl+D 複製、Ctrl+A 全選、方向鍵微調（Shift 一次 10px）、Esc 取消選取
 - 匯出格式由使用者選：**SVG**（向量、不失真）或 **PNG**（1／2／4 倍，4 倍給印刷）
 - 存檔只在這台電腦（localStorage `nb-draw-docs`，設定在 `nb-draw-set`）。因為會被瀏覽器清掉，介面裡有「備份／還原」，可以把所有圖匯成一個 .json 收著，換電腦再還原
-- 已知限制：SVG 裡的文字是記字體名稱，對方電腦沒裝那套字就會換字。要完全一致請用 PNG，或把文字改成「黑體／明體」這類通用字體。之後要做到完全無失真的文字，得加「文字轉外框」，那需要字型解析函式庫
+- **LaTeX 數學式**：`draw-math.js`。KaTeX 排出來的是 HTML，直接包進 `foreignObject` 只有瀏覽器看得懂；所以這裡把 KaTeX 排好的版面量出來、改寫成 SVG 的 `<text>` 與 `<rect>`，匯出的才是真向量。字型是 Computer Modern（KaTeX 自帶，就是 LaTeX 的字），文字物件也能選
+- **字型嵌進檔案**：Computer Modern 只有拉丁字母，一個字重才二十幾 KB，匯出 SVG 時會把用到的字重 base64 嵌進檔案，對方電腦沒裝字型也不會跑版（PNG 轉檔一律嵌，不然會掉字）。中文沒辦法這樣做（CJK 字型太大），所以中文建議用「黑體／明體」這類系統都有的字體
+- **題目附圖模式**：畫布面板填「題目 ID」，匯出的檔名就是 `<題目ID>.svg`，放進 `assets/q/` 就能被那一題引用（題庫 CSV 的 `img` 欄填同一個檔名）。輸出格式刻意跟現有的 5000 多張圖一致：`viewBox` 從 `0 0` 起算、寫出 width/height、底色一張 rect、顏色用實際色碼
+- 匯出範圍可選整張畫布、只要內容（自動裁切）或只要選取的物件；常用尺寸下拉是照 `assets/q/` 裡現有圖的實際大小抓的
 
 ## 漢堡選單（navmenu.js）
 島嶼頁、無限出題頁、遊戲場右上角的「選單」。要加新功能，只要在 `NB.NAV` 陣列加一筆 `{ g, id, href, t, d, ic }`（圖示畫在同一個檔的 `IC`）。

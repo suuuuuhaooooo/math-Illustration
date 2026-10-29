@@ -80,3 +80,11 @@
   .dw-canvas { max-height: 60vh }
   .dw-zoom { margin-left: 0 }
 }
+
+/* 數學式 */
+.dw-mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .92rem }
+.dw-mpv { min-height: 56px; display: flex; align-items: center; justify-content: center; margin: 10px 0;
+  padding: 10px; border: 1px dashed var(--line); border-radius: 8px; background: var(--paper2) }
+.dw-mpv svg { max-width: 100% }
+.dw-err { color: var(--p1) }
+.dw-exe { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: .9rem }
