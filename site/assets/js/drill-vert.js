@@ -137,7 +137,11 @@
   /* ---------- 畫成 SVG ---------- */
   var RED = "#c0392b", GREY = "#9aa1ab";
   V.svg = function (c, md, O) {
-    O = O || {}; var l = V.layout(c), u = O.u || 26, ch = Math.round(u * 0.62), pv = O.pv !== false && md !== "o-none", self = O.mode === "self" && md === "q";
+    O = O || {}; var l = V.layout(c), u = O.u || 26, ch = Math.round(u * 0.62), self = O.mode === "self" && md === "q";
+    /* 小數乘法是「先靠右對齊算成整數，最後再點小數點」，欄位不等於位值
+       （2.4×3 的 3 會排在十分位那一欄），所以這種題不掛位值表頭，免得標錯 */
+    var decMul = c.op === "×" && (/\./.test(String(c.a)) || /\./.test(String(c.b)));
+    var pv = O.pv !== false && md !== "o-none" && !decMul;
     var rows = [], maxR = 0; l.cells.forEach(function (x) { if (x.r > maxR) maxR = x.r; }); l.lines.forEach(function (x) { if (x.r > maxR) maxR = x.r; });
     var extra = O.extra || 0; maxR += extra;
     var hasCarry = !!l.carryRows[0] && O.carry !== false && c.op !== "÷", ys = [], y = pv ? 16 : 4;

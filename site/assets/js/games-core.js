@@ -259,10 +259,15 @@
     if (f.judge && !produced(Q) && !(Q.opts && Q.b.length === 1)) return false;
     if (f.one && !(Q.b.length === 1 && (Q.b[0].k === "n" || Q.b[0].k === "f" || Q.b[0].k === "s" || Q.opts))) return false;
     if (f.nofig && (Q.fig || Q.figFn || Q.calc)) return false;
+    /* 不畫圖的遊戲（修補計算機、錯誤獵人、快速反應賽）不能收「一定要看圖才答得出來」的題。
+       fig 照專案慣例就是題目必要的圖；calc（直式）光看文字就答得出來，所以留著 */
+    if (f.nopic && (Q.fig || Q.figFn)) return false;
     if (f.noopts && Q.opts) return false;
     if (f.short) {
       if (Q.opts) return false;
       if (Q.b.length !== 1) return false;
+      /* 配對的牌放不下圖，少了圖「量杯裡有 □ 毫升」這種題根本答不出來，直接不收 */
+      if (Q.fig || Q.figFn) return false;
       if (GM.plain(Q.q).length > 44) return false;
       if (GM.plain(GM.vals(Q)[0]).length > 7) return false;
     }

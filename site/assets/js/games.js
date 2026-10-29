@@ -136,7 +136,7 @@
         var k = P.broken ? P.fixed / P.broken : 1;
         var card = h('<section class="sheet gm-fix gm-pop">' +
           '<div class="gm-calc"><div class="gm-calch">' + face(k) + '<span>島上的老計算機</span></div>' +
-          '<div class="gm-tape"><p class="gm-tapeh">它算的這一題</p><div class="gm-tq">' + GM.qhtml(Q, vals, "lcd") + "</div></div>" +
+          '<div class="gm-tape"><p class="gm-tapeh">它算的這一題</p><div class="gm-tq">' + GM.figHtml(Q, "q", { nocalc: true }) + GM.qhtml(Q, vals, "lcd") + "</div></div>" +
           '<div class="gm-keys" aria-hidden="true"></div></div>' +
           '<p class="gm-ask">它算對了嗎？</p>' +
           '<div class="gm-jd"><button type="button" class="pen" data-j="ok">算對了</button><button type="button" class="pen" data-j="bad">壞掉了</button></div>' +
@@ -237,7 +237,7 @@
         /* 選擇題的話，顯示「這位同學選了哪個」 */
         var pick = r.Q.opts ? "ABCD".indexOf(String(r.vals[0]).replace(/[()]/g, "")) : -1;
         var el = h('<button type="button" class="gm-hrow" aria-pressed="false"><span class="gm-hn">' + (i + 1) + '.</span>' +
-          '<span class="gm-hq">' + GM.qhtml(r.Q, r.Q.opts ? null : r.vals, "hand") + (r.Q.opts ? GM.optsHtml(r.Q, pick) : "") + "</span>" +
+          '<span class="gm-hq">' + GM.figHtml(r.Q, "q", { nocalc: true }) + GM.qhtml(r.Q, r.Q.opts ? null : r.vals, "hand") + (r.Q.opts ? GM.optsHtml(r.Q, pick) : "") + "</span>" +
           '<span class="gm-hmk" aria-hidden="true"></span></button>');
         el.onclick = function () { r.mark = !r.mark; el.setAttribute("aria-pressed", r.mark ? "true" : "false"); el.classList.toggle("marked", r.mark); };
         host.appendChild(el);
@@ -433,10 +433,10 @@
       top();
       function paint() {
         if (P.over) return;
-        if (P.i >= queue.length) { var more = GM.pool(ids, GM.S.lv, Date.now() + P.i, 20, { one: true, wrongs: 3 }); more.forEach(function (Q) { var o = opt4(Q, R); if (o) queue.push({ Q: Q, o: o }); }); }
+        if (P.i >= queue.length) { var more = GM.pool(ids, GM.S.lv, Date.now() + P.i, 20, { one: true, wrongs: 1 }); more.forEach(function (Q) { var o = opt4(Q, R); if (o) queue.push({ Q: Q, o: o }); }); }
         var it = queue[P.i]; if (!it) return finish();
         var q = wrap.querySelector(".gm-rq"), o = wrap.querySelector(".gm-ro");
-        q.innerHTML = '<div class="gm-rqt">' + GM.qhtml(it.Q) + '</div><p class="gm-src">' + esc(GM.secShort(it.Q.id)) + "</p>";
+        q.innerHTML = GM.figHtml(it.Q, "q", { nocalc: true }) + '<div class="gm-rqt">' + GM.qhtml(it.Q) + '</div><p class="gm-src">' + esc(GM.secShort(it.Q.id)) + "</p>";
         o.innerHTML = "";
         it.o.list.forEach(function (x) {
           var b = h('<button type="button" class="pen gm-rb">' + tx(esc(String(x.t))) + "</button>");
@@ -697,8 +697,12 @@
       var grid = box.querySelector(".gm-grid");
       cards.forEach(function (c, i) {
         var inner = c.k === "q" ? GM.qhtml(pairs[c.p].Q) : tx(esc(pairs[c.p].a));
+        /* 牌面是 flex（置中），內容要再包一層才會照正常的文字排版流動，
+           不然題幹的每一段都變成一個 flex item，被擠成一行一個字 */
+        var n = GM.plain(c.k === "q" ? pairs[c.p].Q.q : pairs[c.p].a).length;
+        var sz = n > 30 ? " s2" : n > 20 ? " s1" : "";
         var el = h('<button type="button" class="gm-mc" aria-pressed="false"><span class="gm-mb" aria-hidden="true"><i>?</i></span>' +
-          '<span class="gm-mf gm-' + c.k + '">' + inner + "</span></button>");
+          '<span class="gm-mf gm-' + c.k + sz + '"><span class="gm-mi">' + inner + "</span></span></button>");
         el.onclick = function () { flip(c, el); };
         c.el = el; grid.appendChild(el);
       });
