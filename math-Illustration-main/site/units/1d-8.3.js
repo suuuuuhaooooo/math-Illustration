@@ -1,0 +1,2 @@
+/* 1d-8.3 */
+NB.unit(NB.kit?NB.kit.vcalc({"op":"-","pre":q=>({a:q.ta*10+q.oa,b:q.tb*10+q.ob}),"q":"47 − 23，用直式算算看（不用退位）。","steps":["個位減個位","十位減十位","個位夠減，不用向十位借"],"ch":{"q":"58 − 31 = ？","a":27,"h":"8 − 1，5 − 3。"},"S":[{"k":"ta","label":"被減數十位","min":2,"max":9,"val":4,"unit":""},{"k":"oa","label":"被減數個位","min":0,"max":9,"val":7,"unit":""},{"k":"tb","label":"減數十位","min":1,"max":9,"val":2,"unit":"","maxOf":v=>v.ta},{"k":"ob","label":"減數個位","min":0,"max":9,"val":3,"unit":"","maxOf":v=>v.oa}],"eq":q=>`${q.a} − ${q.b} = <b>${q.a-q.b}</b>`}):{});

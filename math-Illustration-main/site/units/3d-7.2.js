@@ -1,0 +1,2 @@
+/* 3d-7.2 */
+NB.unit(NB.kit?NB.kit.model({"q":"□ × 6 = 48，被乘數是多少？","steps":["乘法的相反是除法","□ = 48 ÷ 6","□ = 8"],"ch":{"q":"□ × 7 = 63，□ = ？","a":9,"h":"63 ÷ 7。"},"S":[{"k":"x","label":"□（被乘數）","min":2,"max":12,"val":8,"unit":""},{"k":"k","label":"乘數","min":2,"max":9,"val":6,"unit":""}],"rows":q=>[{name:"總數",segs:Array(q.k).fill(q.x),cols:Array(q.k).fill("var(--p1)")}],"brace":q=>q.x*q.k,"eq":q=>`□ × ${q.k} = ${q.x*q.k} → □ = ${q.x*q.k} ÷ ${q.k} = <b>${q.x}</b>`}):{});

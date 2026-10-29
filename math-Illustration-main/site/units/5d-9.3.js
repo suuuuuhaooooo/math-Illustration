@@ -1,0 +1,2 @@
+/* 5d-9.3 */
+NB.unit(NB.kit?NB.kit.model({"q":"做 3 件事共 4 時 30 分，平均每件幾分鐘？","steps":["全部換成分：270 分","270 ÷ 3","= 90 分"],"ch":{"q":"5 時 ÷ 4 = 幾分？","a":75,"h":"300 ÷ 4。"},"S":[{"k":"t","label":"總時間（分）","min":60,"max":600,"val":270,"unit":"分","step":10},{"k":"k","label":"平分成","min":2,"max":6,"val":3,"unit":"份"}],"rows":q=>[{name:"全部",segs:Array(q.k).fill(q.t/q.k),cols:Array(q.k).fill("var(--p1)")}],"brace":q=>q.t+" 分","eq":q=>`${q.t} ÷ ${q.k} = <b>${Math.round(q.t/q.k*10)/10}</b> 分`}):{});

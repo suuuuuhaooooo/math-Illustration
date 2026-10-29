@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="254" height="74" viewBox="0 0 254 74">
+<rect x="0" y="0" width="254" height="74" fill="#ffffff"/>
+<rect x="1" y="1" width="120.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="61.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">數量（包）</text>
+<rect x="121.0" y="1" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="143.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<rect x="165.0" y="1" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="187.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">8</text>
+<rect x="209.0" y="1" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="231.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">12</text>
+<rect x="1" y="37" width="120.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="61.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">重量（公斤）</text>
+<rect x="121.0" y="37" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="143.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">10</text>
+<rect x="165.0" y="37" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="187.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">20</text>
+<rect x="209.0" y="37" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="231.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">30</text>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="292" height="316" viewBox="0 0 292 316">
+<rect x="0" y="0" width="292" height="316" fill="#ffffff"/>
+<path d="M266.0,146.0 A120.0,120.0 0 0 0 26.0,146.0 A120.0,120.0 0 0 0 266.0,146.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M206.0,146.0 A60.0,60.0 0 0 0 86.0,146.0 A60.0,60.0 0 0 0 206.0,146.0 Z" fill="#e6e6e6" stroke="#000000" stroke-width="1.6"/>
+<path d="M176.0,146.0 A30.0,30.0 0 0 0 116.0,146.0 A30.0,30.0 0 0 0 176.0,146.0 Z" fill="#c8c8c8" stroke="#000000" stroke-width="1.6"/>
+<path d="M146.0,146.0 L266.0,146.0" fill="none" stroke="#000000" stroke-width="1.6"/>
+<circle cx="146.0" cy="146.0" r="3" fill="#000000"/>
+<text x="161.0" y="140.9" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">1.5</text>
+<text x="191.0" y="140.9" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">1.5</text>
+<text x="236.0" y="140.9" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">3</text>
+<text x="134.0" y="169.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">丙</text>
+<text x="100.0" y="179.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">乙</text>
+<text x="60.0" y="201.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">甲</text>
+<text x="146.0" y="304.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（單位：公分）</text>
+</svg>

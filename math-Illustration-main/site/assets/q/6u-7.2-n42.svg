@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="292" height="292" viewBox="0 0 292 292">
+<rect x="0" y="0" width="292" height="292" fill="#ffffff"/>
+<path d="M266.0,146.0 A120.0,120.0 0 0 0 26.0,146.0 A120.0,120.0 0 0 0 266.0,146.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6" stroke-dasharray="6 4"/>
+<path d="M146.0,146.0 L223.1,54.1 A120.0,120.0 0 0 0 68.9,54.1 L146.0,146.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<circle cx="146.0" cy="146.0" r="3" fill="#000000"/>
+<text x="188.4" y="114.0" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">45 cm</text>
+<text x="146.0" y="115.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">80°</text>
+</svg>

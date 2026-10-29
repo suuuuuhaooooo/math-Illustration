@@ -1,0 +1,2 @@
+/* 4d-5.3 */
+NB.unit(NB.kit?NB.kit.model({"q":"每瓶果汁 0.6 公升，買 7 瓶，共幾公升？","steps":["6 個 0.1 重複 7 次","6 × 7 = 42 個 0.1","= 4.2 公升"],"ch":{"q":"每條緞帶 1.5 公尺，買 4 條，共幾公尺？","a":6,"h":"1.5 × 4。"},"S":[{"k":"u","label":"每瓶（0.1 公升）","min":1,"max":20,"val":6,"unit":""},{"k":"k","label":"瓶數","min":2,"max":9,"val":7,"unit":"瓶"}],"rows":q=>[{name:"全部",segs:Array(q.k).fill(q.u),cols:Array(q.k).fill("var(--p1)")}],"brace":q=>(q.u*q.k/10).toFixed(1)+" 公升","eq":q=>`${(q.u/10).toFixed(1)} × ${q.k} = <b>${(q.u*q.k/10).toFixed(1)}</b> 公升`}):{});

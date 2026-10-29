@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="162" viewBox="0 0 400 162">
+<rect x="0" y="0" width="400" height="162" fill="#ffffff"/>
+<text x="200.0" y="30.0" font-family="sans-serif" font-size="19" text-anchor="middle" font-weight="bold" fill="#000000">抹茶拿鐵　黃金比例</text>
+<text x="70.0" y="80.0" font-family="sans-serif" font-size="16" text-anchor="end" font-weight="normal" fill="#000000">抹茶</text>
+<rect x="84" y="56" width="32" height="36" rx="4" fill="#eeeeee" stroke="#000000" stroke-width="1.5"/>
+<text x="100.0" y="81.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">1</text>
+<rect x="124" y="56" width="32" height="36" rx="4" fill="#eeeeee" stroke="#000000" stroke-width="1.5"/>
+<text x="140.0" y="81.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">2</text>
+<text x="70.0" y="130.0" font-family="sans-serif" font-size="16" text-anchor="end" font-weight="normal" fill="#000000">鮮奶</text>
+<rect x="84" y="106" width="32" height="36" rx="4" fill="#eeeeee" stroke="#000000" stroke-width="1.5"/>
+<text x="100.0" y="131.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">1</text>
+<rect x="124" y="106" width="32" height="36" rx="4" fill="#eeeeee" stroke="#000000" stroke-width="1.5"/>
+<text x="140.0" y="131.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">2</text>
+<rect x="164" y="106" width="32" height="36" rx="4" fill="#eeeeee" stroke="#000000" stroke-width="1.5"/>
+<text x="180.0" y="131.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">3</text>
+<rect x="204" y="106" width="32" height="36" rx="4" fill="#eeeeee" stroke="#000000" stroke-width="1.5"/>
+<text x="220.0" y="131.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<rect x="244" y="106" width="32" height="36" rx="4" fill="#eeeeee" stroke="#000000" stroke-width="1.5"/>
+<text x="260.0" y="131.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">5</text>
+</svg>

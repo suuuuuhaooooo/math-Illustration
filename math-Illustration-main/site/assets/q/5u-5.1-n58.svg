@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="132" viewBox="0 0 420 132">
+<rect x="0" y="0" width="420" height="132" fill="#ffffff"/>
+<polygon points="98.0,60.0 79.0,92.9 41.0,92.9 22.0,60.0 41.0,27.1 79.0,27.1" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<text x="60.0" y="124.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">甲</text>
+<polygon points="157.7,33.4 191.7,52.4 168.8,88.1 141.6,83.8 127.1,50.6" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<text x="160.0" y="124.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">乙</text>
+<polygon points="260.0,22.0 296.1,48.3 282.3,90.7 237.7,90.7 223.9,48.3" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<text x="260.0" y="124.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">丙</text>
+<polygon points="343.3,38.7 398.0,38.7 376.7,81.3 322.0,81.3" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<text x="360.0" y="124.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">丁</text>
+</svg>

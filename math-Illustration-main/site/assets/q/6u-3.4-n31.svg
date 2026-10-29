@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="346" height="74" viewBox="0 0 346 74">
+<rect x="0" y="0" width="346" height="74" fill="#ffffff"/>
+<rect x="1" y="1" width="168.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="85.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">分裝的袋數（袋）</text>
+<rect x="169.0" y="1" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="191.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<rect x="213.0" y="1" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="235.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">5</text>
+<rect x="257.0" y="1" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="279.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">8</text>
+<rect x="301.0" y="1" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="323.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">10</text>
+<rect x="1" y="37" width="168.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="85.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">每袋的重量（公斤）</text>
+<rect x="169.0" y="37" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="191.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">50</text>
+<rect x="213.0" y="37" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="235.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">40</text>
+<rect x="257.0" y="37" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="279.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">25</text>
+<rect x="301.0" y="37" width="44.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="323.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">20</text>
+</svg>

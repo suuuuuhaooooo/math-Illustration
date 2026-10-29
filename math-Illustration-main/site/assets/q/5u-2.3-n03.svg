@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="334" viewBox="0 0 440 334">
+<rect x="0" y="0" width="440" height="334" fill="#ffffff"/>
+<rect x="60" y="40" width="260" height="156" fill="#eeeeee" stroke="#000000" stroke-width="2"/>
+<text x="190.0" y="28.0" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">40 公分</text>
+<text x="332.0" y="124.0" font-family="sans-serif" font-size="17" text-anchor="start" font-weight="normal" fill="#000000">24 公分</text>
+<g transform="translate(0,216)"><rect x="12.0" y="10" width="84.8" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="54.4" y="35.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">1 公分</text>
+<rect x="108.8" y="10" width="84.8" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="151.2" y="35.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">4 公分</text>
+<rect x="205.6" y="10" width="84.8" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="248.0" y="35.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">6 公分</text>
+<rect x="302.4" y="10" width="84.8" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="344.8" y="35.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">8 公分</text>
+<rect x="12.0" y="64" width="84.8" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="54.4" y="89.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">12 公分</text>
+</g>
+</svg>
