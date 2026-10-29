@@ -332,3 +332,8 @@ body.lp{--sans:"Huninn","Noto Sans TC",system-ui,sans-serif;font-family:var(--sa
 /* 淺色模式：星星、極光淡一點、不放流星（白天看不到滿天星），燈塔光不混色 */
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .shoot{display:none}:root:not([data-theme="dark"]) .aur{mix-blend-mode:multiply;opacity:.22}:root:not([data-theme="dark"]) .hero2 .fl b{opacity:calc(var(--o,.7)*.45)}:root:not([data-theme="dark"]) .beam.b1,:root:not([data-theme="dark"]) .beam.b2{mix-blend-mode:normal}}
 :root[data-theme="light"] .shoot{display:none}:root[data-theme="light"] .aur{mix-blend-mode:multiply;opacity:.22}:root[data-theme="light"] .hero2 .fl b{opacity:calc(var(--o,.7)*.45)}:root[data-theme="light"] .beam.b1,:root[data-theme="light"] .beam.b2{mix-blend-mode:normal}
+/* 島覽頁最後一區：進入島嶼＋小額贊助 */
+.fin-act{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;align-items:center}
+.fin .btn2.ghost{animation:none;font-size:1rem;padding:12px 30px}
+.fin .dn-note{font-size:.9rem;margin:1.2em 0 0}
+@media (max-width:560px){.fin-act{flex-direction:column}.fin-act .btn2{width:min(100%,320px)}}

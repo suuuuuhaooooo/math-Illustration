@@ -48,3 +48,21 @@
 - 色彩與字型都在 `assets/css/notebook.css` 最上方的 CSS 變數（`--p1`～`--p5`、`--serif`、`--sans`、`--hand`），淺色／深色各一組
 - 原創 SVG 點綴在 `core.js` 的 `NB.deco`：`hero()` 首頁插圖、`rule()` 分隔線、`logo()`、`icon()`（例題／動手玩／解法／挑戰）、`bg()` 背景幾何線條
 - 目錄：章名＋點線＋「共 N 小節」；已完成單元為實線，建置中為虛線
+
+## 無限出題（drill.html）— 免費、不用登入、不用後端
+和學員專區完全分開：不載入 member.js、不呼叫 Cloudflare Worker，題目全部在瀏覽器裡用亂數產生。
+- 網址：`drill.html#print`（列印練習卷）、`#online`（線上練習）、`#log`（練習紀錄／錯題本）
+- 題型產生器：`assets/js/drill-core.js`（亂數、空格格式、批改、SVG 圖形）＋ `drill-g12.js`／`drill-g34.js`／`drill-g56.js`（依 catalog.js 的 412 個小節，各有基礎／標準／挑戰三種難度）
+- 介面：`assets/js/drill.js`、`assets/css/drill.css`
+- 卷號：同一個卷號＋同樣設定＝一模一樣的卷；「複製分享連結」會把單元、難度、題數、卷號都放進網址
+- 紀錄只存在瀏覽器（localStorage `nb-drill-rec`），不上傳
+- 新增或修改題型：在對應年級檔案裡 `DR.def("5u-6.1", function (R, lv) { return { q: "題幹 [?]", b: [DR.N(答案, "單位")] }; })`
+  - 空格：`DR.N` 數字、`DR.F`／`DR.FA` 分數（預設要最簡、假分數要寫成帶分數）、`DR.S([選項], 答案)` 選一個、`DR.mc(R, 題幹, 正解, [錯誤選項])` 選擇題
+  - 改完在專案外跑 `node gen-test.js` 之類的檢查：每個產生器跑幾百次，確認答案能通過自己的批改
+
+## 漢堡選單（navmenu.js）
+島嶼頁、無限出題頁右上角的「選單」。要加新功能，只要在 `NB.NAV` 陣列加一筆 `{ g, id, href, t, d, ic }`。
+
+## 小額贊助（BobaMe）
+`assets/data/config.js` 的 `donate.url` 填入你的 BobaMe 頁面網址（例如 `https://你的帳號.bobaboba.me/`）。
+填了之後，漢堡選單、所有頁面的頁尾、島覽頁最後一區會出現「請島民喝珍奶」按鈕；空字串就全部隱藏。
