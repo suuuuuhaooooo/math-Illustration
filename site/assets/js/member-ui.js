@@ -376,11 +376,18 @@ function printWiz(arg){
   if(n===3){if(busy)return["出題中","題目還在準備，請稍等一下再按下一步。"];if(pv&&pvSig!==sig())return["需要重新審題","範圍或題目設定改過了，需要先重新審題。"];if(!pv)return["還沒有審題","請先在第 3 步看過這份卷的題目（系統正在幫你出題），再往後走。"];if(!pv.qs.length)return["沒有題目","目前沒有可以出的題目。請回到上一步放寬範圍或條件，或按「重新出題」。"]}
   if(n===4){var P=panel.get();if(!Object.keys(P.kinds||{}).some(function(k){return P.kinds[k]})&&!P.matrix)return["還沒選輸出卷別","請至少勾選一種輸出卷別（例如題目卷），不然沒有東西可以印。"]}
   return null}
+ /* 鎖步驟：只能往下一步，或回到已經完成過的步驟；前面的設定改了，後面的步驟要重新走 */
+ var maxStep=1,first=true;
+ function relock(k){if(maxStep>k){maxStep=k;paintBar()}}
+ function paintBar(){Array.prototype.forEach.call(bar.children,function(li,i){var n=i+1,lock=n>maxStep&&n>step+1;li.className=n===step?"on":n<=maxStep?"done":lock?"locked":"";var a=li.firstChild;if(n===step)a.setAttribute("aria-current","step");else a.removeAttribute("aria-current");if(lock){a.setAttribute("aria-disabled","true");a.title="請先完成前面的步驟"}else{a.removeAttribute("aria-disabled");a.removeAttribute("title")}})}
  function request(n){
   n=Math.max(1,Math.min(5,n||1));
+  if(first){first=false;if(n>1){n=1;if(location.hash!=="#print/step1")location.replace("#print/step1")}}
+  else if(n>step+1&&n>maxStep){var want=n;popup("請一步一步來","目前在第 "+step+" 步「"+STEPS[step-1][0]+"」。請先完成這一步、按「下一步」，完成後才能到第 "+want+" 步「"+STEPS[want-1][0]+"」。",function(){});if(location.hash!=="#print/step"+step)location.replace("#print/step"+step);return}
   var order=[2,3,4];for(var k=0;k<order.length;k++){var st=order[k];if(st>=n)break;var bad=chk(st);if(bad){popup(bad[0],bad[1],function(){});show(st);if(location.hash!=="#print/step"+st)location.replace("#print/step"+st);return}}
   show(n)}
  function show(n){
+  if(n>maxStep)maxStep=n;
   step=n;hd.textContent=STEPS[n-1][1];stepEls.forEach(function(x,i){x.hidden=i+1!==n});
   if(n===2){layout2();box2.appendChild(panel.el);for(var i=0;i<dts.length;i++){dts[i].hidden=i!==4;if(i===4)dts[i].open=true}}
   if(n===3){if(!pv||pvSig!==sig())runPreview();else drawPreview()}
@@ -388,7 +395,7 @@ function printWiz(arg){
   if(n===5){if(fresh())redrawFinal();else out.innerHTML="";summ()}
   out.hidden=!(n===4||(n===5&&fresh()));
   nav.children[0].hidden=n===1;nav.children[1].hidden=n===5;nav.children[1].textContent=n===4?"下一步：進行出卷":"下一步";
-  Array.prototype.forEach.call(bar.children,function(li,i){li.className=i+1===n?"on":i+1<n?"done":"";var a=li.firstChild;if(i+1===n)a.setAttribute("aria-current","step");else a.removeAttribute("aria-current")});
+  paintBar();
   if(n!==4&&n!==5)out.innerHTML=""}
  function qrWant(){var P=panel.get();return !!(P.qr&&M.cfg&&M.cfg.qr&&u.role==="teacher")}
  /* QR 卷的答案格跟著「題組合併、配分」走；這些改了就要重新出卷，掃描結果才會和卷面一致 */
@@ -411,15 +418,16 @@ function printWiz(arg){
  var node=s;PS={alive:function(){return document.body.contains(node)},go:function(a){var m=/^step([1-5])$/.exec(a||"");request(m?+m[1]:1);window.scrollTo(0,0)}};
  bar.addEventListener("click",function(e){var a=e.target.closest("a");if(!a)return;e.preventDefault();goStep(+a.getAttribute("href").slice(-1))});
  /* 第 1 步 */
- s1.addEventListener("change",function(e){if(e.target.name!=="pw-mode")return;W.mode=e.target.value;if(W.mode!=="quick")ed.setMode(W.mode);layout2()});
+ s1.addEventListener("change",function(e){if(e.target.name!=="pw-mode")return;relock(1);W.mode=e.target.value;if(W.mode!=="quick")ed.setMode(W.mode);layout2()});
  /* 第 2 步 */
  function layout2(){var q=W.mode==="quick";$(".qn").hidden=q?false:true;$("#pw-n").hidden=!q;ed.el.hidden=q;pk.el.hidden=val("pw-src")!=="pick";if(!pk.el.hidden)pk.el.open=true;ed.refreshWeights()}
  function filt(){pk.filter(grades(),val("pw-sem")==="a"?"":val("pw-sem"));ed.refreshWeights()}
  s2.addEventListener("change",function(e){
+  relock(2);
   if(e.target.name==="pw-scope"){W.scope=e.target.value;if(W.mode!=="quick"){var c=ed.syncScope();if(c)popup("已調整題型",c+" 個大題原本是勾選題或連連看，線上速測的題庫沒有這些題型，已改成選擇題。")}}
   else if(e.target.closest("#pw-g")||e.target.id==="pw-sem"){if(e.target.closest("#pw-g")&&!grades().length){e.target.checked=true;popup(SCI?"至少選一冊":"至少選一個年級",SCI?"冊別不能全部取消，請至少保留一冊。":"年級不能全部取消，請至少保留一個。")}filt()}
   else if(e.target.id==="pw-src"){layout2()}});
- pk.el.addEventListener("change",function(){if(pk.get().length&&val("pw-src")!=="pick"){$("#pw-src").value="pick";layout2()}ed.refreshWeights()});
+ pk.el.addEventListener("change",function(){relock(2);if(pk.get().length&&val("pw-src")!=="pick"){$("#pw-src").value="pick";layout2()}ed.refreshWeights()});
  /* 第 3 步：審題預覽（dry：不寫資料庫） */
  function runPreview(){
   if(busy)return;var g=curPlan(),sg=sig();if(g&&g.err){popup("大題設定有問題",g.err,function(){goStep(2)});return}

@@ -711,3 +711,6 @@ h1.title .subj-now::before{content:"・"}@media (max-width:640px){h1.title .subj
 .bar-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto}
 @media (max-width:640px){.bar-r{width:100%;flex-wrap:nowrap;justify-content:space-between}.bar-r .nbm{margin-left:auto}}
 @media (max-width:420px){.bar-r .themes button{padding:7px 8px;gap:3px;font-size:.82rem}.bar-r .themes svg{width:14px;height:14px}}
+/* 列印練習卷五步驟：還不能去的步驟 */
+.pstepbar li.locked a{opacity:.45;cursor:not-allowed;border-style:dashed}
+.pstepbar li.locked a::after{content:"";flex:none;width:10px;height:11px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 11' fill='none' stroke='%23888' stroke-width='1.4'%3E%3Crect x='1' y='5' width='8' height='5.3' rx='1'/%3E%3Cpath d='M3 5V3.3a2 2 0 0 1 4 0V5'/%3E%3C/svg%3E") no-repeat center/contain}
