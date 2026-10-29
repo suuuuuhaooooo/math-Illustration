@@ -1,2 +1,0 @@
-/* 2u-7.1 */
-NB.unit(NB.kit?NB.kit.model({"q":"紅絲帶長 4 公分，藍絲帶是紅絲帶的 3 倍，藍絲帶長多少？","steps":["把紅絲帶當作 1 份","藍絲帶有 3 份一樣長","4 × 3 = 12"],"ch":{"q":"甲是 5 公分，乙是甲的 4 倍，乙長幾公分？","a":20,"h":"5 × 4。"},"S":[{"k":"u","label":"一份","min":1,"max":6,"val":4,"unit":"公分"},{"k":"k","label":"倍數","min":1,"max":6,"val":3,"unit":"倍"}],"rows":q=>[{name:"紅",segs:[q.u],cols:["var(--p1)"]},{name:"藍",segs:Array(q.k).fill(q.u),cols:Array(q.k).fill("var(--p2)")}],"brace":q=>q.u*q.k,"eq":q=>`${q.u} × ${q.k} = <b>${q.u*q.k}</b>，藍是紅的 <b>${q.k}</b> 倍`}):{});

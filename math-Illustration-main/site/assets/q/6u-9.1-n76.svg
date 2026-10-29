@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="452" height="248" viewBox="0 0 452 248">
-<rect x="0" y="0" width="452" height="248" fill="#ffffff"/>
-<path d="M26.0,207.9 L93.4,207.9 L110.2,157.4 L36.1,147.3 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
-<path d="M173.4,207.9 L375.5,207.9 L426.0,56.3 L203.7,26.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
-<text x="56.4" y="226.5" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">2cm</text>
-<text x="271.1" y="226.5" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">6cm</text>
-<text x="66.4" y="185.7" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">甲</text>
-<text x="294.6" y="130.1" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">乙</text>
-</svg>

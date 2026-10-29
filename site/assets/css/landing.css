@@ -332,3 +332,11 @@ body.lp{--sans:"Huninn","Noto Sans TC",system-ui,sans-serif;font-family:var(--sa
 /* 淺色模式：星星、極光淡一點、不放流星（白天看不到滿天星），燈塔光不混色 */
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .shoot{display:none}:root:not([data-theme="dark"]) .aur{mix-blend-mode:multiply;opacity:.22}:root:not([data-theme="dark"]) .hero2 .fl b{opacity:calc(var(--o,.7)*.45)}:root:not([data-theme="dark"]) .beam.b1,:root:not([data-theme="dark"]) .beam.b2{mix-blend-mode:normal}}
 :root[data-theme="light"] .shoot{display:none}:root[data-theme="light"] .aur{mix-blend-mode:multiply;opacity:.22}:root[data-theme="light"] .hero2 .fl b{opacity:calc(var(--o,.7)*.45)}:root[data-theme="light"] .beam.b1,:root[data-theme="light"] .beam.b2{mix-blend-mode:normal}
+
+/* 贊助按鈕：補上珍奶圖示，跟選單和頁尾的樣子一致 */
+.dn-btn{display:inline-flex;align-items:center;gap:8px}
+.dn-btn svg{width:1.12em;height:1.12em;flex:none}
+
+/* 結尾的兩顆按鈕：拉開距離，手機上改成直排 */
+.fin-act{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 26px;margin-top:22px}
+@media (max-width:520px){.fin-act{flex-direction:column;gap:12px}.fin-act .btn2{width:min(280px,100%);text-align:center;justify-content:center}}
