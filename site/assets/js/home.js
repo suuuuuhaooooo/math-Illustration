@@ -7,8 +7,7 @@ function semText(S){var t=0,n=0,u=NB.trail.all();S.chs.forEach(function(c){t+=c.
 /* ---- 數光群島（3D）：單元目錄就是群島；只有瀏覽器畫不出 canvas 時，才退回原本的年級清單 ---- */
 var ISLE=null;
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-/* 上方列：品牌、漢堡選單（學員專區、學習地圖、無限出題……都在裡面，見 navmenu.js 的 NB.NAV）、主題 */
-function topBar(){var bar=NB.h('<nav class="bar"><a class="brand" href="../" title="回到導覽頁" style="text-decoration:none;color:inherit">'+NB.deco.logo()+'數光島筆記本</a></nav>'),r=NB.h('<div class="bar-r"></div>');r.appendChild(NB.themeBar());if(NB.menu)r.appendChild(NB.menu({cur:"home"}));else{if(NB.member)r.appendChild(NB.member.chip());r.appendChild(NB.h('<a class="lnk maplink" href="map.html">學習地圖</a>'))}bar.appendChild(r);return bar}
+function topBar(){var bar=NB.h('<nav class="bar"><a class="brand" href="../" title="回到導覽頁" style="text-decoration:none;color:inherit">'+NB.deco.logo()+'數光島筆記本</a></nav>');if(NB.member)bar.appendChild(NB.member.chip());bar.appendChild(NB.h('<a class="lnk maplink" href="map.html">學習地圖</a>'));bar.appendChild(NB.themeBar());return bar}
 function render3d(){
  app.innerHTML="";app.classList.add("i3page");app.appendChild(topBar());
  var st=NB.h('<section class="i3" aria-label="數光群島：22 座主題島">'+
@@ -152,7 +151,7 @@ function render(){
  window.addEventListener("isle3d-ready",function(){go(true)});setTimeout(function(){go(!!NB.isle3d)},4000)}
 function renderList(){
  app.innerHTML="";app.classList.remove("i3page");rows={};
- app.appendChild(topBar());app.appendChild(NB.h('<div class="ruler"></div>'));
+ var bar=NB.h('<nav class="bar"><a class="brand" href="../" title="回到導覽頁" style="text-decoration:none;color:inherit">'+NB.deco.logo()+'數光島筆記本</a></nav>');if(NB.member)bar.appendChild(NB.member.chip());var ml=NB.h('<a class="lnk maplink" href="map.html">學習地圖</a>');bar.appendChild(ml);bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(NB.h('<div class="ruler"></div>'));
  var hero=NB.h('<section class="hero"><div><p class="eyebrow">國小數學・圖解與互動</p><h1 class="title">看懂數學，<mark>動手玩一玩</mark></h1><p class="lead">從例題出發，拖拉、旋轉、疊一疊，把算式變成看得見的圖形。適用國小一至六年級。</p></div></section>');hero.appendChild(NB.deco.hero());app.appendChild(hero);
  app.appendChild(NB.h('<section class="feats" aria-label="特色"><div class="feat"><b>01</b><h3>看懂</h3><p>每個單元從一個例題出發，用手繪圖解一步一步拆開算式，先理解，再計算。</p></div><div class="feat"><b>02</b><h3>動手</h3><p>拖拉、旋轉、疊一疊，自己操作圖形，從錯誤中修正想法。</p></div><div class="feat"><b>03</b><h3>練習</h3><p>班級學員可使用小測驗、每日一題、錯題本與模擬卷，累積積分與勳章，並可列印練習卷。</p></div></section>'));
  app.appendChild(NB.deco.rule());
@@ -176,7 +175,8 @@ function homeTour(){if(NB.tour)NB.tour.setup("home",[{title:"歡迎來到數光�
  {sel:"details.sheet summary",title:"展開學期",text:"每個學期是一張紙，點一下展開，會看到章與小節。"},
  {sel:".secs .lnk",title:"選一個小節",text:"每個小節都是一頁：先看例題，再動手拖拉，接著看解法，最後挑戰一題。"},
  {sel:".resume",title:"繼續上次",text:"玩過的單元會被記住，按這裡回到上次的地方。"},
- {sel:".nbm-btn",title:"選單",text:"學員專區、學習地圖、無限出題、線上練習都收在這裡。點一下打開，再點一下（或按叉叉）關上。"},
+ {sel:".maplink",title:"學習地圖",text:"看單元之間怎麼連起來：先學什麼、接著學什麼。"},
+ {sel:".chip",title:"學員專區",text:"正式學員在這裡登入，有每日一題、錯題本、模擬卷和積分。"},
  {sel:".themes",title:"外觀與注音",text:"可以切換永晝、永夜或跟隨系統，也能開關注音。"}])}
 render();
 })();
