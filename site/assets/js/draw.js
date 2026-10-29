@@ -33,7 +33,7 @@
 
   /* ---------- 幾何 ---------- */
   function bbox(o) {
-    if (o.t === "line" || o.t === "arrow") {
+    if (o.t === "line" || o.t === "arrow" || o.t === "dim") {
       return { x: Math.min(o.x, o.x2), y: Math.min(o.y, o.y2), w: Math.abs(o.x2 - o.x), h: Math.abs(o.y2 - o.y) };
     }
     if (o.t === "path") { var b = ptsBox(o.d.pts); return b || { x: o.x, y: o.y, w: 2, h: 2 }; }
@@ -190,6 +190,7 @@
       case "path": inner = '<path d="' + pathD(o.d.pts) + '" ' + (o.d.close ? sAttr(s) : 'stroke="' + s.sc + '" stroke-width="' + s.sw + '"' + (s.sd ? ' stroke-dasharray="' + s.sd + '"' : "") + ' fill="none" stroke-linecap="round" stroke-linejoin="round"') + (o.d.close ? ' ' : "") + "/>"; break;
       case "math": inner = o.d.svg ? '<g transform="translate(' + rd(o.x) + " " + rd(o.y) + ") scale(" + rd(o.w / (o.d.w0 || 1), 4) + " " + rd(o.h / (o.d.h0 || 1), 4) + ')">' + String(o.d.svg).replace(/currentColor/g, s.sc) + "</g>" : ""; break;
       case "lib": inner = libSvg(o, s.sc); break;
+      default: if (NB.drawPlus && NB.drawPlus.types[o.t]) inner = NB.drawPlus.svg(o);
     }
     var tr = o.rot ? ' transform="rotate(' + o.rot + " " + rd(b.x + b.w / 2) + " " + rd(b.y + b.h / 2) + ')"' : "";
     return '<g data-id="' + o.id + '"' + tr + (o.op != null && o.op < 1 ? ' opacity="' + o.op + '"' : "") + ">" + inner + "</g>";
@@ -212,7 +213,12 @@
       ["rect", "矩形", "M4 6h16v12H4z"], ["ellipse", "橢圓", "M12 6a8 6 0 1 0 .01 0"], ["poly", "多邊形", "M12 4l8 6-3 9H7l-3-9z"],
       ["line", "直線", "M4 19L20 5"], ["arrow", "箭頭", "M4 19L20 5M20 5h-6M20 5v6"],
       ["nline", "數線", "M3 12h18M7 9v6M12 9v6M17 9v6"], ["axes", "座標軸", "M5 3v16h16M5 19L19 7"],
-      ["grid", "方格", "M4 4h16v16H4zM10 4v16M16 4v16M4 10h16M4 16h16"], ["table", "表格", "M4 5h16v14H4zM4 10h16M12 5v14"], ["math", "數學式", "M4 6h7l-3 12M14 9l6 6M20 9l-6 6"], ["path", "自由筆", "M3 18c4-10 7 4 10-4s4 6 8 2"]];
+      ["grid", "方格", "M4 4h16v16H4zM10 4v16M16 4v16M4 10h16M4 16h16"], ["table", "表格", "M4 5h16v14H4zM4 10h16M12 5v14"], ["math", "數學式", "M4 6h7l-3 12M14 9l6 6M20 9l-6 6"], ["path", "自由筆", "M3 18c4-10 7 4 10-4s4 6 8 2"],
+      ["fn", "函數圖", "M4 20V4M4 20h16M5 17c4 0 4-9 8-9s5 6 9 6"],
+      ["solid", "立體圖", "M4 9l8-4 8 4v8l-8 4-8-4z M4 9l8 4 8-4M12 13v8"],
+      ["blocks", "積木", "M3 8l4.5-2.5L12 8l-4.5 2.5zM12 8l4.5-2.5L21 8l-4.5 2.5zM7.5 15L12 12.5 16.5 15 12 17.5z"],
+      ["angle", "角度", "M5 19h15M5 19L19 7M12 19a9 9 0 0 0-1.6-5"],
+      ["dim", "尺寸標註", "M4 12h16M4 9v6M20 9v6M8 12l2-2M8 12l2 2"]];
     var tbar = h('<div class="dw-tools" role="toolbar" aria-label="工具"></div>');
     TOOLS.forEach(function (t) {
       var b = h('<button type="button" class="dw-t" data-t="' + t[0] + '" title="' + t[1] + '" aria-label="' + t[1] + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="' + t[2] + '"/></svg></button>');
@@ -462,7 +468,7 @@
       var sx = b.w ? nw / b.w : 1, sy = b.h ? nh / b.h : 1;
       st.snap.forEach(function (s0) {
         var o = byId(s0.id); if (!o) return;
-        if (o.t === "line" || o.t === "arrow") {
+        if (o.t === "line" || o.t === "arrow" || o.t === "dim") {
           o.x = nx + (s0.x - b.x) * sx; o.y = ny + (s0.y - b.y) * sy;
           o.x2 = nx + (s0.x2 - b.x) * sx; o.y2 = ny + (s0.y2 - b.y) * sy;
         } else if (o.t === "path") {
@@ -497,7 +503,7 @@
         var b = ptsBox(ps); if (b) { o.x = b.x; o.y = b.y; o.w = b.w; o.h = b.h; }
         live(); return;
       }
-      if (o.t === "line" || o.t === "arrow") {
+      if (o.t === "line" || o.t === "arrow" || o.t === "dim") {
         o.x2 = x; o.y2 = y;
         if (keep) { if (Math.abs(x - o.x) > Math.abs(y - o.y)) o.y2 = o.y; else o.x2 = o.x; }
       } else {
@@ -539,6 +545,8 @@
       if (t === "line" || t === "arrow") { o.x2 = x; o.y2 = y; }
       if (t === "math") { o.d = { tex: "\\frac{3}{4}" }; s.fs = 28; remath(o); }
       if (t === "path") { o.d = { pts: [[x, y]], close: 0 }; }
+      /* 加值包的物件（函數圖、立體圖、積木、角度、尺寸）自己帶預設值 */
+      if (NB.drawPlus && NB.drawPlus.types[t]) NB.drawPlus.init(o);
       return o;
     }
 
@@ -569,7 +577,7 @@
       propsBox.appendChild(colorRow("線條", o.s.sc, function (c) { set(function (x) { x.s.sc = c; }); }));
       propsBox.appendChild(numRow("粗細", o.s.sw, 0.5, 12, 0.5, function (v) { set(function (x) { x.s.sw = v; }); }));
       propsBox.appendChild(selRow("線型", [["", "實線"], ["7 5", "虛線"], ["2 4", "點線"]], o.s.sd, function (v) { set(function (x) { x.s.sd = v; }); }));
-      if (["rect", "ellipse", "poly", "grid", "table"].indexOf(o.t) >= 0) {
+      if (["rect", "ellipse", "poly", "grid", "table", "solid", "blocks", "fn", "angle", "raw"].indexOf(o.t) >= 0) {
         propsBox.appendChild(colorRow("填色", o.s.fc, function (c) { set(function (x) { x.s.fc = c; }); }, true));
         propsBox.appendChild(numRow("填色濃度", o.s.fo, 0, 1, 0.05, function (v) { set(function (x) { x.s.fo = v; }); }));
       }
@@ -639,6 +647,31 @@
         var rb = h('<button type="button" class="pen dw-b dw-full">回到原始大小</button>');
         rb.onclick = function () { push(); list.forEach(function (x) { if (x.t === "lib") { x.w = x.d.w0; x.h = x.d.h0; } }); render(); store(); };
         propsBox.appendChild(rb);
+        var xb = h('<button type="button" class="pen dw-b dw-full">拆成可編輯元件</button>');
+        xb.onclick = function () { explode(); };
+        propsBox.appendChild(xb);
+        propsBox.appendChild(h('<p class="dw-note meta">拆開以後，圖裡的每一條線、每一個圓都會變成可以單獨選取、改色、搬動的元件（拆了就回不去原本的參數，建議先複製一份）。</p>'));
+      }
+      /* 加值包物件：參數欄位照 draw-plus 的規格自動長出來 */
+      var DP = NB.drawPlus, TY = DP && DP.types[o.t];
+      if (TY) {
+        TY.a.forEach(function (a) {
+          var cb = function (v) { set(function (x) { x.d[a.k] = v; }); };
+          var cv = o.d[a.k];
+          if (a.t === "num") propsBox.appendChild(numRow(a.n, cv, a.min, a.max, a.step, cb));
+          else if (a.t === "bool") propsBox.appendChild(chkRow(a.n, cv, function (v) { cb(v ? 1 : 0); }));
+          else if (a.t === "sel") propsBox.appendChild(selRow(a.n, a.o, cv, cb));
+          else if (a.t === "area") {
+            var ta = h('<textarea class="dw-in dw-mono" rows="' + (a.rows || 3) + '">' + esc(String(cv == null ? "" : cv)) + "</textarea>");
+            ta.onchange = function () { cb(ta.value); };
+            propsBox.appendChild(row(a.n, ta));
+          } else propsBox.appendChild(txtRow(a.n, String(cv == null ? "" : cv), cb));
+        });
+        if (o.t === "fn") propsBox.appendChild(h('<p class="dw-note meta">一行一條線：<b>y=x^2-3</b>、<b>2x+1</b>、<b>sin(x)</b>、<b>x=2</b>（鉛直線）。後面可以加 <b>[0,4]</b> 限定範圍、<b>紅 藍 綠 橘 紫</b> 指定顏色、<b>虛線</b>、<b>粗</b>，以及 <b>"標籤"</b>。</p>'));
+        if (o.t === "blocks") propsBox.appendChild(h('<p class="dw-note meta">一行一排、數字是那一格疊幾層，0 代表沒有。預設第一行是最後排。</p>'));
+        if (o.t === "angle") propsBox.appendChild(h('<p class="dw-note meta">頂點在方框正中央：把方框拖到角的頂點上，再用把手調邊長。角度逆時針為正，剛好 90° 會自動改畫直角符號。</p>'));
+        if (o.t === "raw") propsBox.appendChild(h('<p class="dw-note meta">這是從圖庫拆出來的元件，顏色、線粗、大小都可以單獨改。</p>'));
+        if (o.d.err) propsBox.appendChild(h('<p class="dw-note dw-err">' + esc(o.d.err) + "</p>"));
       }
       if (o.t === "table") {
         propsBox.appendChild(numRow("列數", o.d.r, 1, 20, 1, function (v) { set(function (x) { x.d.r = v; }); }));
@@ -670,7 +703,8 @@
       if (list.length > 1) { propsBox.appendChild(h('<p class="dw-ph">對齊</p>')); propsBox.appendChild(ab); }
     }
     function tName(t) {
-      return { sel: "選取", rect: "矩形", ellipse: "橢圓", poly: "多邊形", line: "直線", arrow: "箭頭", text: "文字", nline: "數線", axes: "座標軸", grid: "方格", table: "表格", math: "數學式", path: "自由筆", lib: "圖形" }[t] || t;
+      var base = { sel: "選取", rect: "矩形", ellipse: "橢圓", poly: "多邊形", line: "直線", arrow: "箭頭", text: "文字", nline: "數線", axes: "座標軸", grid: "方格", table: "表格", math: "數學式", path: "自由筆", lib: "圖形" }[t];
+      return base || (NB.drawPlus && NB.drawPlus.name(t)) || t;
     }
     function align(k) {
       var list = selObjs(); if (list.length < 2) return;
@@ -783,6 +817,32 @@
       if (o.d.err) { status("這個圖現在畫不出來。"); return; }
       push(); D.objs.push(o); sel = [o.id]; setTool("sel"); render(); store(); closeDlg();
     }
+    /* 把選到的圖庫圖形拆成一個個 raw 元件，之後每一塊都能單獨編輯 */
+    function explode() {
+      var DP = NB.drawPlus;
+      if (!DP || !DP.explode) { status("拆解模組沒載入。"); return; }
+      var targets = selObjs().filter(function (o) { return o.t === "lib" && o.d.svg; });
+      if (!targets.length) { status("請先選一個圖庫拉出來的圖形。"); return; }
+      push();
+      var made = [], failed = 0;
+      targets.forEach(function (o) {
+        var parts;
+        try {
+          parts = DP.explode(String(o.d.svg).replace(/currentColor/g, o.s.sc), { x: o.x, y: o.y, w: o.w, h: o.h, w0: o.d.w0, h0: o.d.h0, color: o.s.sc, ff: o.s.ff });
+        } catch (e) { parts = []; }
+        if (!parts.length) { failed++; return; }
+        var at = D.objs.indexOf(o);
+        parts.forEach(function (p) { p.id = uid(); p.op = o.op; });
+        D.objs.splice(at, 1);
+        /* 放回原來的圖層位置，疊在別的東西上的順序才不會跑掉 */
+        Array.prototype.splice.apply(D.objs, [at, 0].concat(parts));
+        made = made.concat(parts.map(function (p) { return p.id; }));
+      });
+      if (!made.length) { undo.pop(); status(failed ? "這張圖拆不開。" : "沒有可以拆的圖形。"); return; }
+      sel = made; render(); store(); props();
+      status("拆成 " + made.length + " 個元件了，現在每一塊都可以單獨改。");
+    }
+
     function libDlg() {
       var LB = NB.drawLib;
       if (!LB) { ask("圖庫沒載入", "找不到 draw-lib.js，請確認檔案有放上去。", "知道了", null); return; }

@@ -243,6 +243,11 @@
   .gm-rqt { font-size: 1.14rem }
   .gm-hrow { padding-right: 36px }
 }
+@media (max-width: 640px) {
+  /* 計算機那排按鍵只是裝飾，手機上少畫兩排，後面「修好它」才不會被擠到螢幕外 */
+  .gm-keys i:nth-child(n+5) { display: none }
+  .gm-calc { padding: 10px }
+}
 @media (max-width: 420px) {
   .gm-ro { grid-template-columns: 1fr }
   .gm-rb { padding: 13px 8px }

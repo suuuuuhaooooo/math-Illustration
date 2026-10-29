@@ -37,6 +37,20 @@
   /* 切頁：如果網址本來就是這一頁（例如印章簿按「看印章簿」），hashchange 不會觸發，要自己重畫 */
   function goto(hs) { if (location.hash === hs) { lastHash = null; route(); } else location.hash = hs; }
   function top() { window.scrollTo({ top: 0, behavior: "smooth" }); }
+  /* 手機的畫面比較窄、版面被拉得很長，按下去之後新冒出來的那一塊常常落在螢幕外，
+     看起來就像「按了沒反應」或「按鈕按不到」。只要不在畫面裡就幫使用者捲過去。 */
+  function reveal(el, block) {
+    if (!el) return;
+    setTimeout(function () {
+      try {
+        var r = el.getBoundingClientRect();
+        if (!r.width && !r.height) return;
+        if (r.bottom > window.innerHeight - 10 || r.top < 8) el.scrollIntoView({ behavior: "smooth", block: block || "center" });
+      } catch (e) {}
+    }, 30);
+  }
+  /* 手機上不要把焦點丟給輸入框（會彈出鍵盤把畫面擠掉），按鈕則可以 */
+  function hold(el) { if (!el) return; try { el.focus({ preventScroll: true }); } catch (e) { try { el.focus(); } catch (e2) {} } reveal(el); }
   function rangeText() {
     var S = GM.S;
     if (!S.sel.length) return "一二三四五六"[S.grade - 1] + "年級全部";
@@ -63,7 +77,7 @@
       if (pan.firstChild) { pan.hidden = !pan.hidden; return; }
       pan.appendChild(GM.lvRow(paint));
       pan.appendChild(GM.picker(paint, { note: "選好的範圍，六個遊戲都會用這一份。" }));
-      pan.hidden = false;
+      pan.hidden = false; reveal(pan, "start");
     };
     if (opt.note) box.querySelector(".gm-note").textContent = opt.note;
     var best = opt.bestText && opt.bestText();
@@ -158,6 +172,7 @@
           box.innerHTML = '<p class="gm-ask">抓到了！正確答案是多少？</p><div class="gm-fixrow">' + GM.inHtml(Q) + '</div><div class="dr-btns"><button type="button" class="pen go">修好它</button></div>';
           box.hidden = false;
           var inp = box.querySelector("input"); if (inp && window.innerWidth > 640) inp.focus();
+          reveal(box);
           box.querySelector("button").onclick = function () {
             var r = GM.grade(box, Q);
             if (r.empty) { tell(card, "bad", "還沒寫答案", "", Q, true); return; }
@@ -182,7 +197,7 @@
         if (Q.calc) { try { fb.innerHTML += '<div class="gm-fig gm-calcv">' + D.V.svg(Q.calc, "a", { mode: "filled", grid: "cell", pv: true, carry: true, u: 24, k: 0.8 }) + "</div>"; } catch (e) {} }
         var nx = h('<div class="dr-btns"><button type="button" class="pen go">' + (P.i + 1 >= P.n ? "看結果" : "下一台") + "</button></div>");
         nx.firstChild.onclick = function () { P.i++; step(); };
-        fb.appendChild(nx); nx.firstChild.focus();
+        fb.appendChild(nx); hold(nx.firstChild);
       }
       function done() {
         var rec = GM.best("fix", P.judge, true);
@@ -338,7 +353,7 @@
         sub.onclick = function () { P.answered ? (P.i++, P.answered = false, step()) : submit(card, Q, false); };
         card.querySelector(".gm-skip").onclick = function () { if (!P.answered) submit(card, Q, true); };
         var hb = card.querySelector(".gm-hint");
-        if (hb) hb.onclick = function () { var b = card.querySelector(".gm-hintbox"); b.innerHTML = GM.figHtml(Q, "q", { aid: true, nocalc: true }); b.hidden = false; hb.hidden = true; };
+        if (hb) hb.onclick = function () { var b = card.querySelector(".gm-hintbox"); b.innerHTML = GM.figHtml(Q, "q", { aid: true, nocalc: true }); b.hidden = false; hb.hidden = true; reveal(b); };
         var f = card.querySelector("input"); if (f && window.innerWidth > 640) f.focus();
         top();
       }
@@ -360,7 +375,7 @@
         var w = GM.figHtml(Q, "a", { aid: true });
         if (w) fb.appendChild(h('<div class="gm-worked">' + w + "</div>"));
         var sub = card.querySelector(".gm-sub");
-        sub.textContent = P.i + 1 >= P.n ? "看結果" : "下一題"; sub.focus();
+        sub.textContent = P.i + 1 >= P.n ? "看結果" : "下一題"; hold(sub);
       }
       function done() {
         var pass = P.ok >= 4, got = false;
@@ -584,7 +599,8 @@
             else { try { document.execCommand("copy"); done(); } catch (e) {} }
           };
           if (NB.qr && NB.qr.svg) { try { lk.appendChild(h('<div class="gm-qr">' + NB.qr.svg(url, { px: 3 }) + "<p class=\"meta\">用手機掃也可以</p></div>")); } catch (e) {} }
-          inp.focus(); inp.select();
+          if (window.innerWidth > 640) { inp.focus(); inp.select(); }
+          reveal(lk, "start");
         };
         box.querySelector(".gm-try").onclick = function () { play(pack(), true); };
         box.querySelector(".gm-pr").onclick = function () { printPaper(pack()); };
@@ -640,7 +656,7 @@
         fb.innerHTML = "<h3>" + (r.ok ? "答對了" : "再想想看") + "</h3>" + (r.ok ? "" : "<p>正確答案：" + tx(esc(GM.ansLine(Q))) + "</p>");
         if (r.ok) GM.spark(fb);
         var w = GM.figHtml(Q, "a", { aid: true }); if (w) fb.appendChild(h('<div class="gm-worked">' + w + "</div>"));
-        sub.textContent = S.i + 1 >= qs.length ? "看分數" : "下一題"; sub.focus();
+        sub.textContent = S.i + 1 >= qs.length ? "看分數" : "下一題"; hold(sub);
       };
       var f = card.querySelector("input"); if (f && window.innerWidth > 640) f.focus();
       top();
@@ -781,7 +797,7 @@
       if (pan.firstChild) { pan.hidden = !pan.hidden; return; }
       pan.appendChild(GM.lvRow(paint));
       pan.appendChild(GM.picker(paint, { note: "選好的範圍，六個遊戲都會用這一份。" }));
-      pan.hidden = false;
+      pan.hidden = false; reveal(pan, "start");
     };
     view.appendChild(panel);
     var list = h('<div class="gm-list"></div>');
