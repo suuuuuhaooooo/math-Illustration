@@ -14,7 +14,8 @@
   function secName(id) { var o = BY[id]; return o ? o.sem + " " + o.num + " " + o.title : id; }
 
   /* ---------- 狀態 ---------- */
-  var DEF = { sel: [], lv: 2, grade: 0, title: "", count: "p1", cols: "auto", big: false, gap: "m", order: "unit", head: true, score: true, sol: true, view: "q", on: 10, otime: true, vmode: "filled", vgrid: "cell", vpv: true, vcarry: true, aidAt: "both", alloc: {}, sec: {} };
+  var DEF = { sel: [], lv: 2, grade: 0, title: "", count: "p1", cols: "auto", big: false, gap: "m", order: "unit", head: true, score: true, sol: true, view: "q", on: 10, otime: true, vmode: "filled", vgrid: "cell", vpv: true, vcarry: true, aidAt: "both", alloc: {}, sec: {}, vsize: "m", aidSm: false };
+  var LEGACY = false;   /* 舊版（沒有 ver）分享連結：只出基本題，重現當時的卷 */
   /* 這一份卷上的修改：換題 rr、刪題 del、加題 plus、改題幹 txt、自訂題 add。換卷號或難度就清空 */
   var ED = { rr: {}, del: {}, plus: {}, txt: {}, add: [] }, edSig = "";
   var S = Object.assign({}, DEF, ld(SK, {})), mode = "print", seed = rseed();
@@ -37,12 +38,17 @@
     if (p.b) S.big = p.b === "1";
     if (p.v) { var v = p.v.split(""); S.vmode = v[0] === "s" ? "self" : "filled"; S.vgrid = { c: "cell", l: "col", n: "none" }[v[1]] || "cell"; S.vpv = v[2] !== "0"; S.vcarry = v[3] !== "0"; }
     if (p.ai) S.aidAt = { b: "both", a: "ans", n: "none" }[p.ai] || "both";
-    if (p.so) { S.sec = {}; p.so.split(",").forEach(function (x) { var q = x.split("."); if (!D.has(q[0])) return; var o = {}; (q[1] || "").split("").forEach(function (c) { if (c === "A") o.aid = 1; if (c === "a") o.aid = 0; if (c === "F") o.v = "filled"; if (c === "S") o.v = "self"; if (c === "N") o.v = "none"; }); var tm = /T(\d+)/.exec(q[1] || ""); if (tm) o.ty = tm[1].split("").map(Number); S.sec[q[0]] = o; }); }
+    if (p.vs) S.vsize = /^[lms]$/.test(p.vs) ? p.vs : "m";
+    S.aidSm = p.as === "1";
+    LEGACY = !p.ver;
+    S.sec = {}; if (LEGACY) S.sel.forEach(function (id) { S.sec[id] = { ty: [0] }; });
+    if (p.so) { p.so.split(",").forEach(function (x) { var mm = /^(.+)\.([A-Za-z0-9]*)$/.exec(x); if (!mm) return; var q = [mm[1], mm[2]]; if (!D.has(q[0])) return; var o = {}; (q[1] || "").split("").forEach(function (c) { if (c === "A") o.aid = 1; if (c === "a") o.aid = 0; if (c === "F") o.v = "filled"; if (c === "S") o.v = "self"; if (c === "N") o.v = "none"; }); var tm = /T(\d+)/.exec(q[1] || ""); if (tm) o.ty = tm[1].split("").map(Number); S.sec[q[0]] = o; }); }
     edSig = sigNow();
     if (S.sel.length) { var f = BY[S.sel[0]]; if (f) S.grade = NB.cat.filter(function (x) { return x.sem === f.sem; })[0].grade; }
   }
   readHash();
-  function secURL() { var a = S.sel.filter(function (id) { var o = S.sec[id]; return o && (o.aid != null || o.v || (o.ty && o.ty.length)); }).map(function (id) { var o = S.sec[id]; return id + "." + (o.aid == null ? "" : o.aid ? "A" : "a") + (o.v ? { filled: "F", self: "S", none: "N" }[o.v] : "") + (o.ty && o.ty.length ? "T" + o.ty.join("") : ""); }); return a.length ? "&so=" + a.join(",") : ""; }
+  /* 每個有多種題型的單元都寫出「用哪幾種題型」，以後新增題型也不會改變這份卷 */
+  function secURL() { var a = S.sel.filter(function (id) { var o = S.sec[id]; return (o && (o.aid != null || o.v || (o.ty && o.ty.length))) || D.types(id).length > 1; }).map(function (id) { var o = S.sec[id] || {}, nt = D.types(id).length, ty = o.ty && o.ty.length ? o.ty : nt > 1 ? D.types(id).map(function (x, i) { return i; }) : null; return id + "." + (o.aid == null ? "" : o.aid ? "A" : "a") + (o.v ? { filled: "F", self: "S", none: "N" }[o.v] : "") + (ty ? "T" + ty.join("") : ""); }); return a.length ? "&so=" + a.join(",") : ""; }
   /* 這一題的輔助設定：單元自己的設定優先，沒有就用整份卷的設定 */
   function secAid(id, md) { var o = S.sec[id] || {}; if (o.aid === 0) return false; if (o.aid === 1) return true; return S.aidAt === "both" || (S.aidAt === "ans" && md === "a"); }
   function secV(id) { var o = S.sec[id] || {}; return o.v || S.vmode; }
@@ -50,8 +56,8 @@
   var CAP = {}; function caps(id) { if (CAP[id]) return CAP[id]; var c = { calc: false, aid: false, ty: D.types(id) }; for (var i = 0; i < 16; i++) { var Q = D.make(id, 9000 + i, S.lv); if (Q.calc) c.calc = true; if (Q.aid || Q.aidFn) c.aid = true; } return (CAP[id] = c); }
   function sigNow() { return seed + "|" + S.lv; }
   function save() { var c = Object.assign({}, S); sv(SK, c); }
-  function shareURL() { var q = "u=" + S.sel.join(",") + "&lv=" + S.lv + "&n=" + S.count + "&c=" + S.cols + "&o=" + S.order + "&s=" + seed + (S.big ? "&b=1" : "") + (S.title ? "&t=" + encodeURIComponent(S.title) : "") +
-      "&v=" + (S.vmode === "self" ? "s" : "f") + { cell: "c", col: "l", none: "n" }[S.vgrid] + (S.vpv ? 1 : 0) + (S.vcarry ? 1 : 0) + "&ai=" + S.aidAt[0] + secURL() +
+  function shareURL() { var q = "ver=2&u=" + S.sel.join(",") + "&lv=" + S.lv + "&n=" + S.count + "&c=" + S.cols + "&o=" + S.order + "&s=" + seed + (S.big ? "&b=1" : "") + (S.title ? "&t=" + encodeURIComponent(S.title) : "") +
+      "&v=" + (S.vmode === "self" ? "s" : "f") + { cell: "c", col: "l", none: "n" }[S.vgrid] + (S.vpv ? 1 : 0) + (S.vcarry ? 1 : 0) + "&ai=" + S.aidAt[0] + "&vs=" + S.vsize + (S.aidSm ? "&as=1" : "") + secURL() +
       (S.count === "alloc" ? "&al=" + S.sel.map(function (id) { return id + "*" + (S.alloc[id] == null ? 3 : S.alloc[id]); }).join(",") : "") +
       (Object.keys(ED.rr).length ? "&x=" + Object.keys(ED.rr).map(function (k) { return encodeURIComponent(k) + "~" + ED.rr[k]; }).join(",") : "") +
       (Object.keys(ED.del).length ? "&d=" + Object.keys(ED.del).map(encodeURIComponent).join(",") : "") +
@@ -125,17 +131,18 @@
   function genOne(id, s, key, used) { var Q, k = (ED.rr[key] || 0) * 10, k0 = k; do { Q = D.make(id, D.hash(s + ":" + key + ":" + k), S.lv, (S.sec[id] || {}).ty); k++; } while (used[sig(Q)] && k < k0 + 8); used[sig(Q)] = 1; Q.key = key; if (ED.txt[key]) { Q.q = ED.txt[key]; Q.edited = 1; } return Q; }
   function sortedSel() { return S.sel.slice().sort(function (a, b) { return NB.flat.indexOf(BY[a]) - NB.flat.indexOf(BY[b]); }); }
   /* 題數分配：平均分配、各單元自訂，再加上「加一題」 */
-  function plan(n, s) {
+  function plan(n, s, rr) {
     var ids = sortedSel(), list = [], R = D.rng(D.hash("plan" + s));
     if (!ids.length) return [];
     if (n === "alloc") ids.forEach(function (id) { var c = S.alloc[id] == null ? 3 : S.alloc[id]; for (var i = 0; i < c; i++) list.push(id); });
     else for (var i = 0; i < n; i++) list.push(ids[i % ids.length]);
     ids.forEach(function (id) { for (var i = 0; i < (ED.plus[id] || 0); i++) list.push(id); });
     if (S.order === "mix") return R.shuffle(list);
+    if (rr) return list;
     return list.sort(function (a, b) { return ids.indexOf(a) - ids.indexOf(b); });
   }
   function custom(c, i) { var b = c.a !== "" && c.a != null ? [D.N(/^-?\d+(\.\d+)?$/.test(c.a) ? +c.a : c.a)] : [], q = c.q; if (b.length && q.indexOf("[?]") < 0) q += " [?]"; return { id: "custom", key: "c#" + i, q: q, b: b, gap: c.gap || 0, wide: !!c.wide, custom: 1 }; }
-  function makeSet(n, s) { var used = {}, cnt = {}, out = []; plan(n, s).forEach(function (id) { cnt[id] = (cnt[id] || 0) + 1; var key = id + "#" + cnt[id]; if (ED.del[key]) return; out.push(genOne(id, s, key, used)); }); ED.add.forEach(function (c, i) { out.push(custom(c, i)); }); return out; }
+  function makeSet(n, s, rr) { var used = {}, cnt = {}, out = []; plan(n, s, rr).forEach(function (id) { cnt[id] = (cnt[id] || 0) + 1; var key = id + "#" + cnt[id]; if (ED.del[key]) return; out.push(genOne(id, s, key, used)); }); ED.add.forEach(function (c, i) { out.push(custom(c, i)); }); return out; }
   function edits() { return Object.keys(ED.rr).length + Object.keys(ED.del).length + Object.keys(ED.txt).length + ED.add.length + Object.keys(ED.plus).reduce(function (t, k) { return t + ED.plus[k]; }, 0); }
 
   /* ---------- 題目轉 HTML（q 列印題目、a 列印答案、o 線上） ---------- */
@@ -155,7 +162,8 @@
     return '<span class="bk" style="--bw:' + bw(b) + '"><i>' + (A ? "<b>" + tx(esc(String(D.ansTex(b)))) + "</b>" : "　") + "</i>" + u + hint + "</span>";
   }
   function body(Q, md) {
-    var parts = Q.q.split("[?]"), k = 0, out = "", bi = Q.b.map(function (b, i) { return i; }).filter(function (i) { return Q.b[i].k !== "c"; });
+    var qq = Q.q; if (Q.calc && (md === "o" || secV(Q.id) !== "none")) qq = qq.replace(/^用直式計算：/, "");
+    var parts = qq.split("[?]"), k = 0, out = "", bi = Q.b.map(function (b, i) { return i; }).filter(function (i) { return Q.b[i].k !== "c"; });
     parts.forEach(function (p, j) {
       out += tx(p);
       if (j < parts.length - 1) { var i = bi[k++], bb = Q.b[i], nx = parts[j + 1].replace(/^[\s　]+/, "");
@@ -171,7 +179,8 @@
     return '<div class="dq-o">' + Q.opts.map(function (o, i) { return "<span>(" + "ABCD"[i] + ") " + tx(o) + "</span>"; }).join("") + "</div>";
   }
   /* 圖：題目本身的圖（fig／figFn）＋直式（calc）＋解題小幫手（aid／aidFn，依設定顯示） */
-  function vopt(md, id) { var v = id ? secV(id) : S.vmode; return { mode: md === "o" ? "filled" : v === "none" ? "filled" : v, grid: S.vgrid, pv: S.vpv, carry: S.vcarry }; }
+  var VSZ = { l: [26, 0.82], m: [22, 0.8], s: [19, 0.78] };
+  function vopt(md, id) { var v = id ? secV(id) : S.vmode, z = VSZ[S.vsize] || VSZ.m; return { mode: md === "o" ? "filled" : v === "none" ? "filled" : v, grid: S.vgrid, pv: S.vpv, carry: S.vcarry, u: md === "o" ? 26 : z[0], k: z[1] }; }
   function figHtml(Q, md) {
     var m = md === "a" ? "a" : "q", s = "", f = Q.figFn ? Q.figFn(m) : Q.fig;
     if (f) s += '<div class="dq-f">' + f + "</div>";
@@ -186,7 +195,7 @@
   function qItem(Q, n, md) {
     var figs = figHtml(Q, md), colW = cols() >= 3 ? 200 : cols() === 2 ? 300 : 9999;
     var wide = Q.wide || /dtab|dshapes/.test(figs) || (Q.opts && Q.opts.join("").length > 34) || Q.q.replace(/\$[^$]*\$/g, "xx").length > 70 || maxW(figs) > colW;
-    var g = GAP[S.gap] + (Q.calc ? 0 : (Q.gap || 0) * 6) + (Q.sol ? 4 : 0);
+    var hasGrid = Q.calc && secV(Q.id) !== "none", g = (hasGrid ? Math.max(2, GAP[S.gap] - 5) : GAP[S.gap] + (Q.gap || 0) * 6) + (Q.sol && !hasGrid ? 4 : 0);
     var cMark = Q.opts ? '<span class="dq-c">' + (md === "a" ? "<b>" + "ABCD"[Q.b[0].a] + "</b>" : "　") + "</span>" : "";
     var sol = md === "a" && S.sol && Q.sol ? '<span class="dsol">' + tx("算式：" + Q.sol) + "</span>" : "";
     return '<div class="dq' + (wide ? " wide" : "") + (Q.edited ? " edited" : "") + '" style="--gap:' + g + 'mm" data-key="' + esc(Q.key || "") + '">' + (md === "q" ? TOOLS : "") + cMark + '<span class="dq-n">' + n + '.</span><span class="dq-t">' + body(Q, md) + "</span>" + figs + optsHtml(Q, md) + sol + "</div>";
@@ -201,9 +210,11 @@
     var sk = Object.keys(sems), ck = Object.keys(chs);
     var mid = ck.length === 1 ? chs[ck[0]] : ck.length <= 2 ? ck.map(function (k) { return chs[k]; }).join("・") : ""; return (sk.length === 1 ? sk[0] + " " : "") + (mid ? mid + " 練習卷" : "綜合練習卷");
   }
-  function cols() { if (S.cols !== "auto") return +S.cols; return 2; }
+  var AUTOC = 2; function cols() { if (S.cols !== "auto") return +S.cols; return AUTOC; }
+  /* 自動欄數：大部分是直式、格子不大時排 3 欄，其他 2 欄 */
+  function autoCols(qs) { if (!qs.length) return 2; var c = qs.filter(function (Q) { return Q.calc && secV(Q.id) !== "none" && !(Q.aid && secAid(Q.id, "q")); }).length; return c / qs.length >= 0.8 && S.vsize !== "l" && !S.big ? 3 : 2; }
   function newPage(kind, first, title, pno) {
-    var p = h('<div class="dpage p' + kind + (S.big ? " big" : "") + '"><img class="dwm" src="' + WM + '" alt=""><div class="dbody"><div class="dgrid" style="--cols:' + cols() + '"></div></div><div class="dft"><span>© 蘇昊數理・數光島筆記本</span><span class="pno"></span><span>卷號 ' + seed + "</span></div></div>");
+    var p = h('<div class="dpage p' + kind + (S.big ? " big" : "") + (S.aidSm ? " aidsm" : "") + '"><img class="dwm" src="' + WM + '" alt=""><div class="dbody"><div class="dgrid" style="--cols:' + cols() + '"></div></div><div class="dft"><span>© 蘇昊數理・數光島筆記本</span><span class="pno"></span><span>卷號 ' + seed + "</span></div></div>");
     var kname = kind === "q" ? "" : kind === "a" ? "（答案卷）" : "（簡答）";
     var hd = first ? '<div class="dhd"><h2>' + esc(title) + kname + '</h2><p class="dsub">' + esc(lvName()) + "・共 " + "<span class=dqn></span> 題</p>" + (S.head && kind === "q" ? '<div class="dinfo"><span>班級 <u></u></span><span>座號 <u style="min-width:12mm"></u></span><span>姓名 <u style="min-width:30mm"></u></span>' + (S.score ? '<span>得分 <u style="min-width:16mm"></u></span>' : "") + "</div>" : "") + "</div>" : '<div class="dhd2"><span>' + esc(title) + kname + "</span><span>卷號 " + seed + "</span></div>";
     p.insertBefore(h(hd), p.querySelector(".dbody"));
@@ -248,24 +259,22 @@
     if (!S.sel.length) return;
     var qs, n;
     if (typeof S.count === "string") {
-      /* 填滿 N 頁：先試排算出放得下幾題，再照分配重新出題 */
-      var N = +S.count.slice(1), probe = makeSet(160, seed), tmp = h('<div style="position:absolute;visibility:hidden;left:-9999px;top:0"></div>');
-      document.body.appendChild(tmp);
-      var r = flow(tmp, buildItems(probe, "q").map(function (x) { return x.html; }), "q", title, N);
-      var fitQ = buildItems(probe, "q").slice(0, r.fit).filter(function (x) { return !x.sec; }).length;
-      var nGen = Math.max(1, fitQ - ED.add.length), grew = false;
+      /* 填滿 N 頁：題數從少到多一一試排（照最後的順序與大題），留下放得下的最多題數；
+         某一題特別高放不下時，再往後多試幾個題數，避免太早停下來。 */
+      var N = +S.count.slice(1), tmp = h('<div style="position:absolute;visibility:hidden;left:-9999px;top:0"></div>');
+      document.body.appendChild(tmp); AUTOC = autoCols(makeSet(40, seed));
       function pagesOf(list) { tmp.innerHTML = ""; return flow(tmp, buildItems(list, "q").map(function (x) { return x.html; }), "q", title, 0).pages.length; }
-      qs = makeSet(nGen, seed);
-      if (pagesOf(qs) <= N) { /* 還有空間就一題一題加 */ while (nGen < 150) { var more = makeSet(nGen + 1, seed); if (pagesOf(more) > N) break; nGen++; qs = more; } }
-      else { while (nGen > 1) { nGen--; qs = makeSet(nGen, seed); if (pagesOf(qs) <= N) break; } }
+      var best = null, fails = 0;
+      for (var nn = 1; nn <= 150 && fails < 6; nn++) { var cand = makeSet(nn, seed); if (pagesOf(cand) <= N) { best = cand; fails = 0; } else fails++; }
+      qs = best || makeSet(1, seed);
       document.body.removeChild(tmp);
-    } else qs = makeSet(S.count === "alloc" ? "alloc" : +S.count, seed);
+    } else { qs = makeSet(S.count === "alloc" ? "alloc" : +S.count, seed); AUTOC = autoCols(qs); }
     n = qs.length; CUR = { qs: qs, title: title };
     var fq = flow(inner, buildItems(qs, "q").map(function (x) { return x.html; }), "q", title, 0);
     var fa = flow(inner, buildItems(qs, "a").map(function (x) { return x.html; }), "a", title, 0);
     var fk = flow(inner, [keyHtml(qs)], "k", title, 0);
     inner.querySelectorAll(".dqn").forEach(function (e) { e.textContent = n; });
-    info.textContent = "共 " + n + " 題・題目卷 " + fq.pages.length + " 頁・答案卷 " + fa.pages.length + " 頁"; if (window.__edBar) window.__edBar();
+    info.textContent = (LEGACY ? "舊版連結（已用當時的題型重現）・" : "") + "共 " + n + " 題・題目卷 " + fq.pages.length + " 頁・答案卷 " + fa.pages.length + " 頁"; if (window.__edBar) window.__edBar();
     showView(pv); fit(pv);
   }
   function showView(pv) { var inner = pv.querySelector(".dpv-in"); inner.querySelectorAll(".dpage").forEach(function (p) { p.style.display = p.classList.contains("p" + S.view) ? "" : "none"; }); fit(pv); }
@@ -280,7 +289,7 @@
     st.appendChild(h('<label class="dr-lab" for="dr-title">標題（空白就自動命名）</label>'));
     var ti = h('<input id="dr-title" class="dr-in" maxlength="40" placeholder="例如：五上 第六章 練習卷">'); ti.value = S.title; ti.oninput = function () { S.title = ti.value.trim(); changedSoft(); }; st.appendChild(ti);
     var two = h('<div class="dr-two"><div><label class="dr-lab" for="dr-n">題數</label><select id="dr-n" class="dr-sel"><option value="p1">填滿 1 頁</option><option value="p2">填滿 2 頁</option><option value="p3">填滿 3 頁</option><option value="10">10 題</option><option value="20">20 題</option><option value="25">25 題</option><option value="30">30 題</option><option value="40">40 題</option><option value="50">50 題</option><option value="alloc">各單元自訂題數</option></select></div>' +
-      '<div><label class="dr-lab" for="dr-c">欄數</label><select id="dr-c" class="dr-sel"><option value="auto">自動（2 欄）</option><option value="1">1 欄</option><option value="2">2 欄</option><option value="3">3 欄</option></select></div>' +
+      '<div><label class="dr-lab" for="dr-c">欄數</label><select id="dr-c" class="dr-sel"><option value="auto">自動（直式多時 3 欄）</option><option value="1">1 欄</option><option value="2">2 欄</option><option value="3">3 欄</option></select></div>' +
       '<div><label class="dr-lab" for="dr-g">作答空間</label><select id="dr-g" class="dr-sel"><option value="s">緊湊</option><option value="m">適中</option><option value="l">寬鬆</option></select></div>' +
       '<div><label class="dr-lab" for="dr-o">題目順序</label><select id="dr-o" class="dr-sel"><option value="unit">依單元分大題</option><option value="mix">全部打散</option></select></div></div>');
     st.appendChild(two);
@@ -304,7 +313,7 @@
     st.appendChild(h('<label class="dr-lab" for="dr-seed">卷號（同一個卷號、同樣設定，會出一模一樣的卷）</label>'));
     var sd = h('<div class="dr-seed"><input id="dr-seed" class="dr-in" inputmode="numeric" maxlength="9"><button type="button" class="pen">換一批</button></div>'), si = sd.firstChild;
     si.value = seed; si.onchange = function () { var v = parseInt(si.value.replace(/\D/g, "")); if (v) { seed = v; changed(); } else si.value = seed; };
-    sd.lastChild.onclick = function () { seed = rseed(); si.value = seed; changed(); };
+    sd.lastChild.onclick = function () { if (LEGACY) { LEGACY = false; Object.keys(S.sec).forEach(function (id) { if (S.sec[id].ty && S.sec[id].ty.length === 1 && S.sec[id].ty[0] === 0) delete S.sec[id].ty; }); secHook(); } seed = rseed(); si.value = seed; changed(); };
     st.appendChild(sd);
     var bt = h('<div class="dr-btns"><button type="button" class="pen go" data-p="q">列印題目卷</button><button type="button" class="pen" data-p="a">列印答案卷</button><button type="button" class="pen" data-p="qa">題目卷＋答案卷一起印</button><button type="button" class="pen" data-p="k">只印簡答</button><button type="button" class="pen" data-share>複製這份卷的分享連結</button></div>');
     bt.querySelectorAll("[data-p]").forEach(function (b) { b.onclick = function () { doPrint(b.dataset.p); }; });
@@ -316,11 +325,11 @@
     var vs = h('<section class="sheet"><h2><span class="dr-step">3</span>直式與解題小幫手</h2>' +
       '<div class="dr-two"><div><label class="dr-lab" for="dr-vm">直式題目</label><select id="dr-vm" class="dr-sel"><option value="filled">直式已列好</option><option value="self">自己列直式（只給空白方格）</option></select></div>' +
       '<div><label class="dr-lab" for="dr-vg">對位格線</label><select id="dr-vg" class="dr-sel"><option value="cell">虛線方格</option><option value="col">只有直的對位線</option><option value="none">不要格線</option></select></div></div>' +
-      '<label class="dr-chk"><input type="checkbox" id="dr-vp">標出位值（萬千百十個．十分位…）</label><label class="dr-chk"><input type="checkbox" id="dr-vc">留進位、退位小格</label>' +
-      '<label class="dr-lab" for="dr-ai">解題小幫手（線段圖、十格框、積木、時間軸……）</label><select id="dr-ai" class="dr-sel"><option value="both">題目卷和答案卷都附</option><option value="ans">只附在答案卷</option><option value="none">不附</option></select>' +
+      '<label class="dr-lab" for="dr-vz">直式格子大小</label><select id="dr-vz" class="dr-sel"><option value="l">大（低年級）</option><option value="m">中</option><option value="s">小（一頁放比較多）</option></select><label class="dr-chk"><input type="checkbox" id="dr-vp">標出位值（萬千百十個．十分位…）</label><label class="dr-chk"><input type="checkbox" id="dr-vc">留進位、退位小格</label>' +
+      '<label class="dr-lab" for="dr-ai">解題小幫手（線段圖、十格框、積木、時間軸……）</label><select id="dr-ai" class="dr-sel"><option value="both">題目卷和答案卷都附</option><option value="ans">只附在答案卷</option><option value="none">不附</option></select><label class="dr-chk"><input type="checkbox" id="dr-as">縮小小幫手圖（一頁放比較多）</label>' +
       '<p class="dr-note">答案卷的直式會寫出完整過程：進位、退位、部分積、長除法每一步。</p></section>');
-    [["#dr-vm", "vmode"], ["#dr-vg", "vgrid"], ["#dr-ai", "aidAt"]].forEach(function (p) { var e = vs.querySelector(p[0]); e.value = S[p[1]]; e.onchange = function () { S[p[1]] = e.value; changed(); }; });
-    [["#dr-vp", "vpv"], ["#dr-vc", "vcarry"]].forEach(function (p) { var e = vs.querySelector(p[0]); e.checked = !!S[p[1]]; e.onchange = function () { S[p[1]] = e.checked; changed(); }; });
+    [["#dr-vm", "vmode"], ["#dr-vg", "vgrid"], ["#dr-ai", "aidAt"], ["#dr-vz", "vsize"]].forEach(function (p) { var e = vs.querySelector(p[0]); e.value = S[p[1]]; e.onchange = function () { S[p[1]] = e.value; changed(); }; });
+    [["#dr-vp", "vpv"], ["#dr-vc", "vcarry"], ["#dr-as", "aidSm"]].forEach(function (p) { var e = vs.querySelector(p[0]); e.checked = !!S[p[1]]; e.onchange = function () { S[p[1]] = e.checked; changed(); }; });
     var sl = h('<div class="dr-secopt"></div>'); vs.appendChild(sl);
     function drawSec() {
       sl.innerHTML = ""; var ids = sortedSel().filter(function (id) { var c = caps(id); return c.calc || c.aid || c.ty.length > 1; });
