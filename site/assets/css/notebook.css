@@ -675,3 +675,6 @@ h1.title .subj-now::before{content:"・"}@media (max-width:640px){h1.title .subj
 .bk-full .bkbar button,.bk-full .bktools button{background:#1c2636;color:#f3efe3;border-color:#5d6b82}
 .bk-full .bkbar button.go{background:#d9a93c;color:#1c2635}
 .bk-full .bktools .meta{color:#c9cbd2}
+/* 贊助（珍奶）圖示：限制大小，避免 SVG 撐滿容器 */
+.dn-foot svg,.nbm-it svg,.nbm-btn svg,.nbm-dn svg{width:1.15em;height:1.15em;flex:none;vertical-align:-.2em;display:inline-block}
+.dn-foot{display:inline-flex;align-items:center;gap:.4em}
