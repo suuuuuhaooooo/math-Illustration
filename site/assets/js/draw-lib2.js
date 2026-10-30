@@ -235,8 +235,10 @@
   F.libCompare = function (vals, labs, unit, grid, lab) {
     var V = nums(vals); if (!V.length) V = [3, 5, 2];
     var LB = arr(labs);
-    var mx = Math.max.apply(null, V) || 1, u = Math.min(30, 240 / mx);
+    var mx = Math.max.apply(null, V) || 1;
     var rowH = 34, W = 300, x0 = 46, y0 = (lab ? 26 : 10);
+    /* 有單位的話右邊要留字的位置，不然最長那條的標示會被切掉 */
+    var avail = W - x0 - (unit ? 62 : 14), u = Math.min(30, avail / mx);
     var H = y0 + V.length * rowH + 14;
     var s = lab ? T(W / 2, 13, lab, { z: 13 }) : "";
     if (grid) for (var g = 0; g <= mx; g++) s += L(x0 + g * u, y0, x0 + g * u, y0 + V.length * rowH, { w: .7, c: TN.k, d: "3 3" });
@@ -469,7 +471,7 @@
   /* ---------- 15. 三角板 ---------- */
   F.libSetSquare = function (kind, degs, lab) {
     var k = kind === "3060" ? "3060" : "4545";
-    var W = 238, H = (lab ? 26 : 8) + 176, y0 = (lab ? 26 : 8) + 14;
+    var W = 238, H = (lab ? 26 : 8) + 182, y0 = (lab ? 26 : 8) + 20;
     var s = lab ? T(W / 2, 13, lab, { z: 13 }) : "";
     var P, A;
     if (k === "4545") {
@@ -491,6 +493,440 @@
       var p = P[pr[1]], vx = cx - p[0], vy = cy - p[1], Ln = Math.sqrt(vx * vx + vy * vy) || 1;
       s += T(p[0] + vx / Ln * 40, p[1] + vy / Ln * 40, pr[0], { z: 13 });
     });
+    return svg(W, H, s, .95);
+  };
+
+  /* ---------- 16. 展開圖（角柱、角錐、圓柱、圓錐、長方體）---------- */
+  /* 邊數 3～12 都畫得出來，可以加黏貼處，也可以把每一面標上名稱 */
+  F.libNet = function (kind, sides, tabs, names, lab) {
+    var k = kind || "prism", n = Math.max(3, Math.min(12, Math.round(+sides || 5)));
+    var u = 34, s = "", W, H, y0 = (lab ? 26 : 10);
+    function tab(x1, y1, x2, y2) {
+      /* 黏貼處：往外長出一片梯形 */
+      var dx = x2 - x1, dy = y2 - y1, L = Math.sqrt(dx * dx + dy * dy) || 1;
+      var nx = -dy / L * 9, ny = dx / L * 9, k2 = .18;
+      return '<path d="M' + rd(x1) + " " + rd(y1) + "L" + rd(x1 + dx * k2 + nx) + " " + rd(y1 + dy * k2 + ny) +
+        "L" + rd(x2 - dx * k2 + nx) + " " + rd(y2 - dy * k2 + ny) + "L" + rd(x2) + " " + rd(y2) +
+        '" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/>';
+    }
+    if (k === "cuboid" || k === "cube") {
+      /* 十字形展開圖 */
+      var a = k === "cube" ? u : u * 1.35, b = u, c = k === "cube" ? u : u * .78;
+      W = a * 2 + c * 2 + 24; H = y0 + b + c * 2 + 18;
+      var ox = 12 + c, oy = y0 + c;
+      var cells = [[ox, oy, a, b, "前"], [ox + a, oy, c, b, "右"], [ox + a + c, oy, a, b, "後"], [ox - c, oy, c, b, "左"],
+        [ox, oy - c, a, c, "上"], [ox, oy + b, a, c, "下"]];
+      cells.forEach(function (q) {
+        s += R(q[0], q[1], q[2], q[3], { f: TN.w, w: 1.6 });
+        if (names) s += T(q[0] + q[2] / 2, q[1] + q[3] / 2 + 1, q[4], { z: 12, c: TN.k });
+      });
+      if (tabs) { s += tab(ox + a + c + a, oy, ox + a + c + a, oy + b); s += tab(ox, oy - c, ox + a, oy - c); }
+      return svg(W, H, s, .95);
+    }
+    if (k === "cylinder") {
+      var r = u * .62, cw = 2 * Math.PI * r, bh = u * 1.5;
+      W = cw + 28; H = y0 + bh + r * 4 + 26;
+      var cx = 14 + cw / 2;
+      s += C(cx, y0 + r, r, { f: TN.w, w: 1.6 });
+      s += R(14, y0 + r * 2 + 6, cw, bh, { f: TN.w, w: 1.6 });
+      s += C(cx, y0 + r * 3 + bh + 12, r, { f: TN.w, w: 1.6 });
+      if (names) { s += T(cx, y0 + r + 1, "上底", { z: 11, c: TN.k }); s += T(cx, y0 + r * 2 + 6 + bh / 2, "側面（長＝圓周長）", { z: 11, c: TN.k }); s += T(cx, y0 + r * 3 + bh + 13, "下底", { z: 11, c: TN.k }); }
+      if (tabs) s += tab(14 + cw, y0 + r * 2 + 6, 14 + cw, y0 + r * 2 + 6 + bh);
+      return svg(W, H, s, .95);
+    }
+    if (k === "cone") {
+      var rc = u * .72, Rr = rc * 2.3, ang = 2 * Math.PI * rc / Rr;
+      W = Rr * 2 + 28; H = y0 + Rr + rc * 2 + 30;
+      var ax = 14 + Rr, ay = y0 + Rr;
+      var p1 = [ax - Rr * Math.sin(ang / 2), ay + Rr * Math.cos(ang / 2)];
+      var p2 = [ax + Rr * Math.sin(ang / 2), ay + Rr * Math.cos(ang / 2)];
+      /* 扇形是以正下方為中心展開的，圓弧一定會通過最低點 */
+      var low = ay + Rr;
+      s += '<path d="M' + rd(ax) + " " + rd(ay) + "L" + rd(p1[0]) + " " + rd(p1[1]) +
+        "A" + rd(Rr) + " " + rd(Rr) + " 0 0 0 " + rd(p2[0]) + " " + rd(p2[1]) + 'Z" fill="' + TN.w + '" stroke="currentColor" stroke-width="1.6"/>';
+      var bcy = low + 10 + rc;
+      s += C(ax, bcy, rc, { f: TN.w, w: 1.6 });
+      H = bcy + rc + 16;
+      if (names) { s += T(ax, ay + Rr * .55, "側面（扇形）", { z: 11, c: TN.k }); s += T(ax, bcy, "底面", { z: 11, c: TN.k }); }
+      return svg(W, H, s, .95);
+    }
+    /* 角柱／角錐：底面正 n 邊形，側面一排長方形或三角形。
+       多邊形要擺在哪裡，是用它自己的外框算出來的（不要用外接圓半徑去推，
+       邊數不同時會算錯，圖就會疊在一起）。 */
+    var side = u * .92, r2 = side / (2 * Math.sin(Math.PI / n));
+    function ngon(flip) {
+      var p = [], i;
+      for (i = 0; i < n; i++) {
+        var t = -Math.PI / 2 + (i + .5) * 2 * Math.PI / n + (n % 2 ? 0 : Math.PI / n);
+        p.push([r2 * Math.cos(t), r2 * Math.sin(t) * (flip ? -1 : 1)]);
+      }
+      var y1 = 1e9, y2 = -1e9, x1b = 1e9, x2b = -1e9;
+      p.forEach(function (q) { if (q[1] < y1) y1 = q[1]; if (q[1] > y2) y2 = q[1]; if (q[0] < x1b) x1b = q[0]; if (q[0] > x2b) x2b = q[0]; });
+      return { p: p, y1: y1, y2: y2, w: x2b - x1b, h: y2 - y1 };
+    }
+    function placed(g, cx, topY) {   /* 把多邊形的上緣對到 topY */
+      return '<polygon points="' + g.p.map(function (q) { return rd(cx + q[0]) + "," + rd(topY - g.y1 + q[1]); }).join(" ") +
+        '" fill="' + TN.w + '" stroke="currentColor" stroke-width="1.6"/>';
+    }
+    /* 文字擺在多邊形外框的中央；三角形這種重心偏一邊的，用比例算會跑到形狀外面 */
+    function midY(g, topY) { return topY + g.h / 2; }
+    var gapN = 7;
+    if (k === "pyramid") {
+      var hTri = side * 1.3, gB = ngon(1);
+      W = n * side + 28; H = y0 + hTri + gapN + gB.h + 30;
+      var bx = 14, byy = y0 + hTri;
+      for (var i2 = 0; i2 < n; i2++) {
+        s += '<polygon points="' + rd(bx + i2 * side) + "," + rd(byy) + " " + rd(bx + (i2 + 1) * side) + "," + rd(byy) + " " +
+          rd(bx + (i2 + .5) * side) + "," + rd(byy - hTri) + '" fill="' + TN.w + '" stroke="currentColor" stroke-width="1.5"/>';
+      }
+      var pcx = bx + n * side / 2;
+      s += placed(gB, pcx, byy + gapN);
+      if (names && gB.w > 46) s += T(pcx, midY(gB, byy + gapN), "底面", { z: 11, c: TN.k });
+      if (tabs) for (var t4 = 0; t4 < n; t4++) s += tab(bx + t4 * side, byy, bx + (t4 + .5) * side, byy - hTri);
+      return svg(W, H, s, .95);
+    }
+    var bodyH = u * 1.55, gT = ngon(1), gBo = ngon(0);
+    W = n * side + 28; H = y0 + gT.h + gapN + bodyH + gapN + gBo.h + 24;
+    var x1 = 14, ytop = y0 + gT.h + gapN;
+    for (var i3 = 0; i3 < n; i3++) s += R(x1 + i3 * side, ytop, side, bodyH, { f: TN.w, w: 1.5 });
+    var midx = x1 + n * side / 2;
+    s += placed(gT, midx, y0);
+    s += placed(gBo, midx, ytop + bodyH + gapN);
+    if (names) {
+      /* 三角形這種太窄的，字塞進去會超出形狀，改標在旁邊 */
+      if (gT.w > 46) s += T(midx, midY(gT, y0), "上底", { z: 11, c: TN.k });
+      else s += T(midx + gT.w / 2 + 6, midY(gT, y0), "上底", { z: 11, c: TN.k, a: "start" });
+      if (gBo.w > 46) s += T(midx, midY(gBo, ytop + bodyH + gapN), "下底", { z: 11, c: TN.k });
+      else s += T(midx + gBo.w / 2 + 6, midY(gBo, ytop + bodyH + gapN), "下底", { z: 11, c: TN.k, a: "start" });
+    }
+    if (tabs) s += tab(x1 + n * side, ytop, x1 + n * side, ytop + bodyH);
+    return svg(W, H, s, .95);
+  };
+
+  /* ---------- 17. 切割拼湊（剪開重拼，面積不變）---------- */
+  /* 平行四邊形→長方形、梯形→平行四邊形、三角形→長方形，
+     左邊原圖（含剪開的虛線），中間箭頭，右邊拼好的樣子 */
+  F.libCutPaste = function (kind, showArrow, lab) {
+    var k = kind || "para", u = 26, y0 = (lab ? 28 : 12), gap = 42;
+    var left = "", right = "", LW = 0, RW = 0, HH = 0;
+    function poly(pts, o) {
+      o = o || {};
+      return '<polygon points="' + pts.map(function (q) { return rd(q[0]) + "," + rd(q[1]); }).join(" ") +
+        '" fill="' + (o.f || TN.w) + '" stroke="currentColor" stroke-width="' + (o.w || 1.6) + '"' + (o.d ? ' stroke-dasharray="' + o.d + '"' : "") + "/>";
+    }
+    if (k === "para") {
+      var b = u * 5, h = u * 2.6, sk = u * 1.4;
+      LW = b + sk; RW = b; HH = h;
+      left += poly([[sk, 0], [sk + b, 0], [b, h], [0, h]]);
+      left += L(sk, 0, sk, h, { w: 1.2, d: "5 4", c: TN.r });                /* 剪開的那一刀 */
+      left += T(sk + 8, h / 2, "剪", { z: 11, c: TN.r, a: "start" });
+      right += poly([[0, 0], [b, 0], [b, h], [0, h]]);
+      right += L(b - sk, 0, b - sk, h, { w: 1, d: "4 3", c: TN.k });
+      right += T(b / 2, h + 14, "底 × 高", { z: 12, c: TN.k });
+    } else if (k === "trap") {
+      /* 兩個全等的梯形，其中一個轉 180° 接上去，就拼成一個平行四邊形：
+         底＝上底＋下底、高不變，所以梯形面積＝(上底＋下底)×高÷2 */
+      var a2 = u * 2.2, b2 = u * 4.4, h2 = u * 2.3;
+      var A = [(b2 - a2) / 2, 0], B = [(b2 + a2) / 2, 0], Cc = [b2, h2], D = [0, h2];
+      LW = b2; RW = (b2 + a2) / 2 + b2; HH = h2;
+      left += poly([A, B, Cc, D]);
+      left += T(b2 / 2, -9, "上底", { z: 10, c: TN.k });
+      left += T(b2 / 2, h2 + 13, "下底", { z: 10, c: TN.k });
+      /* 轉 180°：把每個點對那條斜邊的中點做對稱 */
+      var M2 = [(b2 + a2) / 2 + b2, h2];
+      function rot180(q) { return [M2[0] - q[0], M2[1] - q[1]]; }
+      right += poly([A, B, Cc, D]);
+      right += poly([rot180(A), rot180(B), rot180(Cc), rot180(D)], { f: TN.g });
+      right += L(B[0], B[1], Cc[0], Cc[1], { w: 1.2, d: "4 3", c: TN.k });
+      right += T(RW / 2, h2 + 15, "（上底＋下底）× 高 ÷ 2", { z: 11, c: TN.k });
+    } else if (k === "tri") {
+      var b3 = u * 5, h3 = u * 2.8;
+      LW = b3; RW = b3; HH = h3;
+      left += poly([[b3 * .35, 0], [b3, h3], [0, h3]]);
+      left += L(0, h3 / 2, b3 * .675, h3 / 2, { w: 1.2, d: "5 4", c: TN.r });
+      right += poly([[0, h3 / 2], [b3, h3 / 2], [b3, h3], [0, h3]]);
+      right += T(b3 / 2, h3 + 14, "底 × 高 ÷ 2", { z: 12, c: TN.k });
+    } else {
+      /* circ：圓剪成扇形再拼成近似長方形 */
+      var R2 = u * 1.9, N2 = 12;
+      LW = R2 * 2; RW = Math.PI * R2; HH = R2 * 2;
+      left += C(R2, R2, R2, { f: TN.w, w: 1.6 });
+      for (var q2 = 0; q2 < N2; q2++) {
+        var t5 = q2 * 2 * Math.PI / N2;
+        left += L(R2, R2, R2 + R2 * Math.cos(t5), R2 + R2 * Math.sin(t5), { w: .9, c: TN.k, d: "3 3" });
+      }
+      /* 把圓剪成 N2 個扇形，一上一下交錯排好，就接近一個長方形：
+         長＝圓周長的一半、寬＝半徑 */
+      var arcw = Math.PI * R2 / (N2 / 2);        /* 每個扇形的弧長 */
+      var top0 = 0, botY = R2;
+      for (var q3 = 0; q3 < N2; q3++) {
+        var up = q3 % 2 === 0, xx = (q3 >> 1) * arcw + (up ? 0 : arcw / 2);
+        var tipx = xx + arcw / 2;
+        if (up) {
+          right += '<path d="M' + rd(xx) + " " + rd(botY) + "q" + rd(arcw / 2) + " " + rd(-R2 * .14) + " " + rd(arcw) + " 0" +
+            "L" + rd(tipx) + " " + rd(top0) + 'Z" fill="' + TN.w + '" stroke="currentColor" stroke-width="1.1"/>';
+        } else {
+          right += '<path d="M' + rd(xx) + " " + rd(top0) + "q" + rd(arcw / 2) + " " + rd(R2 * .14) + " " + rd(arcw) + " 0" +
+            "L" + rd(tipx) + " " + rd(botY) + 'Z" fill="' + TN.w + '" stroke="currentColor" stroke-width="1.1"/>';
+        }
+      }
+      RW = arcw * (N2 / 2) + arcw / 2;
+      HH = Math.max(R2 * 2, botY);
+      right += T(RW / 2, HH + 16, "半徑 × 圓周長 ÷ 2", { z: 11, c: TN.k });
+    }
+    var W = LW + gap + RW + 28, H = y0 + HH + 34;
+    var s = lab ? T(W / 2, 14, lab, { z: 13 }) : "";
+    s += '<g transform="translate(14 ' + rd(y0) + ')">' + left + "</g>";
+    s += '<g transform="translate(' + rd(14 + LW + gap) + " " + rd(y0) + ')">' + right + "</g>";
+    if (showArrow !== 0) s += arw(14 + LW + 10, y0 + HH / 2, 14 + LW + gap - 10, y0 + HH / 2, { w: 1.8, c: TN.b });
+    return svg(W, H, s, .95);
+  };
+
+  /* ---------- 18. 水族箱／容器（可放魚、石頭、水草）---------- */
+  /* 容積、排水法、水位變化都用得到。石頭是用亂數長出來的不規則多邊形，
+     但亂數種子固定，所以同樣的參數每次畫出來都一模一樣。 */
+  function rng(seed) { var a = (seed || 1) >>> 0; return function () { a ^= a << 13; a ^= a >>> 17; a ^= a << 5; a >>>= 0; return a / 4294967296; }; }
+  function fish(x, y, k, col, flip) {
+    var w = 26 * k, h = 13 * k, d = flip ? -1 : 1;
+    var s = '<path d="M' + rd(x - w / 2 * d) + " " + rd(y) +
+      "q" + rd(w * .32 * d) + " " + rd(-h * .78) + " " + rd(w * .78 * d) + " 0" +
+      "q" + rd(-w * .46 * d) + " " + rd(h * .78) + " " + rd(-w * .78 * d) + ' 0Z" fill="' + col + '" stroke="currentColor" stroke-width="1"/>';
+    s += '<path d="M' + rd(x - w / 2 * d) + " " + rd(y) + "l" + rd(-w * .3 * d) + " " + rd(-h * .55) + "v" + rd(h * 1.1) + 'Z" fill="' + col + '" stroke="currentColor" stroke-width="1"/>';
+    s += C(x + w * .2 * d, y - h * .16, 1.5 * k, { f: "currentColor", c: "none" });
+    return s;
+  }
+  function rock(x, y, k, seed, col) {
+    var r = rng(seed), n = 7, p = [];
+    for (var i = 0; i < n; i++) {
+      var t = Math.PI + i * Math.PI / (n - 1), rr = (0.72 + r() * 0.42) * k;
+      p.push([x + Math.cos(t) * rr * 1.25, y + Math.sin(t) * rr * .9]);
+    }
+    p.push([x + k * 1.3, y], [x - k * 1.3, y]);
+    return '<polygon points="' + p.map(function (q) { return rd(q[0]) + "," + rd(q[1]); }).join(" ") +
+      '" fill="' + col + '" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>';
+  }
+  F.libTank = function (level, fishes, rocks, weed, marks, unit, lab) {
+    var W = 320, Hh = 190, x0 = 18, y0 = (lab ? 28 : 12), bw = 214, bh = 130;
+    var top = y0 + 14, bot = top + bh;
+    var lv = Math.max(0, Math.min(100, +level == null ? 60 : +level));
+    var wy = bot - bh * lv / 100;
+    var s = lab ? T(W / 2, 14, lab, { z: 13 }) : "";
+    /* 水 */
+    if (lv > 0) s += R(x0, wy, bw, bot - wy, { f: TN.b, c: "none" });
+    /* 石頭沉在底部 */
+    var nr = Math.max(0, Math.min(8, Math.round(+rocks || 0)));
+    for (var i = 0; i < nr; i++) {
+      var rx = x0 + 28 + (i % 4) * 52 + (i >= 4 ? 22 : 0);
+      s += rock(rx, bot - 2 - (i >= 4 ? 13 : 0), 11 + (i % 3) * 2.5, 7 + i * 31, TN.k);
+    }
+    /* 水草 */
+    var nw = Math.max(0, Math.min(6, Math.round(+weed || 0)));
+    for (var j = 0; j < nw; j++) {
+      var gx = x0 + 18 + j * (bw - 36) / Math.max(1, nw - 1 || 1), gh = 34 + (j % 3) * 16;
+      s += '<path d="M' + rd(gx) + " " + rd(bot - 2) + "q" + rd(-10) + " " + rd(-gh * .5) + " " + rd(2) + " " + rd(-gh) +
+        "M" + rd(gx) + " " + rd(bot - 2) + "q" + rd(11) + " " + rd(-gh * .45) + " " + rd(1) + " " + rd(-gh * .82) +
+        '" fill="none" stroke="' + TN.g + '" stroke-width="2.4" stroke-linecap="round"/>';
+    }
+    /* 魚（游在水裡） */
+    var nf = Math.max(0, Math.min(8, Math.round(+fishes || 0)));
+    /* 留出水面與底部石頭的空間，魚才不會半隻露出水面或壓在石頭上；
+       位置照隻數平均散開，再加一點點位移，不會全部擠在同一邊 */
+    var rockTop = nr ? 26 : 10, lo = wy + 16, hi = Math.max(wy + 16, bot - rockTop);
+    for (var f2 = 0; f2 < nf; f2++) {
+      var r2 = rng(101 + f2 * 37), span = bw - 70;
+      var fx = x0 + 35 + (nf === 1 ? span / 2 : span * f2 / (nf - 1)) + (r2() - .5) * 14;
+      var fy = lo + (hi - lo) * (nf === 1 ? .5 : (f2 % 3) / 2 * .8 + .1);
+      s += fish(fx, Math.max(lo, Math.min(hi, fy)), 1 + (f2 % 2) * .22, [TN.r, TN.y, TN.p][f2 % 3], f2 % 2 === 1);
+    }
+    /* 水面 */
+    if (lv > 0) s += L(x0, wy, x0 + bw, wy, { w: 1.6, c: TN.b });
+    /* 缸體（無蓋） */
+    s += '<path d="M' + x0 + " " + top + "V" + bot + "H" + (x0 + bw) + "V" + top + '" fill="none" stroke="currentColor" stroke-width="2"/>';
+    /* 刻度 */
+    var MK = nums(marks);
+    MK.forEach(function (m) {
+      var my = bot - bh * Math.max(0, Math.min(100, m)) / 100;
+      s += L(x0 + bw, my, x0 + bw + 7, my, { w: 1.1, c: TN.k });
+      s += T(x0 + bw + 10, my, m + (unit || "%"), { z: 11, a: "start", c: TN.k });
+    });
+    return svg(W, Hh, s, .95);
+  };
+
+  /* ---------- 19. 大容器分裝成小容器 ---------- */
+  F.libPour = function (big, bigU, small, smallU, n, lab) {
+    var unit = "";
+    var cnt = Math.max(1, Math.min(10, Math.round(+n || 4)));
+    var bw = 72, bh = 96, sw = 34, sh = 46, gap = 10;
+    var W = bw + 54 + cnt * (sw + gap) + 20, y0 = (lab ? 28 : 12), H = y0 + bh + 40;
+    var s = lab ? T(W / 2, 14, lab, { z: 13 }) : "";
+    var bx = 14, by = y0 + 6;
+    s += R(bx, by, bw, bh, { f: TN.b, w: 2 });
+    s += '<path d="M' + bx + " " + by + "V" + (by + bh) + "H" + (bx + bw) + "V" + by + '" fill="none" stroke="currentColor" stroke-width="2"/>';
+    s += T(bx + bw / 2, by + bh + 16, (big || "") + (bigU || ""), { z: 13 });
+    s += arw(bx + bw + 12, by + bh / 2, bx + bw + 40, by + bh / 2, { w: 1.8, c: TN.b });
+    var sx0 = bx + bw + 48;
+    for (var i = 0; i < cnt; i++) {
+      var sx = sx0 + i * (sw + gap), sy = by + bh - sh;
+      s += R(sx, sy, sw, sh, { f: TN.b, w: 1.6 });
+      s += '<path d="M' + sx + " " + sy + "V" + (sy + sh) + "H" + (sx + sw) + "V" + sy + '" fill="none" stroke="currentColor" stroke-width="1.6"/>';
+    }
+    s += T(sx0 + (cnt * (sw + gap) - gap) / 2, by + bh + 16, (small || "") + (smallU || "") + " × " + cnt + " 杯", { z: 13 });
+    return svg(W, H, s, .95);
+  };
+
+  /* ---------- 20. 牛吃草（動物與草地）---------- */
+  /* 六年級「牛吃草」這類工作量問題用的：一片草地＋幾隻動物＋幾天。
+     動物都畫成簡單的幾何造型，不是插畫。 */
+  var ANI = {};
+  ANI.cow = function (x, y, k, col) {                       /* 牛 */
+    var w = 42 * k, h = 23 * k, bodyY = y - 10 * k - h, s = "";
+    /* 身體 */
+    s += R(x - w / 2, bodyY, w, h, { f: col, w: 1.5, r: 7 * k });
+    /* 脖子與頭：頭壓在身體右前方，接在一起 */
+    var hx = x + w / 2 + 4 * k, hy = bodyY + 3 * k;
+    s += '<path d="M' + rd(x + w / 2 - 6 * k) + " " + rd(bodyY + 2 * k) + "L" + rd(hx - 2 * k) + " " + rd(hy - 1 * k) +
+      "v" + rd(13 * k) + "L" + rd(x + w / 2 - 6 * k) + " " + rd(bodyY + 14 * k) + 'Z" fill="' + col + '" stroke="currentColor" stroke-width="1.4"/>';
+    s += R(hx - 2 * k, hy, 15 * k, 13 * k, { f: col, w: 1.4, r: 5 * k });
+    s += R(hx + 8 * k, hy + 5 * k, 8 * k, 8 * k, { f: TN.r, w: 1.2, r: 3.5 * k });     /* 鼻口 */
+    s += C(hx + 11 * k, hy + 8 * k, 1 * k, { f: "currentColor", c: "none" });
+    s += C(hx + 14 * k, hy + 8 * k, 1 * k, { f: "currentColor", c: "none" });
+    s += C(hx + 4 * k, hy + 4 * k, 1.4 * k, { f: "currentColor", c: "none" });        /* 眼睛 */
+    /* 角與耳朵 */
+    s += '<path d="M' + rd(hx + 1 * k) + " " + rd(hy) + "q" + rd(-1 * k) + " " + rd(-6 * k) + " " + rd(4 * k) + " " + rd(-6.5 * k) +
+      "M" + rd(hx + 10 * k) + " " + rd(hy) + "q" + rd(1 * k) + " " + rd(-6 * k) + " " + rd(-3 * k) + " " + rd(-6.5 * k) +
+      '" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>';
+    s += '<ellipse cx="' + rd(hx - 3 * k) + '" cy="' + rd(hy + 3 * k) + '" rx="' + rd(4 * k) + '" ry="' + rd(2.4 * k) + '" fill="' + col + '" stroke="currentColor" stroke-width="1.2"/>';
+    /* 腳 */
+    [-.34, -.12, .14, .36].forEach(function (f) {
+      s += L(x + w * f, bodyY + h - 1, x + w * f, y - 1, { w: 2.6 });
+      s += L(x + w * f - 1.6 * k, y - 1, x + w * f + 1.6 * k, y - 1, { w: 2.6 });
+    });
+    /* 尾巴（末端一撮毛） */
+    s += '<path d="M' + rd(x - w / 2) + " " + rd(bodyY + 4 * k) + "q" + rd(-8 * k) + " " + rd(5 * k) + " " + rd(-4 * k) + " " + rd(14 * k) + '" fill="none" stroke="currentColor" stroke-width="1.4"/>';
+    s += '<ellipse cx="' + rd(x - w / 2 - 4 * k) + '" cy="' + rd(bodyY + 20 * k) + '" rx="' + rd(2.2 * k) + '" ry="' + rd(3.2 * k) + '" fill="currentColor" stroke="none"/>';
+    /* 乳牛的斑紋 */
+    s += '<ellipse cx="' + rd(x - w * .16) + '" cy="' + rd(bodyY + h * .42) + '" rx="' + rd(7 * k) + '" ry="' + rd(5 * k) + '" fill="currentColor" opacity=".32" stroke="none"/>';
+    s += '<ellipse cx="' + rd(x + w * .16) + '" cy="' + rd(bodyY + h * .72) + '" rx="' + rd(5 * k) + '" ry="' + rd(3.6 * k) + '" fill="currentColor" opacity=".24" stroke="none"/>';
+    return s;
+  };
+  ANI.sheep = function (x, y, k, col) {                     /* 羊 */
+    var w = 34 * k, h = 21 * k, s = "";
+    var d = "M" + rd(x - w / 2) + " " + rd(y - h * .5);
+    for (var i = 0; i < 6; i++) d += "a" + rd(w / 11) + " " + rd(w / 11) + " 0 0 1 " + rd(w / 5.6) + " " + rd(i < 3 ? -h * .14 : h * .14);
+    d += "v" + rd(h * .5) + "h" + rd(-w) + "Z";
+    s += '<path d="' + d + '" fill="' + col + '" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>';
+    s += '<ellipse cx="' + rd(x + w / 2 + 3 * k) + '" cy="' + rd(y - h * .78) + '" rx="' + rd(7 * k) + '" ry="' + rd(6 * k) + '" fill="' + TN.k + '" stroke="currentColor" stroke-width="1.3"/>';
+    s += C(x + w / 2 + 5 * k, y - h * .86, 1.3 * k, { f: "var(--paper,#fff)", c: "none" });
+    [-.3, -.08, .16, .34].forEach(function (f) { s += L(x + w * f, y - 2, x + w * f, y + 8 * k, { w: 2 }); });
+    return s;
+  };
+  ANI.pig = function (x, y, k, col) {                       /* 豬 */
+    var w = 36 * k, h = 22 * k, s = "";
+    s += R(x - w / 2, y - h, w, h, { f: col, w: 1.4, r: 10 * k });
+    s += '<ellipse cx="' + rd(x + w / 2 + 2 * k) + '" cy="' + rd(y - h * .66) + '" rx="' + rd(9 * k) + '" ry="' + rd(7.5 * k) + '" fill="' + col + '" stroke="currentColor" stroke-width="1.3"/>';
+    s += '<ellipse cx="' + rd(x + w / 2 + 9 * k) + '" cy="' + rd(y - h * .6) + '" rx="' + rd(3.4 * k) + '" ry="' + rd(2.8 * k) + '" fill="var(--paper,#fff)" stroke="currentColor" stroke-width="1.1"/>';
+    s += '<path d="M' + rd(x + w / 2 - 2 * k) + " " + rd(y - h * .95 - 4 * k) + "l" + rd(4 * k) + " " + rd(-5 * k) + "l" + rd(3 * k) + " " + rd(6 * k) + 'Z" fill="' + col + '" stroke="currentColor" stroke-width="1.1"/>';
+    s += C(x + w / 2 + 4 * k, y - h * .82, 1.2 * k, { f: "currentColor", c: "none" });
+    [-.3, -.08, .14, .32].forEach(function (f) { s += L(x + w * f, y - 1, x + w * f, y + 8 * k, { w: 2.2 }); });
+    s += '<path d="M' + rd(x - w / 2) + " " + rd(y - h * .8) + "a" + rd(4 * k) + " " + rd(4 * k) + " 0 1 0 " + rd(-5 * k) + " " + rd(3 * k) + '" fill="none" stroke="currentColor" stroke-width="1.3"/>';
+    return s;
+  };
+  ANI.chicken = function (x, y, k, col) {                   /* 雞 */
+    var w = 20 * k, h = 20 * k, s = "";
+    s += '<ellipse cx="' + rd(x) + '" cy="' + rd(y - h * .5) + '" rx="' + rd(w * .62) + '" ry="' + rd(h * .46) + '" fill="' + col + '" stroke="currentColor" stroke-width="1.3"/>';
+    s += C(x + w * .5, y - h * .95, 5.4 * k, { f: col, w: 1.3 });
+    s += '<path d="M' + rd(x + w * .5 - 3 * k) + " " + rd(y - h * .95 - 5 * k) + "q" + rd(2 * k) + " " + rd(-4 * k) + " " + rd(4 * k) + " 0q" + rd(2 * k) + " " + rd(-4 * k) + " " + rd(3 * k) + " " + rd(1 * k) +
+      '" fill="' + TN.r + '" stroke="currentColor" stroke-width="1.1"/>';                       /* 雞冠 */
+    s += '<path d="M' + rd(x + w * .5 + 5 * k) + " " + rd(y - h * .95) + "l" + rd(5 * k) + " " + rd(1.6 * k) + "l" + rd(-5 * k) + " " + rd(1.8 * k) + 'Z" fill="' + TN.y + '" stroke="currentColor" stroke-width="1"/>';
+    s += C(x + w * .62, y - h * 1.02, 1.1 * k, { f: "currentColor", c: "none" });
+    [-.18, .12].forEach(function (f) { s += L(x + w * f, y - h * .08, x + w * f, y + 7 * k, { w: 1.8, c: TN.y }); });
+    s += '<path d="M' + rd(x - w * .6) + " " + rd(y - h * .62) + "l" + rd(-6 * k) + " " + rd(-6 * k) + "l" + rd(1 * k) + " " + rd(8 * k) + 'Z" fill="' + col + '" stroke="currentColor" stroke-width="1.1"/>';
+    return s;
+  };
+  ANI.duck = function (x, y, k, col) {                      /* 鴨 */
+    var w = 30 * k, s = "";
+    /* 身體：後面翹起來一點 */
+    s += '<path d="M' + rd(x - w * .5) + " " + rd(y - 7 * k) +
+      "q" + rd(-5 * k) + " " + rd(-9 * k) + " " + rd(4 * k) + " " + rd(-11 * k) +
+      "q" + rd(9 * k) + " " + rd(-5 * k) + " " + rd(20 * k) + " " + rd(1 * k) +
+      "q" + rd(6 * k) + " " + rd(3 * k) + " " + rd(1 * k) + " " + rd(9 * k) +
+      "q" + rd(-11 * k) + " " + rd(5 * k) + " " + rd(-25 * k) + ' 1Z" fill="' + col + '" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>';
+    /* 脖子與頭 */
+    var nx = x + w * .4, ny = y - 20 * k;
+    s += '<path d="M' + rd(nx - 2 * k) + " " + rd(y - 14 * k) + "q" + rd(5 * k) + " " + rd(-7 * k) + " " + rd(4 * k) + " " + rd(-12 * k) +
+      "l" + rd(5 * k) + " 0q" + rd(1 * k) + " " + rd(7 * k) + " " + rd(-4 * k) + " " + rd(13 * k) + 'Z" fill="' + col + '" stroke="currentColor" stroke-width="1.3"/>';
+    s += C(nx + 4 * k, ny - 5 * k, 5.6 * k, { f: col, w: 1.4 });
+    /* 扁嘴 */
+    s += '<path d="M' + rd(nx + 9 * k) + " " + rd(ny - 7 * k) + "q" + rd(9 * k) + " " + rd(1.5 * k) + " " + rd(8 * k) + " " + rd(4 * k) +
+      "q" + rd(-2 * k) + " " + rd(2 * k) + " " + rd(-9 * k) + " " + rd(0.5 * k) + 'Z" fill="' + TN.y + '" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/>';
+    s += C(nx + 5 * k, ny - 7 * k, 1.2 * k, { f: "currentColor", c: "none" });
+    /* 翅膀 */
+    s += '<path d="M' + rd(x - w * .1) + " " + rd(y - 13 * k) + "q" + rd(9 * k) + " " + rd(-3 * k) + " " + rd(13 * k) + " " + rd(3 * k) +
+      "q" + rd(-7 * k) + " " + rd(4 * k) + " " + rd(-13 * k) + ' -3Z" fill="none" stroke="currentColor" stroke-width="1.2"/>';
+    /* 腳 */
+    [-.12, .1].forEach(function (f) {
+      s += L(x + w * f, y - 6 * k, x + w * f, y, { w: 1.8, c: TN.y });
+      s += '<path d="M' + rd(x + w * f - 3 * k) + " " + rd(y) + "h" + rd(6.5 * k) + '" stroke="' + TN.y + '" stroke-width="2.2" fill="none"/>';
+    });
+    return s;
+  };
+  ANI.horse = function (x, y, k, col) {                     /* 馬 */
+    var w = 46 * k, h = 22 * k, bodyY = y - 15 * k - h, s = "";
+    s += R(x - w / 2, bodyY, w, h, { f: col, w: 1.5, r: 9 * k });
+    /* 脖子：從身體右前方斜斜往上 */
+    var n1x = x + w / 2 - 7 * k, n1y = bodyY + 2 * k;
+    var n2x = x + w / 2 + 11 * k, n2y = bodyY - 16 * k;
+    s += '<path d="M' + rd(n1x) + " " + rd(n1y) + "L" + rd(n2x - 4 * k) + " " + rd(n2y) + "l" + rd(8 * k) + " " + rd(2 * k) +
+      "L" + rd(n1x + 9 * k) + " " + rd(n1y + 12 * k) + 'Z" fill="' + col + '" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>';
+    /* 頭：往前下方 */
+    s += '<path d="M' + rd(n2x - 5 * k) + " " + rd(n2y - 2 * k) + "l" + rd(15 * k) + " " + rd(4 * k) + "l" + rd(-2 * k) + " " + rd(7 * k) +
+      "l" + rd(-14 * k) + " " + rd(-3 * k) + 'Z" fill="' + col + '" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>';
+    s += C(n2x + 1 * k, n2y + 2 * k, 1.3 * k, { f: "currentColor", c: "none" });
+    /* 耳朵 */
+    s += '<path d="M' + rd(n2x - 3 * k) + " " + rd(n2y - 2 * k) + "l" + rd(1 * k) + " " + rd(-6 * k) + "l" + rd(3.5 * k) + " " + rd(4 * k) + 'Z" fill="' + col + '" stroke="currentColor" stroke-width="1.1"/>';
+    /* 鬃毛 */
+    s += '<path d="M' + rd(n2x - 5 * k) + " " + rd(n2y - 1 * k) + "q" + rd(-8 * k) + " " + rd(6 * k) + " " + rd(-14 * k) + " " + rd(17 * k) +
+      '" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>';
+    /* 腳：前後各兩隻，長一點 */
+    [-.36, -.16, .18, .36].forEach(function (f) {
+      s += L(x + w * f, bodyY + h - 1, x + w * f, y - 1, { w: 2.4 });
+      s += L(x + w * f - 1.8 * k, y - 1, x + w * f + 1.8 * k, y - 1, { w: 2.6 });
+    });
+    /* 尾巴 */
+    s += '<path d="M' + rd(x - w / 2 + 1 * k) + " " + rd(bodyY + 3 * k) + "q" + rd(-10 * k) + " " + rd(8 * k) + " " + rd(-6 * k) + " " + rd(20 * k) +
+      '" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>';
+    return s;
+  };
+  var ANIN = { cow: "牛", sheep: "羊", pig: "豬", chicken: "雞", duck: "鴨", horse: "馬" };
+  F.libGraze = function (kind, n, grass, days, lab) {
+    var k0 = ANI[kind] ? kind : "cow", cnt = Math.max(1, Math.min(8, Math.round(+n || 3)));
+    var sc = cnt > 5 ? .74 : cnt > 3 ? .88 : 1;
+    /* 牛和馬的頭會往右伸出去，間距要留夠，不然隻數一多就疊在一起 */
+    var per = ({ chicken: 38, duck: 42, sheep: 50, pig: 54, cow: 66, horse: 74 }[k0] || 56) * sc;
+    /* 最後一隻的頭會往右多伸一點，草地要蓋得到 */
+    var W = Math.max(220, cnt * per + 56), y0 = (lab ? 28 : 12);
+    var gh = grass ? 34 : 0, base = y0 + 86 * sc;
+    var H = base + gh + 30;
+    var s = lab ? T(W / 2, 14, lab, { z: 13 }) : "";
+    if (grass) {
+      /* 草地：一片綠底加一叢一叢的草 */
+      s += R(10, base + 2, W - 20, gh, { f: TN.g, w: 1.4, r: 6 });
+      var r3 = rng(29);
+      for (var g = 0; g < Math.round((W - 20) / 13); g++) {
+        var gx = 16 + g * 13 + r3() * 4, gy = base + 2 + 6 + r3() * (gh - 14);
+        s += '<path d="M' + rd(gx) + " " + rd(gy + 9) + "q" + rd(-2) + " " + rd(-6) + " " + rd(1) + " " + rd(-9) +
+          "M" + rd(gx + 3) + " " + rd(gy + 9) + "q" + rd(2) + " " + rd(-5) + " " + rd(1) + " " + rd(-8) +
+          '" fill="none" stroke="currentColor" stroke-width="1" opacity=".55"/>';
+      }
+    }
+    var col = { cow: TN.w, sheep: TN.w, pig: TN.r, chicken: TN.y, duck: TN.w, horse: TN.p }[k0];
+    for (var i = 0; i < cnt; i++) {
+      s += ANI[k0](20 + per / 2 + i * per, base, sc, col);
+    }
+    var cap = cnt + " 隻" + ANIN[k0] + (days ? "・" + days : "");
+    if (k0 === "cow") cap = cnt + " 頭牛" + (days ? "・" + days : "");
+    if (k0 === "horse") cap = cnt + " 匹馬" + (days ? "・" + days : "");
+    s += T(W / 2, base + gh + 16, cap, { z: 13 });
     return svg(W, H, s, .95);
   };
 
@@ -532,7 +968,20 @@
     { f: "libVert", g: G1, n: "直式（可留空格）", a: [TT("expr", "算式（? 代表空格）", "128+95"), N("blanks", "答案留幾格", 3, 1, 8),
       BB("showAns", "直接寫出答案", 0), TT("lab", "標示", "")] },
     { f: "libSetSquare", g: G2, n: "三角板", a: [SE("kind", "哪一種", "4545", [["4545", "45°-45°-90°"], ["3060", "30°-60°-90°"]]),
-      BB("degs", "標出角度", 1), TT("lab", "標示", "")] }
+      BB("degs", "標出角度", 1), TT("lab", "標示", "")] },
+    { f: "libNet", g: "立體圖形", n: "展開圖（各種柱錐）", a: [SE("kind", "哪一種", "prism", [["prism", "角柱"], ["pyramid", "角錐"],
+      ["cylinder", "圓柱"], ["cone", "圓錐"], ["cuboid", "長方體"], ["cube", "正方體"]]),
+      N("sides", "幾邊形（角柱／角錐）", 5, 3, 12), BB("tabs", "加黏貼處", 0), BB("names", "標出每一面", 0), TT("lab", "標示", "")] },
+    { f: "libCutPaste", g: "平面圖形", n: "切割拼湊（面積不變）", a: [SE("kind", "哪一種", "para", [["para", "平行四邊形→長方形"],
+      ["trap", "梯形→平行四邊形"], ["tri", "三角形→長方形"], ["circ", "圓→近似長方形"]]), BB("showArrow", "畫箭頭", 1), TT("lab", "標示", "")] },
+    { f: "libTank", g: G2, n: "水族箱／容器（魚、石頭、水草）", a: [N("level", "水位（％）", 60, 0, 100),
+      N("fishes", "幾條魚", 3, 0, 8), N("rocks", "幾顆石頭", 2, 0, 8), N("weed", "幾叢水草", 2, 0, 6),
+      NS("marks", "右邊標哪幾個刻度", ""), TT("unit", "刻度單位", " 公升"), TT("lab", "標示", "")] },
+    { f: "libPour", g: G2, n: "大容器分裝小容器", a: [TT("big", "大容器", "2"), TT("bigU", "大容器單位", " 公升"),
+      TT("small", "小容器", "500"), TT("smallU", "小容器單位", " 毫升"), N("n", "分成幾杯", 4, 1, 10), TT("lab", "標示", "")] },
+    { f: "libGraze", g: G3, n: "牛吃草（動物與草地）", a: [SE("kind", "哪一種動物", "cow", [["cow", "牛"], ["sheep", "羊"], ["pig", "豬"],
+      ["chicken", "雞"], ["duck", "鴨"], ["horse", "馬"]]), N("n", "幾隻", 3, 1, 8), BB("grass", "畫草地", 1),
+      TT("days", "吃幾天", "6 天"), TT("lab", "標示", "")] }
   ];
 
   function install() {

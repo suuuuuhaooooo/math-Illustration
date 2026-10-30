@@ -455,6 +455,55 @@
     var V = b.concat([[0, h / 2, 0]]);
     return { V: V, F: [[0, 1, 2], [0, 1, 3], [1, 2, 3], [2, 0, 3]], sm: {}, vn: ["A", "B", "C", "D"], le: { w: [0, 1] } };
   }
+  /* 無蓋容器：做成「外盒＋內盒」的封閉形體，杯口有厚度，
+     這樣從上面看得到內壁和內底，就跟課本的無蓋容器一樣。 */
+  function mOpenBox(w, h, dp, t) {
+    var hw = w / 2, hh = h / 2, hd = dp / 2, iw = hw - t, id = hd - t, ib = -hh + t;
+    var V = [
+      [-hw, -hh, hd], [hw, -hh, hd], [hw, -hh, -hd], [-hw, -hh, -hd],      /* 0-3 外底 */
+      [-hw, hh, hd], [hw, hh, hd], [hw, hh, -hd], [-hw, hh, -hd],          /* 4-7 外口 */
+      [-iw, ib, id], [iw, ib, id], [iw, ib, -id], [-iw, ib, -id],          /* 8-11 內底 */
+      [-iw, hh, id], [iw, hh, id], [iw, hh, -id], [-iw, hh, -id]           /* 12-15 內口 */
+    ];
+    var F = [], fn = [];
+    function add(f, nn) { F.push(f); fn.push(nn); }
+    add([0, 1, 2, 3], [0, -1, 0]);                 /* 外底 */
+    add([0, 1, 5, 4], [0, 0, 1]);                  /* 外前 */
+    add([1, 2, 6, 5], [1, 0, 0]);                  /* 外右 */
+    add([2, 3, 7, 6], [0, 0, -1]);                 /* 外後 */
+    add([3, 0, 4, 7], [-1, 0, 0]);                 /* 外左 */
+    add([4, 5, 13, 12], [0, 1, 0]);                /* 杯口四條 */
+    add([5, 6, 14, 13], [0, 1, 0]);
+    add([6, 7, 15, 14], [0, 1, 0]);
+    add([7, 4, 12, 15], [0, 1, 0]);
+    add([8, 9, 10, 11], [0, 1, 0]);                /* 內底（朝上） */
+    add([8, 9, 13, 12], [0, 0, -1]);               /* 內壁（法向量朝空腔裡） */
+    add([9, 10, 14, 13], [-1, 0, 0]);
+    add([10, 11, 15, 14], [0, 0, 1]);
+    add([11, 8, 12, 15], [1, 0, 0]);
+    return { V: V, F: F, fn: fn, sm: {}, le: { w: [0, 1], d: [1, 2], h: [1, 5] } };
+  }
+  /* 把一個 2D 多邊形沿 z 拉伸成柱體：複合形體（L 形、階梯形）都用這個做 */
+  function mExtrude(pts, dp) {
+    var n = pts.length, hd = dp / 2, V = [], F = [], fn = [], i;
+    /* 先確認是逆時針（在螢幕座標裡），這樣側面的法向量才算得出來 */
+    var area = 0;
+    for (i = 0; i < n; i++) { var a = pts[i], b = pts[(i + 1) % n]; area += a[0] * b[1] - b[0] * a[1]; }
+    var P = area < 0 ? pts.slice().reverse() : pts.slice();
+    for (i = 0; i < n; i++) V.push([P[i][0], P[i][1], hd]);
+    for (i = 0; i < n; i++) V.push([P[i][0], P[i][1], -hd]);
+    var front = [], back = [];
+    for (i = 0; i < n; i++) front.push(i);
+    for (i = n - 1; i >= 0; i--) back.push(n + i);
+    F.push(front); fn.push([0, 0, 1]);
+    F.push(back); fn.push([0, 0, -1]);
+    for (i = 0; i < n; i++) {
+      var j = (i + 1) % n, dx = P[j][0] - P[i][0], dy = P[j][1] - P[i][1];
+      var L = Math.sqrt(dx * dx + dy * dy) || 1;
+      F.push([i, j, n + j, n + i]); fn.push([dy / L, -dx / L, 0]);
+    }
+    return { V: V, F: F, fn: fn, sm: {} };
+  }
   function ek(a, b) { return a < b ? a + "_" + b : b + "_" + a; }
   /* 一堆首尾相接的線段 → 一圈一圈的封閉頂點序列 */
   function chain(segs) {
@@ -482,12 +531,24 @@
 
   var SOLIDS = [["cuboid", "長方體"], ["cube", "正方體"], ["cyl", "圓柱"], ["cone", "圓錐"], ["sphere", "球"],
     ["hemi", "半球"], ["prismN", "角柱（邊數可調）"], ["pyrN", "角錐（邊數可調）"], ["frus", "圓錐台"],
+    ["openbox", "無蓋長方體"], ["opencube", "無蓋正方體"], ["Lsolid", "複合形體（L 形）"], ["step", "複合形體（兩個長方體相接）"],
     ["prism3", "三角柱"], ["prism6", "六角柱"], ["pyr4", "四角錐"], ["pyr3", "三角錐"]];
   function build(k, sides) {
     /* 角柱與角錐的邊數可以從 3 調到 12（課本五年級上到八角柱、八角錐） */
     var sd = Math.max(3, Math.min(12, Math.round(+sides || 5)));
     if (k === "prismN") return mPrism(sd, sd % 2 ? .58 : .55, 1, sd % 2 ? -Math.PI / 2 : Math.PI / sd);
     if (k === "pyrN") return sd === 3 ? mTetra(.6, 1) : mPyr(sd, sd % 2 ? .62 : .62, 1, sd % 2 ? -Math.PI / 2 : Math.PI / sd);
+    if (k === "openbox") return mOpenBox(1, .78, .72, .07);
+    if (k === "opencube") return mOpenBox(1, 1, 1, .07);
+    if (k === "Lsolid") {
+      /* L 形：大長方體缺一角，算體積與表面積常用 */
+      var a2 = .5, b2 = .5;
+      return mExtrude([[-.5, -.5], [.5, -.5], [.5, -.5 + b2], [-.5 + a2, -.5 + b2], [-.5 + a2, .5], [-.5, .5]], .6);
+    }
+    if (k === "step") {
+      /* 兩個長方體相接（階梯形） */
+      return mExtrude([[-.55, -.45], [.55, -.45], [.55, 0], [0, 0], [0, .45], [-.55, .45]], .6);
+    }
     switch (k) {
       case "cube": return mBox(1, 1, 1);
       case "cyl": return mPrism(64, .5, 1, 0);
@@ -613,9 +674,12 @@
         var W = cam.W, rot = cam.rot;
         function depth(v) { return W ? v[0] * W[0] + v[1] * W[1] + v[2] * W[2] : rot(v)[2]; }
         function sp(v) { var p = cam.p(v); return [(p[0] - q.x1) * sc + pad, (p[1] - q.y1) * sc + pad]; }
-        var info = M.F.map(function (f) {
+        var info = M.F.map(function (f, fi) {
           var g = fnorm(M.V, f);
-          return { dot: W ? (g.n[0] * W[0] + g.n[1] * W[1] + g.n[2] * W[2]) : rot(g.n)[2], c: g.c, n: g.n };
+          /* 無蓋容器、複合形體這種有內壁的，法向量要照網格自己給的，
+             不能用「從物體中心往外」去推，不然內壁會被當成背面而消失 */
+          var nn = M.fn && M.fn[fi] ? M.fn[fi] : g.n;
+          return { dot: W ? (nn[0] * W[0] + nn[1] * W[1] + nn[2] * W[2]) : rot(nn)[2], c: g.c, n: nn };
         });
         var EPS = 1e-6, em = {};
         M.F.forEach(function (f, fi) {
