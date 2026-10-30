@@ -481,8 +481,13 @@
   }
 
   var SOLIDS = [["cuboid", "長方體"], ["cube", "正方體"], ["cyl", "圓柱"], ["cone", "圓錐"], ["sphere", "球"],
-    ["hemi", "半球"], ["prism3", "三角柱"], ["prism6", "六角柱"], ["pyr4", "四角錐"], ["pyr3", "三角錐"], ["frus", "圓錐台"]];
-  function build(k) {
+    ["hemi", "半球"], ["prismN", "角柱（邊數可調）"], ["pyrN", "角錐（邊數可調）"], ["frus", "圓錐台"],
+    ["prism3", "三角柱"], ["prism6", "六角柱"], ["pyr4", "四角錐"], ["pyr3", "三角錐"]];
+  function build(k, sides) {
+    /* 角柱與角錐的邊數可以從 3 調到 12（課本五年級上到八角柱、八角錐） */
+    var sd = Math.max(3, Math.min(12, Math.round(+sides || 5)));
+    if (k === "prismN") return mPrism(sd, sd % 2 ? .58 : .55, 1, sd % 2 ? -Math.PI / 2 : Math.PI / sd);
+    if (k === "pyrN") return sd === 3 ? mTetra(.6, 1) : mPyr(sd, sd % 2 ? .62 : .62, 1, sd % 2 ? -Math.PI / 2 : Math.PI / sd);
     switch (k) {
       case "cube": return mBox(1, 1, 1);
       case "cyl": return mPrism(64, .5, 1, 0);
@@ -544,6 +549,7 @@
     w: 230, h: 200,
     a: [
       { k: "k", n: "形狀", t: "sel", o: SOLIDS },
+      { k: "sides", n: "角柱／角錐幾邊形", t: "num", min: 3, max: 12, step: 1 },
       { k: "view", n: "視角", t: "sel", o: VIEWS },
       { k: "yaw", n: "左右轉（自由角度用）", t: "num", min: -180, max: 180, step: 5 },
       { k: "pitch", n: "上下轉（自由角度用）", t: "num", min: -90, max: 90, step: 5 },
@@ -560,7 +566,7 @@
     ],
     init: function (o) {
       o.w = 230; o.h = 200;
-      o.d = { k: "cuboid", view: "obl", yaw: 35, pitch: 25, dep: .5, ang: 40, hid: "dash", shade: 1, guide: 1, lw: "", ld: "", lh: "", vn: 0, labs: 1 };
+      o.d = { k: "cuboid", sides: 5, view: "obl", yaw: 35, pitch: 25, dep: .5, ang: 40, hid: "dash", shade: 1, guide: 1, lw: "", ld: "", lh: "", vn: 0, labs: 1 };
       o.s.fc = "#cfe0ef"; o.s.fo = 1; o.s.fs = 13;
     },
     svg: function (o) {
@@ -569,7 +575,7 @@
       var base = s.fc && s.fc !== "none" ? s.fc : "none";
       var fo = s.fo == null ? 1 : s.fo;
       var hid = d.hid || "dash", dash = rd(lw * 2.6) + " " + rd(lw * 2.2);
-      var M = build(d.k || "cuboid");
+      var M = build(d.k || "cuboid", d.sides);
       var view = d.view || "obl";
       var hasLab = !!(d.lw || d.ld || d.lh || (d.vn && M.vn));
       var modes = view === "three" ? [["front", "前視圖"], ["top", "上視圖"], ["right", "右側視圖"]] : [[view, ""]];
