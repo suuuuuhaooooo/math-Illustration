@@ -13,6 +13,40 @@
   function rseed() { return 100000 + Math.floor(Math.random() * 900000); }
   function secName(id) { var o = BY[id]; return o ? o.sem + " " + o.num + " " + o.title : id; }
 
+  /* ---------- 可以收起來的設定區塊 ----------
+     左邊那幾個設定區（選單元、卷面設定、直式小幫手）很佔位置，
+     點一下標題就收起來，收合狀態記在這台裝置，下次進來還是一樣。 */
+  var FK = "nb-drill-fold";
+  function foldState() { return ld(FK, {}); }
+  function foldable(sec, key) {
+    var h2 = sec.querySelector("h2"); if (!h2 || sec.dataset.fold) return sec;
+    sec.dataset.fold = key;
+    sec.classList.add("dr-fo");
+    var body = document.createElement("div");
+    body.className = "dr-fo-b";
+    while (h2.nextSibling) body.appendChild(h2.nextSibling);
+    sec.appendChild(body);
+    var cv = h('<span class="dr-fo-c" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>');
+    h2.appendChild(cv);
+    h2.setAttribute("role", "button");
+    h2.setAttribute("tabindex", "0");
+    var st = foldState(), open = st[key] !== 0;
+    function paint() {
+      sec.classList.toggle("off", !open);
+      h2.setAttribute("aria-expanded", open ? "true" : "false");
+      h2.setAttribute("title", open ? "點一下收起來" : "點一下展開");
+    }
+    function toggle() { open = !open; var m = foldState(); m[key] = open ? 1 : 0; sv(FK, m); paint(); }
+    h2.addEventListener("click", function (e) {
+      /* 標題裡如果以後放了按鈕，點按鈕不要跟著收合 */
+      if (e.target.closest("button,input,select,a")) return;
+      toggle();
+    });
+    h2.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+    paint();
+    return sec;
+  }
+
   /* ---------- 狀態 ---------- */
   var DEF = { sel: [], lv: 2, grade: 0, title: "", count: "p1", cols: "auto", big: false, gap: "m", order: "unit", head: true, score: true, sol: true, view: "q", on: 10, otime: true, vmode: "filled", vgrid: "cell", vpv: true, vcarry: true, aidAt: "both", alloc: {}, sec: {}, vsize: "m", aidSm: false };
   var LEGACY = false;   /* 舊版（沒有 ver）分享連結：只出基本題，重現當時的卷 */
@@ -283,7 +317,7 @@
   /* ---------- 列印模式 ---------- */
   function printMode() {
     side.innerHTML = ""; main.innerHTML = "";
-    side.appendChild(pickerBox());
+    side.appendChild(foldable(pickerBox(), "pick"));
     var st = h('<section class="sheet"><h2><span class="dr-step">2</span>卷面設定</h2></section>');
     st.appendChild(lvRow());
     st.appendChild(h('<label class="dr-lab" for="dr-title">標題（空白就自動命名）</label>'));
@@ -320,7 +354,7 @@
     bt.querySelector("[data-share]").onclick = function () { copy(shareURL(), bt.querySelector("[data-share]")); };
     st.appendChild(bt);
     st.appendChild(h('<p class="dr-note">列印時請選 A4、縮放 100%（或「預設」），並關閉瀏覽器的頁首頁尾。手機也能印；版面以電腦的 Chrome、Edge 最準。</p>'));
-    side.appendChild(st);
+    side.appendChild(foldable(st, "paper"));
     /* 3. 直式與解題小幫手 */
     var vs = h('<section class="sheet"><h2><span class="dr-step">3</span>直式與解題小幫手</h2>' +
       '<div class="dr-two"><div><label class="dr-lab" for="dr-vm">直式題目</label><select id="dr-vm" class="dr-sel"><option value="filled">直式已列好</option><option value="self">自己列直式（只給空白方格）</option></select></div>' +
@@ -350,7 +384,7 @@
       });
     }
     drawSec(); secHook = drawSec;
-    side.appendChild(vs);
+    side.appendChild(foldable(vs, "vert"));
 
     var tb = h('<div class="dr-bar"><div class="dr-seg" role="group" aria-label="預覽"><button type="button" data-v="q">題目卷</button><button type="button" data-v="a">答案卷</button><button type="button" data-v="k">簡答</button></div><span class="dr-info"></span></div>');
     var eb = h('<div class="dr-edbar"><span class="dr-edtip">滑到題目上可以「換題、改字、刪除」</span><button type="button" class="pen" data-e="add">＋ 加一題</button><button type="button" class="pen" data-e="own">＋ 自己出一題</button><button type="button" class="pen" data-e="reset" hidden>還原所有修改</button></div>');
@@ -436,7 +470,7 @@
   var P = null; /* 一輪練習 */
   function onlineMode() {
     side.innerHTML = ""; main.innerHTML = "";
-    side.appendChild(pickerBox());
+    side.appendChild(foldable(pickerBox(), "pick"));
     var st = h('<section class="sheet"><h2><span class="dr-step">2</span>練習設定</h2></section>');
     st.appendChild(lvRow());
     var two = h('<div class="dr-two"><div><label class="dr-lab" for="dp-n">題數</label><select id="dp-n" class="dr-sel"><option value="10">10 題</option><option value="20">20 題</option><option value="30">30 題</option><option value="0">無限（自己按結束）</option></select></div><div><label class="dr-lab">&nbsp;</label><label class="dr-chk"><input type="checkbox" id="dp-t">顯示計時</label></div></div>');
@@ -445,7 +479,7 @@
     var bt = h('<div class="dr-btns"><button type="button" class="pen go">開始練習</button></div>'); bt.firstChild.onclick = function () { start(false); };
     st.appendChild(bt);
     st.appendChild(h('<p class="dr-note">按 Enter 送出、再按一次下一題。分數可以填 2又1/3：整數格填 2、分子 1、分母 3；沒有整數就空著。答題紀錄只存在這台裝置。</p>'));
-    side.appendChild(st);
+    side.appendChild(foldable(st, "online"));
     changed = function () { save(); };
     main.appendChild(h('<div class="sheet dr-empty"><p>選好單元與難度，按「開始練習」。答錯的題目會自動收進「練習紀錄」的錯題本，可以再練一次。</p></div>'));
     main.firstChild.insertBefore(h(NB.deco.hero().outerHTML), main.firstChild.firstChild);
