@@ -293,6 +293,22 @@ function bank(ctx){
    欄位順序跟上面「範例檔」一樣，匯出的檔案可以直接拿回來匯入。
    不是題組的題目那四欄是空的，匯入時空的就不會動到原本的題組設定。 */
   b2.onclick=function(){download("題庫.csv",COLS.concat(AH,GRPN,["題目類別"]).join(",")+"\n"+rows.map(function(x){return COLS.concat(AK,["gid","gstem","gimg","gord"],["kind"]).map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
+  /* 清空題庫：一次把這一科的題目全部刪掉。會先試算並依版本分類，
+     最容易出事的就是「舊代號和新代號疊在一起」，分類一列出來就看得出來。 */
+  if(M.U.admin){
+   var pg=ctx.sheet("清空題庫","把目前這一科的題目全部刪掉，包含題目屬性與題組。學生的作答紀錄和錯題本不會被刪（那些在「資料管理」處理）。通常只有「代號換過、要整批重匯」才會用到。");
+   var pgf=h('<div class="fb"></div>'),pgb=h('<div class="ctl"><button class="pen">先看看現在有什麼（不會刪）</button><button class="pen no">清空這一科的題庫</button></div>');
+   pg.appendChild(pgb);pg.appendChild(pgf);
+   function pgRun(go){var btn=pgb.children[go?1:0];
+    if(go&&prompt("這會刪掉目前這一科的所有題目，沒辦法復原。\n確定的話請輸入四個字：清空題庫")!=="清空題庫")return;
+    btn.disabled=true;
+    M.api("POST","/api/admin/bank/purge",go?{confirm:"清空題庫"}:{}).then(function(x){btn.disabled=false;
+     var ks=Object.keys(x.by||{}).filter(function(k){return x.by[k]});
+     var t=(x.dry?"<b>目前這一科的題庫有 "+x.total+" 題</b>":"<b>已清空 "+x.total+" 題</b>")+
+       (ks.length?"<ul>"+ks.map(function(k){return"<li>"+k+"："+x.by[k]+" 題</li>"}).join("")+"</ul>":"")+(x.note?esc(x.note):"");
+     msg(pgf,t,1);if(!x.dry)setTimeout(ctx.go,1200)},function(er){btn.disabled=false;msg(pgf,errs(er),0)})}
+   pgb.children[0].onclick=function(){pgRun(false)};pgb.children[1].onclick=function(){pgRun(true)};
+  }
   c2.onclick=function(){var K=["id","perf","content","diff","cog","know"];download("題目屬性表.csv",["id"].concat(AH).join(",")+"\n"+rows.filter(function(x){return x.perf||x.content||x.diff||x.cog||x.know}).map(function(x){return K.map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 
