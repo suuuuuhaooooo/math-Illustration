@@ -7,13 +7,18 @@ var TABS=[["home","首頁"],["daily","每日一題"],["quiz","單元小測驗"],
 function pad(n){return("0"+n).slice(-2)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function sheet(tag,sub){return h('<section class="sheet"><h2><span class="tag">'+tag+'</span>'+(sub||"")+'</h2></section>')}
-function title(id){var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
+/* 付費畫面的目錄一律走這三個，不要直接讀 NB.cat／NB.flat——
+   版本（適康／適翰／適南）就是在這一層換掉的，免費那一邊完全不受影響 */
+function eCat(){return window.NB&&NB.ed?NB.ed.cat():NB.cat}
+function eFlat(){return window.NB&&NB.ed?NB.ed.flat():NB.flat}
+function eSort(a){return window.NB&&NB.ed?NB.ed.sortIds(a):NB.sortIds(a)}
+function title(id){if(window.NB&&NB.ed)return NB.ed.title(id);var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
 /* 科目差異：數學依「年級＋上下學期」（單元代號 5u-3.2：第 1 碼年級、第 2 碼學期）；理化依「冊」（v3-4.2：第 2 碼是冊別，一冊就是一學期） */
 var SCI=M.subj==="sci",GL=SCI?[3,4,5,6]:[1,2,3,4,5,6],VOL=["","","","第三冊","第四冊","第五冊","第六冊"],CNZ="零一二三四五六七八九十";
 function gOf(id){return String(id).charAt(SCI?1:0)}
 function gLab(g){return SCI?VOL[g]:"一二三四五六"[g-1]+"年級"}
 function gShort(g){return SCI?VOL[g]:"一二三四五六"[g-1]}
-function chNo(c){return c.no==="跨科"||c.cross?"跨科":"第"+(SCI?CNZ[c.no]:"一二三四五六七八九十"[c.no-1])+"章"}
+function chNo(c){if(c.no==="跨科"||c.cross)return"跨科";var z=SCI?CNZ[c.no]:"一二三四五六七八九十"[c.no-1];return"第"+(z||c.no)+"章"}
 function gClamp(g){g=+g||GL[GL.length-1];return Math.min(GL[GL.length-1],Math.max(GL[0],g))}
 var TC=["#b87333","#9aa5b1","#d9a93c","#5fb6c9","#8e6bd6"],TN=["銅","銀","金","白金","鑽石"];
 function stkSvg(s,i,on){var t=(s.t||1)-1,c=TC[t],pips="",k;for(k=0;k<=t;k++)pips+='<circle cx="'+(32-t*4+k*8)+'" cy="58" r="2" fill="'+(on?c:"var(--soft)")+'"/>';
@@ -30,7 +35,8 @@ function labOf(o,v){if(o&&o.length===2&&o[0]==="對"&&o[1]==="錯")return v==="�
 /* 單元多選器：不選＝由系統依年級自動配；可依年級展開勾選 */
 function picker(ids,mine){
  var el=h('<details class="upick"><summary>自選單元（<b class="cnt">0</b> 個）</summary><div class="ctl"><button class="pen" data-a="all">全選</button><button class="pen" data-a="none">全不選</button><button class="pen" data-a="mine">只選我的年級</button></div><div class="ug"></div></details>'),g=el.querySelector(".ug"),boxes=[];
- var by={};NB.sortIds(ids).forEach(function(id){var o=NB.flat.filter(function(x){return x.id===id})[0];if(!o)return;(by[gOf(id)]=by[gOf(id)]||[]).push(o)});
+ var by={},FX={};eFlat().forEach(function(o){FX[o.id]=o});/* 查表，不要每個 id 都掃一遍目錄 */
+ eSort(ids).forEach(function(id){var o=FX[id];if(!o)return;(by[gOf(id)]=by[gOf(id)]||[]).push(o)});
  if(!Object.keys(by).length)g.appendChild(h('<p class="meta">'+(SCI?"國中理化":"這一科")+"的題庫還在準備中，題目上線後這裡就會出現可以選的單元。</p>"));
  Object.keys(by).sort().forEach(function(gr){var d=h('<div class="ugr"><b>'+gLab(+gr)+"</b></div>");by[gr].forEach(function(o){var l=h('<label class="uck"><input type="checkbox"> <span></span></label>');l.querySelector("input").value=o.id;l.querySelector("span").textContent=o.sem+" "+o.num+" "+o.title;boxes.push(l.querySelector("input"));d.appendChild(l)});g.appendChild(d)});
  function cnt(){el.querySelector(".cnt").textContent=boxes.filter(function(b){return b.checked&&!b.parentNode.hidden}).length}
@@ -50,6 +56,10 @@ function shell(){
  if(M.catErr)app.appendChild(h('<div class="fb no">讀不到見微理畫（國中理化網站）的單元目錄，單元名稱暫時無法顯示，請稍後再重新整理。</div>'));
  /* 兩科都開通：可以切換（同一個帳號、各科資料分開） */
  if((u.subjects||[]).length>1){var sw=h('<div class="ctl subj-sw noprint"><span class="meta">科目：</span></div>');u.subjects.forEach(function(k){if(!M.SUBJ[k])return;var a=h('<a class="pen'+(k===M.subj?" go":"")+'"></a>');a.textContent=M.SUBJ[k];a.href=location.pathname+(k==="math"?"":"?s="+k);sw.appendChild(a)});app.appendChild(sw)}
+ /* 課本版本：掛了兩個以上才需要切換器；都沒掛就提示一句（不自動幫人挑一本課本） */
+ if(window.NB&&NB.ed&&M.subj==="math"){var ep=NB.ed.picker(function(){location.reload()});if(ep)app.appendChild(ep);
+  else if(NB.ed.on())app.appendChild(h('<p class="meta noprint">課本版本：'+esc(NB.ed.label())+"</p>"));
+  else{var en=NB.ed.note();if(en)app.appendChild(h('<p class="meta noprint">'+esc(en)+"</p>"))}}
  who=h('<div class="who"><b></b><span></span><button class="pen">登出</button></div>');
  who.querySelector("b").textContent=u.role==="teacher"?"老師　"+u.name:u.cls+" 班　"+u.no+" 號　"+u.name;
  who.querySelector("button").onclick=function(){M.logout().then(function(){location.hash="#login";route()})};app.appendChild(who);updWho();
@@ -194,7 +204,7 @@ V.quiz=function(id){
  if(id)return startQuiz(id);
  var u=user();if(qg===null)qg=gClamp(u.grade);
  var tabs=h('<div class="tabs"></div>');GL.forEach(function(g){var b=h('<button class="pen'+(qg===g?" on":"")+'">'+gLab(g)+"</button>");b.onclick=function(){qg=g;view.innerHTML="";V.quiz()};tabs.appendChild(b)});view.appendChild(tabs);
- NB.cat.filter(function(S){return S.grade===qg}).forEach(function(S,k){
+ eCat().filter(function(S){return S.grade===qg}).forEach(function(S,k){
   var d=h('<details class="sheet"><summary><span class="tag">'+S.sem+"</span></summary></details>");
   S.chs.forEach(function(c){d.appendChild(h('<div class="chap"><span class="no">'+chNo(c)+'</span><b>'+esc(c.name)+'</b><span class="dots"></span></div>'));var ul=h('<div class="secs"></div>');
    c.secs.forEach(function(o){ul.appendChild(h('<a class="'+(M.has(o.id)?"lnk":"todo")+'" href="#quiz/'+o.id+'">'+o.num+" "+esc(o.title)+"</a>"))});d.appendChild(ul)});
@@ -242,7 +252,7 @@ V.wrong=function(){
  if(!D.wr.length){s.appendChild(h("<p>目前沒有錯題，真棒！</p>"));return}
  var due=D.wr.filter(function(w){return!w.due||w.due<=ymdT()}).length;s.appendChild(h("<p>每一題要在 "+M.cfg.review.join("、")+" 天後各答對一次才會畢業（間隔複習，記得最牢），還能拿積分。今天該複習 <b>"+due+"</b> 題。</p>"));
  var b=h('<div class="ctl"><button class="pen go">開始訂正（最多 10 題）</button></div>');b.firstChild.onclick=function(){fix()};if(!due)b.firstChild.textContent="今天沒有要複習的題目";s.appendChild(b);
- var units=[],seen={};D.wr.forEach(function(w){if(!seen[w.id]){seen[w.id]=1;units.push(w.id)}});units=NB.sortIds(units);
+ var units=[],seen={};D.wr.forEach(function(w){if(!seen[w.id]){seen[w.id]=1;units.push(w.id)}});units=eSort(units);
  var F=fbar([{k:"g",l:SCI?"冊別":"年級",o:GRADE_OPT},{k:"m",l:"學期",o:SEM_OPT,hide:SCI},{k:"u",l:"單元",o:[["","全部單元"]]},{k:"st",l:"狀態",o:[["","全部"],["due","今天可複習"],["wait","還沒到複習日"],["hard","錯 2 次以上"]]}],draw);
  s.appendChild(F.el);var cnt=h('<p class="meta"></p>');s.appendChild(cnt);
  var sbx=h('<div class="sbox"></div>');s.appendChild(sbx);
@@ -265,7 +275,7 @@ V.progress=function(){
  var days=[],i,mx=5;for(i=6;i>=0;i--){var dt=new Date(Date.now()-i*864e5),k=M.today(dt),x=D.day[k]||{n:0,c:0};days.push({l:(dt.getMonth()+1)+"/"+dt.getDate(),n:x.n,c:x.c});mx=Math.max(mx,x.n)}
  s.appendChild(h('<p class="meta">最近 7 天（淺色＝答題數，綠色＝答對數）</p>'));var st=h('<div class="stage"></div>');s.appendChild(st);var sv=NB.svg(st,420,150);
  days.forEach(function(d,j){var X=30+j*56,H=d.n/mx*100,C=d.c/mx*100;NB.mk("rect",{x:X,y:120-H,width:34,height:H,fill:"var(--p2)",opacity:.28},sv,1.6);NB.mk("rect",{x:X,y:120-C,width:34,height:C,fill:"var(--p3)"},sv,1.6);NB.t(sv,X+17,142,d.l,{z:12,c:"var(--soft)"})});
- s.appendChild(h('<p class="meta">各單元答對率</p>'));var ks=NB.sortIds(Object.keys(D.u).filter(function(k){return D.u[k].n}));
+ s.appendChild(h('<p class="meta">各單元答對率</p>'));var ks=eSort(Object.keys(D.u).filter(function(k){return D.u[k].n}));
  if(!ks.length)s.appendChild(h("<p>還沒有作答紀錄，去做一份小測驗吧。</p>"));
  var ubx=h('<div class="sbox"></div>'),PF=null;
  if(ks.length){PF=fbar([{k:"g",l:SCI?"冊別":"年級",o:GRADE_OPT},{k:"m",l:"學期",o:SEM_OPT,hide:SCI},{k:"o",l:"排序",o:[["id","單元順序"],["low","答對率由低到高"],["many","答題數由多到少"]]},{k:"w",l:"顯示",o:[["","全部"],["weak","待加強（低於 70%）"],["good","很穩（90% 以上）"]]}],drawU);s.appendChild(PF.el);s.appendChild(ubx)}
@@ -318,7 +328,7 @@ function printStudent(){
  var u=user(),D=M.D,PP=NB.pp,s=sheet("列印練習卷","選好範圍與題數，按「出題」，就能印出題目卷和答案卷");s.classList.add("noprint");
  var src='<select id="ps"><option value="mix">'+(SCI?"本冊綜合":"本年級綜合")+'</option>'+(D.wr.length?'<option value="wrong">我的錯題（'+D.wr.length+" 題）</option>":"")+'<option value="pick">自選單元（下方勾選）</option></select>';
  var ctl=h('<div class="ctl"><label>題目來源</label>'+src+'<label>題數</label><select id="pn"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>30</option><option>40</option></select><button class="pen go" id="go">出題</button></div>');
- var pk=picker(NB.sortIds(M.gens||[]),u.grade),out=h("<div></div>"),note=h('<p class="meta noprint"></p>'),last=null,panel=PP.panel(u,function(){});
+ var pk=picker(eSort(M.gens||[]),u.grade),out=h("<div></div>"),note=h('<p class="meta noprint"></p>'),last=null,panel=PP.panel(u,function(){});
  var acts=h('<div class="ctl pact noprint" hidden><button class="pen go" data-k="q-0">列印題目卷</button><button class="pen" data-k="ak-0">列印答案卷（簡答與詳解）</button></div>');
  s.appendChild(ctl);s.appendChild(pk.el);s.appendChild(acts);s.appendChild(note);view.appendChild(s);view.appendChild(out);
  /* 學生的卷面固定：題目卷＋答案卷、一份、有頁碼、浮水印強制 */
@@ -344,7 +354,7 @@ function printStudent(){
 function printWiz(arg){
  var u=user(),PP=NB.pp,s=sheet("列印練習卷","一步一步設定，最後按「進行出卷」");s.classList.add("noprint");
  var W={mode:"quick",scope:"paper"},STEPS=[["出題方式","第 1 步　選擇出題方式"],["範圍","第 2 步　選擇出題範圍"],["審題預覽","第 3 步　審題預覽（還沒有正式出卷，不會留下列印紀錄）"],["版面配置","第 4 步　版面配置"],["進行出卷","第 5 步　確認並進行出卷"]],step=1;
- var pk=picker(NB.sortIds(M.gens||[]),u.grade),out=h("<div></div>"),pv=null,pvSig="",last=null,cm=null,busy=false,showAns=false;
+ var pk=picker(eSort(M.gens||[]),u.grade),out=h("<div></div>"),pv=null,pvSig="",last=null,cm=null,busy=false,showAns=false;
  var panel=PP.panel(u,function(){if(step===4)drawDraft()});
  var ed=NB.plan.editor({role:u.role,admin:!!u.admin,api:function(m,p){return M.api(m,p)},tx:tx,title:title,units:function(){return unitsNow()},online:function(){return W.scope==="online"},avail:function(us,on){return M.api("GET","/api/print/avail?units="+encodeURIComponent(us.join(","))+(on?"&scope=online":""))},say:function(m){popup("提醒",m)}},function(){});ed.el.classList.add("noprint");
  var bar=h('<ol class="pstepbar noprint"></ol>'),hd=h('<h3 class="pst noprint"></h3>'),nav=h('<div class="ctl pnav noprint"><button class="pen" type="button">上一步</button><button class="pen go" type="button">下一步</button></div>');
@@ -448,7 +458,7 @@ function printWiz(arg){
  function blocksNow(){return NB.score.blocks(pv.qs,true)}
  function setBlocks(bs){pv.qs=bs.reduce(function(a,b){return a.concat(b.qs)},[])}
  function bLv(b){return Math.max.apply(null,b.qs.map(function(q){return q.lv||2}))}
- var ORD={};NB.flat.forEach(function(o,i){ORD[o.id]=i});
+ var ORD={};eFlat().forEach(function(o,i){ORD[o.id]=i});
  function sortBy(how){var bs=blocksNow(),r=Math.random;
   var key=function(b,i){return how==="easy"?[bLv(b),i]:how==="hard"?[-bLv(b),i]:how==="unit"?[b.qs[0].unit in ORD?ORD[b.qs[0].unit]:1e6,i]:[r(),i]};
   var ks=bs.map(function(b,i){return{b:b,k:key(b,i),s:pv.secs?b.s:0}});

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="282" height="282" viewBox="0 0 282 282">
+<rect x="0" y="0" width="282" height="282" fill="#ffffff"/>
+<path d="M256.0,141.0 A115.0,115.0 0 0 0 26.0,141.0 A115.0,115.0 0 0 0 256.0,141.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path d="M60.5,221.5 L221.5,221.5 L221.5,60.5 L60.5,60.5 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<circle cx="141.0" cy="141.0" r="3" fill="#000000"/>
+<path d="M26.0,141.0 L256.0,141.0" fill="none" stroke="#000000" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="141.0" y="134.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">20 cm</text>
+<text x="141.0" y="78.8" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">14 cm</text>
+<path d="M69.5,221.5 L69.5,212.5 L60.5,212.5" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M212.5,221.5 L212.5,212.5 L221.5,212.5" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M212.5,60.5 L212.5,69.5 L221.5,69.5" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M69.5,60.5 L69.5,69.5 L60.5,69.5" fill="none" stroke="#000000" stroke-width="1.2"/>
+</svg>

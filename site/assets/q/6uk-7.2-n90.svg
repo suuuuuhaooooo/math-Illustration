@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="328" height="306" viewBox="0 0 328 306">
+<rect x="0" y="0" width="328" height="306" fill="#ffffff"/>
+<path d="M302.0,164.0 A138.0,138.0 0 0 0 26.0,164.0 L302.0,164.0 Z" fill="#cfe8f7" stroke="#000000" stroke-width="1.6"/>
+<path d="M118.0,164.0 A92.0,92.0 0 0 0 302.0,164.0 L118.0,164.0 Z" fill="#cfe8f7" stroke="#000000" stroke-width="1.6"/>
+<path d="M118.0,164.0 A46.0,46.0 0 0 0 210.0,164.0 L118.0,164.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M302.0,164.0 A46.0,46.0 0 0 0 210.0,164.0 L302.0,164.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M26.0,164.0 L302.0,164.0" fill="none" stroke="#000000" stroke-width="1.6"/>
+<text x="95.0" y="156.9" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">大半圓直徑 48</text>
+<text x="210.0" y="246.9" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">下半圓直徑 32</text>
+<text x="164.0" y="181.9" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">16</text>
+<text x="256.0" y="156.9" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">16</text>
+<text x="164.0" y="294.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（單位：公分）</text>
+</svg>

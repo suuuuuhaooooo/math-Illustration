@@ -192,6 +192,9 @@
       var line = [];
       if (P.showExam) line.push('<b class="pexam">' + esc((P.exam || "練習卷") + (nm ? "（" + nm + "）" : "")) + (label ? "｜" + label : "") + (tag || "") + "</b>"); else if (label) line.push('<b class="pexam">' + label + (tag || "") + "</b>");
       if (P.showSubject && P.subject) line.push("<span>科目：" + esc(P.subject) + "</span>");
+      /* 課本版本寫在卷頭：老師用翰林、學生用康軒的時候，拿到卷子就知道單元編號是照哪一本課本排的。
+         沒設定版本（通用目錄）就不印這一欄，免費那邊也完全看不到。 */
+      if (window.NB && NB.ed && NB.ed.on()) line.push("<span>課本版本：" + esc(NB.ed.label()) + "</span>");
       if (P.showClass && (P.grade || P.cls)) line.push("<span>班級：" + esc(P.grade) + " 年 " + esc(P.cls) + " 班</span>");
       h += '<div class="ptitle">' + line.join("") + "</div>";
       var u = D.u, f = P.prefill;

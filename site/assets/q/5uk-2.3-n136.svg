@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="372" height="142" viewBox="0 0 372 142">
+<rect x="0" y="0" width="372" height="142" fill="#ffffff"/>
+<text x="34.0" y="24.0" font-family="sans-serif" font-size="16" text-anchor="start" font-weight="normal" fill="#000000">(1)</text>
+<rect x="30" y="36" width="36" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="2"/>
+<text x="48.0" y="94.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">邊長 4 公分</text>
+<text x="130.0" y="24.0" font-family="sans-serif" font-size="16" text-anchor="start" font-weight="normal" fill="#000000">(2)</text>
+<rect x="126" y="36" width="54" height="54" fill="#e6e6e6" stroke="#000000" stroke-width="2"/>
+<text x="153.0" y="112.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">邊長 6 公分</text>
+<text x="244.0" y="24.0" font-family="sans-serif" font-size="16" text-anchor="start" font-weight="normal" fill="#000000">(3)</text>
+<rect x="240" y="36" width="72" height="72" fill="#e6e6e6" stroke="#000000" stroke-width="2"/>
+<text x="276.0" y="130.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">邊長 8 公分</text>
+</svg>

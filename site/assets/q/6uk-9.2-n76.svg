@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="343" height="169" viewBox="0 0 343 169">
+<rect x="0" y="0" width="343" height="169" fill="#ffffff"/>
+<path transform="translate(11.0,0)" d="M26.0,142.7 L306.0,142.7 L26.0,26.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path transform="translate(11.0,0)" d="M35.0,142.7 L35.0,133.7 L26.0,133.7" fill="none" stroke="#000000" stroke-width="1.2"/>
+<text transform="translate(11.0,0)" x="22.0" y="153.9" font-family="sans-serif" font-size="15" text-anchor="end" fill="#000000">B</text>
+<text transform="translate(11.0,0)" x="310.0" y="147.9" font-family="sans-serif" font-size="15" text-anchor="start" fill="#000000">C</text>
+<text transform="translate(11.0,0)" x="22.0" y="31.2" font-family="sans-serif" font-size="15" text-anchor="end" fill="#000000">A</text>
+<text transform="translate(11.0,0)" x="166.0" y="160.9" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">12cm</text>
+<text transform="translate(11.0,0)" x="20.0" y="89.6" font-family="sans-serif" font-size="15" text-anchor="end" fill="#000000">5cm</text>
+<text transform="translate(11.0,0)" x="176.0" y="81.6" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">13cm</text>
+</svg>

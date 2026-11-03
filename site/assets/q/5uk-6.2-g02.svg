@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="470" height="210" viewBox="0 0 470 210">
+<rect x="0" y="0" width="470" height="210" fill="#ffffff"/>
+<line x1="30.0" y1="160.0" x2="440.0" y2="160.0" stroke="#000000" stroke-width="2"/>
+<circle cx="30.0" cy="160" r="4" fill="#000000"/><text x="30.0" y="186.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">小敏家</text>
+<circle cx="132.5" cy="160" r="4" fill="#000000"/><text x="132.5" y="186.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">文具店</text>
+<circle cx="235.0" cy="160" r="4" fill="#000000"/><text x="235.0" y="186.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">餐廳</text>
+<circle cx="337.5" cy="160" r="4" fill="#000000"/><text x="337.5" y="186.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">公車站</text>
+<circle cx="440.0" cy="160" r="4" fill="#000000"/><text x="440.0" y="186.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">游泳池</text>
+<path d="M30.0,154 Q81.2,122.0 132.5,154" fill="none" stroke="#555" stroke-width="1.3"/><rect x="56.5" y="94.0" width="49.4" height="34" fill="#ffffff"/><text x="65.8" y="109.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<text x="65.8" y="127.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">6</text>
+<line x1="59.5" y1="113.0" x2="72.0" y2="113.0" stroke="#000000" stroke-width="1.4"/>
+<text x="75.0" y="117.2" font-family="sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#000000">公里</text>
+<path d="M30.0,154 Q132.5,84.0 235.0,154" fill="none" stroke="#555" stroke-width="1.3"/><rect x="103.6" y="56.0" width="57.8" height="34" fill="#ffffff"/><text x="117.0" y="71.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">36</text>
+<text x="117.0" y="89.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">10</text>
+<line x1="106.6" y1="75.0" x2="127.4" y2="75.0" stroke="#000000" stroke-width="1.4"/>
+<text x="130.4" y="79.2" font-family="sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#000000">公里</text>
+<path d="M235.0,154 Q337.5,84.0 440.0,154" fill="none" stroke="#555" stroke-width="1.3"/><rect x="308.6" y="56.0" width="57.8" height="34" fill="#ffffff"/><text x="322.0" y="71.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">14</text>
+<text x="322.0" y="89.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">5</text>
+<line x1="311.6" y1="75.0" x2="332.4" y2="75.0" stroke="#000000" stroke-width="1.4"/>
+<text x="335.4" y="79.2" font-family="sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#000000">公里</text>
+<path d="M337.5,154 Q388.8,122.0 440.0,154" fill="none" stroke="#555" stroke-width="1.3"/><rect x="364.1" y="94.0" width="49.4" height="34" fill="#ffffff"/><text x="373.2" y="109.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">5</text>
+<text x="373.2" y="127.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">3</text>
+<line x1="367.1" y1="113.0" x2="379.4" y2="113.0" stroke="#000000" stroke-width="1.4"/>
+<text x="382.4" y="117.2" font-family="sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#000000">公里</text>
+</svg>

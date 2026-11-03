@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="466" height="168" viewBox="0 0 466 168">
+<rect x="0" y="0" width="466" height="168" fill="#ffffff"/>
+<g transform="translate(10,28) scale(0.795)"><path d="M66.0,26.0 A40.0,40.0 0 0 0 66.0,106.0 L66.0,26.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path d="M66.0,106.0 L146.0,106.0 A80.0,80.0 0 0 0 66.0,26.0 L66.0,106.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path d="M66.0,106.0 L66.0,26.0" fill="none" stroke="#000000" stroke-width="1.6" stroke-dasharray="5 4"/>
+<path d="M75.0,106.0 L75.0,97.0 L66.0,97.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<text x="72.0" y="71.2" font-family="sans-serif" font-size="15" text-anchor="start" fill="#000000">10cm</text>
+<text x="106.0" y="125.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">10cm</text>
+</g>
+<text x="14" y="20" font-family="sans-serif" font-size="16" fill="#000000">甲</text>
+<g transform="translate(156,28) scale(0.795)"><path d="M146.0,86.0 A60.0,60.0 0 0 0 26.0,86.0 L146.0,86.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<circle cx="86.0" cy="86.0" r="3" fill="#000000"/>
+<text x="116.0" y="103.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">10cm</text>
+</g>
+<text x="160" y="20" font-family="sans-serif" font-size="16" fill="#000000">(1)</text>
+<g transform="translate(302,28) scale(0.795)"><path transform="translate(20.0,0)" d="M26.0,146.0 L146.0,146.0 A120.0,120.0 0 0 0 26.0,26.0 L26.0,146.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path transform="translate(20.0,0)" d="M26.0,146.0 A60.0,60.0 0 0 0 26.0,26.0 L26.0,146.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path transform="translate(20.0,0)" d="M26.0,146.0 L26.0,26.0" fill="none" stroke="#000000" stroke-width="1.6" stroke-dasharray="5 4"/>
+<circle transform="translate(20.0,0)" cx="26.0" cy="146.0" r="3" fill="#000000"/>
+<path transform="translate(20.0,0)" d="M35.0,146.0 L35.0,137.0 L26.0,137.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<text transform="translate(20.0,0)" x="86.0" y="165.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">10cm</text>
+<text transform="translate(20.0,0)" x="20.0" y="91.2" font-family="sans-serif" font-size="15" text-anchor="end" fill="#000000">10cm</text>
+</g>
+<text x="306" y="20" font-family="sans-serif" font-size="16" fill="#000000">(2)</text>
+</svg>

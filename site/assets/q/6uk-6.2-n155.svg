@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="419" height="272" viewBox="0 0 419 272">
+<rect x="0" y="0" width="419" height="272" fill="#ffffff"/>
+<path d="M62.7,136.0 A18.3,18.3 0 0 0 26.0,136.0 A18.3,18.3 0 0 0 62.7,136.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<circle cx="44.3" cy="136.0" r="3" fill="#000000"/>
+<text x="44.3" y="176.3" font-family="sans-serif" font-size="17" text-anchor="middle" fill="#000000">甲</text>
+<path d="M172.7,136.0 A55.0,55.0 0 0 0 62.7,136.0 A55.0,55.0 0 0 0 172.7,136.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<circle cx="117.7" cy="136.0" r="3" fill="#000000"/>
+<text x="117.7" y="212.9" font-family="sans-serif" font-size="17" text-anchor="middle" fill="#000000">乙</text>
+<path d="M392.7,136.0 A110.0,110.0 0 0 0 172.7,136.0 A110.0,110.0 0 0 0 392.7,136.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<circle cx="282.7" cy="136.0" r="3" fill="#000000"/>
+<text x="282.7" y="267.9" font-family="sans-serif" font-size="17" text-anchor="middle" fill="#000000">丙</text>
+</svg>

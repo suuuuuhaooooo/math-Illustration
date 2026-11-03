@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="308" height="126" viewBox="0 0 308 126">
+<rect x="0" y="0" width="308" height="126" fill="#ffffff"/>
+<circle cx="58.0" cy="54.0" r="38.4" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+<path d="M58.0,54.0 L24.7,34.8 A38.400000000000006,38.400000000000006 0 0 1 64.7,16.2 Z" fill="#c8c8c8" stroke="#000000" stroke-width="1.5"/>
+<circle cx="58.0" cy="54.0" r="2.5" fill="#000000"/>
+<text x="58.0" y="110.4" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">(1)</text>
+<circle cx="154.0" cy="54.0" r="38.4" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+<path d="M183.4,78.7 A38.400000000000006,38.400000000000006 0 0 1 124.6,78.7 Z" fill="#c8c8c8" stroke="#000000" stroke-width="1.5"/>
+<circle cx="154.0" cy="54.0" r="2.5" fill="#000000"/>
+<text x="154.0" y="110.4" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">(2)</text>
+<circle cx="250.0" cy="54.0" r="38.4" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+<path d="M250.0,54.0 L269.2,20.7 L283.3,73.2 Z" fill="#c8c8c8" stroke="#000000" stroke-width="1.5"/>
+<circle cx="250.0" cy="54.0" r="2.5" fill="#000000"/>
+<text x="250.0" y="110.4" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">(3)</text>
+</svg>

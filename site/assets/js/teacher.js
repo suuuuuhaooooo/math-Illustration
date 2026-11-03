@@ -5,11 +5,15 @@ var M=NB.member,app=document.getElementById("app"),h=NB.h,TAB="overview",CLS=nul
 var READY=false;TAB=decodeURIComponent(location.hash.slice(1))||TAB; /* 頁籤記在網址的 # 後面，例如 teacher.html#assign，上一頁與分享網址都能用 */
 var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["assign","派卷"],["draw","製圖"],["bank","題庫"],["settings","設定"],["data","資料管理"],["prints","列印紀錄"],["mocks","模擬考紀錄"],["reports","問題回報"],["books","卷類專區"]],TABS=TABS_ALL;/* 老師看不到題庫／設定／資料管理，這三項只有管理員能改 */
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function title(id){var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
+/* 單元名稱依老師自己的課本版本顯示（適康／適翰／適南），沒設定版本就是依課綱編的通用目錄。
+   小節代號沒有改，所以分析、錯題本的資料完全不用動，只是章節編號跟著課本走。 */
+function title(id){if(window.NB&&NB.ed)return NB.ed.title(id);var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
 function pct(c,n){return n?Math.round(c/n*100):null}
 function shell(notabs){app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="member.html'+(M.subj!=="math"?"?s="+M.subj:"")+'">← 回到學員專區</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));app.appendChild(h('<h1 class="title"><mark>老師後台</mark>'+(M.U?'<small class="subj-now">'+(M.SUBJ[M.subj]||M.subj)+"</small>":"")+'</h1>'));
  /* 科目切換：帳號開通兩科（老師、管理員預設都有）才顯示；切換後整頁重新載入，名單、題庫、派卷、紀錄都只看那一科 */
  var ss=M.U&&M.U.subjects||[];if(ss.length>1){var sw=h('<div class="ctl subj-sw noprint"><span class="meta">目前科目：</span></div>');ss.forEach(function(k){if(!M.SUBJ[k])return;var b=h('<button class="pen'+(k===M.subj?" go":"")+'"></button>');b.textContent=M.SUBJ[k];b.onclick=function(){if(k===M.subj)return;M.setSubj(k);location.reload()};sw.appendChild(b)});app.appendChild(sw)}
+ if(window.NB&&NB.ed&&M.subj==="math"){var ep=NB.ed.picker(function(){location.reload()});if(ep)app.appendChild(ep);
+  else if(NB.ed.on())app.appendChild(h('<p class="meta noprint">課本版本：'+esc(NB.ed.label())+"</p>"))}
  var tabs=h('<div class="tabs"></div>');TABS.forEach(function(t){var b=h('<button class="pen'+(t[0]===TAB?" go":"")+'">'+t[1]+"</button>");b.onclick=function(){tab(t[0])};tabs.appendChild(b)});if(!notabs)app.appendChild(tabs);
  if(M.catErr)app.appendChild(h('<div class="fb no">讀不到見微理畫（國中理化網站）的單元目錄，所以這裡看不到理化的冊、章、節。請確認 science-Illustration 已經推上 GitHub 並完成部署，再重新整理。</div>'))}
 function sheet(tag,sub){var s=h('<section class="sheet"><h2><span class="tag">'+tag+'</span>'+(sub||"")+'</h2></section>');app.appendChild(s);return s}

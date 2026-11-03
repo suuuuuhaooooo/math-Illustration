@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="156" viewBox="0 0 300 156">
+<rect x="0" y="0" width="300" height="156" fill="#ffffff"/>
+<rect x="6" y="6" width="288" height="140" fill="#ffffff" stroke="#555555" stroke-width="2"/>
+<text x="150.0" y="39.0" font-family="sans-serif" font-size="20" text-anchor="middle" font-weight="bold" fill="#000000">奶茶隨身包　成分</text>
+<line x1="18" y1="54" x2="282" y2="54" stroke="#777777" stroke-dasharray="6 4"/>
+<text x="22.0" y="75.0" font-family="sans-serif" font-size="17" text-anchor="start" font-weight="normal" fill="#000000">紅茶粉　6 公克</text>
+<text x="22.0" y="105.0" font-family="sans-serif" font-size="17" text-anchor="start" font-weight="normal" fill="#000000">奶　精　8 公克</text>
+<text x="22.0" y="135.0" font-family="sans-serif" font-size="17" text-anchor="start" font-weight="normal" fill="#000000">砂　糖　5 公克</text>
+</svg>

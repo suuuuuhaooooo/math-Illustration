@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="332" height="216" viewBox="0 0 332 216">
+<rect x="0" y="0" width="332" height="216" fill="#ffffff"/>
+<path d="M26.0,166.0 L306.0,166.0 L306.0,26.0 L26.0,26.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6" stroke-dasharray="5 4"/>
+<path d="M26.0,166.0 L166.0,166.0 A140.0,140.0 0 0 0 26.0,26.0 L26.0,166.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path d="M306.0,166.0 L306.0,26.0 A140.0,140.0 0 0 0 166.0,166.0 L306.0,166.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<circle cx="26.0" cy="166.0" r="3" fill="#000000"/>
+<circle cx="306.0" cy="166.0" r="3" fill="#000000"/>
+<text x="166.0" y="15.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">16</text>
+<text x="314.0" y="101.6" font-family="sans-serif" font-size="16" text-anchor="start" fill="#000000">8</text>
+<path d="M35.0,166.0 L35.0,157.0 L26.0,157.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M297.0,166.0 L297.0,157.0 L306.0,157.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M297.0,26.0 L297.0,35.0 L306.0,35.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M35.0,26.0 L35.0,35.0 L26.0,35.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<text x="166.0" y="204.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（單位：公分）</text>
+</svg>

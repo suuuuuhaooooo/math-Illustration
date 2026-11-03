@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="240" viewBox="0 0 380 240">
+<rect x="0" y="0" width="380" height="240" fill="#ffffff"/>
+<polygon points="134.8,196.0 294.6,196.0 245.2,44.0 85.4,44.0" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<path d="M129.2,178.9 A18,18 0 0 1 152.8,196.0" fill="none" stroke="#000000" stroke-width="1.5"/>
+<path d="M276.6,196.0 A18,18 0 0 1 289.0,178.9" fill="none" stroke="#000000" stroke-width="1.5"/>
+<path d="M250.8,61.1 A18,18 0 0 1 227.2,44.0" fill="none" stroke="#000000" stroke-width="1.5"/>
+<text x="155.9" y="172.8" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">108°</text>
+<text x="267.1" y="182.0" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">∠1</text>
+<text x="225.2" y="77.5" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">∠2</text>
+<text x="125.4" y="214.9" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">A</text>
+<text x="307.5" y="211.4" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">B</text>
+<text x="254.6" y="37.1" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">C</text>
+<text x="72.5" y="40.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">D</text>
+</svg>

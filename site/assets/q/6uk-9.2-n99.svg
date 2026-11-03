@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="452" height="168" viewBox="0 0 452 168">
+<rect x="0" y="0" width="452" height="168" fill="#ffffff"/>
+<path d="M33.8,134.3 L114.7,134.3 L69.0,100.9 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path d="M175.4,134.3 L418.2,134.3 L281.0,34.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<text x="26.0" y="142.2" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">B</text>
+<text x="122.5" y="142.0" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">C</text>
+<text x="67.7" y="98.5" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">A</text>
+<text x="167.6" y="142.2" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">E</text>
+<text x="426.0" y="142.0" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">F</text>
+<text x="279.7" y="31.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">D</text>
+<text x="297.8" y="145.9" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">15cm</text>
+<text x="72.5" y="128.8" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">甲</text>
+<text x="291.5" y="106.5" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">乙</text>
+</svg>

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="389" height="146" viewBox="0 0 389 146">
+<rect x="0" y="0" width="389" height="146" fill="#ffffff"/>
+<rect x="1" y="1" width="111.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="56.5" y="24.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000"></text>
+<rect x="112.0" y="1" width="90.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="157.0" y="24.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">上午9時</text>
+<rect x="202.0" y="1" width="87.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="245.5" y="24.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">上午11時</text>
+<rect x="289.0" y="1" width="99.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="338.5" y="24.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">下午1時</text>
+<rect x="1" y="37" width="111.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="56.5" y="60.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">樹高120公分</text>
+<rect x="112.0" y="37" width="90.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="157.0" y="60.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">96 公分</text>
+<rect x="202.0" y="37" width="87.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="245.5" y="60.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">36 公分</text>
+<rect x="289.0" y="37" width="99.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="338.5" y="60.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">15 公分</text>
+<rect x="1" y="73" width="111.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="56.5" y="96.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">樹高180公分</text>
+<rect x="112.0" y="73" width="90.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="157.0" y="96.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">144 公分</text>
+<rect x="202.0" y="73" width="87.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="245.5" y="96.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">54 公分</text>
+<rect x="289.0" y="73" width="99.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="338.5" y="96.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">22.5 公分</text>
+<rect x="1" y="109" width="111.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="56.5" y="132.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">樹高240公分</text>
+<rect x="112.0" y="109" width="90.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="157.0" y="132.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">192 公分</text>
+<rect x="202.0" y="109" width="87.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="245.5" y="132.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">72 公分</text>
+<rect x="289.0" y="109" width="99.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="338.5" y="132.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">30 公分</text>
+</svg>

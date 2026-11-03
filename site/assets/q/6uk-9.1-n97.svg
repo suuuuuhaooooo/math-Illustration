@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="453" height="222" viewBox="0 0 453 222">
+<rect x="0" y="0" width="453" height="222" fill="#ffffff"/>
+<path d="M26.0,171.5 L26.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M62.4,171.5 L62.4,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M98.7,171.5 L98.7,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M135.1,171.5 L135.1,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M171.5,171.5 L171.5,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M207.8,171.5 L207.8,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M244.2,171.5 L244.2,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M280.5,171.5 L280.5,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M316.9,171.5 L316.9,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M353.3,171.5 L353.3,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M389.6,171.5 L389.6,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M426.0,171.5 L426.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,171.5 L426.0,171.5" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,135.1 L426.0,135.1" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,98.7 L426.0,98.7" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,62.4 L426.0,62.4" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,26.0 L426.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M62.4,135.1 L207.8,135.1 L135.1,62.4 Z" fill="#cfe8f7" stroke="#000000" stroke-width="1.8"/>
+<text x="135.1" y="116.1" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">甲</text>
+<path d="M280.5,135.1 L353.3,135.1 L316.9,98.7 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.8"/>
+<text x="316.9" y="128.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">乙</text>
+<text x="226.0" y="209.5" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（每一小格的邊長都一樣）</text>
+</svg>

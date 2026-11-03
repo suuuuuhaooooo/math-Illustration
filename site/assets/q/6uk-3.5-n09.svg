@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="270" height="92" viewBox="0 0 270 92">
+<rect x="0" y="0" width="270" height="92" fill="#ffffff"/>
+<rect x="10.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<text x="17.0" y="72.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">圖①</text>
+<rect x="64.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="64.0" y="24.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="78.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="50.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<text x="71.0" y="72.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">圖②</text>
+<rect x="174.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="146.0" y="10.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="146.0" y="24.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="118.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="132.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="146.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<rect x="160.0" y="38.0" width="14" height="14" fill="#d9d9d9" stroke="#000000" stroke-width="1.5"/>
+<text x="153.0" y="72.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">圖③</text>
+<text x="229.0" y="47.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">……</text>
+</svg>

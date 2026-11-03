@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="453" height="186" viewBox="0 0 453 186">
+<rect x="0" y="0" width="453" height="186" fill="#ffffff"/>
+<path d="M26.0,135.1 L26.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M44.2,135.1 L44.2,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M62.4,135.1 L62.4,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M80.5,135.1 L80.5,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M98.7,135.1 L98.7,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M116.9,135.1 L116.9,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M135.1,135.1 L135.1,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M153.3,135.1 L153.3,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M171.5,135.1 L171.5,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M189.6,135.1 L189.6,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M207.8,135.1 L207.8,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M226.0,135.1 L226.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M244.2,135.1 L244.2,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M262.4,135.1 L262.4,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M280.5,135.1 L280.5,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M298.7,135.1 L298.7,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M316.9,135.1 L316.9,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M335.1,135.1 L335.1,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M353.3,135.1 L353.3,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M371.5,135.1 L371.5,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M389.6,135.1 L389.6,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M407.8,135.1 L407.8,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M426.0,135.1 L426.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,135.1 L426.0,135.1" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,116.9 L426.0,116.9" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,98.7 L426.0,98.7" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,80.5 L426.0,80.5" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,62.4 L426.0,62.4" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,44.2 L426.0,44.2" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M26.0,26.0 L426.0,26.0" fill="none" stroke="#000000" stroke-width="0.5"/>
+<path d="M44.2,116.9 L153.3,116.9 L153.3,44.2 L44.2,44.2 Z" fill="#cfe8f7" stroke="#000000" stroke-width="1.8"/>
+<text x="98.7" y="85.8" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">ㄅ</text>
+<path d="M171.5,116.9 L280.5,116.9 L280.5,80.5 L171.5,80.5 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.8"/>
+<text x="226.0" y="104.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">ㄆ</text>
+<path d="M298.7,116.9 L353.3,116.9 L353.3,80.5 L298.7,80.5 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.8"/>
+<text x="326.0" y="104.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">ㄇ</text>
+<path d="M371.5,116.9 L407.8,116.9 L407.8,44.2 L371.5,44.2 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.8"/>
+<text x="389.6" y="85.8" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">ㄈ</text>
+<text x="226.0" y="173.1" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（每一小格的邊長都一樣）</text>
+</svg>

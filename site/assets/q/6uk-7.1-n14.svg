@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="332" height="263" viewBox="0 0 332 263">
+<rect x="0" y="0" width="332" height="263" fill="#ffffff"/>
+<path d="M26.0,212.7 L306.0,212.7 L306.0,26.0 L26.0,26.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path d="M212.7,119.3 A93.3,93.3 0 0 0 26.0,119.3 A93.3,93.3 0 0 0 212.7,119.3 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<circle cx="119.3" cy="119.3" r="3" fill="#000000"/>
+<path d="M35.0,212.7 L35.0,203.7 L26.0,203.7" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M297.0,212.7 L297.0,203.7 L306.0,203.7" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M297.0,26.0 L297.0,35.0 L306.0,35.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M35.0,26.0 L35.0,35.0 L26.0,35.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<text x="166.0" y="234.3" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">12</text>
+<text x="18.0" y="124.9" font-family="sans-serif" font-size="16" text-anchor="end" fill="#000000">8</text>
+<text x="166.0" y="250.7" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（單位：公分）</text>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="182" viewBox="0 0 240 182">
+<rect x="0" y="0" width="240" height="182" fill="#ffffff"/>
+<rect x="1" y="1" width="72.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="37.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">成分</text>
+<rect x="73.0" y="1" width="132.8" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="139.4" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">含量</text>
+<rect x="1" y="37" width="72.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="37.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">蛋白質</text>
+<rect x="73.0" y="37" width="132.8" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="139.4" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">0.078 公克</text>
+<rect x="1" y="73" width="72.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="37.0" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">脂肪</text>
+<rect x="73.0" y="73" width="132.8" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="139.4" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">0.35 公克</text>
+<rect x="1" y="109" width="72.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="37.0" y="132.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">醣類</text>
+<rect x="73.0" y="109" width="132.8" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="139.4" y="132.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">0.566 公克</text>
+<rect x="1" y="145" width="72.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="37.0" y="168.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">鈉</text>
+<rect x="73.0" y="145" width="132.8" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="139.4" y="168.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">0.00427 公克</text>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="316" viewBox="0 0 384 316">
+<rect x="0" y="0" width="384" height="316" fill="#ffffff"/>
+<path transform="translate(2.0,0)" d="M268.0,202.0 L180.0,202.0 A88.0,88.0 0 1 0 268.0,114.0 L268.0,202.0 Z" fill="#cdeee0" stroke="#000000" stroke-width="1.6" stroke-dasharray="6 4"/>
+<path transform="translate(2.0,0)" d="M26.0,202.0 L268.0,202.0 L268.0,26.0 L26.0,26.0 Z" fill="#bdbdbd" stroke="#000000" stroke-width="1.6"/>
+<text transform="translate(2.0,0)" x="147.0" y="119.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">牛舍</text>
+<path transform="translate(2.0,0)" d="M268.0,202.0 L318.5,274.1" fill="none" stroke="#000000" stroke-width="1.6"/>
+<circle transform="translate(2.0,0)" cx="268.0" cy="202.0" r="3" fill="#000000"/>
+<circle transform="translate(2.0,0)" cx="318.5" cy="274.1" r="4" fill="#000000"/>
+<text transform="translate(2.0,0)" x="326.5" y="285.7" font-family="sans-serif" font-size="16" text-anchor="start" fill="#000000">牛</text>
+<text transform="translate(2.0,0)" x="147.0" y="19.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">11m</text>
+<text transform="translate(2.0,0)" x="20.0" y="119.2" font-family="sans-serif" font-size="15" text-anchor="end" fill="#000000">8m</text>
+<text transform="translate(2.0,0)" x="287.2" y="243.3" font-family="sans-serif" font-size="15" text-anchor="end" fill="#000000">4m</text>
+</svg>

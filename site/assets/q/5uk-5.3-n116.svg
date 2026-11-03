@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180">
+<rect x="0" y="0" width="320" height="180" fill="#ffffff"/>
+<path d="M95.0,80.0 L37.0,80.0 A58,58 0 0 1 54.0,39.0 Z" fill="#d0d0d0" stroke="#000000" stroke-width="1.5"/>
+<path d="M95.0,80.0 L54.0,39.0 A58,58 0 0 1 95.0,22.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<path d="M95.0,80.0 L95.0,22.0 A58,58 0 0 1 136.0,39.0 Z" fill="#a8a8a8" stroke="#000000" stroke-width="1.5"/>
+<path d="M95.0,80.0 L136.0,39.0 A58,58 0 0 1 153.0,80.0 Z" fill="#d0d0d0" stroke="#000000" stroke-width="1.5"/>
+<path d="M95.0,80.0 L153.0,80.0 A58,58 0 0 1 136.0,121.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<path d="M95.0,80.0 L136.0,121.0 A58,58 0 0 1 95.0,138.0 Z" fill="#a8a8a8" stroke="#000000" stroke-width="1.5"/>
+<path d="M95.0,80.0 L95.0,138.0 A58,58 0 0 1 54.0,121.0 Z" fill="#d0d0d0" stroke="#000000" stroke-width="1.5"/>
+<path d="M95.0,80.0 L54.0,121.0 A58,58 0 0 1 37.0,80.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="95.0" y="170.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">角 1 拼成周角</text>
+<path d="M245.0,120.0 L187.0,120.0 A58,58 0 0 1 216.0,69.8 Z" fill="#d0d0d0" stroke="#000000" stroke-width="1.5"/>
+<path d="M245.0,120.0 L216.0,69.8 A58,58 0 0 1 274.0,69.8 Z" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<path d="M245.0,120.0 L274.0,69.8 A58,58 0 0 1 303.0,120.0 Z" fill="#a8a8a8" stroke="#000000" stroke-width="1.5"/>
+<text x="245.0" y="170.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">角 2 拼成平角</text>
+</svg>

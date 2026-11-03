@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="274" height="110" viewBox="0 0 274 110">
+<rect x="0" y="0" width="274" height="110" fill="#ffffff"/>
+<rect x="1" y="1" width="104.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="53.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">購買的人</text>
+<rect x="105.0" y="1" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="133.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">小安</text>
+<rect x="161.0" y="1" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="189.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">小美</text>
+<rect x="217.0" y="1" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="245.0" y="24.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">老師</text>
+<rect x="1" y="37" width="104.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="53.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">枝數（枝）</text>
+<rect x="105.0" y="37" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="133.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">6</text>
+<rect x="161.0" y="37" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="189.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">9</text>
+<rect x="217.0" y="37" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="245.0" y="60.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">40</text>
+<rect x="1" y="73" width="104.0" height="36" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="53.0" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">金額（元）</text>
+<rect x="105.0" y="73" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="133.0" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">108</text>
+<rect x="161.0" y="73" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="189.0" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">162</text>
+<rect x="217.0" y="73" width="56.0" height="36" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<text x="245.0" y="96.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">？</text>
+</svg>

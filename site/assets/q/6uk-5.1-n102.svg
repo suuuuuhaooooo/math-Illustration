@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="316" height="144" viewBox="0 0 316 144">
+<rect x="0" y="0" width="316" height="144" fill="#ffffff"/>
+<text x="162.0" y="26.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#000000">鳳梨酥禮盒</text>
+<rect x="16" y="40" width="130" height="90" rx="10" fill="#eeeeee" stroke="#000000" stroke-width="1.5"/>
+<text x="81.0" y="72.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="bold" fill="#000000">A 禮盒</text>
+<text x="81.0" y="98.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">10 個裝</text>
+<text x="81.0" y="120.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">380 元</text>
+<rect x="170" y="40" width="130" height="90" rx="10" fill="#eeeeee" stroke="#000000" stroke-width="1.5"/>
+<text x="235.0" y="72.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="bold" fill="#000000">B 禮盒</text>
+<text x="235.0" y="98.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">16 個裝</text>
+<text x="235.0" y="120.0" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">576 元</text>
+</svg>

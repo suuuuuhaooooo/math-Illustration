@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="312" height="325" viewBox="0 0 312 325">
+<rect x="0" y="0" width="312" height="325" fill="#ffffff"/>
+<path d="M69.3,187.7 A86.7,86.7 0 0 0 242.7,187.7 L69.3,187.7 Z" fill="#cfe8f7" stroke="#000000" stroke-width="1.6"/>
+<path d="M242.7,187.7 A86.7,86.7 0 0 0 156.0,37.6 L242.7,187.7 Z" fill="#cfe8f7" stroke="#000000" stroke-width="1.6"/>
+<path d="M156.0,37.6 A86.7,86.7 0 0 0 69.3,187.7 L156.0,37.6 Z" fill="#cfe8f7" stroke="#000000" stroke-width="1.6"/>
+<path d="M69.3,187.7 L242.7,187.7 L156.0,37.6 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<text x="156.0" y="205.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">16</text>
+<text x="156.0" y="312.4" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（單位：公分）</text>
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="340" viewBox="0 0 360 340">
+<rect x="0" y="0" width="360" height="340" fill="#ffffff"/>
+<rect x="50" y="45" width="260" height="250" fill="none" stroke="#000000" stroke-width="1.6"/><circle cx="50.0" cy="45.0" r="29" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+<text x="50.0" y="42.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">3</text>
+<text x="50.0" y="60.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<line x1="43.8" y1="46.0" x2="56.2" y2="46.0" stroke="#000000" stroke-width="1.4"/>
+<circle cx="180.0" cy="45.0" r="29" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+<text x="180.0" y="52.0" font-family="sans-serif" font-size="20" text-anchor="middle" font-weight="normal" fill="#000000">①</text>
+<circle cx="310.0" cy="45.0" r="29" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+<text x="310.0" y="42.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">5</text>
+<text x="310.0" y="60.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">6</text>
+<line x1="303.8" y1="46.0" x2="316.2" y2="46.0" stroke="#000000" stroke-width="1.4"/>
+<circle cx="310.0" cy="170.0" r="29" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+<text x="310.0" y="177.0" font-family="sans-serif" font-size="20" text-anchor="middle" font-weight="normal" fill="#000000">②</text>
+<circle cx="310.0" cy="295.0" r="29" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+<text x="310.0" y="292.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">1</text>
+<text x="310.0" y="310.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<line x1="303.8" y1="296.0" x2="316.2" y2="296.0" stroke="#000000" stroke-width="1.4"/>
+<circle cx="180.0" cy="295.0" r="29" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+<text x="180.0" y="302.0" font-family="sans-serif" font-size="20" text-anchor="middle" font-weight="normal" fill="#000000">③</text>
+<circle cx="50.0" cy="295.0" r="29" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+<text x="43.8" y="300.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">1</text>
+<text x="55.5" y="292.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">1</text>
+<text x="55.5" y="310.0" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">2</text>
+<line x1="49.3" y1="296.0" x2="61.7" y2="296.0" stroke="#000000" stroke-width="1.4"/>
+<circle cx="50.0" cy="170.0" r="29" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+<text x="50.0" y="177.0" font-family="sans-serif" font-size="20" text-anchor="middle" font-weight="normal" fill="#000000">④</text>
+</svg>

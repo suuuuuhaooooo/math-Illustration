@@ -20,6 +20,12 @@ function inp(v,ph,type){var i=document.createElement("input");i.type=type||"text
 var SJN={math:"數學",sci:"理化"};
 function sjText(x,today){var m=x.sj||{math:x.expires||""};if(x.role==="admin")return"全科";return Object.keys(SJN).filter(function(k){return k in m}).map(function(k){var d=m[k];return SJN[k]+" "+(!M.U.admin?"":d?(d<today?'<b class="flag">已到期 '+d+"</b>":d):"不限期")}).join("<br>")||"—"}
 function sjCsv(x){var m=x.sj||{math:x.expires||""};return Object.keys(SJN).filter(function(k){return k in m}).map(function(k){return k+(m[k]?":"+m[k]:"")}).join(",")}
+/* 課本版本：row.ed = ["kang","han"]（可複選）。版本不是授權，所以沒有到期日；
+   沒設定＝空陣列，那個人看到的就是依課綱編的通用目錄。 */
+var EDN={kang:"適康版",han:"適翰版",nan:"適南版"},EDK=Object.keys(EDN);
+function edName(k,r){return(r&&r.edNames&&r.edNames[k])||EDN[k]||k}
+function edText(x,r){if(x.role==="admin")return"全部";var a=x.ed||[];return a.length?a.map(function(k){return edName(k,r)}).join("、"):'<span class="meta">通用</span>'}
+function edCsv(x){return(x.ed||[]).join(",")}
 function sel(opts,v){var s=document.createElement("select");opts.forEach(function(o){var e=document.createElement("option");e.value=o[0];e.textContent=o[1];if(String(o[0])===String(v))e.selected=true;s.appendChild(e)});return s}
 function area(v,rows){var a=document.createElement("textarea");a.rows=rows||3;a.value=v||"";a.style.width="100%";return a}
 function migrateBanner(ctx,legacy){if(!legacy)return;var b=h('<div class="fb no">偵測到你還在使用舊的「試算表同步」資料，尚未搬進資料庫。搬完後就能在這裡直接新增、修改、刪除。<div class="ctl"><button class="pen go">一鍵搬移舊資料</button></div></div>');
@@ -32,8 +38,8 @@ function roster(ctx){
   ctx.box=s;
   if(!M.U.admin){ /* 老師：只能看自己班的名單；新增、修改、刪除、授權期限、批次匯入都只有管理員能做 */
    s.appendChild(h('<p class="meta">這裡是你班級的名單（唯讀）。新增、修改、刪除學生與授權期限，只有管理員可以操作；需要異動請聯絡管理員。</p>'));
-   var tr='<table class="tb"><tr><th>班</th><th>號</th><th>姓名</th><th>Email</th><th>年級</th><th>科目</th><th>狀態</th></tr>';
-   r.rows.forEach(function(x){tr+='<tr class="'+(x.active==="0"||x.active===0?"low":"")+'"><td>'+esc(x.class)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+esc(x.email)+"</td><td>"+x.grade+"</td><td>"+sjText(x)+"</td><td>"+(x.active==="0"||x.active===0?"停用":"啟用")+"</td></tr>"});
+   var tr='<table class="tb"><tr><th>班</th><th>號</th><th>姓名</th><th>Email</th><th>年級</th><th>科目</th><th>課本版本</th><th>狀態</th></tr>';
+   r.rows.forEach(function(x){tr+='<tr class="'+(x.active==="0"||x.active===0?"low":"")+'"><td>'+esc(x.class)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+esc(x.email)+"</td><td>"+x.grade+"</td><td>"+sjText(x)+"</td><td>"+edText(x,r)+"</td><td>"+(x.active==="0"||x.active===0?"停用":"啟用")+"</td></tr>"});
    s.appendChild(h(tr+"</table>"));
    var eb0=h('<div class="ctl"><button class="pen">匯出名單 CSV</button></div>');eb0.firstChild.onclick=function(){download("名單.csv","email,class,no,name,grade,active\n"+r.rows.map(function(x){return[x.email,x.class,x.no,x.name,x.grade,x.active==="0"?0:1].map(csvEsc).join(",")}).join("\n"))};s.appendChild(eb0);
    return}
@@ -45,15 +51,20 @@ function roster(ctx){
   function setSj(m){Object.keys(SB).forEach(function(k){SB[k].ck.checked=k in m;SB[k].d.value=m[k]||""})}setSj({math:""});
   f.role.onchange=function(){if(f.role.value!=="student")setSj({math:SB.math.d.value,sci:SB.sci.d.value})};
   function sjVal(){return Object.keys(SB).filter(function(k){return SB[k].ck.checked}).map(function(k){return k+(SB[k].d.value?":"+SB[k].d.value:"")}).join(",")}
+  /* 課本版本：可以複選（老師帶不同班用不同課本很常見）。沒有日期——版本不是授權，到期日跟著科目走 */
+  var EB={};form.appendChild(h('<span class="fld"><b>課本版本</b></span>'));
+  EDK.forEach(function(k){var w=h('<span class="fld sjf"><label><input type="checkbox"> '+edName(k,r)+"</label></span>");w.title="付費題庫的目錄會依版本重新分章；不勾＝看依課綱編的通用目錄";EB[k]=w.querySelector("input");form.appendChild(w)});
+  function setEd(a){a=a||[];EDK.forEach(function(k){EB[k].checked=a.indexOf(k)>=0})}
+  function edVal(){return EDK.filter(function(k){return EB[k].checked}).join(",")}
   var save=h('<button class="pen go">儲存這位</button>');form.appendChild(save);s.appendChild(form);
   function send(list,done){M.api("POST","/api/admin/roster",{rows:list}).then(function(x){if(!x.ok)return msg(fb,"<b>有地方要修正，完全沒有儲存：</b><br>"+x.errs.map(esc).join("<br>"),0);msg(fb,"已儲存 "+x.n+" 筆",1);if(done)done()},function(e){msg(fb,errs(e),0)})}
-  save.onclick=function(){var sv=sjVal();if(!sv&&f.role.value!=="admin")return msg(fb,"請至少勾選一個科目",0);send([{email:f.email.value,class:f.cls.value,no:f.no.value,name:f.name.value,role:f.role.value,grade:f.grade.value,active:f.act.value,subjects:f.role.value==="admin"?"":sv,expires:SB.math.ck.checked?SB.math.d.value:""}],ctx.go)};
+  save.onclick=function(){var sv=sjVal();if(!sv&&f.role.value!=="admin")return msg(fb,"請至少勾選一個科目",0);send([{email:f.email.value,class:f.cls.value,no:f.no.value,name:f.name.value,role:f.role.value,grade:f.grade.value,active:f.act.value,subjects:f.role.value==="admin"?"":sv,editions:edVal(),expires:SB.math.ck.checked?SB.math.d.value:""}],ctx.go)};
   s.appendChild(fb);
-  var t='<table class="tb"><tr><th>班</th><th>號</th><th>姓名</th><th>Email</th><th>身分</th><th>年級</th><th>狀態</th><th>科目・授權到期</th><th></th></tr>';
-  rows.forEach(function(x,i){t+='<tr class="'+(x.active==="0"||x.active===0?"low":"")+'"><td>'+esc(x.class)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+esc(x.email)+"</td><td>"+(x.role==="student"?"學生":x.role==="admin"?"管理員":"老師")+"</td><td>"+x.grade+"</td><td>"+(x.active==="0"||x.active===0?"停用":"啟用")+"</td><td>"+sjText(x,today)+'</td><td><button class="pen" data-e="'+i+'">編輯</button> <button class="pen" data-d="'+i+'">刪除</button></td></tr>'});
+  var t='<table class="tb"><tr><th>班</th><th>號</th><th>姓名</th><th>Email</th><th>身分</th><th>年級</th><th>狀態</th><th>科目・授權到期</th><th>課本版本</th><th></th></tr>';
+  rows.forEach(function(x,i){t+='<tr class="'+(x.active==="0"||x.active===0?"low":"")+'"><td>'+esc(x.class)+"</td><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+esc(x.email)+"</td><td>"+(x.role==="student"?"學生":x.role==="admin"?"管理員":"老師")+"</td><td>"+x.grade+"</td><td>"+(x.active==="0"||x.active===0?"停用":"啟用")+"</td><td>"+sjText(x,today)+"</td><td>"+edText(x,r)+'</td><td><button class="pen" data-e="'+i+'">編輯</button> <button class="pen" data-d="'+i+'">刪除</button></td></tr>'});
   var tb=h(t+"</table>");s.appendChild(tb);
   tb.onclick=function(e){var b=e.target.closest("button");if(!b)return;
-   if(b.dataset.e!==undefined){var x=rows[+b.dataset.e];f.email.value=x.email;f.cls.value=x.class;f.no.value=x.no;f.name.value=x.name;f.grade.value=x.grade;f.role.value=x.role;f.act.value=x.active==="0"?"0":"1";setSj(x.sj||{math:x.expires||""});scrollTo(0,0)}
+   if(b.dataset.e!==undefined){var x=rows[+b.dataset.e];f.email.value=x.email;f.cls.value=x.class;f.no.value=x.no;f.name.value=x.name;f.grade.value=x.grade;f.role.value=x.role;f.act.value=x.active==="0"?"0":"1";setSj(x.sj||{math:x.expires||""});setEd(x.ed);scrollTo(0,0)}
    else{var y=rows[+b.dataset.d];if(!confirm("從名單刪除 "+y.name+"（"+y.email+"）？他就無法登入。成績資料另外在「資料管理」處理。"))return;M.api("POST","/api/admin/roster/delete",{email:y.email}).then(ctx.go,function(er){msg(fb,errs(er),0)})}};
   var cls=[];rows.forEach(function(x){if(x.role==="student"&&cls.indexOf(String(x.class))<0)cls.push(String(x.class))});
   var CUR=M.subj,CURN=SJN[CUR]||CUR;
@@ -70,16 +81,51 @@ function roster(ctx){
   function setExp(d){M.api("POST","/api/admin/roster/expire",{cls:cs.value,date:d,subj:CUR}).then(function(r){msg(exf,"已更新 "+cs.value+" 班「"+CURN+"」："+(d||"不限期")+"（"+r.n+" 人）",1);setTimeout(ctx.go,700)},function(e){msg(exf,errs(e),0)})}
   b1.onclick=function(){if(!ed.value)return msg(exf,"請先選日期",0);setExp(ed.value)};b2.onclick=function(){setExp("")};
   b3.onclick=function(){var d=new Date(Math.max(Date.now(),0));d.setMonth(d.getMonth()+6);setExp(M.today(d))};
-  var bulk=ctx.sheet("批次匯入／匯出","從 Excel、Google 試算表複製貼上；欄位：email, 班級, 座號, 姓名, 身分, 年級, 啟用(1/0), 到期日(2027-01-31，可省略), 科目(可省略)。科目寫 math、sci（或 數學、理化），兩科用逗號分開並加引號，例如 \"math,sci:2027-01-31\"；科目後面的日期是那一科的到期日。沒有科目欄就不改原本的科目；新學生預設只開數學，老師預設兩科");
+  /* 整班設定課本版本。一個班幾乎都用同一本課本，所以整班設定比一個一個改實用太多。
+     這裡會連老師一起算進去（老師帶哪一班就用那一班的課本），符合「不管老師還是學生都要能設定」。 */
+  var ev=ctx.sheet("課本版本","付費題庫的目錄會依這裡設定的版本重新分章、排序。版本只改目錄的編排，不改小節代號，所以成績、錯題本、派卷紀錄都不受影響；沒設定版本的人看到的是依課綱編的通用目錄。免費的無限出題、島覽頁不受版本影響。");
+  var ec=sel(cls.map(function(c){return[c,c+" 班"]}),cls[0]),evf=h('<div class="fb"></div>'),ecb=h('<div class="ctl wrapctl"></div>'),EC={};
+  ecb.appendChild(ec);
+  EDK.forEach(function(k){var w=h('<span class="fld sjf"><label><input type="checkbox"> '+edName(k,r)+"</label></span>");EC[k]=w.querySelector("input");ecb.appendChild(w)});
+  var e1=h('<button class="pen go">整班設為勾選的版本</button>'),e2=h('<button class="pen">整班加上</button>'),e3=h('<button class="pen">整班拿掉</button>');
+  ecb.appendChild(e1);ecb.appendChild(e2);ecb.appendChild(e3);
+  ev.appendChild(h('<p class="meta">「設為」會整個換掉原本的版本，「加上／拿掉」只動勾選的那幾個。一個人可以同時掛好幾個版本。</p>'));
+  ev.appendChild(ecb);ev.appendChild(evf);
+  function edAct(act){var ks=EDK.filter(function(k){return EC[k].checked}),nm=ks.map(function(k){return edName(k,r)}).join("、");
+   if(act!=="set"&&!ks.length)return msg(evf,"請先勾選版本",0);
+   if(act==="set"&&!ks.length&&!confirm("把 "+ec.value+" 班的課本版本全部清掉？他們會改看依課綱編的通用目錄。"))return;
+   M.api("POST","/api/admin/roster/edition",{cls:ec.value,eds:ks,act:act}).then(function(x){msg(evf,ec.value+" 班："+(act==="set"?"設為":act==="add"?"加上":"拿掉")+(nm||"（清空）")+"，共 "+x.n+" 人異動",1);setTimeout(ctx.go,900)},function(er){msg(evf,errs(er),0)})}
+  e1.onclick=function(){edAct("set")};e2.onclick=function(){edAct("add")};e3.onclick=function(){edAct("remove")};
+  /* 沒設定版本的人看到的是通用目錄，而通用目錄底下沒有題目（題目都掛在各版自己的代號上），
+     所以這裡一定要提醒，不然那些人會以為題庫壞了 */
+  var noEd=rows.filter(function(x){return x.role!=="admin"&&!(x.ed||[]).length});
+  if(noEd.length){
+   var wb=h('<div class="fb no">還有 <b>'+noEd.length+'</b> 人沒有設定課本版本（'+esc(noEd.slice(0,6).map(function(x){return x.class+" "+x.name}).join("、"))+(noEd.length>6?" 等":"")+"）。<br>沒設定版本的人看到的是依課綱編的通用目錄，而題目都掛在各版自己的代號上，所以他們會看不到題目。<div class=\"ctl\"><button class=\"pen go\">把這 "+noEd.length+" 人都設為適康版</button></div></div>");
+   wb.querySelector("button").onclick=function(){var btn=this;btn.disabled=true;
+    M.api("POST","/api/admin/roster/edition",{emails:noEd.map(function(x){return x.email}),eds:["kang"],act:"set"}).then(function(x){msg(evf,"已設定 "+x.n+" 人為適康版",1);setTimeout(ctx.go,900)},function(er){btn.disabled=false;msg(evf,errs(er),0)})};
+   ev.appendChild(wb)}
+  /* 一次性搬家：舊資料的單元代號沒有版本字母（3u-1.1），要換成適康版的 3uk-1.1 */
+  var mg=ctx.sheet("搬移舊的單元代號","只需要做一次。舊的題目、插圖和作答紀錄用的是沒有版本字母的代號（3u-1.1），現在每一版都有自己的代號，所以康軒那一組要換成 3uk-1.1。會一起更新題庫、題目屬性、題組、作答紀錄、各單元統計、錯題本和派卷選的單元；插圖檔名在前端那一包已經改好了。重複執行不會壞，已經搬過的不會再動。");
+  var mgf=h('<div class="fb"></div>'),mgb=h('<div class="ctl"><button class="pen">先試算（不會改到資料）</button><button class="pen go">確定搬移</button></div>');
+  mg.appendChild(mgb);mg.appendChild(mgf);
+  function mgRun(go){var btn=mgb.children[go?1:0];
+   if(go&&!confirm("確定要把舊的單元代號換成適康版（3uk-…）嗎？建議先按「先試算」看會動到幾筆。"))return;
+   btn.disabled=true;
+   M.api("POST","/api/admin/unitk",go?{go:true}:{}).then(function(x){btn.disabled=false;
+    var P=x.plan||{},L=[["bank_unit","題庫的單元欄"],["bank_id","題目 id"],["bank_img","題目附圖"],["bank_himg","解說附圖"],["bank_meta","題目屬性"],["bank_grp","題組成員"],["attempts","作答紀錄"],["profiles","學生檔案（統計＋錯題本）"],["assigns","派卷選的單元"]];
+    var t=(x.dry?"<b>試算結果</b>（還沒改到任何資料）":"<b>搬移完成</b>")+"：共 "+x.total+" 筆<ul>"+L.map(function(a){return"<li>"+a[1]+"："+(P[a[0]]||0)+"</li>"}).join("")+"</ul>"+(x.note?esc(x.note):"");
+    msg(mgf,t,x.dry?1:1);if(!x.dry)setTimeout(ctx.go,1500)},function(er){btn.disabled=false;msg(mgf,errs(er),0)})}
+  mgb.children[0].onclick=function(){mgRun(false)};mgb.children[1].onclick=function(){mgRun(true)};
+  var bulk=ctx.sheet("批次匯入／匯出","從 Excel、Google 試算表複製貼上；欄位：email, 班級, 座號, 姓名, 身分, 年級, 啟用(1/0), 到期日(2027-01-31，可省略), 科目(可省略)。科目寫 math、sci（或 數學、理化），兩科用逗號分開並加引號，例如 \"math,sci:2027-01-31\"；科目後面的日期是那一科的到期日。沒有科目欄就不改原本的科目；新學生預設只開數學，老師預設兩科。最後還可以加一欄 課本版本(可省略)：寫 kang、han、nan（或 康軒、翰林、南一），複選用逗號分開並加引號，例如 \"kang,han\"；沒有這一欄就不改原本的版本");
   var ta=area("",5),rn=h('<p class="meta"></p>');ta.placeholder="a@gmail.com,601,1,王小明,student,6";bulk.appendChild(pickCsv(ta,rn));bulk.appendChild(rn);bulk.appendChild(ta);
   var bt=h('<div class="ctl"><button class="pen go">匯入（相同 Email 會更新）</button><button class="pen">匯出名單 CSV</button></div>'),bf=h('<div class="fb"></div>');bulk.appendChild(bt);bulk.appendChild(bf);
-  bt.children[0].onclick=function(){var p=parseCSV(ta.value);if(!p.length)return;var list=toObjs(p,["email","class","no","name","role","grade","active","expires","subjects"]);
+  bt.children[0].onclick=function(){var p=parseCSV(ta.value);if(!p.length)return;var list=toObjs(p,["email","class","no","name","role","grade","active","expires","subjects","editions"]);
    M.api("POST","/api/admin/roster",{rows:list}).then(function(x){if(!x.ok)return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+x.errs.map(esc).join("<br>"),0);msg(bf,"已匯入 "+x.n+" 筆",1);setTimeout(ctx.go,600)},function(e){msg(bf,errs(e),0)})};
-  bt.children[1].onclick=function(){download("名單.csv","email,class,no,name,role,grade,active,expires,subjects\n"+rows.map(function(x){return[x.email,x.class,x.no,x.name,x.role,x.grade,x.active==="0"?0:1,x.expires||"",x.role==="admin"?"":sjCsv(x)].map(csvEsc).join(",")}).join("\n"))};
+  bt.children[1].onclick=function(){download("名單.csv","email,class,no,name,role,grade,active,expires,subjects,editions\n"+rows.map(function(x){return[x.email,x.class,x.no,x.name,x.role,x.grade,x.active==="0"?0:1,x.expires||"",x.role==="admin"?"":sjCsv(x),x.role==="admin"?"":edCsv(x)].map(csvEsc).join(",")}).join("\n"))};
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 
 /* 選 CSV：可一次選很多個檔。keep=true（題庫）：檔案分開保存、逐檔檢查匯入；否則（名單）合併成一份文字貼進框裡 */
-var HEADS="id,unit,type,lv,q,options,answer,hint,diag,img,himg,print,daily,mock,active,email,class,no,name,role,grade,expires,subjects,科目,學習表現,學習內容,難易度,認知層次,知識類型,perf,content,diff,cog,know,題組id,題組題幹,題組附圖,小題序,gid,gstem,gimg,gord".split(",");
+var HEADS="id,unit,type,lv,q,options,answer,hint,diag,img,himg,print,daily,mock,active,email,class,no,name,role,grade,expires,subjects,editions,版本,科目,學習表現,學習內容,難易度,認知層次,知識類型,perf,content,diff,cog,know,題組id,題組題幹,題組附圖,小題序,gid,gstem,gimg,gord".split(",");
 function isHead(line){var c=parseCSV(line)[0]||[];return c.filter(function(x){return HEADS.indexOf(x.trim().toLowerCase())>=0}).length>=2}
 function pickCsv(ta,note,keep){var w=h('<div class="ctl"></div>'),b=h('<button class="pen">選擇 CSV 檔（可多選）</button>'),f=document.createElement("input");f.type="file";f.multiple=true;f.accept=".csv,.txt,text/csv,text/plain";f.hidden=true;
  ta.addEventListener("input",function(){ta.__files=null});
@@ -95,30 +141,47 @@ var COLS=["id","unit","type","lv","q","options","answer","hint","diag","img","hi
 function resize(file,cb){var img=new Image(),u=URL.createObjectURL(file);img.onload=function(){var m=1000,k=Math.min(1,m/Math.max(img.width,img.height)),q=.88,c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);
   var d;do{d=c.toDataURL("image/jpeg",q).split(",")[1];q-=.12}while(d.length>540000&&q>.3);URL.revokeObjectURL(u);cb(d)};img.onerror=function(){cb(null)};img.src=u}
 function bkCss(){if(document.getElementById("bkcss"))return;var st=document.createElement("style");st.id="bkcss";st.textContent=".bkwrap{max-height:68vh;overflow:auto;border:1.5px solid var(--line);border-radius:10px}.bkwrap .tb{margin:0}.bkwrap .tb th{position:sticky;top:0;z-index:2;background:var(--paper,#fff);box-shadow:0 1.5px 0 var(--line)}.bkbar{position:sticky;top:0;z-index:5;background:var(--paper,#fff);padding:8px 0;border-bottom:1.5px solid var(--line)}.bkkpi{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 10px}.bkkpi div{flex:1;min-width:92px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;text-align:center}.bkkpi b{display:block;font-size:1.35rem;font-variant-numeric:tabular-nums}.bkkpi span{font-size:.82rem;color:var(--soft)}.bkun summary{cursor:pointer;font-weight:700;margin:8px 0}.bkun tr[data-u]{cursor:pointer}.bkun tr[data-u]:hover td{background:color-mix(in srgb,var(--p2,#888) 10%,transparent)}.tb td.n,.tb th.n{text-align:right;font-variant-numeric:tabular-nums}";st.textContent+='.bkdash{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0 12px}.bkhead{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center}.bkbig{flex:1 1 220px;min-width:200px}.bkbig b{font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums;margin-right:6px}.bkbig>span{font-size:1rem;color:var(--soft)}.bktrack{height:8px;border-radius:4px;background:var(--line);margin:8px 0 4px;overflow:hidden}.bktrack i,.bkrow .bt i{display:block;height:100%;background:var(--p2,#6b8e5a);border-radius:4px;transition:width .25s}.bkbig small{color:var(--soft)}.bkmini{display:flex;flex-wrap:wrap;gap:8px;flex:2 1 320px}.bkmini div{flex:1;min-width:96px;border:1.5px solid var(--line);border-radius:10px;padding:6px 8px;text-align:center}.bkmini b{display:block;font-size:1.25rem;font-variant-numeric:tabular-nums}.bkmini span{display:block;font-size:.8rem;line-height:1.25;color:var(--soft)}.bkmini .warn{border-color:var(--p1,#b4452f)}.bkmini .warn b{color:var(--p1,#b4452f)}.bkcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 22px;margin-top:12px}.bkcols h4{margin:0 0 6px;font-size:.92rem;color:var(--soft)}.bkrow{display:grid;grid-template-columns:5.2em 1fr 4.6em;gap:8px;align-items:center;padding:3px 4px;border-radius:8px;cursor:pointer}.bkrow:hover,.bkrow.on{background:color-mix(in srgb,var(--p2,#888) 14%,transparent)}.bkrow.on .bl{font-weight:700}.bkrow .bt{height:10px;border-radius:5px;background:var(--line);overflow:hidden}.bkrow .bn{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}.bkrow small{font-weight:400;color:var(--soft)}.bkchips{display:flex;flex-wrap:wrap;gap:6px}.bkchip{font:inherit;border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:3px 10px;cursor:pointer;color:inherit}.bkchip.on{background:var(--p2,#6b8e5a);color:#fff;border-color:transparent}.bkwrap.short{max-height:40vh}.bkun tr.sel td{background:color-mix(in srgb,var(--p2,#888) 18%,transparent);font-weight:700}';document.head.appendChild(st)}
-function unitInfo(u){var o=NB.flat.filter(function(y){return y.id===u})[0];return o?{name:o.title,ch:o.ch.name,sem:o.sem,num:o.num}:{name:"（目錄找不到）",ch:"",sem:"",num:""}}
+/* 題庫管理要同時看得到三家的單元：題目的 unit 欄就是靠代號分家的
+   （3u-1.1 康軒＝通用、3un-1.1 南一、3uh-1.1 翰林），
+   所以這裡用三個版本的目錄聯集，章篩選（代號 . 前面那一段）在各版裡還是對得起來。 */
+function edFlat(){return window.NB&&NB.ed&&NB.ed.ready()?NB.ed.allFlat():NB.flat}
+function edOf(u){return window.NB&&NB.ed?NB.ed.edOf(u):""}
+function edNm(k){return window.NB&&NB.ed&&k?NB.ed.name(k):""}
+/* 代號 → 小節 的索引：各單元題數表有上千列，每一列都線性搜尋會把畫面拖垮 */
+var UIX=null,UIXn=0;
+function unitIx(){var a=edFlat();if(!UIX||UIXn!==a.length){UIX={};a.forEach(function(o){UIX[o.id]=o});UIXn=a.length}return UIX}
+function unitInfo(u){var o=unitIx()[u];return o?{name:o.title,ch:o.ch.name,sem:o.sem,num:o.num,ed:edOf(u)}:{name:"（目錄找不到）",ch:"",sem:"",num:"",ed:""}}
 function bank(ctx){
  bkCss();var s=ctx.sheet("題庫","固定題；沒有的單元會自動用「隨機產生器」出題");
  M.api("GET","/api/admin/bank").then(function(r){
   ctx.box=s;migrateBanner(ctx,r.legacy);var rows=r.rows,fb=h('<div class="fb"></div>'),list=h("<div></div>");
   var bar=h('<div class="ctl wrapctl"></div>'),fc=document.createElement("select"),fu=document.createElement("select"),ft=sel([["","全部題型"],["num","數值題"],["choice","選擇題"],["text","文字題"],["tf","是非題"],["multi","勾選題"],["match","連連看"]],""),fl=sel([["","全部難度"],["1","難度 1 基礎"],["2","難度 2 應用"],["3","難度 3 挑戰"]],""),fk=sel([["","全部用途"],["print","可出卷"],["daily","可當每日一題"],["mock","可放模擬卷"],["off","已停用"],["img","有附圖"],["grp","題組"]],""),fd=sel([["","全部難易度"],["易","難易度：易"],["中","難易度：中"],["難","難易度：難"],["none","尚未標屬性"]],""),fg=sel([["","全部認知層次"],["知識","知識"],["理解","理解"],["應用","應用"],["分析","分析"],["評鑑","評鑑"],["創造","創造"]],""),fq=inp("","搜尋題目文字、id 或題組ID"),nw=h('<button class="pen go">＋ 新增題目</button>');
-  var units={},chs={};rows.forEach(function(x){units[x.unit]=1;chs[String(x.unit).split(".")[0]]=1});NB.flat.forEach(function(o){units[o.id]=1;chs[o.id.split(".")[0]]=1});
-  var chName=function(c){var o=NB.flat.filter(function(y){return y.id.split(".")[0]===c})[0];return o?c+" "+o.sem+(o.ch.cross||o.ch.no==="跨科"?"跨科 ":"第"+o.ch.no+"章 ")+o.ch.name:c};
-  fc.innerHTML='<option value="">全部章（'+rows.length+"）</option>"+NB.sortIds(Object.keys(chs).map(function(c){return c+".1"})).map(function(c){return c.slice(0,-2)}).map(function(c){return'<option value="'+esc(c)+'">'+esc(chName(c))+"</option>"}).join("");
-  function fillUnits(){var c=fc.value;fu.innerHTML='<option value="">'+(c?"此章全部細項":"全部單元")+"</option>"+NB.sortIds(Object.keys(units)).filter(function(u){return!c||String(u).split(".")[0]===c}).map(function(u){return'<option value="'+esc(u)+'">'+esc(u)+"</option>"}).join("")}
-  fillUnits();
-  [fc,fu,ft,fl,fk,fd,fg,fq,nw].forEach(function(e){bar.appendChild(e)});bar.className+=" bkbar";
+  /* 版本篩選：題庫按代號分家，所以這一個下拉就能把某一版的題目單獨撈出來 */
+  var EDO=window.NB&&NB.ed&&M.subj==="math"?NB.ed.KEYS.filter(function(k){return NB.ed.filled(k)}):[];
+  var fv=sel([["","全部版本"]].concat(EDO.map(function(k){return[k,NB.ed.name(k)]})),"");
+  var FL=edFlat();
+  var units={},chs={};rows.forEach(function(x){units[x.unit]=1;chs[String(x.unit).split(".")[0]]=1});FL.forEach(function(o){units[o.id]=1;chs[o.id.split(".")[0]]=1});
+  var CHIX={};FL.forEach(function(o){var c=o.id.split(".")[0];if(!CHIX[c])CHIX[c]=o});
+  var chName=function(c){var o=CHIX[c];if(!o)return c;var e=edOf(o.id);return c+" "+(e?edNm(e)+" ":"")+o.sem+(o.ch.cross||o.ch.no==="跨科"?"跨科 ":"第"+o.ch.no+"章 ")+o.ch.name};
+  var inEd=function(u){return !fv.value||edOf(u)===fv.value};
+  function fillChs(){var ks=Object.keys(chs).filter(function(c){return inEd(c+".1")});
+   fc.innerHTML='<option value="">全部章（'+rows.length+"）</option>"+ks.sort().map(function(c){return'<option value="'+esc(c)+'">'+esc(chName(c))+"</option>"}).join("")}
+  function fillUnits(){var c=fc.value;fu.innerHTML='<option value="">'+(c?"此章全部細項":"全部單元")+"</option>"+Object.keys(units).filter(function(u){return inEd(u)&&(!c||String(u).split(".")[0]===c)}).sort().map(function(u){return'<option value="'+esc(u)+'">'+esc(u)+"</option>"}).join("")}
+  fillChs();fillUnits();
+  [fv,fc,fu,ft,fl,fk,fd,fg,fq,nw].forEach(function(e){bar.appendChild(e)});bar.className+=" bkbar";
+  if(!EDO.length)fv.hidden=true;
   /* 統計面板：跟著下面的篩選即時變動（預設＝全部） */
   var USES={print:["可出卷",function(x){return x.print==="1"}],daily:["每日一題",function(x){return x.daily==="1"}],mock:["可放模擬卷",function(x){return x.mock!=="0"}],off:["已停用",function(x){return x.active==="0"}],img:["有附圖",function(x){return !!(x.img||x.himg)}],grp:["題組",function(x){return !!x.gid}]};
   var TYPES=[["num","數值題"],["choice","選擇題"],["text","文字題"],["tf","是非題"],["multi","勾選題"],["match","連連看"]],LVS=[["1","1 基礎"],["2","2 應用"],["3","3 挑戰"]];
   var chOf=function(u){return String(u).split(".")[0]};
-  function match(x,skipUnit){var k=fq.value.trim();return(skipUnit||((!fc.value||chOf(x.unit)===fc.value)&&(!fu.value||x.unit===fu.value)))&&(!ft.value||x.type===ft.value)&&(!fl.value||String(x.lv)===fl.value)&&(!fk.value||USES[fk.value][1](x))&&(!fd.value||(fd.value==="none"?!(x.diff||x.cog||x.perf||x.content||x.know):x.diff===fd.value))&&(!fg.value||x.cog===fg.value)&&(!k||(x.q+x.id+(x.gid||"")).indexOf(k)>=0)}
+  function match(x,skipUnit){var k=fq.value.trim();return inEd(x.unit)&&(skipUnit||((!fc.value||chOf(x.unit)===fc.value)&&(!fu.value||x.unit===fu.value)))&&(!ft.value||x.type===ft.value)&&(!fl.value||String(x.lv)===fl.value)&&(!fk.value||USES[fk.value][1](x))&&(!fd.value||(fd.value==="none"?!(x.diff||x.cog||x.perf||x.content||x.know):x.diff===fd.value))&&(!fg.value||x.cog===fg.value)&&(!k||(x.q+x.id+(x.gid||"")).indexOf(k)>=0)}
   var dash=h('<div class="bkdash"></div>'),det=document.createElement("details");det.className="bkun";det.open=true;
-  var filtered=function(){return fc.value||fu.value||ft.value||fl.value||fk.value||fd.value||fg.value||fq.value.trim()};
+  var filtered=function(){return fv.value||fc.value||fu.value||ft.value||fl.value||fk.value||fd.value||fg.value||fq.value.trim()};
   function barRows(list,total,key,cur){return list.map(function(t){var n=t[2],pc=total?Math.round(100*n/total):0;return'<div class="bkrow'+(cur===t[0]?" on":"")+'" data-k="'+key+'" data-v="'+t[0]+'"><span class="bl">'+esc(t[1])+'</span><span class="bt"><i style="width:'+pc+'%"></i></span><span class="bn">'+n+'<small> '+pc+'%</small></span></div>'}).join("")}
   function renderDash(a){
-    var n=a.length,on=a.filter(function(x){return x.active!=="0"}).length,secs=NB.flat.filter(function(o){return(!fc.value||chOf(o.id)===fc.value)&&(!fu.value||o.id===fu.value)}).length||(fu.value?1:0),seen={};a.forEach(function(x){if(x.active!=="0")seen[x.unit]=1});
+    var n=a.length,on=a.filter(function(x){return x.active!=="0"}).length,secs=FL.filter(function(o){return inEd(o.id)&&(!fc.value||chOf(o.id)===fc.value)&&(!fu.value||o.id===fu.value)}).length||(fu.value?1:0),seen={};a.forEach(function(x){if(x.active!=="0")seen[x.unit]=1});
     var cov=Object.keys(seen).length,pc=rows.length?Math.round(100*n/rows.length):0,by={};rows.filter(function(x){return match(x,0)&&x.active!=="0"}).forEach(function(x){by[x.unit]=(by[x.unit]||0)+1});
-    var thin=NB.flat.filter(function(o){return(!fc.value||chOf(o.id)===fc.value)&&(!fu.value||o.id===fu.value)&&(by[o.id]||0)<5}).length;
+    var thin=FL.filter(function(o){return inEd(o.id)&&(!fc.value||chOf(o.id)===fc.value)&&(!fu.value||o.id===fu.value)&&(by[o.id]||0)<5}).length;
     var tc=TYPES.map(function(t){return[t[0],t[1],a.filter(function(x){return x.type===t[0]}).length]}),lc=LVS.map(function(t){return[t[0],t[1],a.filter(function(x){return String(x.lv)===t[0]}).length]});
     var uc=Object.keys(USES).map(function(k){return'<button class="bkchip'+(fk.value===k?" on":"")+'" data-k="use" data-v="'+k+'">'+USES[k][0]+" <b>"+a.filter(function(x){return USES[k][1](x)}).length+"</b></button>"}).join("");
     dash.innerHTML='<div class="bkhead"><div class="bkbig"><b>'+n+'</b><span>題'+(filtered()?" ／ 全部 "+rows.length+" 題":"")+'</span><div class="bktrack"><i style="width:'+pc+'%"></i></div><small>'+(filtered()?"目前篩選中（佔全部 "+pc+"%）":"目前顯示：全部題庫")+'</small>'+(filtered()?' <button class="pen" data-k="clear">清除篩選</button>':"")+'</div>'+
@@ -126,24 +189,25 @@ function bank(ctx){
      '<div class="bkcols"><div><h4>題型</h4>'+barRows(tc,n,"type",ft.value)+'</div><div><h4>難度</h4>'+barRows(lc,n,"lv",fl.value)+'</div><div><h4>用途（點選可篩選）</h4><div class="bkchips">'+uc+"</div></div></div>"}
   function renderUnits(){
     var by={};rows.forEach(function(x){if(!match(x,1))return;var b=by[x.unit]=by[x.unit]||{n:0,a:0,l:[0,0,0,0]};b.n++;if(x.active!=="0")b.a++;b.l[+x.lv||0]++});
-    var ul=NB.flat.map(function(o){return o.id});Object.keys(units).forEach(function(u){if(ul.indexOf(u)<0)ul.push(u)});ul=ul.filter(function(u){return!fc.value||chOf(u)===fc.value});
+    var ul=FL.map(function(o){return o.id});Object.keys(units).forEach(function(u){if(ul.indexOf(u)<0)ul.push(u)});ul=ul.filter(function(u){return inEd(u)&&(!fc.value||chOf(u)===fc.value)});
     var few=ul.filter(function(u){return !by[u]||by[u].a<5}).length;
-    var dt='<summary>各單元題數（'+ul.length+' 節，'+few+' 節啟用題少於 5 題；數字跟著篩選變動；點一列篩選該節）</summary><div class="bkwrap short"><table class="tb"><tr><th>單元</th><th>名稱</th><th class="n">啟用</th><th class="n">全部</th><th class="n">難度1</th><th class="n">難度2</th><th class="n">難度3</th></tr>';
-    ul.forEach(function(u){var b=by[u]||{n:0,a:0,l:[0,0,0,0]},i=unitInfo(u);dt+='<tr data-u="'+esc(u)+'" class="'+(b.a<5?"low ":"")+(fu.value===u?"sel":"")+'"><td>'+esc(u)+"</td><td>"+esc(i.sem+" "+i.num+" "+i.name)+'</td><td class="n">'+b.a+'</td><td class="n">'+b.n+'</td><td class="n">'+b.l[1]+'</td><td class="n">'+b.l[2]+'</td><td class="n">'+b.l[3]+"</td></tr>"});
+    var dt='<summary>各單元題數（'+ul.length+' 節，'+few+' 節啟用題少於 5 題；數字跟著篩選變動；點一列篩選該節）</summary><div class="bkwrap short"><table class="tb"><tr><th>單元</th><th>版本</th><th>名稱</th><th class="n">啟用</th><th class="n">全部</th><th class="n">難度1</th><th class="n">難度2</th><th class="n">難度3</th></tr>';
+    ul.forEach(function(u){var b=by[u]||{n:0,a:0,l:[0,0,0,0]},i=unitInfo(u);dt+='<tr data-u="'+esc(u)+'" class="'+(b.a<5?"low ":"")+(fu.value===u?"sel":"")+'"><td>'+esc(u)+"</td><td>"+esc(edNm(i.ed)||"—")+"</td><td>"+esc(i.sem+" "+i.num+" "+i.name)+'</td><td class="n">'+b.a+'</td><td class="n">'+b.n+'</td><td class="n">'+b.l[1]+'</td><td class="n">'+b.l[2]+'</td><td class="n">'+b.l[3]+"</td></tr>"});
     var op=det.open;det.innerHTML=dt+"</table></div>";det.open=op}
   s.appendChild(dash);s.appendChild(det);
   det.onclick=function(e){var r=e.target.closest("tr[data-u]");if(!r)return;var u=r.dataset.u;if(fu.value===u){fu.value=""}else{fc.value=chOf(u);fillUnits();fu.value=u}draw()};
   dash.onclick=function(e){var el=e.target.closest("[data-k]");if(!el)return;var k=el.dataset.k,v=el.dataset.v,tg=function(sl){sl.value=sl.value===v?"":v};
-   if(k==="type")tg(ft);else if(k==="lv")tg(fl);else if(k==="use")tg(fk);else if(k==="clear"){[fc,fu,ft,fl,fk,fd,fg].forEach(function(x){x.value=""});fq.value="";fillUnits()}draw()};
+   if(k==="type")tg(ft);else if(k==="lv")tg(fl);else if(k==="use")tg(fk);else if(k==="clear"){[fv,fc,fu,ft,fl,fk,fd,fg].forEach(function(x){x.value=""});fq.value="";fillChs();fillUnits()}draw()};
   s.appendChild(bar);s.appendChild(fb);s.appendChild(list);
   function draw(){var a=rows.filter(function(x){return match(x,0)});renderDash(a);renderUnits();var t='<p class="meta">共 '+a.length+" 題"+(a.length>100?"（只顯示前 100，請用篩選）":"")+'</p><div class="bkwrap"><table class="tb"><tr><th>id</th><th>單元</th><th>題目</th><th>題型</th><th class="n">難度</th><th>屬性</th><th>用途</th><th></th></tr>';
-   a.slice(0,100).forEach(function(x){var u=[];if(x.print==="1")u.push("出卷");if(x.daily==="1")u.push("每日");if(x.mock!=="0")u.push("模擬");if(x.gid)u.push("題組 "+x.gid+(x.gord?"#"+x.gord:""));if(x.active==="0")u.push("停用");t+="<tr><td class=\"sm\">"+esc(x.id)+"</td><td>"+esc(x.unit)+"<br><span class=\"meta\">"+esc(unitInfo(x.unit).name)+"</span></td><td>"+esc(String(x.q).slice(0,46))+"</td><td>"+({num:"數值",choice:"選擇",text:"文字"}[x.type]||esc(x.type))+"</td><td class=\"n\">"+x.lv+"</td><td class=\"sm\" title=\""+esc([x.perf,x.content,x.know].filter(Boolean).join(" / "))+"\">"+(x.diff||x.cog?esc([x.diff,x.cog].filter(Boolean).join("・")):"<span class=\"meta\">—</span>")+(x.know?"<br><span class=\"meta\">"+esc(String(x.know).slice(0,14))+"</span>":"")+"</td><td>"+u.join("・")+'</td><td><button class="pen" data-e="'+esc(x.id)+'">編輯</button> <button class="pen" data-d="'+esc(x.id)+'">刪除</button></td></tr>'});
+   a.slice(0,100).forEach(function(x){var u=[];if(x.print==="1")u.push("出卷");if(x.daily==="1")u.push("每日");if(x.mock!=="0")u.push("模擬");if(x.gid)u.push("題組 "+x.gid+(x.gord?"#"+x.gord:""));if(x.active==="0")u.push("停用");var ui=unitInfo(x.unit);t+="<tr><td class=\"sm\">"+esc(x.id)+"</td><td>"+esc(x.unit)+"<br><span class=\"meta\">"+esc((edNm(ui.ed)?edNm(ui.ed)+"・":"")+ui.name)+"</span></td><td>"+esc(String(x.q).slice(0,46))+"</td><td>"+({num:"數值",choice:"選擇",text:"文字"}[x.type]||esc(x.type))+"</td><td class=\"n\">"+x.lv+"</td><td class=\"sm\" title=\""+esc([x.perf,x.content,x.know].filter(Boolean).join(" / "))+"\">"+(x.diff||x.cog?esc([x.diff,x.cog].filter(Boolean).join("・")):"<span class=\"meta\">—</span>")+(x.know?"<br><span class=\"meta\">"+esc(String(x.know).slice(0,14))+"</span>":"")+"</td><td>"+u.join("・")+'</td><td><button class="pen" data-e="'+esc(x.id)+'">編輯</button> <button class="pen" data-d="'+esc(x.id)+'">刪除</button></td></tr>'});
    var el=h("<div>"+t+"</table></div></div>");list.innerHTML="";list.appendChild(el);
    el.onclick=function(e){var b=e.target.closest("button");if(!b)return;if(b.dataset.e!==undefined)edit(rows.filter(function(x){return x.id===b.dataset.e})[0]);else if(confirm("刪除題目 "+b.dataset.d+"？"))M.api("POST","/api/admin/bank/delete",{ids:[b.dataset.d]}).then(ctx.go,function(er){msg(fb,errs(er),0)})}}
+  fv.onchange=function(){fc.value="";fu.value="";fillChs();fillUnits();draw()};
   fc.onchange=function(){fillUnits();draw()};fu.onchange=ft.onchange=fl.onchange=fk.onchange=fd.onchange=fg.onchange=fq.oninput=draw;draw();nw.onclick=function(){edit(null)};
-  function edit(x){x=x||{id:"",unit:fu.value||"6d-5.3",type:"num",lv:2,q:"",options:"",answer:"",hint:"",diag:"",img:"",himg:"",print:"",daily:"",mock:"1",active:"1",perf:"",content:"",diff:"",cog:"",know:"",gid:"",gstem:"",gimg:"",gord:""};
+  function edit(x){x=x||{id:"",unit:fu.value||(fv.value?(FL.filter(function(o){return edOf(o.id)===fv.value})[0]||{id:"6dk-5.3"}).id:"6dk-5.3"),type:"num",lv:2,q:"",options:"",answer:"",hint:"",diag:"",img:"",himg:"",print:"",daily:"",mock:"1",active:"1",perf:"",content:"",diff:"",cog:"",know:"",gid:"",gstem:"",gimg:"",gord:""};
    var ed=ctx.sheet(x.id?"編輯題目":"新增題目",x.id?esc(x.id):"儲存後立刻出現在小測驗、出卷、每日一題、模擬卷"),F={};
-   var dl=document.createElement("datalist");dl.id="ul";NB.flat.forEach(function(o){var e=document.createElement("option");e.value=o.id;e.label=o.sem+" "+o.num+" "+o.title;dl.appendChild(e)});ed.appendChild(dl);
+   var dl=document.createElement("datalist");dl.id="ul";FL.forEach(function(o){var e=document.createElement("option");e.value=o.id;e.label=(edNm(edOf(o.id))?edNm(edOf(o.id))+" ":"")+o.sem+" "+o.num+" "+o.title;dl.appendChild(e)});ed.appendChild(dl);
    F.unit=inp(x.unit);F.unit.setAttribute("list","ul");F.type=sel([["num","數值題（填數字）"],["choice","選擇題"],["text","文字題（輸入文字）"],["tf","是非題（答案填 對 或 錯）"],["multi","勾選題（可複選，列印卷用）"],["match","連連看（列印卷用）"]],x.type);F.kind=sel([["","（未標示，列印時依題目長短推測）"],["計算題","計算題"],["應用題","應用題"],["情境題","情境題"],["圖表題","圖表題"],["概念題","概念題"]],x.kind||"");F.lv=sel([[1,"1 基礎"],[2,"2 應用"],[3,"3 挑戰"]],x.lv);F.q=area(x.q,3);F.options=area(String(x.options||"").split("|").join("\n"),4);F.answer=inp(x.answer);F.hint=area(x.hint,2);F.diag=area(String(x.diag||"").split(";;").join("\n"),2);F.img=inp(x.img);F.himg=inp(x.himg);
    F.perf=inp(x.perf||"","例如 n-III-3（多個用逗號）");F.content=inp(x.content||"","例如 N-5-3");F.diff=sel([["","（未標示）"],["易","易"],["中","中"],["難","難"]],x.diff||"");F.cog=sel([["","（未標示）"],["知識","知識"],["理解","理解"],["應用","應用"],["分析","分析"],["評鑑","評鑑"],["創造","創造"]],x.cog||"");F.know=inp(x.know||"","例如 公因數和最大公因數");
    F.gid=inp(x.gid||"","題組ID，例如 5u-9.2-A（沒有就留空）");F.gstem=area(x.gstem||"",3);F.gimg=inp(x.gimg||"","題組附圖（選填）");F.gord=inp(x.gord||"","小題序，例如 1（不填就排在最後）","number");
@@ -176,8 +240,8 @@ function bank(ctx){
   var GRPH=["題組id","題組題幹","題組附圖","小題序","gid","gstem","gimg","gord"],GRPN=["題組ID","題組題幹","題組附圖","小題序"];
   var AK=["perf","content","diff","cog","know"],AH=["學習表現","學習內容","難易度","認知層次","知識類型"],ATTR=AH.concat(AK);
   var KINDS={bank:{label:"題庫（題目；後面可以多帶屬性欄與題組欄）",api:"/api/admin/bank",req:["unit","type","q","answer"],allow:COLS.concat(ATTR,GRPH,KH),
-    guide:"必要欄位：<b>unit、type、q、answer</b>（id 可以空白，系統會自動編）。其他欄位：lv、options、hint、diag、img、himg、print、daily、mock、active、<b>題目類別</b>（計算題／應用題／情境題／圖表題／概念題；列印出卷可依類別挑題）。<br><b>type</b> 可填：num（填數字）、choice（選擇）、text（填文字）、<b>tf</b>（是非，answer 填 對 或 錯，也可以寫 ○／✕）、<b>multi</b>（勾選，options 用 | 分隔，answer 填所有正確選項、用 | 分隔）、<b>match</b>（連連看，options 寫成「左=右|左=右」，answer 可留空）。勾選題與連連看只用在列印練習卷，不會出現在小測驗、模擬卷和每日一題。後面可以多加 <b>學習表現、學習內容、難易度、認知層次、知識類型</b>，題目和屬性會一起存。<br><b>題組</b>（幾個小題共用一段題幹或情境）：再加 <b>題組ID、題組題幹、小題序</b>（還可以有 題組附圖）。同一個題組ID的列會合成一組，<b>題幹只要寫在其中一列</b>，小題序決定順序（不填就照列的先後）；同一組的小題要<b>放在一起</b>、單元要相同、最多 10 題。題組會整組一起出題，不會拆開；<b>每日一題</b>不使用題組。沒有帶題組欄位的列，不會動到原本的題組；題組ID 填「-」＝把這題移出題組。",
-    sample:COLS.concat(AH,GRPN,["題目類別"]).join(",")+"\n"+["","6d-5.3","num","2","範例題目：2+3=?","","5","先算 2+3","","","","1","","1","1","","","易","理解","加法","","","","","計算題"].join(",")+"\n"+["","6d-5.3","num","2","（題組第 1 小題）小明有 5 顆糖，吃掉 2 顆，還剩幾顆？","","3","5-2","","","","1","","1","1","","","易","理解","減法","範例組A","小明有 5 顆糖，媽媽又給他 4 顆。請回答下列問題。","","1","應用題"].join(",")+"\n"+["","6d-5.3","num","2","（題組第 2 小題）現在共有幾顆糖？","","9","5+4","","","","1","","1","1","","","易","理解","加法","範例組A","","","2","應用題"].join(",")+"\n"+["","6d-5.3","tf","1","三角形的內角和是 180 度。","","對","","","","","1","","0","1","","","易","知識","三角形","","","","","概念題"].join(",")},
+    guide:"必要欄位：<b>unit、type、q、answer</b>（id 可以空白，系統會自動編）。<br><b>unit</b> 就是各版的小節代號，版本靠代號分家：<b>3uk-1.1</b>＝適康版（冊別加 k）、<b>3un-1.1</b>＝適南版（加 n）、<b>3uh-1.1</b>＝適翰版（加 h）。沒有字母的 3u-1.1 是免費端的通用目錄，題庫不要用。匯入哪一版就填那一版的代號，三家的題目各自一區，不會混在一起。其他欄位：lv、options、hint、diag、img、himg、print、daily、mock、active、<b>題目類別</b>（計算題／應用題／情境題／圖表題／概念題；列印出卷可依類別挑題）。<br><b>type</b> 可填：num（填數字）、choice（選擇）、text（填文字）、<b>tf</b>（是非，answer 填 對 或 錯，也可以寫 ○／✕）、<b>multi</b>（勾選，options 用 | 分隔，answer 填所有正確選項、用 | 分隔）、<b>match</b>（連連看，options 寫成「左=右|左=右」，answer 可留空）。勾選題與連連看只用在列印練習卷，不會出現在小測驗、模擬卷和每日一題。後面可以多加 <b>學習表現、學習內容、難易度、認知層次、知識類型</b>，題目和屬性會一起存。<br><b>題組</b>（幾個小題共用一段題幹或情境）：再加 <b>題組ID、題組題幹、小題序</b>（還可以有 題組附圖）。同一個題組ID的列會合成一組，<b>題幹只要寫在其中一列</b>，小題序決定順序（不填就照列的先後）；同一組的小題要<b>放在一起</b>、單元要相同、最多 10 題。題組會整組一起出題，不會拆開；<b>每日一題</b>不使用題組。沒有帶題組欄位的列，不會動到原本的題組；題組ID 填「-」＝把這題移出題組。",
+    sample:COLS.concat(AH,GRPN,["題目類別"]).join(",")+"\n"+["","6dk-5.3","num","2","範例題目：2+3=?","","5","先算 2+3","","","","1","","1","1","","","易","理解","加法","","","","","計算題"].join(",")+"\n"+["","6dk-5.3","num","2","（題組第 1 小題）小明有 5 顆糖，吃掉 2 顆，還剩幾顆？","","3","5-2","","","","1","","1","1","","","易","理解","減法","範例組A","小明有 5 顆糖，媽媽又給他 4 顆。請回答下列問題。","","1","應用題"].join(",")+"\n"+["","6dk-5.3","num","2","（題組第 2 小題）現在共有幾顆糖？","","9","5+4","","","","1","","1","1","","","易","理解","加法","範例組A","","","2","應用題"].join(",")+"\n"+["","6dk-5.3","tf","1","三角形的內角和是 180 度。","","對","","","","","1","","0","1","","","易","知識","三角形","","","","","概念題"].join(",")},
    meta:{label:"題目屬性表（只有屬性，用 id 對應已有的題目）",api:"/api/admin/meta",req:["id"],need:ATTR,allow:["id"].concat(ATTR),
     guide:"必要欄位：<b>id</b>，加上至少一個屬性欄：<b>學習表現、學習內容、難易度、認知層次、知識類型</b>（中英文欄名皆可）。id 要和題庫的 id 一樣；難易度只能填 易／中／難。",
     sample:"id,學習表現,學習內容,難易度,認知層次,知識類型\n範例id,n-III-3,N-5-3,中,應用,公因數"}};
@@ -452,7 +516,7 @@ function assign(ctx){
    st.filter(function(x){return on.indexOf(x.class)>=0}).forEach(function(x){g.appendChild(h('<label class="ppc"><input type="checkbox" data-e="'+esc(x.email)+'"> '+esc(x.class)+"-"+x.no+" "+esc(x.name)+"</label>"))})}
   cw.addEventListener("change",drawStu);drawStu();
   var n=sel([[5,"5 題"],[10,"10 題"],[15,"15 題"],[20,"20 題"],[30,"30 題"]],10),mi=inp("","留空＝每題 2 分鐘","number"),du=inp("","","date"),un=inp("","單元代號，多個用逗號；留空＝依年級綜合");un.setAttribute("list","aul");
-  var dl=document.createElement("datalist");dl.id="aul";NB.flat.forEach(function(o){var e=document.createElement("option");e.value=o.id;e.label=o.sem+" "+o.num+" "+o.title;dl.appendChild(e)});
+  var dl=document.createElement("datalist");dl.id="aul";edFlat().forEach(function(o){var e=document.createElement("option");e.value=o.id;e.label=(edNm(edOf(o.id))?edNm(edOf(o.id))+" ":"")+o.sem+" "+o.num+" "+o.title;dl.appendChild(e)});
   function chk(name,vals){return h('<div class="ctl wrapctl">'+vals.map(function(v){return'<label class="ppc"><input type="checkbox" name="'+name+'" value="'+v+'"> '+v+"</label>"}).join("")+"</div>")}
   var fd=chk("afd",["易","中","難"]),fg=chk("afg",["知識","理解","應用","分析","評鑑","創造"]),fk=inp("","知識類型包含的字，例如：面積、公因數"),fp=inp("","學習表現／學習內容代碼，例如：n-III-3、S-5");
   s.appendChild(dl);s.appendChild(field("標題",ti));s.appendChild(field("班級",cw));s.appendChild(pw);s.appendChild(field("題數",n));s.appendChild(field("時限（分鐘）",mi));s.appendChild(field("截止日（當天晚上 11:59 截止，可留空）",du));

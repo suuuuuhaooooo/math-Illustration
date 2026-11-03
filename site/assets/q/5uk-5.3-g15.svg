@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="240" viewBox="0 0 380 240">
+<rect x="0" y="0" width="380" height="240" fill="#ffffff"/>
+<polygon points="34.0,189.5 220.9,189.5 346.0,50.5 159.1,50.5" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<path d="M46.0,176.1 A18,18 0 0 1 52.0,189.5" fill="none" stroke="#000000" stroke-width="1.5"/>
+<path d="M202.9,189.5 A18,18 0 0 1 233.0,176.1" fill="none" stroke="#000000" stroke-width="1.5"/>
+<path d="M334.0,63.9 A18,18 0 0 1 328.0,50.5" fill="none" stroke="#000000" stroke-width="1.5"/>
+<text x="85.2" y="172.6" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">48°</text>
+<text x="207.1" y="164.3" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">∠2</text>
+<text x="304.0" y="75.2" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">∠1</text>
+</svg>

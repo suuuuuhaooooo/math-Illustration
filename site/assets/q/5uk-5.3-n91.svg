@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260">
+<rect x="0" y="0" width="400" height="260" fill="#ffffff"/>
+<polygon points="151.8,49.3 131.4,105.6 213.2,122.4" fill="none" stroke="#000000" stroke-width="1.5" stroke-dasharray="6 5"/>
+<polygon points="131.4,105.6 93.4,210.0 286.6,210.0 213.2,122.4" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<path d="M125.2,122.5 A18,18 0 0 0 149.0,109.2" fill="none" stroke="#000000" stroke-width="1.5"/>
+<text x="150.9" y="146.1" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">115°</text>
+<path d="M195.5,118.8 A18,18 0 0 0 224.7,136.2" fill="none" stroke="#000000" stroke-width="1.5"/>
+<text x="192.7" y="162.4" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">125°</text>
+<text x="151.8" y="41.3" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">A</text>
+<text x="115.4" y="105.6" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">E</text>
+<text x="229.2" y="122.4" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">D</text>
+<text x="81.4" y="228.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">B</text>
+<text x="298.6" y="228.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">C</text>
+</svg>

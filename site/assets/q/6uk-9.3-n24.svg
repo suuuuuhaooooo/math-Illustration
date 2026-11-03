@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="256" viewBox="0 0 240 256">
+<rect x="0" y="0" width="240" height="256" fill="#ffffff"/>
+<path d="M30.0,206.0 L210.0,206.0 L210.0,26.0 L30.0,26.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<text x="120.0" y="17.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">4cm</text>
+<text x="218.0" y="121.6" font-family="sans-serif" font-size="16" text-anchor="start" fill="#000000"></text>
+<path d="M39.0,206.0 L39.0,197.0 L30.0,197.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M201.0,206.0 L201.0,197.0 L210.0,197.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M201.0,26.0 L201.0,35.0 L210.0,35.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<path d="M39.0,26.0 L39.0,35.0 L30.0,35.0" fill="none" stroke="#000000" stroke-width="1.2"/>
+<text x="120.0" y="244.0" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">（正方形土地的縮圖）</text>
+</svg>

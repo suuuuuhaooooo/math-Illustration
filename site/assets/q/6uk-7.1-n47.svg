@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="292" height="292" viewBox="0 0 292 292">
+<rect x="0" y="0" width="292" height="292" fill="#ffffff"/>
+<path d="M266.0,146.0 A120.0,120.0 0 0 0 26.0,146.0 A120.0,120.0 0 0 0 266.0,146.0 Z" fill="#d4d4d4" stroke="#000000" stroke-width="1.6"/>
+<path d="M221.0,146.0 A75.0,75.0 0 0 0 71.0,146.0 A75.0,75.0 0 0 0 221.0,146.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+<path d="M170.0,146.0 A24.0,24.0 0 0 0 122.0,146.0 A24.0,24.0 0 0 0 170.0,146.0 Z" fill="#ffffff" stroke="#000000" stroke-width="1.6" stroke-dasharray="4 3"/>
+<circle cx="146.0" cy="146.0" r="3" fill="#000000"/>
+<text x="146.0" y="53.8" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">8 分</text>
+<text x="146.0" y="100.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">9 分</text>
+<text x="146.0" y="201.9" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#000000">10 分在正中央</text>
+<path d="M71.0,146.0 L221.0,146.0" fill="none" stroke="#000000" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="146.0" y="166.6" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#000000">10 cm</text>
+<path d="M221.0,146.0 L266.0,146.0" fill="none" stroke="#000000" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="243.5" y="138.2" font-family="sans-serif" font-size="15" text-anchor="middle" fill="#000000">3 cm</text>
+</svg>

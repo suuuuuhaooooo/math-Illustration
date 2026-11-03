@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="240" viewBox="0 0 380 240">
+<rect x="0" y="0" width="380" height="240" fill="#ffffff"/>
+<polygon points="125.6,206.0 224.1,206.0 245.0,87.4 134.2,106.9" fill="#e4e4e4" stroke="#000000" stroke-width="2"/>
+<path d="M127.1,188.1 A18,18 0 0 1 143.6,206.0" fill="none" stroke="#000000" stroke-width="1.5"/>
+<path d="M206.1,206.0 A18,18 0 0 1 227.2,188.3" fill="none" stroke="#000000" stroke-width="1.5"/>
+<path d="M152.0,103.8 A18,18 0 0 1 132.7,124.8" fill="none" stroke="#000000" stroke-width="1.5"/>
+<text x="150.6" y="189.0" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">85°</text>
+<text x="199.7" y="182.8" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">100°</text>
+<text x="159.3" y="135.8" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">★</text>
+<line x1="245.0" y1="87.4" x2="254.4" y2="34.0" stroke="#000000" stroke-width="2"/>
+<path d="M248.8,65.7 A22,22 0 0 0 223.4,91.2" fill="none" stroke="#000000" stroke-width="1.5"/>
+<text x="218.2" y="66.5" font-family="sans-serif" font-size="17" text-anchor="middle" font-weight="normal" fill="#000000">110°</text>
+</svg>

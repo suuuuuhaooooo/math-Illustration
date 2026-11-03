@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="454" height="210" viewBox="0 0 454 210">
+<rect x="0" y="0" width="454" height="210" fill="#ffffff"/>
+<rect x="60" y="40" width="160" height="80" rx="8" fill="#dddddd" stroke="#000000" stroke-width="2"/>
+<text x="140.0" y="88.0" font-family="sans-serif" font-size="20" text-anchor="middle" font-weight="normal" fill="#000000">2 × □</text>
+<text x="140.0" y="26.0" font-family="sans-serif" font-size="16" text-anchor="middle" font-weight="normal" fill="#000000">放進 4</text>
+<line x1="140" y1="30" x2="140" y2="40" stroke="#000000" stroke-width="2"/>
+<line x1="220" y1="80" x2="262" y2="80" stroke="#000000" stroke-width="2"/>
+<path d="M262,74 L272,80 L262,86 Z" fill="#000000"/>
+<text x="278.0" y="86.0" font-family="sans-serif" font-size="16" text-anchor="start" font-weight="normal" fill="#000000">得到 8</text>
+<g transform="translate(10,140)"><rect x="1.0" y="1" width="72.0" height="30" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="37.0" y="20.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">放進的數</text>
+<rect x="73.0" y="1" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<text x="91.0" y="20.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">1</text>
+<rect x="109.0" y="1" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<text x="127.0" y="20.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">2</text>
+<rect x="145.0" y="1" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<text x="163.0" y="20.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">3</text>
+<rect x="181.0" y="1" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<text x="199.0" y="20.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">4</text>
+<rect x="217.0" y="1" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<text x="235.0" y="20.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">5</text>
+<rect x="253.0" y="1" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<text x="271.0" y="20.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">6</text>
+<rect x="289.0" y="1" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<text x="307.0" y="20.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">7</text>
+<rect x="325.0" y="1" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<text x="343.0" y="20.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">8</text>
+<rect x="361.0" y="1" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<text x="379.0" y="20.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">9</text>
+<rect x="397.0" y="1" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<text x="415.0" y="20.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">10</text>
+<rect x="1.0" y="31" width="72.0" height="30" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="37.0" y="50.9" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#000000">得到的數</text>
+<rect x="73.0" y="31" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="109.0" y="31" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="145.0" y="31" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="181.0" y="31" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="217.0" y="31" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="253.0" y="31" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="289.0" y="31" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="325.0" y="31" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="361.0" y="31" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+<rect x="397.0" y="31" width="36.0" height="30" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+</g>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="315" height="118" viewBox="0 0 315 118">
+<rect x="0" y="0" width="315" height="118" fill="#ffffff"/>
+<rect x="12.0" y="10" width="63.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="43.8" y="35.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">1 盒</text>
+<rect x="87.6" y="10" width="63.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="119.4" y="35.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">2 盒</text>
+<rect x="163.2" y="10" width="63.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="195.0" y="35.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">3 盒</text>
+<rect x="238.8" y="10" width="63.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="270.6" y="35.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">4 盒</text>
+<rect x="12.0" y="64" width="63.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="43.8" y="89.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">5 盒</text>
+<rect x="87.6" y="64" width="63.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="119.4" y="89.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">6 盒</text>
+<rect x="163.2" y="64" width="63.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="195.0" y="89.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">7 盒</text>
+<rect x="238.8" y="64" width="63.6" height="38" rx="8" fill="#e6e6e6" stroke="#000000" stroke-width="1"/>
+<text x="270.6" y="89.0" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="normal" fill="#000000">8 盒</text>
+</svg>

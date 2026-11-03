@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="434" height="82" viewBox="0 0 434 82">
+<rect x="0" y="0" width="434" height="82" fill="#ffffff"/>
+<rect x="1.0" y="1" width="72.0" height="40" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="37.0" y="26.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">個位</text>
+<rect x="73.0" y="1" width="72.0" height="40" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="109.0" y="26.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">十分位</text>
+<rect x="145.0" y="1" width="72.0" height="40" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="181.0" y="26.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">百分位</text>
+<rect x="217.0" y="1" width="72.0" height="40" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="253.0" y="26.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">千分位</text>
+<rect x="289.0" y="1" width="72.0" height="40" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="325.0" y="26.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">萬分位</text>
+<rect x="361.0" y="1" width="72.0" height="40" fill="#e6e6e6" stroke="#000000" stroke-width="1.5"/>
+<text x="397.0" y="26.2" font-family="sans-serif" font-size="15" text-anchor="middle" font-weight="normal" fill="#000000">十萬分位</text>
+<rect x="1.0" y="41" width="72.0" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<rect x="73.0" y="41" width="72.0" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<rect x="145.0" y="41" width="72.0" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<rect x="217.0" y="41" width="72.0" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<rect x="289.0" y="41" width="72.0" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<rect x="361.0" y="41" width="72.0" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+<circle cx="73.0" cy="73" r="3.5" fill="#000000"/>
+</svg>
