@@ -289,7 +289,10 @@ function bank(ctx){
    pass(true,0).then(function(){if(bad.length){done();return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+bad.slice(0,30).map(esc).join("<br>")+(bad.length>30?"<br>…還有 "+(bad.length-30)+" 項":""),0)}
     return pass(false,0).then(function(){done();msg(bf,"已匯入 "+total+(kind.value==="bank"?" 題":" 列屬性")+"（"+src.length+" 個來源）"+(gcount?"，含 "+gcount+" 個題組":"")+(orphan?"。其中 "+orphan+" 列的 id 在題庫找不到，已先存起來，之後題庫有那題就會對上":""),1);setTimeout(ctx.go,900)})}).catch(function(e){done();msg(bf,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
   bx.onclick=function(){download(kind.value==="bank"?"題庫範本.csv":"題目屬性表範本.csv",KINDS[kind.value].sample)};
-  b2.onclick=function(){download("題庫.csv",COLS.concat(AH,["題目類別"]).join(",")+"\n"+rows.map(function(x){return COLS.concat(AK,["kind"]).map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
+  /* 匯出要帶題組欄位（題組ID、題組題幹、題組附圖、小題序），不然匯出再匯入題組會不見。
+   欄位順序跟上面「範例檔」一樣，匯出的檔案可以直接拿回來匯入。
+   不是題組的題目那四欄是空的，匯入時空的就不會動到原本的題組設定。 */
+  b2.onclick=function(){download("題庫.csv",COLS.concat(AH,GRPN,["題目類別"]).join(",")+"\n"+rows.map(function(x){return COLS.concat(AK,["gid","gstem","gimg","gord"],["kind"]).map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
   c2.onclick=function(){var K=["id","perf","content","diff","cog","know"];download("題目屬性表.csv",["id"].concat(AH).join(",")+"\n"+rows.filter(function(x){return x.perf||x.content||x.diff||x.cog||x.know}).map(function(x){return K.map(function(k){return csvEsc(x[k])}).join(",")}).join("\n"))};
  },function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))})}
 
