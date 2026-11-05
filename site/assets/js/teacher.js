@@ -3,7 +3,7 @@
 "use strict";
 var M=NB.member,app=document.getElementById("app"),h=NB.h,TAB="overview",CLS=null;document.body.classList.add("tpage");
 var READY=false;TAB=decodeURIComponent(location.hash.slice(1))||TAB; /* 頁籤記在網址的 # 後面，例如 teacher.html#assign，上一頁與分享網址都能用 */
-var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["assign","派卷"],["draw","製圖"],["bank","題庫"],["settings","設定"],["data","資料管理"],["prints","列印紀錄"],["mocks","模擬考紀錄"],["reports","問題回報"],["books","卷類專區"]],TABS=TABS_ALL;/* 老師看不到題庫／設定／資料管理，這三項只有管理員能改 */
+var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["assign","派卷"],["draw","製圖"],["bank","題庫"],["settings","設定"],["data","資料管理"],["prints","列印紀錄"],["mocks","模擬考紀錄"],["reports","問題回報"],["books","卷類專區"],["guard","題庫防護"]],TABS=TABS_ALL;/* 老師看不到題庫／設定／資料管理／題庫防護，這些只有管理員能改 */
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 /* 單元名稱依老師自己的課本版本顯示（適康／適翰／適南），沒設定版本就是依課綱編的通用目錄。
    小節代號沒有改，所以分析、錯題本的資料完全不用動，只是章節編號跟著課本走。 */
@@ -33,7 +33,8 @@ function teacherTour(){if(!NB.tour)return;
   {sel:tb("題庫"),title:"題庫",text:"匯入與編輯題目、題目屬性（學習表現、學習內容、難易度、認知層次、知識類型）。這一頁只有管理員看得到。"},
   {sel:tb("設定"),title:"設定",text:"系統參數與用量提醒。這一頁只有管理員看得到。"},
   {sel:tb("列印紀錄"),title:"列印紀錄",text:"查看出過的練習卷與列印次數。"},
-  {sel:tb("模擬考紀錄"),title:"模擬考紀錄",text:"查看學生的模擬考成績與作答紀錄。"}])}
+  {sel:tb("模擬考紀錄"),title:"模擬考紀錄",text:"查看學生的模擬考成績與作答紀錄。"},
+  {sel:tb("題庫防護"),title:"題庫防護",text:"看今天誰取得最多題目、誰被自動暫停，也可以手動暫停或解除。這一頁只有管理員看得到。"}])}
 function go(){try{return go0()}finally{teacherTour()}}function go0(){if(!TABS.some(function(t){return t[0]===TAB})){TAB="overview";try{history.replaceState(null,"","#overview")}catch(e){}}document.title="老師後台・"+(TABS.filter(function(t){return t[0]===TAB})[0]||[0,""])[1]+"｜數光島筆記本"; /* 記在瀏覽器裡的分頁已不存在、或老師沒有權限時，回到班級分析 */
  shell();var ctx={sheet:sheet,go:go,tab:tab};
  if(TAB==="overview")return load(CLS);
@@ -124,6 +125,6 @@ var swapped=false;
 function after(){if(!M.U&&M.err==="no_subject"&&!swapped){var ok=(M.errX&&M.errX.subjects||[]).filter(function(k){return M.SUBJ[k]&&k!==M.subj});if(ok.length){swapped=true;M.setSubj(ok[0]);return M.boot().then(after)}}
  start()}
 shell(1);app.appendChild(h('<p class="meta" style="text-align:center;margin-top:3em">載入中…</p>'));
-function start(){if(M.U&&!M.U.admin){TABS=TABS_ALL.filter(function(t){return t[0]!=="bank"&&t[0]!=="settings"&&t[0]!=="data"&&t[0]!=="reports"&&t[0]!=="books"});if(TAB==="bank"||TAB==="settings"||TAB==="data"||TAB==="reports"||TAB==="books")TAB="overview"}if(!M.U&&M.err==="no_subject")return msg("你的帳號沒有開通可以在這裡使用的科目，請聯絡管理員。");if(!M.U)return msg("請先用老師的 Google 帳號登入學員專區。");if(M.U.expired||(M.acct&&M.acct.expired))return expiredMsg();if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");READY=true;go()}
+function start(){if(M.U&&!M.U.admin){TABS=TABS_ALL.filter(function(t){return t[0]!=="bank"&&t[0]!=="settings"&&t[0]!=="data"&&t[0]!=="reports"&&t[0]!=="books"&&t[0]!=="guard"});if(TAB==="bank"||TAB==="settings"||TAB==="data"||TAB==="reports"||TAB==="books"||TAB==="guard")TAB="overview"}if(!M.U&&M.err==="no_subject")return msg("你的帳號沒有開通可以在這裡使用的科目，請聯絡管理員。");if(!M.U)return msg("請先用老師的 Google 帳號登入學員專區。");if(M.U.expired||(M.acct&&M.acct.expired))return expiredMsg();if(M.U.role!=="teacher")return msg("只有老師可以使用這個頁面。");READY=true;go()}
 M.boot().then(after);
 })();

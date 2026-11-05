@@ -155,6 +155,29 @@
     var out = []; secs.forEach(function (sc, si) { out = out.concat(variant1(qs.filter(function (q) { return q.s === si; }), v + si * 7)); }); return out;
   }
 
+  /* ---- 隱形指紋（零寬字元） ----
+     把卷號用「看不見的字元」編在每一題題目的後面：U+200B＝0、U+200C＝1，前後用 U+2060 當界標。
+     螢幕上看不到、印出來也不會有東西，但只要有人把題目「複製貼上」到別的網站、Word 或群組，
+     這段指紋會跟著一起走；貼回後台「題庫防護」的查詢框就能查出是哪一份卷、誰印的、什麼時候印的。
+     抓不到的情況：拿相機拍紙本，或自己重打一遍。那兩種情況靠的是卷面上本來就有的卷號與浮水印。 */
+  var FP0 = "\u200b", FP1 = "\u200c", FPE = "\u2060";
+  function fpEnc(pid) {
+    var s = String(pid || "").slice(0, 16), out = FPE, i, k, c;
+    if (!s) return "";
+    for (i = 0; i < s.length; i++) { c = s.charCodeAt(i) & 127; for (k = 6; k >= 0; k--) out += (c >> k) & 1 ? FP1 : FP0; }
+    return out + FPE;
+  }
+  /* 從貼進來的文字裡找出所有卷號（同一段文字可能混了好幾份卷） */
+  function fpDec(txt) {
+    var s = String(txt || ""), out = [], re = new RegExp(FPE + "([" + FP0 + FP1 + "]+)" + FPE, "g"), m;
+    while ((m = re.exec(s))) {
+      var bits = m[1], v = "", i, k, c;
+      for (i = 0; i + 7 <= bits.length; i += 7) { c = 0; for (k = 0; k < 7; k++) c = (c << 1) | (bits.charAt(i + k) === FP1 ? 1 : 0); if (c >= 32 && c < 127) v += String.fromCharCode(c); }
+      if (v && out.indexOf(v) < 0) out.push(v);
+    }
+    return out;
+  }
+
   /* 浮水印：整張卷斜著鋪滿重複的文字。是真正的文字，所以不管瀏覽器有沒有開「列印背景圖形」都印得出來 */
   function wmHtml(P, D) {
     var w = D.wm || {}, force = !!w.force, on = force || P.wm;
@@ -178,6 +201,7 @@
   function build(P, qs, nm, D) { /* D：{u, today, title, tx, qimg} */
     OPTLAB = P.optLab === "dot" ? "dot" : "paren";
     var cols = P.layout === "s1" ? 1 : 2, kinds = list(P).filter(function (x) { return x.k !== "matrix"; }), out = [], pw = pageCss(P).w, WM = wmHtml(P, D);
+    var FP = fpEnc(D.wm && D.wm.pid); /* 隱形指紋：每一題都埋一份，剪掉一題也還在 */
     if (!kinds.length && !P.matrix) return '<div class="fb no noprint">請至少勾選一種輸出卷別。</div>';
     var CURV = 0, CURK = "";
     /* QR code：正式出卷後（有卷號）才是真的；版面配置的草稿先放一個虛線框佔位置 */
@@ -262,7 +286,7 @@
     function totalPts() { return D.secs ? NB.score.total(ST) : 0; }
     function line(q) { return q.ty === "tf" || q.ty === "match" ? "" : '<span class="ln">答：' + (q.o ? "（　　）" : "＿＿＿＿＿＿＿＿＿") + "</span>"; }
     function ansBox(q) { return '<div class="pans"><b>答案：</b>' + ans(q) + (q.h ? "<br><small>詳解：" + D.tx(q.h) + "</small>" : "") + D.qimg(q.himg) + "</div>"; }
-    function body(q, withAns, bySec) { var tf = q.ty === "tf"; return (tf && !withAns ? '<span class="pbr">（　　）</span>' : "") + D.tx(q.q) + hint(q, bySec) + D.qimg(q.img) + opts(q) + (withAns ? ansBox(q) : line(q)); }
+    function body(q, withAns, bySec) { var tf = q.ty === "tf"; return (tf && !withAns ? '<span class="pbr">（　　）</span>' : "") + D.tx(q.q) + FP + hint(q, bySec) + D.qimg(q.img) + opts(q) + (withAns ? ansBox(q) : line(q)); }
     function qItem(arr, q, qi, withAns, bySec) {
       return "<li" + (q.gid ? ' class="gsub"' : "") + ">" + gHead(arr, qi) + meta(q, withAns ? "qa" : "q") + body(q, withAns, bySec) + "</li>";
     }
@@ -348,5 +372,5 @@
     var blob = new Blob(["﻿" + rows.map(function (r) { return r.map(c).join(","); }).join("\r\n")], { type: "text/csv;charset=utf-8" }), a = document.createElement("a");
     a.href = URL.createObjectURL(blob); a.download = "練習卷題目.csv"; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
-  window.NB = window.NB || {}; NB.pp = { variant: variant, list: list, printSheet: printSheet, panel: panel, build: build, csv: csv, applyPage: applyPage, clearPage: clearPage, device: device, guard: guard };
+  window.NB = window.NB || {}; NB.pp = { variant: variant, list: list, printSheet: printSheet, panel: panel, build: build, csv: csv, applyPage: applyPage, clearPage: clearPage, device: device, guard: guard, fpEnc: fpEnc, fpDec: fpDec };
 })();

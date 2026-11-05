@@ -709,5 +709,123 @@ function books(ctx){
  }
  load();
 }
-NB.tadmin={roster:roster,bank:bank,settings:settings,data:data,reports:reports,prints:prints,mocks:mocks,assign:assign,books:books};
+/* ---- 題庫防護：今天誰取得最多題目、誰被暫停 ----
+   題庫最怕的不是一次暴衝，是有人每天慢慢抓。伺服器會累計每個帳號「今天拿到幾題」，
+   超過上限就自動暫停 24 小時並記在這裡。這一頁是給人看的那一面：
+   看得出誰不太對、為什麼被暫停，也可以手動暫停或立刻解除（誤判時很重要）。 */
+/* 解出埋在題目裡的卷號（零寬字元：U+200B＝0、U+200C＝1，U+2060 當界標）。
+   和 printpaper.js 的 fpEnc 是一對；老師後台沒有載入 printpaper.js，所以這裡自己帶一份解碼。 */
+function fpDec(txt){
+ var FP0="\u200b",FP1="\u200c",FPE="\u2060";
+ var str=String(txt||""),out=[],re=new RegExp(FPE+"(["+FP0+FP1+"]+)"+FPE,"g"),m;
+ while((m=re.exec(str))){
+  var bits=m[1],v="",i,k,c;
+  for(i=0;i+7<=bits.length;i+=7){c=0;for(k=0;k<7;k++)c=(c<<1)|(bits.charAt(i+k)===FP1?1:0);if(c>=32&&c<127)v+=String.fromCharCode(c)}
+  if(v&&out.indexOf(v)<0)out.push(v)}
+ return out}
+
+function guard(ctx){
+ var s=ctx.sheet("題庫防護","每個帳號每天能取得的題數有上限，超過會自動暫停 24 小時。這一頁可以查看與手動處理。");
+ s.appendChild(h('<p class="meta">正在載入…</p>'));
+ function when(ms){if(!ms)return"無期限";var d=new Date(ms),p=function(x){return(x<10?"0":"")+x};
+  return(d.getMonth()+1)+"/"+d.getDate()+" "+p(d.getHours())+":"+p(d.getMinutes())}
+ function left(ms){if(!ms)return"要人工解除";var m=Math.ceil((ms-Date.now())/6e4);if(m<=0)return"已到期";
+  return m<60?"還有 "+m+" 分鐘":"還有 "+Math.ceil(m/60)+" 小時"}
+ function who(x){return esc((x.name||x.email)+(x.cls?"　"+x.cls+" 班":"")+(x.no?" "+x.no+" 號":""))}
+ function act(email,body,after){M.api("POST","/api/admin/guard/ban",Object.assign({email:email},body)).then(after,function(e){alert(errs(e))})}
+ function load(){
+  M.api("GET","/api/admin/guard").then(function(r){
+   s.innerHTML='<h2><span class="tag">題庫防護</span>每個帳號每天能取得的題數有上限，超過會自動暫停 24 小時。</h2>';
+   /* 目前的上限 */
+   s.appendChild(h('<p class="meta">目前上限：學生每天 <b>'+r.caps.student+'</b> 題、老師每天 <b>'+r.caps.teacher+'</b> 題、整份題庫下載每天 <b>'+r.caps.pull+'</b> 次。管理員不受限制。'
+    +'要調整請改 wrangler.toml 的 <code>SCRAPE_CAP</code>、<code>SCRAPE_CAP_TEACHER</code>、<code>BANK_PULL_CAP</code>（填 0 就是不限制）。</p>'));
+
+   /* 暫停中的帳號 */
+   var live=r.bans.filter(function(x){return x.live});
+   var bx=h('<div></div>');bx.appendChild(h('<h3>暫停中（'+live.length+'）</h3>'));
+   if(!live.length)bx.appendChild(h('<p class="meta">目前沒有帳號被暫停。</p>'));
+   else{
+    var t='<table class="tb"><tr><th>帳號</th><th>原因</th><th>開始</th><th>解除</th><th></th></tr>';
+    live.forEach(function(x){t+='<tr><td>'+who(x)+'<br><small class="soft">'+esc(x.email)+'</small></td>'
+     +'<td>'+(x.auto?'<b>自動</b>　':"管理員　")+esc(x.why||"")+'</td><td>'+when(x.ts)+'</td>'
+     +'<td>'+when(x.until)+'<br><small class="soft">'+left(x.until)+'</small></td>'
+     +'<td><button class="pen" data-off="'+esc(x.email)+'">解除</button></td></tr>'});
+    bx.appendChild(h(t+"</table>"));
+   }
+   s.appendChild(bx);
+
+   /* 今天的取用量 */
+   var hot=r.today.filter(function(x){return x.n>0});
+   var tx2=h('<div></div>');tx2.appendChild(h('<h3>今天取得的題數（'+esc(r.d)+'）</h3>'));
+   if(!hot.length)tx2.appendChild(h('<p class="meta">今天還沒有人取用題目。</p>'));
+   else{
+    var t2='<table class="tb"><tr><th>帳號</th><th class="pc">題數</th><th class="pc">用量</th><th class="pc">下載題庫</th><th class="pc">IP 數</th><th></th></tr>';
+    hot.forEach(function(x){
+     var cap=x.role==="teacher"?r.caps.teacher:r.caps.student,pc=cap?Math.min(100,Math.round(x.n/cap*100)):0;
+     /* IP 數偏多通常是帳號借給別人用（學校、家裡、手機網路大概 2～4 個） */
+     var warn=x.ipn>=5;
+     t2+='<tr><td>'+who(x)+'<br><small class="soft">'+esc(x.email)+(x.role==="teacher"?"・老師":"")+'</small></td>'
+      +'<td class="pc">'+x.n+(cap?' <small class="soft">/ '+cap+'</small>':"")+'</td>'
+      +'<td class="pc">'+(cap?'<div class="bktrack" style="min-width:60px"><i style="width:'+pc+'%"></i></div>'+pc+"%":"不限")+'</td>'
+      +'<td class="pc">'+(x.pulls||0)+'</td>'
+      +'<td class="pc'+(warn?' bad':"")+'" title="'+esc(x.ips)+'">'+x.ipn+(warn?" ⚠":"")+'</td>'
+      +'<td><button class="pen" data-ban="'+esc(x.email)+'">暫停 1 天</button></td></tr>'});
+    tx2.appendChild(h(t2+"</table>"));
+    tx2.appendChild(h('<p class="meta">「IP 數」是今天這個帳號用過幾個不同的網路位置。學校、家裡、手機網路加起來大概 2～4 個；'
+     +'出現 5 個以上（標 ⚠）常常是帳號借給別人用，可以點進「列印紀錄」對照看看。</p>'));
+   }
+   s.appendChild(tx2);
+
+   /* 手動暫停 */
+   var mf=h('<div class="ctl"><input class="in" placeholder="學生或老師的 email" style="min-width:16em">'
+    +'<select class="in"><option value="1">暫停 1 天</option><option value="7">暫停 7 天</option><option value="0">無期限（要人工解除）</option></select>'
+    +'<input class="in" placeholder="原因（會顯示給對方）" style="min-width:12em">'
+    +'<button class="pen go">暫停</button><button class="pen">解除</button></div>');
+   s.appendChild(h("<h3>手動處理</h3>"));s.appendChild(mf);
+   var em=mf.querySelector("input"),dd=mf.querySelector("select"),wy=mf.querySelectorAll("input")[1],bs=mf.querySelectorAll("button");
+   bs[0].onclick=function(){var e=em.value.trim();if(!e)return alert("請填 email");
+    if(!confirm("要暫停「"+e+"」嗎？對方會看到暫停原因與解除時間。"))return;
+    act(e,{days:+dd.value,why:wy.value.trim()||"管理員手動暫停"},load)};
+   bs[1].onclick=function(){var e=em.value.trim();if(!e)return alert("請填 email");act(e,{off:1},load)};
+   s.appendChild(h('<p class="meta">暫停期間對方不能練習、考試或出卷，畫面會說明什麼時候自動恢復、以及可以找管理員解除。'
+    +'自動暫停一律只有 24 小時，所以誤判的話隔天就會自己好，你也可以在這裡立刻解除。</p>'));
+
+   /* 查外流來源：把外流的題目文字貼進來，解出埋在裡面的卷號 */
+   s.appendChild(h("<h3>查外流來源</h3>"));
+   s.appendChild(h('<p class="meta">每一份印出來的卷子，都會在每一題後面埋一組「看不見的字元」記下卷號。'
+    +'把外流的題目<b>複製貼上</b>到下面（要用複製，不能用截圖或重打），就能查出是哪一份卷、誰印的。'
+    +'貼上去之後畫面上看起來一樣，因為那些字元本來就看不見。</p>'));
+   var fp=h('<div><textarea class="in" rows="4" placeholder="把外流的題目貼在這裡" style="width:100%"></textarea>'
+    +'<div class="ctl"><button class="pen go">查卷號</button></div><div class="fpout"></div></div>');
+   s.appendChild(fp);
+   var fta=fp.querySelector("textarea"),fbt=fp.querySelector("button"),fout=fp.querySelector(".fpout");
+   fbt.onclick=function(){
+    var ids=fpDec(fta.value);
+    if(!ids.length){fout.innerHTML='<div class="fb no">這段文字裡沒有找到指紋。可能是：用截圖或拍照流出的、被重新打過一遍、'
+     +'經過會清掉特殊字元的程式（有些聊天軟體會），或是在這個功能上線前印的卷子。這種情況請改用卷面上的卷號與浮水印查。</div>';return}
+    fout.innerHTML='<div class="fb ok">找到卷號：<b>'+ids.map(esc).join("、")+"</b>，正在查紀錄…</div>";
+    var box=h('<div></div>');fout.appendChild(box);
+    ids.forEach(function(id){
+     M.api("GET","/api/admin/print?id="+encodeURIComponent(id)).then(function(r){
+      box.appendChild(h('<table class="tb"><tr><th>卷號</th><td>'+esc(id)+'</td></tr>'
+       +'<tr><th>印的人</th><td>'+esc((r.name||"")+"　"+(r.cls&&r.cls!=="all"?r.cls+" 班 "+r.no+" 號":"")+"　"+(r.email||""))+'</td></tr>'
+       +'<tr><th>身分</th><td>'+esc(r.role==="teacher"?"老師":"學生")+'</td></tr>'
+       +'<tr><th>時間</th><td>'+when(r.ts)+'</td></tr>'
+       +'<tr><th>來源</th><td>'+esc(r.src||"")+'</td></tr>'
+       +'<tr><th>IP</th><td>'+esc((r.ip||"")+(r.net?"（"+r.net+"）":"")+(r.place?"　"+r.place:""))+'</td></tr>'
+       +'<tr><th>裝置</th><td>'+esc(r.brief||"")+'</td></tr>'
+       +'<tr><th>題數</th><td>'+(r.n||0)+' 題</td></tr></table>'));
+     },function(e){box.appendChild(h('<div class="fb no">卷號 '+esc(id)+"：查不到紀錄（"+esc(errs(e))+"）。列印紀錄可能已經超過保留天數被清掉了。</div>"))});
+    });
+   };
+
+   s.querySelectorAll("button[data-off]").forEach(function(b){b.onclick=function(){act(b.dataset.off,{off:1},load)}});
+   s.querySelectorAll("button[data-ban]").forEach(function(b){b.onclick=function(){
+    if(!confirm("要暫停「"+b.dataset.ban+"」1 天嗎？"))return;act(b.dataset.ban,{days:1,why:"管理員手動暫停"},load)}});
+  },function(e){s.innerHTML='<h2><span class="tag">題庫防護</span></h2>';s.appendChild(h('<div class="fb no">'+esc(errs(e))+"</div>"))});
+ }
+ load();
+}
+
+NB.tadmin={roster:roster,bank:bank,settings:settings,data:data,reports:reports,prints:prints,mocks:mocks,assign:assign,books:books,guard:guard};
 })();

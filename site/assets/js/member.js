@@ -55,7 +55,7 @@ M.api=function(method,path,body){
   if(body){o.headers["Content-Type"]="application/json";o.body=JSON.stringify(body)}
   return fetch(CFG.api+path,o)}).then(function(r){return r.json().then(function(j){
    if(!r.ok){var e=new Error(j.err||"http");e.code=j.err||"http";e.status=r.status;
-    if(e.code==="other_device"&&!M._kick){M._kick=1;M.kicked()}if(j.subjects)e.subjects=j.subjects;if(j.subj)e.subj=j.subj;throw e}return j},function(){var e=new Error("bad");e.code="net";throw e})},function(e){if(e.code)throw e;var x=new Error("net");x.code="net";throw x})};
+    if(e.code==="other_device"&&!M._kick){M._kick=1;M.kicked()}if(j.subjects)e.subjects=j.subjects;if(j.subj)e.subj=j.subj;if(j.until!==undefined)e.until=j.until;if(j.why)e.why=j.why;if(j.cap!==undefined)e.cap=j.cap;throw e}return j},function(){var e=new Error("bad");e.code="net";throw e})},function(e){if(e.code)throw e;var x=new Error("net");x.code="net";throw x})};
 
 /* 被別的裝置踢掉：清乾淨並回登入頁，附上原因 */
 M.kicked=function(){try{sessionStorage.setItem("nb-kick","1")}catch(e){}
