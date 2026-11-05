@@ -42,7 +42,8 @@
 "use strict";
 var NB = window.NB || (window.NB = {}), K = "nb-edition";
 var CN = "一二三四五六七八九十十一十二".match(/十[一二]|./g);
-var KEYS = ["kang", "nan", "han"], FALL = { kang: "適康版", nan: "適南版", han: "適翰版" };
+/* 顯示順序：康軒→翰林→南一（所有選單都照這個順序） */
+var KEYS = ["kang", "han", "nan"], FALL = { kang: "適康版", han: "適翰版", nan: "適南版" };
 function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
 
 var E = NB.ed = {}, cache = {}, bc = { t: null, byId: {} }, all = null, subs = [];
@@ -54,7 +55,7 @@ E.ready = function () { return !!window.EDITIONS; };
 /* 版本名稱：伺服器給的優先（以後要改叫法，後端改一個地方就好），讀不到才用這裡的 */
 E.name = function (k) { var M = NB.member, s = M && M.U && M.U.edNames; return (s && s[k]) || FALL[k] || k; };
 /* 版本字母：康軒 k、南一 n、翰林 h */
-E.sfx = function (k) { var d = SRC()[k]; return d && typeof d.sfx === "string" ? d.sfx : { kang: "k", nan: "n", han: "h" }[k] || ""; };
+E.sfx = function (k) { var d = SRC()[k]; return d && typeof d.sfx === "string" ? d.sfx : { kang: "k", han: "h", nan: "n" }[k] || ""; };
 /* 從代號反推版本：3un-1.1 → nan。沒有字母的 3u-1.1 是通用目錄，不屬於任何版本，回空字串 */
 E.edOf = function (id) {
   var m = /^([1-6])([ud])([a-z])-/.exec(String(id || ""));
@@ -201,6 +202,24 @@ E.byId = function (id) {
   return m || E.find(id) || base()[id] || null;
 };
 E.title = function (id) { var o = E.byId(id); return o ? o.sem + " " + o.num + " " + o.title : id; };
+/* 所有選單共用的排序規則：年級小到大 → 上學期在前 → 章小到大 → 節小到大 →
+   版本康軒、翰林、南一。數學排在理化前面。
+   不能用字串排序——"3uk-10.1" 用字串排會跑到 "3uk-2.1" 前面。
+   傳進來的可以是小節代號（3uk-10.2）也可以是章的代號（3uk-10）。 */
+var EDORD = { "": 0, k: 1, h: 2, n: 3 };
+function parts(id) {
+  var s = String(id == null ? "" : id);
+  var m = /^([1-6])([ud])([a-z]?)-(\d+)(?:\.(\d+))?$/.exec(s);
+  if (m) return [0, +m[1], m[2] === "u" ? 0 : 1, +m[4], m[5] ? +m[5] : 0, EDORD[m[3]] === undefined ? 9 : EDORD[m[3]]];
+  var v = /^v([3-6])-(\d+|x)\.(\d+)$/.exec(s);          /* 國中理化：v3-4.2、跨科 v3-x.1（跨科排最後） */
+  if (v) return [1, +v[1], 0, v[2] === "x" ? 99 : +v[2], +v[3], 0];
+  return [9, 0, 0, 0, 0, 0];
+}
+E.cmp = function (a, b) {
+  var x = parts(a), y = parts(b);
+  for (var i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i];
+  return a < b ? -1 : a > b ? 1 : 0;
+};
 E.sortIds = function (a) {
   if (!E.on()) return NB.sortIds ? NB.sortIds(a) : a.slice();
   var ix = {}; build(E.cur()).flat.forEach(function (o, i) { ix[o.id] = i; });

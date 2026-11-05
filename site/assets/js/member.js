@@ -42,15 +42,27 @@ M.has=function(id){return(M.units||[]).indexOf(id)>=0};
 /* auth.js（模組）載入完成後會呼叫這個；12 秒還沒好就當作無法登入 */
 M.ready=new Promise(function(res){window.__nbAuthResolve=res;setTimeout(function(){res(null)},12000)});
 
+/* 這台瀏覽器的裝置碼：同一個帳號只能有一台在線，新登入會把舊的踢掉。
+   存在 localStorage，換瀏覽器或清掉資料就是新的一台。 */
+var DK="nb-dev";
+function devId(){var v=ls(DK);if(!v){v=(Date.now().toString(36)+Math.random().toString(36).slice(2,10));ls(DK,v)}return v}
+M.devId=devId;
 M.api=function(method,path,body){
  if(!CFG.api)return Promise.reject(Object.assign(new Error("noapi"),{code:"noapi"}));
  if(!M.auth||!M.auth.user())return Promise.reject(Object.assign(new Error("nologin"),{code:"nologin"}));
  return M.auth.token().then(function(tok){
-  var o={method:method,headers:{Authorization:"Bearer "+tok,"X-Subject":M.subj}};
+  var o={method:method,headers:{Authorization:"Bearer "+tok,"X-Subject":M.subj,"X-Device":devId()}};
   if(body){o.headers["Content-Type"]="application/json";o.body=JSON.stringify(body)}
   return fetch(CFG.api+path,o)}).then(function(r){return r.json().then(function(j){
-   if(!r.ok){var e=new Error(j.err||"http");e.code=j.err||"http";e.status=r.status;if(j.subjects)e.subjects=j.subjects;if(j.subj)e.subj=j.subj;throw e}return j},function(){var e=new Error("bad");e.code="net";throw e})},function(e){if(e.code)throw e;var x=new Error("net");x.code="net";throw x})};
+   if(!r.ok){var e=new Error(j.err||"http");e.code=j.err||"http";e.status=r.status;
+    if(e.code==="other_device"&&!M._kick){M._kick=1;M.kicked()}if(j.subjects)e.subjects=j.subjects;if(j.subj)e.subj=j.subj;throw e}return j},function(){var e=new Error("bad");e.code="net";throw e})},function(e){if(e.code)throw e;var x=new Error("net");x.code="net";throw x})};
 
+/* 被別的裝置踢掉：清乾淨並回登入頁，附上原因 */
+M.kicked=function(){try{sessionStorage.setItem("nb-kick","1")}catch(e){}
+ return (M.logout()||Promise.resolve()).catch(function(){}).then(function(){
+  location.href=(document.body.getAttribute("data-root")||"./")+"member.html"})};
+/* 登入後占位 */
+M.claim=function(){return M.api("POST","/api/session/claim",{}).catch(function(){return null})};
 M.load=function(){return M.api("GET","/api/me").then(function(r){
  M.U=r.user;M.D=r.data;M.STK=r.stk;M.prog=r.prog||{};M.acct=r.acct||{};M.units=r.units;M.gens=r.gens;M.T=r.today;M.cfg=r.cfg;M.step=r.cfg.step;
  ls(CKS(),JSON.stringify({n:r.user.name,lv:M.lv(r.data),pts:r.data.pts,r:r.user.admin?"admin":r.user.role}));
@@ -62,10 +74,17 @@ M.forceOut=function(){var f=ls("nb-force-out");if(!f)return Promise.resolve();ls
 M.boot=function(){M.err=null;M.errX=null;return M.forceOut().then(M.loadCat).then(function(){return M.ready}).then(function(A){
  M.auth=A;if(!A){M.U=null;M.err=CFG.firebase&&CFG.firebase.apiKey?"noauth":"noconfig";return}
  if(!A.user()){M.U=null;return}
- return M.load().catch(function(e){M.U=null;M.err=e.code||"net";M.errX=e})})};
+ return M.load().then(function(){
+   /* 登入後把裝置位占下來：同一個帳號在別台登入時，那一台的下一個請求就會被擋 */
+   return M.claim().then(function(){},function(){});
+  }).catch(function(e){M.U=null;M.err=e.code||"net";M.errX=e})})};
 M.setData=function(D,pg){M.D=D;if(pg)M.prog=pg;ls(CKS(),JSON.stringify({n:M.U.name,lv:M.lv(D),pts:D.pts}))};
 M.signIn=function(){return M.auth.signIn()};
-M.logout=function(){ls(CK,null);ls(CK+"-sci",null);M.U=null;M.D=null;return M.auth?M.auth.signOut():Promise.resolve()};
+M.logout=function(){
+ var done=function(){ls(CK,null);ls(CK+"-sci",null);M.U=null;M.D=null;return M.auth?M.auth.signOut():Promise.resolve()};
+ /* 自己按登出就把裝置位放掉，換台裝置不用等 */
+ if(M.auth&&M.auth.user())return M.api("POST","/api/session/release",{}).catch(function(){}).then(done);
+ return done()};
 
 /* ---- 與首頁、單元頁的接點（這兩頁不載入 Firebase，只讀本機的「顯示用」資訊） ---- */
 M.cur=function(){try{return JSON.parse(ls(CK)||"null")}catch(e){return null}};

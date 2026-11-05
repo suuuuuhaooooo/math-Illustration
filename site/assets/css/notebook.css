@@ -717,3 +717,24 @@ h1.title .subj-now::before{content:"・"}@media (max-width:640px){h1.title .subj
 
 /* 贊助（珍奶）圖示：限制大小，避免 SVG 撐滿容器 */
 .dn-foot svg,.nbm-it svg,.nbm-btn svg,.nbm-dn svg{flex:none;vertical-align:-.2em;display:inline-block}
+
+/* ───── 付費端：數字一律用 LaTeX（KaTeX）的數學字體 ─────
+   做法是另外宣告一個只含數字的字族 NBNum，再把它排在每個字族堆疊的最前面。
+   unicode-range 限定 U+0030–0039，所以瀏覽器只會用它來畫 0～9，
+   中文和英文仍然走原本的字體，不會整頁變樣。
+   只掛在 member.html／teacher.html（data-page="member"），免費頁面不受影響。 */
+@font-face{font-family:NBNum;src:url("../vendor/katex/fonts/KaTeX_Main-Regular.woff2") format("woff2"),url("../vendor/katex/fonts/KaTeX_Main-Regular.woff") format("woff");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0030-0039}
+@font-face{font-family:NBNum;src:url("../vendor/katex/fonts/KaTeX_Main-Bold.woff2") format("woff2"),url("../vendor/katex/fonts/KaTeX_Main-Bold.woff") format("woff");font-weight:500 900;font-style:normal;font-display:swap;unicode-range:U+0030-0039}
+@font-face{font-family:NBNum;src:url("../vendor/katex/fonts/KaTeX_Main-Italic.woff2") format("woff2"),url("../vendor/katex/fonts/KaTeX_Main-Italic.woff") format("woff");font-weight:400;font-style:italic;font-display:swap;unicode-range:U+0030-0039}
+body[data-page="member"]{
+  --sans:NBNum,"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei","Noto Sans CJK TC",sans-serif;
+  --serif:NBNum,"LXGW WenKai TC","Kaiti TC","BiauKai","DFKai-SB","標楷體",serif;
+  --hand:NBNum,"Iansui","LXGW WenKai TC","Kaiti TC","DFKai-SB","標楷體",cursive;
+}
+/* 表單元件不吃繼承來的字體，要各自指定一次 */
+body[data-page="member"] input,body[data-page="member"] select,body[data-page="member"] textarea,
+body[data-page="member"] button,body[data-page="member"] option{font-family:var(--sans)}
+/* 等寬字的地方（代號、題目 id）也讓數字走 KaTeX，欄位才不會對不齊 */
+body[data-page="member"] code,body[data-page="member"] kbd,body[data-page="member"] samp,
+body[data-page="member"] .mono,body[data-page="member"] .sm{font-family:NBNum,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+/* KaTeX 排出來的數學式本來就用這套字，而且它的規則下在元素上，不會被上面的變數蓋掉，所以這裡不用處理 */

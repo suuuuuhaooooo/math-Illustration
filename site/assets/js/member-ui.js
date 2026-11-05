@@ -107,6 +107,8 @@ function subjMsg(e){var have=(e&&e.subjects)||[],cur=M.SUBJ[M.subj]||M.subj,o=ha
  return t}
 function login(){
  try{if(sessionStorage.getItem("nb-idle")){sessionStorage.removeItem("nb-idle");setTimeout(function(){var f=document.querySelector(".fb");if(f){f.className="fb no";f.textContent="因為閒置太久，已為了帳號安全自動登出，請重新登入。"}},0)}}catch(e){}
+ /* 被別台裝置踢掉：一個帳號只能一台在線 */
+ try{if(sessionStorage.getItem("nb-kick")){sessionStorage.removeItem("nb-kick");setTimeout(function(){var f=document.querySelector(".fb");if(f){f.className="fb no";f.textContent="這個帳號剛剛在另一台裝置登入了。一個帳號同時只能在一台裝置使用，所以這一台已經登出。如果不是你本人操作，請盡快告訴老師或管理員。"}},0)}}catch(e){}
  var s=sheet("登入","僅供班內學員使用"),fb=h('<div class="fb"></div>'),em=M.auth&&M.auth.user()?M.auth.user().email:"";
  s.appendChild(h("<p>請使用老師登記的 Google 帳號登入平台。登入後，即可使用小測驗、模擬卷、錯題本、學習進度、貼紙獎勵、每日一題、列印練習卷及排行榜等功能。上述功能皆須登入後方可使用。</p>"));
  s.appendChild(h('<p class="meta">登入即表示你已閱讀並同意<a href="terms.html" target="_blank" rel="noopener">使用者條款</a>與<a href="privacy.html" target="_blank" rel="noopener">隱私權政策</a>。未滿 18 歲請家長或監護人一起閱讀。</p>'));

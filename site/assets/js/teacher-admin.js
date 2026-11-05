@@ -140,20 +140,35 @@ function pickCsv(ta,note,keep){var w=h('<div class="ctl"></div>'),b=h('<button c
 var COLS=["id","unit","type","lv","q","options","answer","hint","diag","img","himg","print","daily","mock","active"];
 function resize(file,cb){var img=new Image(),u=URL.createObjectURL(file);img.onload=function(){var m=1000,k=Math.min(1,m/Math.max(img.width,img.height)),q=.88,c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);
   var d;do{d=c.toDataURL("image/jpeg",q).split(",")[1];q-=.12}while(d.length>540000&&q>.3);URL.revokeObjectURL(u);cb(d)};img.onerror=function(){cb(null)};img.src=u}
-function bkCss(){if(document.getElementById("bkcss"))return;var st=document.createElement("style");st.id="bkcss";st.textContent=/* 各單元題數表：固定欄寬。預設的 auto 版面會讓欄寬跟著「全表最長的節名」跑，   南一最長的節名有 33 字、翰林短很多，同一張表在不同版本就會長得不一樣（欄位換行、列高不同）。   固定下來之後三個版本的畫面就一致了。 */".bkun-t{table-layout:fixed;width:100%}.bkun-t th,.bkun-t td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bkun-t th:nth-child(1),.bkun-t td:nth-child(1){width:7.5em}.bkun-t th:nth-child(2),.bkun-t td:nth-child(2){width:5.5em}.bkun-t th:nth-child(3),.bkun-t td:nth-child(3){white-space:normal;word-break:break-word}.bkun-t th.n,.bkun-t td.n{width:4em;text-align:right}@media (max-width:720px){.bkun-t th:nth-child(1),.bkun-t td:nth-child(1){width:6.5em}.bkun-t th:nth-child(2),.bkun-t td:nth-child(2){width:4.5em}.bkun-t th.n,.bkun-t td.n{width:3.2em}}.bkwrap{max-height:68vh;overflow:auto;border:1.5px solid var(--line);border-radius:10px}.bkwrap .tb{margin:0}.bkwrap .tb th{position:sticky;top:0;z-index:2;background:var(--paper,#fff);box-shadow:0 1.5px 0 var(--line)}.bkbar{position:sticky;top:0;z-index:5;background:var(--paper,#fff);padding:8px 0;border-bottom:1.5px solid var(--line)}.bkkpi{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 10px}.bkkpi div{flex:1;min-width:92px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;text-align:center}.bkkpi b{display:block;font-size:1.35rem;font-variant-numeric:tabular-nums}.bkkpi span{font-size:.82rem;color:var(--soft)}.bkun summary{cursor:pointer;font-weight:700;margin:8px 0}.bkun tr[data-u]{cursor:pointer}.bkun tr[data-u]:hover td{background:color-mix(in srgb,var(--p2,#888) 10%,transparent)}.tb td.n,.tb th.n{text-align:right;font-variant-numeric:tabular-nums}";st.textContent+='.bkdash{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0 12px}.bkhead{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center}.bkbig{flex:1 1 220px;min-width:200px}.bkbig b{font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums;margin-right:6px}.bkbig>span{font-size:1rem;color:var(--soft)}.bktrack{height:8px;border-radius:4px;background:var(--line);margin:8px 0 4px;overflow:hidden}.bktrack i,.bkrow .bt i{display:block;height:100%;background:var(--p2,#6b8e5a);border-radius:4px;transition:width .25s}.bkbig small{color:var(--soft)}.bkmini{display:flex;flex-wrap:wrap;gap:8px;flex:2 1 320px}.bkmini div{flex:1;min-width:96px;border:1.5px solid var(--line);border-radius:10px;padding:6px 8px;text-align:center}.bkmini b{display:block;font-size:1.25rem;font-variant-numeric:tabular-nums}.bkmini span{display:block;font-size:.8rem;line-height:1.25;color:var(--soft)}.bkmini .warn{border-color:var(--p1,#b4452f)}.bkmini .warn b{color:var(--p1,#b4452f)}.bkcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 22px;margin-top:12px}.bkcols h4{margin:0 0 6px;font-size:.92rem;color:var(--soft)}.bkrow{display:grid;grid-template-columns:5.2em 1fr 4.6em;gap:8px;align-items:center;padding:3px 4px;border-radius:8px;cursor:pointer}.bkrow:hover,.bkrow.on{background:color-mix(in srgb,var(--p2,#888) 14%,transparent)}.bkrow.on .bl{font-weight:700}.bkrow .bt{height:10px;border-radius:5px;background:var(--line);overflow:hidden}.bkrow .bn{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}.bkrow small{font-weight:400;color:var(--soft)}.bkchips{display:flex;flex-wrap:wrap;gap:6px}.bkchip{font:inherit;border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:3px 10px;cursor:pointer;color:inherit}.bkchip.on{background:var(--p2,#6b8e5a);color:#fff;border-color:transparent}.bkwrap.short{max-height:40vh}.bkun tr.sel td{background:color-mix(in srgb,var(--p2,#888) 18%,transparent);font-weight:700}';document.head.appendChild(st)}
+function bkCss(){if(document.getElementById("bkcss"))return;var st=document.createElement("style");st.id="bkcss";st.textContent=/* 篩選列的下拉選單固定寬度：預設寬度會跟著目前選到的文字跑，換個版本整排就位移、很難按。
+     各單元題數表也固定欄寬：auto 版面會讓欄寬跟著「全表最長的節名」跑，南一最長 33 字、
+     翰林短很多，同一張表在不同版本就長得不一樣。兩個都固定下來，畫面才不會跳。 */
+  ".bkbar{align-items:center}.bkbar{align-items:center}.bkbar select{width:9.5em;min-width:9.5em;max-width:9.5em;text-overflow:ellipsis}.bkbar select.wide{width:17em;min-width:17em;max-width:17em}.bkbar input[type=search],.bkbar input[type=text]{width:15em;min-width:15em}@media (max-width:720px){.bkbar select{width:7.6em;min-width:7.6em;max-width:7.6em}.bkbar select.wide{width:11em;min-width:11em;max-width:11em}.bkbar input[type=search],.bkbar input[type=text]{width:100%;min-width:0}}.bkun-t{table-layout:fixed;width:100%}.bkun-t th,.bkun-t td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bkun-t th:nth-child(1),.bkun-t td:nth-child(1){width:7.5em}.bkun-t th:nth-child(2),.bkun-t td:nth-child(2){width:5.5em}.bkun-t th:nth-child(3),.bkun-t td:nth-child(3){white-space:normal;word-break:break-word}.bkun-t th.n,.bkun-t td.n{width:4em;text-align:right}@media (max-width:720px){.bkun-t th:nth-child(1),.bkun-t td:nth-child(1){width:6.5em}.bkun-t th:nth-child(2),.bkun-t td:nth-child(2){width:4.5em}.bkun-t th.n,.bkun-t td.n{width:3.2em}}.bkwrap{max-height:68vh;overflow:auto;border:1.5px solid var(--line);border-radius:10px}.bkwrap .tb{margin:0}.bkwrap .tb th{position:sticky;top:0;z-index:2;background:var(--paper,#fff);box-shadow:0 1.5px 0 var(--line)}.bkbar{position:sticky;top:0;z-index:5;background:var(--paper,#fff);padding:8px 0;border-bottom:1.5px solid var(--line)}.bkkpi{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 10px}.bkkpi div{flex:1;min-width:92px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;text-align:center}.bkkpi b{display:block;font-size:1.35rem;font-variant-numeric:tabular-nums}.bkkpi span{font-size:.82rem;color:var(--soft)}.bkun summary{cursor:pointer;font-weight:700;margin:8px 0}.bkun tr[data-u]{cursor:pointer}.bkun tr[data-u]:hover td{background:color-mix(in srgb,var(--p2,#888) 10%,transparent)}.tb td.n,.tb th.n{text-align:right;font-variant-numeric:tabular-nums}";st.textContent+='.bkdash{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0 12px}.bkhead{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center}.bkbig{flex:1 1 220px;min-width:200px}.bkbig b{font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums;margin-right:6px}.bkbig>span{font-size:1rem;color:var(--soft)}.bktrack{height:8px;border-radius:4px;background:var(--line);margin:8px 0 4px;overflow:hidden}.bktrack i,.bkrow .bt i{display:block;height:100%;background:var(--p2,#6b8e5a);border-radius:4px;transition:width .25s}.bkbig small{color:var(--soft)}.bkmini{display:flex;flex-wrap:wrap;gap:8px;flex:2 1 320px}.bkmini div{flex:1;min-width:96px;border:1.5px solid var(--line);border-radius:10px;padding:6px 8px;text-align:center}.bkmini b{display:block;font-size:1.25rem;font-variant-numeric:tabular-nums}.bkmini span{display:block;font-size:.8rem;line-height:1.25;color:var(--soft)}.bkmini .warn{border-color:var(--p1,#b4452f)}.bkmini .warn b{color:var(--p1,#b4452f)}.bkcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 22px;margin-top:12px}.bkcols h4{margin:0 0 6px;font-size:.92rem;color:var(--soft)}.bkrow{display:grid;grid-template-columns:5.2em 1fr 4.6em;gap:8px;align-items:center;padding:3px 4px;border-radius:8px;cursor:pointer}.bkrow:hover,.bkrow.on{background:color-mix(in srgb,var(--p2,#888) 14%,transparent)}.bkrow.on .bl{font-weight:700}.bkrow .bt{height:10px;border-radius:5px;background:var(--line);overflow:hidden}.bkrow .bn{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}.bkrow small{font-weight:400;color:var(--soft)}.bkchips{display:flex;flex-wrap:wrap;gap:6px}.bkchip{font:inherit;border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:3px 10px;cursor:pointer;color:inherit}.bkchip.on{background:var(--p2,#6b8e5a);color:#fff;border-color:transparent}.bkwrap.short{max-height:40vh}.bkun tr.sel td{background:color-mix(in srgb,var(--p2,#888) 18%,transparent);font-weight:700}';document.head.appendChild(st)}
 /* 題庫管理要同時看得到三家的單元：題目的 unit 欄就是靠代號分家的
    （3u-1.1 康軒＝通用、3un-1.1 南一、3uh-1.1 翰林），
    所以這裡用三個版本的目錄聯集，章篩選（代號 . 前面那一段）在各版裡還是對得起來。 */
 function edFlat(){return window.NB&&NB.ed&&NB.ed.ready()?NB.ed.allFlat():NB.flat}
+/* 選單一律用這個排序：年級→學期→章→節→版本（康軒、翰林、南一）。
+   不能用 .sort() 字串排，"3uk-10.1" 會跑到 "3uk-2.1" 前面。 */
+function uSort(a){return window.NB&&NB.ed&&NB.ed.cmp?a.slice().sort(NB.ed.cmp):a.slice().sort()}
 function edOf(u){return window.NB&&NB.ed?NB.ed.edOf(u):""}
 function edNm(k){return window.NB&&NB.ed&&k?NB.ed.name(k):""}
 /* 代號 → 小節 的索引：各單元題數表有上千列，每一列都線性搜尋會把畫面拖垮 */
 var UIX=null,UIXn=0;
 function unitIx(){var a=edFlat();if(!UIX||UIXn!==a.length){UIX={};a.forEach(function(o){UIX[o.id]=o});UIXn=a.length}return UIX}
 function unitInfo(u){var o=unitIx()[u];return o?{name:o.title,ch:o.ch.name,sem:o.sem,num:o.num,ed:edOf(u)}:{name:"（目錄找不到）",ch:"",sem:"",num:"",ed:""}}
+/* 題庫快取：兩萬多題抓一次要好幾百 KB，而且伺服器那邊得把整張表讀進記憶體。
+   切分頁、關掉再回來題庫頁，以前每次都重抓一次；現在帶上次拿到的版本號，
+   版本沒變伺服器就只回一個 same:true，整包不會再送一次。
+   任何寫入（匯入、存一題、刪題）都會推進版本，所以資料不會過期。 */
+var BK = { ver: "", rows: null, legacy: false, subj: "" };
+function bankReset(){ BK = { ver: "", rows: null, legacy: false, subj: "" }; }
 function bank(ctx){
  bkCss();var s=ctx.sheet("題庫","固定題；沒有的單元會自動用「隨機產生器」出題");
- M.api("GET","/api/admin/bank").then(function(r){
+ var q=(BK.rows&&BK.subj===M.subj&&BK.ver)?"?v="+encodeURIComponent(BK.ver):"";
+ M.api("GET","/api/admin/bank"+q).then(function(r){
+  if(r.same&&BK.rows&&BK.subj===M.subj){r={rows:BK.rows,legacy:BK.legacy,ver:BK.ver,subj:BK.subj}}
+  else{BK={ver:r.ver||"",rows:r.rows||[],legacy:!!r.legacy,subj:M.subj}}
   ctx.box=s;migrateBanner(ctx,r.legacy);var rows=r.rows,fb=h('<div class="fb"></div>'),list=h("<div></div>");
   var bar=h('<div class="ctl wrapctl"></div>'),fc=document.createElement("select"),fu=document.createElement("select"),ft=sel([["","全部題型"],["num","數值題"],["choice","選擇題"],["text","文字題"],["tf","是非題"],["multi","勾選題"],["match","連連看"]],""),fl=sel([["","全部難度"],["1","難度 1 基礎"],["2","難度 2 應用"],["3","難度 3 挑戰"]],""),fk=sel([["","全部用途"],["print","可出卷"],["daily","可當每日一題"],["mock","可放模擬卷"],["off","已停用"],["img","有附圖"],["grp","題組"]],""),fd=sel([["","全部難易度"],["易","難易度：易"],["中","難易度：中"],["難","難易度：難"],["none","尚未標屬性"]],""),fg=sel([["","全部認知層次"],["知識","知識"],["理解","理解"],["應用","應用"],["分析","分析"],["評鑑","評鑑"],["創造","創造"]],""),fq=inp("","搜尋題目文字、id 或題組ID"),nw=h('<button class="pen go">＋ 新增題目</button>');
   /* 版本篩選：題庫按代號分家，所以這一個下拉就能把某一版的題目單獨撈出來 */
@@ -165,9 +180,12 @@ function bank(ctx){
   var chName=function(c){var o=CHIX[c];if(!o)return c;var e=edOf(o.id);return c+" "+(e?edNm(e)+" ":"")+o.sem+(o.ch.cross||o.ch.no==="跨科"?"跨科 ":"第"+o.ch.no+"章 ")+o.ch.name};
   var inEd=function(u){return !fv.value||edOf(u)===fv.value};
   function fillChs(){var ks=Object.keys(chs).filter(function(c){return inEd(c+".1")});
-   fc.innerHTML='<option value="">全部章（'+rows.length+"）</option>"+ks.sort().map(function(c){return'<option value="'+esc(c)+'">'+esc(chName(c))+"</option>"}).join("")}
-  function fillUnits(){var c=fc.value;fu.innerHTML='<option value="">'+(c?"此章全部細項":"全部單元")+"</option>"+Object.keys(units).filter(function(u){return inEd(u)&&(!c||String(u).split(".")[0]===c)}).sort().map(function(u){return'<option value="'+esc(u)+'">'+esc(u)+"</option>"}).join("")}
+   fc.innerHTML='<option value="">全部章（'+rows.length+"）</option>"+uSort(ks).map(function(c){return'<option value="'+esc(c)+'">'+esc(chName(c))+"</option>"}).join("")}
+  function fillUnits(){var c=fc.value,ls=Object.keys(units).filter(function(u){return inEd(u)&&(!c||String(u).split(".")[0]===c)});
+   fu.innerHTML='<option value="">'+(c?"此章全部細項":"全部單元")+"</option>"+uSort(ls).map(function(u){return'<option value="'+esc(u)+'">'+esc(u)+"</option>"}).join("")}
   fillChs();fillUnits();
+  /* 「全部章」那個選項文字最長，給它寬一點，其餘一律同寬 */
+  fc.className="wide";
   [fv,fc,fu,ft,fl,fk,fd,fg,fq,nw].forEach(function(e){bar.appendChild(e)});bar.className+=" bkbar";
   if(!EDO.length)fv.hidden=true;
   /* 統計面板：跟著下面的篩選即時變動（預設＝全部） */
@@ -229,9 +247,19 @@ function bank(ctx){
    bt.children[0].onclick=function(){var o={id:x.id};COLS.forEach(function(k){if(F[k])o[k]=F[k].value});o.kind=F.kind.value;var gid0=F.gid.value.trim();if(gid0){o["題組ID"]=gid0;o["題組題幹"]=F.gstem.value.trim();o["題組附圖"]=F.gimg.value.trim();o["小題序"]=F.gord.value.trim()}else if(x.gid)o["題組ID"]="-";
     o.options=F.options.value.split("\n").map(function(v){return v.trim()}).filter(Boolean).join("|");o.diag=F.diag.value.split("\n").map(function(v){return v.trim()}).filter(Boolean).join(";;");
     var at={perf:F.perf.value.trim(),content:F.content.value.trim(),diff:F.diff.value,cog:F.cog.value,know:F.know.value.trim()},had=!!(x.perf||x.content||x.diff||x.cog||x.know),has=!!(at.perf||at.content||at.diff||at.cog||at.know);
+    /* 存一題之後只更新快取裡的那一列，不要把整張題庫重抓一次。
+       伺服器會把新的版本號一起回來，順手帶到快取上，畫面資料就不會過期。 */
+    function after(nid,nver,extra){
+     var row={};Object.keys(o).forEach(function(k){row[k]=o[k]});row.id=nid;
+     if(extra)Object.keys(extra).forEach(function(k){if(k!=="id")row[k]=extra[k]});
+     if(BK.rows){var i=-1;BK.rows.forEach(function(x,j){if(x.id===nid)i=j});
+      if(i>=0){var old=BK.rows[i];Object.keys(row).forEach(function(k){old[k]=row[k]})}else BK.rows.push(row)}
+     if(nver)BK.ver=nver;
+     msg(ef,"已儲存",1);setTimeout(ctx.go,500);}
     M.api("POST","/api/admin/bank",{rows:[o],mode:"merge"}).then(function(r){if(!r.ok)return msg(ef,r.errs.map(esc).join("<br>"),0);
-     if(!has&&!had){msg(ef,"已儲存",1);return setTimeout(ctx.go,500)}
-     at.id=(r.ids&&r.ids[0])||o.id;return M.api("POST","/api/admin/meta",{rows:[at],mode:"merge"}).then(function(m){if(!m.ok)return msg(ef,"題目已儲存，但屬性有問題："+m.errs.map(esc).join("<br>"),0);msg(ef,"已儲存",1);setTimeout(ctx.go,500)})},function(e){msg(ef,errs(e),0)})};
+     var nid=(r.ids&&r.ids[0])||o.id;
+     if(!has&&!had){after(nid,r.ver);return}
+     at.id=nid;return M.api("POST","/api/admin/meta",{rows:[at],mode:"merge"}).then(function(m){if(!m.ok)return msg(ef,"題目已儲存，但屬性有問題："+m.errs.map(esc).join("<br>"),0);after(nid,m.ver||r.ver,at)})},function(e){msg(ef,errs(e),0)})};
    ed.scrollIntoView()}
   /* ---- 匯入／匯出（題庫與題目屬性共用同一個區塊）：先選資料類型，欄名不符就整份不匯入 ---- */
   var bk=ctx.sheet("匯入／匯出","題庫與題目屬性都在這裡匯入。先選資料類型；第一列必須是欄名，欄名不符就整份都不會匯入"),mi=h('<p class="meta">讀取中…</p>');
@@ -285,9 +313,12 @@ function bank(ctx){
    function done(){b1.disabled=false}
    function pass(dry,k){ /* dry：只檢查不寫入；全部檢查完才真正寫入 */
     if(k>=jobs.length)return Promise.resolve(true);var j=jobs[k];msg(bf,(dry?"檢查中 ":"匯入中 ")+(k+1)+" / "+jobs.length+"（"+esc(j.file)+"）…",1);
-    return M.api("POST",K.api,{rows:j.rows,mode:!dry&&k===0&&mode.value==="replace"?"replace":"merge",dry:dry?1:0,base:j.base}).then(function(x){if(!x.ok)bad=bad.concat(x.errs.map(function(e){return"【"+j.file+"】"+e}));else if(dry){orphan+=x.orphans||0;gcount+=x.groups||0}return pass(dry,k+1)})}
+    return M.api("POST",K.api,{rows:j.rows,mode:!dry&&k===0&&mode.value==="replace"?"replace":"merge",dry:dry?1:0,base:j.base,more:!dry&&k<jobs.length-1}).then(function(x){if(!x.ok)bad=bad.concat(x.errs.map(function(e){return"【"+j.file+"】"+e}));else if(dry){orphan+=x.orphans||0;gcount+=x.groups||0}return pass(dry,k+1)})}
+   /* 匯入中途不推進版本（省讀取），所以不管成功或失敗，結束都補打一次 refresh，
+      確保快取不會一直停在舊版本；順手把前端的題庫快取清掉。 */
+   var fin=function(){bankReset();return M.api("POST","/api/admin/refresh",{}).catch(function(){})};
    pass(true,0).then(function(){if(bad.length){done();return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+bad.slice(0,30).map(esc).join("<br>")+(bad.length>30?"<br>…還有 "+(bad.length-30)+" 項":""),0)}
-    return pass(false,0).then(function(){done();msg(bf,"已匯入 "+total+(kind.value==="bank"?" 題":" 列屬性")+"（"+src.length+" 個來源）"+(gcount?"，含 "+gcount+" 個題組":"")+(orphan?"。其中 "+orphan+" 列的 id 在題庫找不到，已先存起來，之後題庫有那題就會對上":""),1);setTimeout(ctx.go,900)})}).catch(function(e){done();msg(bf,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
+    return pass(false,0).then(fin,function(e){return fin().then(function(){throw e})}).then(function(){done();msg(bf,"已匯入 "+total+(kind.value==="bank"?" 題":" 列屬性")+"（"+src.length+" 個來源）"+(gcount?"，含 "+gcount+" 個題組":"")+(orphan?"。其中 "+orphan+" 列的 id 在題庫找不到，已先存起來，之後題庫有那題就會對上":""),1);setTimeout(ctx.go,900)})}).catch(function(e){done();msg(bf,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
   bx.onclick=function(){download(kind.value==="bank"?"題庫範本.csv":"題目屬性表範本.csv",KINDS[kind.value].sample)};
   /* 匯出要帶題組欄位（題組ID、題組題幹、題組附圖、小題序），不然匯出再匯入題組會不見。
    欄位順序跟上面「範例檔」一樣，匯出的檔案可以直接拿回來匯入。
