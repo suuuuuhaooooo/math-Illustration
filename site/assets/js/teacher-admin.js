@@ -479,11 +479,21 @@ function settings(ctx){
       :'<br><br>請在 <code>backend/wrangler.toml</code> 加上 <code>[ai]</code> 和 <code>binding = "AI"</code>，然後重新部署。');
    },function(e){b.disabled=false;aiout.className="fb no";aiout.textContent=errs(e)})};
   if(e.ai&&e.ai.lastErr)s.appendChild(h('<div class="fb no">最近一次失敗的原因：<code style="white-space:pre-wrap">'+esc(e.ai.lastErr)+"</code></div>"));
-  if(e.ai)s.appendChild(h('<p class="meta">目前狀態：'
-   +(e.ai.bound?"已綁定 Workers AI":"<b>尚未綁定</b>")+"・今天已產生 <b>"+(e.ai.today||0)+"</b> 次・"
-   +"已快取 <b>"+(e.ai.cached||0)+"</b> 題，靠快取省下 <b>"+(e.ai.saved||0)+"</b> 次產生。<br>"
-   +"成本控制的做法：<b>同一題的詳解全站只產生一次</b>，之後所有人都讀快取，快取命中不算額度也不計次數。"
-   +"所以一個班卡在同一題，只會花掉一次額度；學生想重看幾遍都不花錢。</p>"));
+  if(e.ai){
+   var ai=e.ai,left=Math.max(0,(ai.dayCap||0)-(ai.today||0));
+   s.appendChild(h('<p class="meta">目前狀態：'
+    +(ai.bound?"已綁定 Workers AI":"<b>尚未綁定</b>")+"・今天已產生 <b>"+(ai.today||0)+"</b> 次"
+    +(ai.dayCap?"（今天還可以產生 "+left+" 次）":"（沒有設上限）")+"・"
+    +"已快取 <b>"+(ai.cached||0)+"</b> 題，靠快取省下 <b>"+(ai.saved||0)+"</b> 次產生。</p>"));
+   /* 免費額度換算：管理員最想知道的其實是「一天到底能用幾次」 */
+   s.appendChild(h('<p class="meta">Cloudflare 免費額度是每天 <b>'+(ai.free||10000).toLocaleString()+' Neurons</b>'
+    +'（台灣時間每天早上 8 點重置）。目前使用的模型是 <code>'+esc(ai.model||"—")+'</code>，'
+    +'一次詳解大約吃掉 <b>'+(ai.per||"?")+'</b> Neurons，所以免費額度一天大約夠產生 <b>'+(ai.fits||"?")+'</b> 次。<br>'
+    +'上面的「全站每天」建議不要超過這個數字；超過免費額度之後 Cloudflare 會停掉，不會自動變成帳單。</p>'));
+   s.appendChild(h('<p class="meta"><b>為什麼實際上夠用</b>：同一題的詳解<b>全站只產生一次</b>，'
+    +'之後所有人都讀快取，快取命中不算額度也不計次數。一個班 30 個人卡在同一題只會花掉一次；'
+    +'學生重看幾遍都不花錢。所以「可以看的次數」遠大於上面那個產生次數。</p>'));
+  }
   var fb=h('<div class="fb"></div>'),b=h('<div class="ctl"><button class="pen go">儲存設定</button></div>');s.appendChild(b);s.appendChild(fb);
   b.firstChild.onclick=function(){var o={};Object.keys(F).forEach(function(k){o[k]=F[k].value});M.api("POST","/api/admin/settings",o).then(function(){msg(fb,"已儲存",1)},function(er){msg(fb,errs(er),0)})}},function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))});
  if(M.U&&M.U.admin){usage(ctx);sysinfo(ctx)}}
