@@ -782,3 +782,12 @@ details.rdmd>summary::-webkit-details-marker{color:var(--soft)}
 .cdform label{display:inline-flex;align-items:center;gap:5px;font-size:.9rem;color:var(--soft)}
 .cdform label .in{text-transform:none;letter-spacing:0}
 .tb code{font-size:.92em;letter-spacing:.04em}
+
+/* ───── AI 詳解 ───── */
+.aiw{margin:8px 0 2px}
+.aibt{font-size:.85rem;padding:2px 12px}
+.aiout{margin:8px 0 0;padding:10px 12px;border-left:3px solid var(--line);background:var(--paper2);border-radius:0 10px 10px 0;font-size:.95rem}
+.aiout p{margin:0 0 .5em}
+.aiout p:last-child{margin:0}
+.aiout.fb{border-left-width:3px}
+@media print{.aiw{display:none}}

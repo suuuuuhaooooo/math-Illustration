@@ -62,6 +62,31 @@ function redeemBox(opt){
  ip.onkeydown=function(e){if(e.key==="Enter")bt.click()};
  if(opt.code){ip.value=opt.code;setTimeout(function(){bt.click()},300)} /* 網址帶 #code/XXXXX 可以直接兌換，分享連結用 */
  return w}
+/* ---- AI 詳解 ----
+   答錯（或答對但想看算法）的時候按一下，由伺服器產生一步一步的說明。
+   成本控制在伺服器那邊：同一題全站只產生一次，之後所有人都讀快取，所以按鈕可以放心給大家按。
+   這裡只負責兩件事：一律顯示成純文字（AI 的輸出不當 HTML），以及講清楚這是 AI 寫的、可能有錯。 */
+function aiMsg(e){var c=e&&e.code;return{
+ ai_off:"AI 詳解目前沒有開放。",
+ ai_mine:"你今天的 AI 詳解次數已經用完了（每天 "+((e&&e.cap)||"")+" 次），明天再來。已經看過的詳解還是可以再看。",
+ ai_day:"今天全站的 AI 詳解額度用完了，明天會重新開始。",
+ ai_fail:"AI 這次沒有產生出說明，請稍後再試一次。",
+ no_question:"找不到這一題的內容。",rate_limit:"按太快了，請等一下再試。"}[c]||null}
+/* host：按鈕放進去的容器；ask：要傳給伺服器的參數（{sid,i} 或 {qid}） */
+function aiBtn(host,ask){
+ if(!(M.cfg&&M.cfg.ai))return null;
+ var w=h('<div class="aiw"><button class="pen aibt">AI 詳解</button><div class="aiout" hidden></div></div>');
+ var bt=w.querySelector("button"),out=w.querySelector(".aiout");
+ bt.onclick=function(){
+  if(out.dataset.done){out.hidden=!out.hidden;bt.textContent=out.hidden?"AI 詳解":"收起詳解";return}
+  bt.disabled=true;bt.textContent="產生中…";out.hidden=false;out.className="aiout";out.textContent="AI 正在想怎麼說明這一題…";
+  M.api("POST","/api/ai/explain",ask).then(function(r){
+   bt.disabled=false;bt.textContent="收起詳解";out.dataset.done="1";out.innerHTML="";
+   String(r.txt).split(/\n+/).forEach(function(line){if(line.trim()){var pp=document.createElement("p");pp.textContent=line.trim();out.appendChild(pp)}});
+   out.appendChild(h('<p class="meta">這段說明是 AI 產生的，可能有錯或講得不夠清楚，請以老師的說明為準。</p>'));
+  },function(e){bt.disabled=false;bt.textContent="AI 詳解";out.className="aiout fb no";out.textContent=aiMsg(e)||errMsg(e)});
+ };
+ host.appendChild(w);return w}
 function errMsg(e){var c=e&&e.code;if(c==="expired"&&M.U&&M.U.role==="teacher")return"你的老師帳號使用期限已到期，請聯絡管理員延長；延長後重新整理頁面就能繼續使用。";return{qr_off:"老師目前沒有開放 QR code 線上作答。",paper_closed:"這份卷已經關閉線上作答。",already_done:"你已經交過這份卷了。",bad_qr:"QR code 作答資料有問題，請重新出卷。",not_found:"找不到這份卷，請確認 QR code 是不是完整的。",plan_too_big:"題數超過上限了，請減少題數。",bad_plan:"大題設定有誤，請檢查後再試。",preview_limit:"審題預覽太頻繁了，請等幾分鐘再試（為了節省資源，預覽每 10 分鐘有次數上限）。",pool_limit:"挑題查得太頻繁了，請等幾分鐘再試。",rate_limit:"操作太快了，請等一分鐘再試。",suspended:susMsg(e),pull_limit:"今天下載整份題庫的次數已達上限（"+((e&&e.cap)||"")+" 次），請明天再試，或請管理員調整。",no_units:"請先勾選單元。",print_limit:"今天出的練習卷已經到上限了，明天再來，或請管理員調整。",net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請管理員完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",expired:"你的正式學員授權已到期，請找管理員延期。",forbidden:"沒有權限。",no_questions:"這個範圍（或篩選條件）沒有可以出的題目。",closed:"這份卷子已經截止，或老師已經結束這份派卷。",not_found:"找不到這份卷子，可能已被老師刪除。",server:"伺服器忙碌中，請稍後再試。",wrong_subject:"這份卷是「"+((e&&M.SUBJ[e.subj])||"另一科")+"」的卷，請用正確的 QR code 或網址開啟。",no_subject:"你的帳號沒有開通「"+(M.SUBJ[M.subj]||M.subj)+"」。",last_subject:"每個帳號至少要保留一個科目；要停用請改用刪除。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
 /* 題組的共用題幹：每一小題上方都顯示一次（學生一題一題作答，不用往上翻）；只有一小題（例如錯題本單獨練習）就不寫「第幾小題」 */
 function gstem(g,s,im,k,n){return s?'<div class="gstem">'+(n>1?'<small class="gtag">題組・第 '+k+"／"+n+" 小題</small>":'<small class="gtag">題組</small>')+"<div>"+tx(s)+"</div>"+qimg(im)+"</div>":""}
@@ -242,7 +267,9 @@ function run(o){
     busy=false;go.disabled=false;res.push({q:q,ok:r.ok});if(S.kind==="daily"&&r.data){M.setData(r.data,r.prog);dres={gain:r.gain,got:r.got||[]};updWho()}done=true;go.textContent=i+1<qs.length?"下一題":"看結果";if(hb)hb.disabled=true;
     if(q.o)ob.forEach(function(b){b.disabled=true;if(b.dataset.v===String(r.a))b.classList.add("right");else if(b.classList.contains("sel"))b.classList.add("wrong")});else inp.disabled=true;
     fb.className="fb "+(r.ok?"ok":"no");
-    fb.innerHTML=r.ok?"答對了！":tx("答案是 "+(r.al?"("+r.al+") ":"")+r.a+"。"+r.h)+(r.diag?'<br><b class="diag">'+tx(r.diag)+"</b>":"")+qimg(r.himg)+"<br><small>"+(S.kind==="fix"?"還沒訂正成功，會留在錯題本。":"這題已放進錯題本。")+"</small>"
+    fb.innerHTML=r.ok?"答對了！":tx("答案是 "+(r.al?"("+r.al+") ":"")+r.a+"。"+r.h)+(r.diag?'<br><b class="diag">'+tx(r.diag)+"</b>":"")+qimg(r.himg)+"<br><small>"+(S.kind==="fix"?"還沒訂正成功，會留在錯題本。":"這題已放進錯題本。")+"</small>";
+    /* AI 詳解：答完才出現（答對的人也常想知道有沒有別的算法） */
+    aiBtn(fb,{sid:S.sid,i:i})
    }).catch(function(e){busy=false;go.disabled=false;fb.className="fb no";fb.textContent=errMsg(e)})}}
  function next(){if(i+1<qs.length){i++;show()}else finish()}
  function finish(){
@@ -352,7 +379,10 @@ V.wrong=function(){
   D.wr.slice().reverse().forEach(function(w){var isDue=!w.due||w.due<=t;
    if(!gsOk(w.id,F.val("g"),F.val("m")))return;if(F.val("u")&&w.id!==F.val("u"))return;
    var st=F.val("st");if(st==="due"&&!isDue)return;if(st==="wait"&&isDue)return;if(st==="hard"&&!(w.n>=2))return;n++;
-   var d=h('<div class="wi">'+gstem(0,w.gs,w.gi,1,1)+"<div>"+tx(w.q)+"</div>"+qimg(w.img)+"<small>"+(w.qid?"<span class=\"qid\">"+esc(w.qid)+"</span>　":"")+esc(title(w.id))+"・錯 "+w.n+" 次・已通過 "+(w.ok||0)+"/"+M.cfg.review.length+"・"+(isDue?"今天可複習":w.due.slice(5)+" 再複習")+"　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));d.appendChild(dt);sbx.appendChild(d)});
+   var d=h('<div class="wi">'+gstem(0,w.gs,w.gi,1,1)+"<div>"+tx(w.q)+"</div>"+qimg(w.img)+"<small>"+(w.qid?"<span class=\"qid\">"+esc(w.qid)+"</span>　":"")+esc(title(w.id))+"・錯 "+w.n+" 次・已通過 "+(w.ok||0)+"/"+M.cfg.review.length+"・"+(isDue?"今天可複習":w.due.slice(5)+" 再複習")+"　</small></div>"),dt=h("<details><summary>看答案</summary></details>");dt.appendChild(h("<div>"+tx("答案："+w.a+"。"+(w.h||""))+"</div>"));
+   /* 錯題本是最需要詳解的地方：看了答案還是不懂，就按 AI 詳解 */
+   aiBtn(dt,w.qid?{qid:w.qid}:{qid:w.id});
+   d.appendChild(dt);sbx.appendChild(d)});
   if(!n)sbx.appendChild(h("<p>這個篩選條件下沒有錯題。</p>"));cnt.textContent="符合條件 "+n+" 題（共 "+D.wr.length+" 題）";
   if(window.Zhuyin&&Zhuyin.refresh)try{Zhuyin.refresh()}catch(e){}}
  unitOpts();draw();

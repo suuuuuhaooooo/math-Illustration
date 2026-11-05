@@ -455,8 +455,22 @@ function settings(ctx){
  ann(ctx);
  var s=ctx.sheet("遊戲設定","改完按儲存，全班立刻套用；空白＝用預設值");
  M.api("GET","/api/admin/settings").then(function(r){var e=r.effective,F={
-  POINTS_BY_LEVEL:inp(e.pts.join(",")),LEVEL_STEP:inp(e.step,"","number"),DAILY_Q_CAP:inp(e.capQ,"","number"),DAILY_MOCK_CAP:inp(e.capMock,"","number"),REVIEW_DAYS:inp(e.review.join(",")),HINT_COST:inp(e.hint,"","number"),QR_ON:h('<select><option value="0">關閉</option><option value="1">開放</option></select>'),TOOLS_PRACTICE:h('<select><option value="1">開放</option><option value="0">不開放</option></select>'),TOOLS_MOCK:h('<select><option value="0">不開放</option><option value="1">開放</option></select>'),PURGE_DAYS:h('<select><option value="0">不自動清除（由管理員手動清）</option><option value="90">保留 90 天</option><option value="180">保留 180 天</option><option value="365">保留 1 年</option><option value="730">保留 2 年</option></select>')};F.QR_ON.value=e.qr?"1":"0";if(e.tools){F.TOOLS_PRACTICE.value=e.tools.practice?"1":"0";F.TOOLS_MOCK.value=e.tools.mock?"1":"0"}F.PURGE_DAYS.value=String(e.purge===undefined?180:e.purge);
+  POINTS_BY_LEVEL:inp(e.pts.join(",")),LEVEL_STEP:inp(e.step,"","number"),DAILY_Q_CAP:inp(e.capQ,"","number"),DAILY_MOCK_CAP:inp(e.capMock,"","number"),REVIEW_DAYS:inp(e.review.join(",")),HINT_COST:inp(e.hint,"","number"),QR_ON:h('<select><option value="0">關閉</option><option value="1">開放</option></select>'),TOOLS_PRACTICE:h('<select><option value="1">開放</option><option value="0">不開放</option></select>'),TOOLS_MOCK:h('<select><option value="0">不開放</option><option value="1">開放</option></select>'),PURGE_DAYS:h('<select><option value="0">不自動清除（由管理員手動清）</option><option value="90">保留 90 天</option><option value="180">保留 180 天</option><option value="365">保留 1 年</option><option value="730">保留 2 年</option></select>'),
+   AI_ON:h('<select><option value="0">關閉</option><option value="1">開放</option></select>'),AI_CAP:inp((e.ai&&e.ai.cap)||10,"","number"),AI_DAY_CAP:inp((e.ai&&e.ai.dayCap)||200,"","number")};
+  if(e.ai)F.AI_ON.value=e.ai.on?"1":"0";F.QR_ON.value=e.qr?"1":"0";if(e.tools){F.TOOLS_PRACTICE.value=e.tools.practice?"1":"0";F.TOOLS_MOCK.value=e.tools.mock?"1":"0"}F.PURGE_DAYS.value=String(e.purge===undefined?180:e.purge);
   s.appendChild(field("答對一題的積分（基礎,應用,挑戰）",F.POINTS_BY_LEVEL));s.appendChild(field("每幾分升一級",F.LEVEL_STEP));s.appendChild(field("每天最多計分的題數（防刷）",F.DAILY_Q_CAP));s.appendChild(field("每天可領獎勵的模擬卷份數",F.DAILY_MOCK_CAP));s.appendChild(field("看一次提示扣幾分（0＝不扣；看過提示的題目答對只拿一半積分）",F.HINT_COST));s.appendChild(field("錯題複習間隔（幾天後，用逗號分隔）",F.REVIEW_DAYS));s.appendChild(field("舊紀錄自動清除（列印紀錄、作答紀錄、模擬考紀錄、QR 線上作答；超過保留天數會自動刪掉。選「不自動清除」就只能由管理員手動清）",F.PURGE_DAYS));s.appendChild(field("QR code 線上作答（總開關：開放後，老師出卷時才能勾選「印 QR code 線上作答」；關閉時學生掃描也不能作答）",F.QR_ON));s.appendChild(field("國中理化小工具：練習時（小測驗、每日一題、錯題訂正）",F.TOOLS_PRACTICE));s.appendChild(field("國中理化小工具：模擬卷（派卷由老師在派卷時逐份決定）",F.TOOLS_MOCK));
+  /* ---- AI 詳解 ---- */
+  s.appendChild(h("<h3>AI 詳解</h3>"));
+  if(e.ai&&!e.ai.bound)s.appendChild(h('<div class="fb no">後端還沒綁定 Workers AI，所以這個功能開了也不會出現。'
+   +'請在 <code>backend/wrangler.toml</code> 加上 <code>[ai]</code> 與 <code>binding = "AI"</code> 再重新部署。</div>'));
+  s.appendChild(field("AI 詳解（開放後，學生在作答回饋與錯題本會看到「AI 詳解」按鈕）",F.AI_ON));
+  s.appendChild(field("每人每天可以產生幾次（0＝不限。已經產生過的詳解之後都讀快取，不算次數）",F.AI_CAP));
+  s.appendChild(field("全站每天可以產生幾次（0＝不限。這是保護免費額度的最後一道防線）",F.AI_DAY_CAP));
+  if(e.ai)s.appendChild(h('<p class="meta">目前狀態：'
+   +(e.ai.bound?"已綁定 Workers AI":"<b>尚未綁定</b>")+"・今天已產生 <b>"+(e.ai.today||0)+"</b> 次・"
+   +"已快取 <b>"+(e.ai.cached||0)+"</b> 題，靠快取省下 <b>"+(e.ai.saved||0)+"</b> 次產生。<br>"
+   +"成本控制的做法：<b>同一題的詳解全站只產生一次</b>，之後所有人都讀快取，快取命中不算額度也不計次數。"
+   +"所以一個班卡在同一題，只會花掉一次額度；學生想重看幾遍都不花錢。</p>"));
   var fb=h('<div class="fb"></div>'),b=h('<div class="ctl"><button class="pen go">儲存設定</button></div>');s.appendChild(b);s.appendChild(fb);
   b.firstChild.onclick=function(){var o={};Object.keys(F).forEach(function(k){o[k]=F[k].value});M.api("POST","/api/admin/settings",o).then(function(){msg(fb,"已儲存",1)},function(er){msg(fb,errs(er),0)})}},function(e){s.appendChild(h('<div class="fb no">'+errs(e)+"</div>"))});
  if(M.U&&M.U.admin){usage(ctx);sysinfo(ctx)}}
