@@ -35,8 +35,13 @@ function labOf(o,v){if(o&&o.length===2&&o[0]==="對"&&o[1]==="錯")return v==="�
 /* 單元多選器：不選＝由系統依年級自動配；可依年級展開勾選 */
 function picker(ids,mine){
  var el=h('<details class="upick"><summary>自選單元（<b class="cnt">0</b> 個）</summary><div class="ctl"><button class="pen" data-a="all">全選</button><button class="pen" data-a="none">全不選</button><button class="pen" data-a="mine">只選我的年級</button></div><div class="ug"></div></details>'),g=el.querySelector(".ug"),boxes=[];
- var by={},FX={};eFlat().forEach(function(o){FX[o.id]=o});/* 查表，不要每個 id 都掃一遍目錄 */
- eSort(ids).forEach(function(id){var o=FX[id];if(!o)return;(by[gOf(id)]=by[gOf(id)]||[]).push(o)});
+ /* 查表，不要每個 id 都掃一遍目錄。
+    注意：只查「目前這一版」的目錄是不夠的——還沒指定課本版本的帳號，目錄是通用版（3u-1.1），
+    但題庫送回來的單元是帶版本的（3uk-1.1），對不起來的話整個選單會變成空的。
+    所以查不到就用 NB.ed.byId 跨版本再找一次。 */
+ var by={},FX={};eFlat().forEach(function(o){FX[o.id]=o});
+ var look=function(id){return FX[id]||(window.NB&&NB.ed&&NB.ed.byId?NB.ed.byId(id):null)};
+ eSort(ids).forEach(function(id){var o=look(id);if(!o)return;(by[gOf(id)]=by[gOf(id)]||[]).push(o)});
  if(!Object.keys(by).length)g.appendChild(h('<p class="meta">'+(SCI?"國中理化":"這一科")+"的題庫還在準備中，題目上線後這裡就會出現可以選的單元。</p>"));
  Object.keys(by).sort().forEach(function(gr){var d=h('<div class="ugr"><b>'+gLab(+gr)+"</b></div>");by[gr].forEach(function(o){var l=h('<label class="uck"><input type="checkbox"> <span></span></label>');l.querySelector("input").value=o.id;l.querySelector("span").textContent=o.sem+" "+o.num+" "+o.title;boxes.push(l.querySelector("input"));d.appendChild(l)});g.appendChild(d)});
  function cnt(){el.querySelector(".cnt").textContent=boxes.filter(function(b){return b.checked&&!b.parentNode.hidden}).length}
@@ -129,7 +134,7 @@ function login(){
    練習（小測驗、每日一題、錯題訂正）：每題送出就由伺服器判分並回傳解答
    模擬卷：全部寫完交卷才一次判分；時間由伺服器管，逾時視為未作答 */
 function run(o){
- var S=o.sess,qs=S.qs,exam=S.kind==="mock",i=0,ans=[],res=[],left=S.seconds||0,box=sheet(o.tag,o.title),body=h("<div></div>"),busy=false,fin=false,dres=null,hinted={};
+ var S=o.sess,qs=S.qs,exam=S.kind==="mock",i=0,ans=[],res=[],left=S.seconds||0,box=sheet(o.tag,o.title),body=h("<div></div>"),busy=false,fin=false,dres=null,hinted={},PAD=null;
  box.appendChild(body);view.innerHTML="";view.appendChild(box);if(o.note)box.insertBefore(h('<p class="meta"></p>'),body).textContent=o.note;
  if(SCI){var tc=(M.cfg&&M.cfg.tools)||{practice:true,mock:false},okT=S.tools!==undefined?!!S.tools:exam?!!tc.mock:!!tc.practice; /* 理化小工具：派卷看老師的設定，其他看管理員的設定 */
   if(okT)sciTools(function(T){T.button()});else if(window.SciTools)SciTools.remove();
@@ -137,6 +142,7 @@ function run(o){
  if(exam){var clock=h('<span class="clock"></span>');box.querySelector("h2").appendChild(clock);var t0=Date.now();TM=setInterval(tick,1000);tick();if(XG)XG();XG=NB.xg?NB.xg.start({sid:S.sid,lw:S.lw,user:user(),api:M.api,box:box}):null}
  function tick(){left=S.seconds-Math.floor((Date.now()-t0)/1000);if(left<0)left=0;clock.textContent="剩 "+pad(Math.floor(left/60))+":"+pad(left%60);if(left<=0)finish()}
  function show(){
+  if(PAD){PAD.destroy();PAD=null}
   var q=qs[i],sel=null,done=false,ob=[],inp,hb,d=h('<div><div class="prog">第 '+(i+1)+" / "+qs.length+' 題</div>'+(q.g?gstem(0,q.g.s,q.g.i,q.g.k,q.g.n):"")+'<div class="q">'+tx(q.q)+"</div>"+qimg(q.img)+"</div>");body.innerHTML="";
   if(q.o){var w=h('<div class="opts"></div>');q.o.forEach(function(t,ti){var b=h('<button class="pen opt"></button>');b.innerHTML=q.tf?"<b>"+(t==="對"?"○":"✕")+"　</b>"+tx(esc(t)):"<b>("+L(ti)+")</b> "+tx(esc(t));b.dataset.v=t;b.onclick=function(){if(done)return;sel=t;ob.forEach(function(x){x.classList.toggle("sel",x===b)})};ob.push(b);w.appendChild(b)});d.appendChild(w)}
   else if(q.t==="text"){var c=h('<div class="ctl"><input class="num txt" type="text" maxlength="60" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="輸入答案"></div>');inp=c.firstChild;d.appendChild(c)}
@@ -147,7 +153,9 @@ function run(o){
    if(!hinted[i]&&hc&&!confirm("看提示會扣 "+hc+" 分，而且這題答對只能拿一半的積分。\n確定要看嗎？"))return;
    M.api("POST","/api/hint",{sid:S.sid,i:i}).then(function(r){hinted[i]=1;if(r.data){M.setData(r.data);updWho()}fb.className="fb";fb.innerHTML=tx("提示："+r.h)+qimg(r.himg)+(r.cost?"<br><small>已扣 "+r.cost+" 分，這題答對只拿一半積分。</small>":"")},function(e){fb.className="fb no";fb.textContent=errMsg(e)})}}
   if(exam&&i>0){var pv=h('<button class="pen">上一題</button>');pv.onclick=function(){i--;show()};bar.insertBefore(pv,go)}
-  d.appendChild(bar);d.appendChild(fb);body.appendChild(d);
+  /* 計算紙放在作答欄和按鈕中間：先算再按「檢查」，手機上不用上下捲 */
+  var pd=h("<div></div>");d.appendChild(pd);d.appendChild(bar);d.appendChild(fb);body.appendChild(d);
+  if(NB.pad)PAD=NB.pad.attach(pd,{sid:S.sid,key:i});
   if(exam&&ans[i]!==undefined&&ans[i]!==null){if(q.o)ob.forEach(function(b){if(b.dataset.v===String(ans[i])){sel=ans[i];b.classList.add("sel")}});else inp.value=ans[i]}
   if(inp){inp.focus();inp.onkeydown=function(e){if(e.key==="Enter")go.click()}}
   go.onclick=function(){
@@ -165,7 +173,9 @@ function run(o){
    }).catch(function(e){busy=false;go.disabled=false;fb.className="fb no";fb.textContent=errMsg(e)})}}
  function next(){if(i+1<qs.length){i++;show()}else finish()}
  function finish(){
-  if(fin||busy)return;fin=true;clearInterval(TM);body.innerHTML="";body.appendChild(h('<p class="meta">'+(exam?"交卷中，伺服器判分…":"結算中…")+"</p>"));
+  if(fin||busy)return;fin=true;clearInterval(TM);
+  if(PAD){PAD.destroy();PAD=null}if(NB.pad)NB.pad.clear(S.sid);
+  body.innerHTML="";body.appendChild(h('<p class="meta">'+(exam?"交卷中，伺服器判分…":"結算中…")+"</p>"));
   var p=S.kind==="daily"&&dres?Promise.resolve({n:1,c:res[0]&&res[0].ok?1:0,gain:dres.gain,got:dres.got,data:M.D}):exam?M.api("POST","/api/submit",{sid:S.sid,ans:qs.map(function(_,k){return ans[k]===undefined?null:ans[k]})}):M.api("POST","/api/finish",{sid:S.sid});
   p.then(function(r){if(XG){XG();XG=null}M.setData(r.data,r.prog);updWho();result(r)},function(e){fin=false;body.innerHTML="";var s=h('<div><div class="fb no">'+esc(errMsg(e))+"</div></div>"),b=h('<div class="ctl"><button class="pen go">再試一次</button></div>');b.firstChild.onclick=function(){finish()};s.appendChild(b);body.appendChild(s);if(exam&&e.code==="no_session"){s.appendChild(h('<a class="pen" href="#home">回首頁</a>'))}})}
  function result(r){
@@ -460,7 +470,10 @@ function printWiz(arg){
  function blocksNow(){return NB.score.blocks(pv.qs,true)}
  function setBlocks(bs){pv.qs=bs.reduce(function(a,b){return a.concat(b.qs)},[])}
  function bLv(b){return Math.max.apply(null,b.qs.map(function(q){return q.lv||2}))}
- var ORD={};eFlat().forEach(function(o,i){ORD[o.id]=i});
+ /* 「依單元」排序用的先後表：要涵蓋三個版本的代號，只放目前這一版的話，
+    沒指定版本的帳號會每一題都查不到、排序等於沒作用。 */
+ var ORD={},ALL=(window.NB&&NB.ed&&NB.ed.allFlat?NB.ed.allFlat():eFlat());
+ eSort(ALL.map(function(o){return o.id})).forEach(function(id,i){ORD[id]=i});
  function sortBy(how){var bs=blocksNow(),r=Math.random;
   var key=function(b,i){return how==="easy"?[bLv(b),i]:how==="hard"?[-bLv(b),i]:how==="unit"?[b.qs[0].unit in ORD?ORD[b.qs[0].unit]:1e6,i]:[r(),i]};
   var ks=bs.map(function(b,i){return{b:b,k:key(b,i),s:pv.secs?b.s:0}});

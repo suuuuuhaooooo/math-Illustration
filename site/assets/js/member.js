@@ -74,10 +74,10 @@ M.forceOut=function(){var f=ls("nb-force-out");if(!f)return Promise.resolve();ls
 M.boot=function(){M.err=null;M.errX=null;return M.forceOut().then(M.loadCat).then(function(){return M.ready}).then(function(A){
  M.auth=A;if(!A){M.U=null;M.err=CFG.firebase&&CFG.firebase.apiKey?"noauth":"noconfig";return}
  if(!A.user()){M.U=null;return}
- return M.load().then(function(){
-   /* 登入後把裝置位占下來：同一個帳號在別台登入時，那一台的下一個請求就會被擋 */
-   return M.claim().then(function(){},function(){});
-  }).catch(function(e){M.U=null;M.err=e.code||"net";M.errX=e})})};
+ /* 順序很重要：先占裝置位，再載入資料。
+    反過來的話，新裝置的 /api/me 會先被舊裝置的位子擋下來（other_device），
+    claim 根本輪不到執行，於是「新登入的贏」變成「舊的永遠贏」，新裝置就再也進不來了。 */
+ return M.claim().then(function(){return M.load()}).catch(function(e){M.U=null;M.err=e.code||"net";M.errX=e})})};
 M.setData=function(D,pg){M.D=D;if(pg)M.prog=pg;ls(CKS(),JSON.stringify({n:M.U.name,lv:M.lv(D),pts:D.pts}))};
 M.signIn=function(){return M.auth.signIn()};
 M.logout=function(){

@@ -738,3 +738,38 @@ body[data-page="member"] button,body[data-page="member"] option{font-family:var(
 body[data-page="member"] code,body[data-page="member"] kbd,body[data-page="member"] samp,
 body[data-page="member"] .mono,body[data-page="member"] .sm{font-family:NBNum,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 /* KaTeX 排出來的數學式本來就用這套字，而且它的規則下在元素上，不會被上面的變數蓋掉，所以這裡不用處理 */
+
+/* ───── 計算紙（答題時可以直接算、畫圖；scratch.js） ───── */
+.padwrap{margin:10px 0 2px}
+.padtg{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;padding:3px 14px;color:var(--soft);border-color:var(--line)}
+.padtg svg{width:16px;height:16px}
+.padtg:hover{color:var(--ink);border-color:var(--ink)}
+.padtg.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pad{margin:8px 0 0;border:1.6px solid var(--line);border-radius:14px 6px 12px 8px/8px 12px 6px 14px;background:var(--paper2);overflow:hidden}
+.pad-bar{display:flex;gap:4px 8px;flex-wrap:wrap;align-items:center;padding:6px 8px;border-bottom:1.5px dashed var(--line)}
+.pad-g{display:inline-flex;gap:3px;align-items:center}
+.pad-g.pad-end{margin-left:auto}
+.pad-b{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:28px;padding:0 7px;font:inherit;font-size:.82rem;line-height:1;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);color:var(--soft);cursor:pointer}
+.pad-b svg{width:17px;height:17px}
+.pad-b:hover{color:var(--ink);border-color:var(--ink)}
+.pad-b.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.pad-c{width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid transparent;border-radius:999px;background:none;cursor:pointer}
+.pad-c i{display:block;width:16px;height:16px;border-radius:999px;background:var(--pc)}
+.pad-c.on{border-color:var(--ink)}
+.pad-w{width:28px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);cursor:pointer}
+.pad-w i{display:block;width:15px;border-radius:999px;background:currentColor;color:var(--ink)}
+.pad-w.on{border-color:var(--ink);background:var(--paper2)}
+.pad-sheet{position:relative;height:clamp(200px,34vh,320px);background:var(--paper)}
+.pad-sheet canvas{display:block;touch-action:none;cursor:crosshair}
+.pad.era .pad-sheet canvas{cursor:cell}
+/* 放大：鋪滿畫面，寫完按右上角或 Esc 收起來 */
+.pad.pad-full{position:fixed;inset:8px;z-index:90;margin:0;border-radius:12px;box-shadow:0 20px 60px -20px var(--shadow);display:flex;flex-direction:column}
+.pad.pad-full .pad-sheet{flex:1;height:auto}
+body.pad-lock{overflow:hidden}
+@media (max-width:640px){
+  .pad-bar{gap:3px 5px;padding:5px 6px}
+  .pad-b{min-width:28px;height:26px;padding:0 5px}
+  .pad-g.pad-end{margin-left:0}
+  .pad-sheet{height:clamp(190px,40vh,300px)}
+}
+@media print{.padwrap{display:none}}
