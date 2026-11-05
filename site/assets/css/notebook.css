@@ -786,8 +786,47 @@ details.rdmd>summary::-webkit-details-marker{color:var(--soft)}
 /* ───── AI 詳解 ───── */
 .aiw{margin:8px 0 2px}
 .aibt{font-size:.85rem;padding:2px 12px}
-.aiout{margin:8px 0 0;padding:10px 12px;border-left:3px solid var(--line);background:var(--paper2);border-radius:0 10px 10px 0;font-size:.95rem}
-.aiout p{margin:0 0 .5em}
-.aiout p:last-child{margin:0}
-.aiout.fb{border-left-width:3px}
+/* 這個框會出現在答對／答錯的回饋區裡面，那裡的文字是綠色或紅色，
+   不自己指定顏色的話整段詳解會跟著變色 */
+.aiout{margin:8px 0 0;padding:14px 16px;border:1.6px solid var(--line);background:var(--paper2);border-radius:14px 6px 12px 8px/8px 12px 6px 14px;font-size:.95rem;color:var(--ink)}
+.aiout>p:last-child{margin:.8em 0 0}
+.aiout.fb{padding:10px 12px}
+/* 區塊 */
+.ais{margin:0 0 14px}
+.ais:last-of-type{margin-bottom:0}
+.ais h4{margin:0 0 7px;font-size:.92rem;letter-spacing:.14em;font-weight:700;color:var(--p2);
+ display:flex;align-items:center;gap:8px}
+.ais h4::after{content:"";flex:1;height:0;border-top:1.5px dashed var(--line)}
+.ais-ans h4{color:var(--p1)}
+.ais-tip h4{color:var(--p4b)}
+.ais-val h4{color:var(--soft)}
+.aip{margin:0 0 .45em;line-height:1.85}
+.aip:last-child{margin-bottom:0}
+.aili{padding-left:1.1em;position:relative}
+.aili::before{content:"・";position:absolute;left:0;color:var(--soft)}
+/* 解題步驟 */
+.aist{display:grid;grid-template-columns:1.7em 1fr;gap:9px;align-items:start;margin:0 0 .55em}
+.aist:last-child{margin-bottom:0}
+.aist>i{font-style:normal;font-weight:700;font-size:.82rem;line-height:1.7em;text-align:center;
+ color:var(--paper);background:var(--p2);border-radius:999px;height:1.7em}
+.aist .t{line-height:1.85}
+.aist .t>b{display:block;margin-bottom:1px}
+/* 解答：框起來 */
+.ais-ans{padding:10px 14px;border:1.6px solid var(--p1);border-radius:10px;background:color-mix(in srgb,var(--p1) 7%,transparent)}
+.ais-ans h4{margin-bottom:4px}
+.ais-ans .katex-display{margin:.3em 0}
+/* 小撇步 */
+.ais-tip{padding:9px 13px;border-left:3px solid var(--p4);background:color-mix(in srgb,var(--p4) 7%,transparent);border-radius:0 10px 10px 0}
+/* 題目價值評鑑 */
+.aiv{display:grid;grid-template-columns:5.5em 1fr;gap:4px 10px;font-size:.92rem;line-height:1.7;margin:0 0 3px}
+.aiv>b{color:var(--soft);font-weight:700}
+/* 手機 */
+@media (max-width:520px){
+ .aiout{padding:12px 13px}
+ .aiv{grid-template-columns:4.8em 1fr;font-size:.88rem}
+ .ais h4{font-size:.86rem;letter-spacing:.1em}
+}
 @media print{.aiw{display:none}}
+/* 算式畫不出來時的退路：至少排得整齊，不要露出原始碼 */
+.aimath{font-family:var(--serif);letter-spacing:.02em}
+div.aimath{text-align:center;margin:.35em 0}

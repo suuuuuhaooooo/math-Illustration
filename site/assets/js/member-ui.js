@@ -72,6 +72,95 @@ function aiMsg(e){var c=e&&e.code;return{
  ai_day:"今天全站的 AI 詳解額度用完了，明天會重新開始。",
  ai_fail:"AI 這次沒有產生出說明，請稍後再試一次。",
  no_question:"找不到這一題的內容。",rate_limit:"按太快了，請等一下再試。"}[c]||null}
+/* 把 AI 回來的文字排成版面。
+   伺服器要求模型用固定的六個區塊（### 破題分析／解題思路／解題步驟／解答／小撇步／題目價值評鑑），
+   這裡照標題拆開，各自給不同的樣式；「步驟 N」會變成有編號的段落，「- 考點：…」變成對照表，
+   $…$ 與 $$…$$ 交給 KaTeX 畫（和題目用的是同一套）。
+   模型沒照格式寫的時候不會壞掉：認不出標題就當成一般段落，一樣看得懂。 */
+var AISEC={"破題分析":"clue","解題思路":"idea","解題步驟":"step","解答":"ans","小撇步":"tip","題目價值評鑑":"val"};
+/* ---- 算式一定要能看 ----
+   AI 偶爾會寫出 KaTeX 畫不出來的語法（不支援的指令、少一個括號、沒載到 KaTeX…）。
+   網站本來的做法是「畫不出來就把原始碼印出來」，那對學生來說就是看到一行 \frac{3}{4} 的亂碼。
+   這裡改成：畫不出來就翻成看得懂的純文字（\frac{3}{4} → 3/4、\times → ×），
+   絕對不把 LaTeX 原始碼漏到畫面上。 */
+function deTex(t){
+ var s=String(t||"");
+ for(var i=0;i<6;i++){ /* 巢狀的 frac 要跑幾輪才拆得完 */
+  var b=s;
+  s=s.replace(/\\d?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g,"$1/$2")
+     .replace(/\\sqrt\s*\{([^{}]*)\}/g,"√$1")
+     .replace(/\\(?:boxed|text|mathrm|mathbf|operatorname)\s*\{([^{}]*)\}/g,"$1")
+     .replace(/\\overline\s*\{([^{}]*)\}/g,"$1")
+     .replace(/_\{([^{}]*)\}/g,"$1").replace(/\^\{([^{}]*)\}/g,"^$1");
+  if(s===b)break}
+ /* 環境（\begin{align}…）整組拿掉，不然會剩下 align 這種字 */
+ s=s.replace(/\\(?:begin|end)\s*\{[^{}]*\}/g,"");
+ return s.replace(/\\times/g,"×").replace(/\\div/g,"÷").replace(/\\cdot/g,"·")
+  .replace(/\\pm/g,"±").replace(/\\le(?![a-z])/g,"≤").replace(/\\ge(?![a-z])/g,"≥")
+  .replace(/\\neq/g,"≠").replace(/\\approx/g,"≈").replace(/\\pi(?![a-z])/g,"π")
+  .replace(/\\degree|\^\\circ/g,"°").replace(/\\%/g,"%")
+  .replace(/\^2/g,"²").replace(/\^3/g,"³")
+  .replace(/\\(?:left|right|quad|qquad|,|;|!|displaystyle)/g," ")
+  .replace(/\\[a-zA-Z]+/g,"")      /* 其他不認得的指令：直接拿掉，不要漏出來 */
+  .replace(/\}\s*\{/g," ")        /* \cmd{6}{20} 拿掉指令後要留空格，不然會黏成 620 */
+  .replace(/[{}$\\]/g,"")
+  .replace(/\s{2,}/g," ").trim()}
+function kxSafe(tex,disp){
+ if(window.katex){try{return katex.renderToString(tex,{displayMode:!!disp,throwOnError:true,strict:false})}catch(e){}}
+ var t=esc(deTex(tex));
+ return disp?'<div class="aimath">'+t+"</div>":'<span class="aimath">'+t+"</span>"}
+/* AI 文字專用：$…$ 與 $$…$$ 交給 KaTeX，其餘跳脫成純文字；畫不出來就退回看得懂的寫法 */
+function aiTx(str){
+ /* 伺服器清掉不支援的語法後可能留下空的 $$$$，要先拿掉，不然會原樣印在畫面上。
+    （只處理「$$ 中間沒東西 $$」這一種，不要用 \$\s*\$，那會把一般 $$ 算式的開頭吃掉。） */
+ var src=String(str==null?"":str).replace(/#{2,}/g,"").replace(/\$\$[ \t]*\$\$/g,"");
+ return src.split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/).map(function(p,i){
+  /* 非算式的部分：跳脫成純文字，並清掉落單的 $（沒有成對的時候） */
+  if(i%2===0)return esc(p.replace(/\$/g,""));
+  return p.slice(0,2)==="$$"?kxSafe(p.slice(2,-2),1):kxSafe(p.slice(1,-1),0)}).join("")}
+function aiRender(box,txt){
+ var lines=String(txt||"").split(/\n/),cur=null,body=null,stepN=0;
+ function sec(title,kind){
+  var w=h('<section class="ais ais-'+(kind||"x")+'"></section>');
+  if(title)w.appendChild(h('<h4>'+esc(title)+"</h4>"));
+  body=h("<div></div>");w.appendChild(body);box.appendChild(w);cur=kind;stepN=0;return w}
+ function para(t,cls){
+  if(!body)sec("","x");
+  var d=document.createElement("div");d.className=cls||"aip";
+  d.innerHTML=aiTx(t);body.appendChild(d);return d}
+ lines.forEach(function(raw){
+  var line=raw.replace(/\s+$/,"");
+  if(!line.trim()){return}
+  var mh=/^\s*#{2,4}\s*(.+?)\s*$/.exec(line);
+  if(mh){var t=mh[1].replace(/^[☆★\s]+/,"").trim();sec(t,AISEC[t]||"x");return}
+  /* 題目價值評鑑：「- 考點：說明」排成左右兩欄 */
+  var mv=/^\s*-\s*(.+?)\s*[：:]\s*(.*)$/.exec(line);
+  if(mv&&cur==="val"){
+   if(!body)sec("題目價值評鑑","val");
+   var row=h('<div class="aiv"><b></b><span></span></div>');
+   row.querySelector("b").textContent=mv[1];
+   row.querySelector("span").innerHTML=aiTx(mv[2]);
+   body.appendChild(row);return}
+  /* 解題步驟：「步驟 1：…」給編號 */
+  var ms=/^\s*(?:步驟|Step)\s*([0-9０-９一二三四五六七八九十]+)\s*[：:.、]?\s*(.*)$/i.exec(line);
+  if(ms){
+   if(!body)sec("解題步驟","step");
+   stepN++;
+   var st=h('<div class="aist"><i></i><div class="t"></div></div>');
+   st.querySelector("i").textContent=ms[1];
+   /* 「小標題｜說明」：小標變粗體，看起來才有層次 */
+   var rest=String(ms[2]||""),bar=rest.indexOf("｜");if(bar<0)bar=rest.indexOf("|");
+   st.querySelector(".t").innerHTML=bar>0
+    ?'<b>'+aiTx(rest.slice(0,bar).trim())+"</b>"+aiTx(rest.slice(bar+1))
+    :aiTx(rest);
+   body.appendChild(st);return}
+  if(/^\s*-\s+/.test(line)){para(line.replace(/^\s*-\s+/,""),"aip aili");return}
+  para(line);
+ });
+ if(!box.children.length){ /* 完全認不出格式：至少一行一段，不要糊成一坨 */
+  String(txt||"").split(/\n+/).forEach(function(l){if(l.trim())para(l)})}
+}
+
 /* host：按鈕放進去的容器；ask：要傳給伺服器的參數（{sid,i} 或 {qid}） */
 function aiBtn(host,ask){
  if(!(M.cfg&&M.cfg.ai))return null;
@@ -82,7 +171,7 @@ function aiBtn(host,ask){
   bt.disabled=true;bt.textContent="產生中…";out.hidden=false;out.className="aiout";out.textContent="AI 正在想怎麼說明這一題…";
   M.api("POST","/api/ai/explain",ask).then(function(r){
    bt.disabled=false;bt.textContent="收起詳解";out.dataset.done="1";out.innerHTML="";
-   String(r.txt).split(/\n+/).forEach(function(line){if(line.trim()){var pp=document.createElement("p");pp.textContent=line.trim();out.appendChild(pp)}});
+   aiRender(out,r.txt);
    out.appendChild(h('<p class="meta">這段說明是 AI 產生的，可能有錯或講得不夠清楚，請以老師的說明為準。</p>'));
   },function(e){bt.disabled=false;bt.textContent="AI 詳解";out.className="aiout fb no";out.textContent=aiMsg(e)||errMsg(e)});
  };
