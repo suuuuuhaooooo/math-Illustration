@@ -827,5 +827,107 @@ function guard(ctx){
  load();
 }
 
-NB.tadmin={roster:roster,bank:bank,settings:settings,data:data,reports:reports,prints:prints,mocks:mocks,assign:assign,books:books,guard:guard};
+/* ---- 邀請碼／兌換碼 ----
+   一組碼可以同時做三件事（入班、延長期限、送積分），發的時候各自填或留空。
+   最實用的是入班碼：以前新學生要管理員一個一個打 email 進名單，現在把碼給家長就好，
+   學生登入後在「不在名單裡」那一頁直接輸入就加進來了。
+
+   版面分三段，各自獨立重畫：表單、這次產生的碼、已發出的清單。
+   這樣重新整理清單時不會把「剛產生還沒複製走的碼」一起洗掉。 */
+function codes(ctx){
+ var s=ctx.sheet("邀請碼／兌換碼","一組碼可以同時做入班、延長期限、送積分；不需要的欄位留空就好");
+ var form=h("<div></div>"),out=h("<div></div>"),box=h('<div><p class="meta">正在載入…</p></div>');
+ s.appendChild(form);s.appendChild(out);s.appendChild(box);
+ function when(ms){if(!ms)return"";var d=new Date(ms),p=function(x){return(x<10?"0":"")+x};
+  return(d.getMonth()+1)+"/"+d.getDate()+" "+p(d.getHours())+":"+p(d.getMinutes())}
+
+ /* ---- 發碼表單 ---- */
+ var f=h('<div class="cdform">'
+  +'<div class="ctl"><label>張數 <input class="in" id="cd-n" type="number" min="1" max="200" value="1" style="width:5em"></label>'
+  +'<label>每張可用次數 <input class="in" id="cd-u" type="number" min="0" max="10000" value="1" style="width:5em"></label>'
+  +'<label>使用期限 <input class="in" id="cd-x" type="date" style="width:10em"></label></div>'
+  +'<h3>入班（給還不在名單裡的新學生）</h3>'
+  +'<div class="ctl"><label>班級 <input class="in" id="cd-c" placeholder="例：601" style="width:7em"></label>'
+  +'<label>年級 <select class="in" id="cd-g"><option value="0">—</option>'+[1,2,3,4,5,6].map(function(g){return'<option value="'+g+'">'+g+" 年級</option>"}).join("")+'</select></label>'
+  +'<label>身分 <select class="in" id="cd-r"><option value="student">學生</option><option value="teacher">老師</option></select></label></div>'
+  +'<div class="ctl"><span class="meta">科目：</span>'+Object.keys(M.SUBJ).map(function(k){return'<label><input type="checkbox" class="cd-s" value="'+k+'"'+(k==="math"?" checked":"")+'> '+esc(M.SUBJ[k])+"</label>"}).join("")
+  +'<span class="meta">　課本版本：</span>'+(NB.ed?NB.ed.KEYS.map(function(k){return'<label><input type="checkbox" class="cd-e" value="'+k+'"> '+esc(NB.ed.name(k))+"</label>"}).join(""):"")+'</div>'
+  +'<h3>延長期限與積分（名單裡的人也能用）</h3>'
+  +'<div class="ctl"><label>延長 <input class="in" id="cd-d" type="number" min="0" max="3650" value="0" style="width:6em"> 天</label>'
+  +'<label>贈送 <input class="in" id="cd-p" type="number" min="0" max="100000" value="0" style="width:6em"> 積分</label>'
+  +'<label>備註 <input class="in" id="cd-note" placeholder="自己看的，例：11 月續訂" style="width:12em"></label></div>'
+  +'<div class="ctl"><button class="pen go" id="cd-make">產生</button></div><div class="fb" id="cd-msg" hidden></div></div>');
+ form.appendChild(f);
+ form.appendChild(h('<p class="meta">「可用次數」填 1＝一人一張；填 30＝一張碼全班都能用；填 0＝不限次數。'
+  +'不管填多少，<b>同一個人對同一組碼只能用一次</b>。入班一定要選年級，不然系統不知道要出哪個年段的題目。</p>'));
+ var msg=f.querySelector("#cd-msg");
+ function say(cls,html){msg.hidden=false;msg.className="fb"+(cls?" "+cls:"");msg.innerHTML=html}
+ f.querySelector("#cd-make").onclick=function(){
+  var b=this,g=+f.querySelector("#cd-g").value,cls=f.querySelector("#cd-c").value.trim();
+  var body={n:+f.querySelector("#cd-n").value||1,uses:+f.querySelector("#cd-u").value||0,expires:f.querySelector("#cd-x").value||"",
+   cls:cls,grade:g,role:f.querySelector("#cd-r").value,days:+f.querySelector("#cd-d").value||0,pts:+f.querySelector("#cd-p").value||0,
+   note:f.querySelector("#cd-note").value.trim(),
+   subjects:[].filter.call(f.querySelectorAll(".cd-s"),function(x){return x.checked}).map(function(x){return x.value}),
+   eds:[].filter.call(f.querySelectorAll(".cd-e"),function(x){return x.checked}).map(function(x){return x.value})};
+  if(cls&&!g)return say("no","入班碼要選年級。");
+  if(!cls&&!body.days&&!body.pts)return say("no","至少要填一項：班級（入班）、延長天數、或贈送積分。");
+  b.disabled=true;say("","產生中…");
+  M.api("POST","/api/admin/codes",body).then(function(x){
+   b.disabled=false;say("ok","已產生 <b>"+x.codes.length+"</b> 組（"+esc(x.kind)+"）。");
+   showCodes(x.codes);load(); /* 清單另外一段，重畫不會動到上面的碼 */
+  },function(e){b.disabled=false;say("no",esc(cdErr(e)))});
+ };
+
+ /* ---- 這次產生的碼：發完的下一步一定是貼給別人，所以直接給可複製的清單 ---- */
+ function showCodes(list){
+  out.innerHTML="";
+  var ta=h('<textarea class="in" rows="'+Math.min(10,list.length+1)+'" readonly style="width:100%"></textarea>');
+  ta.value=list.join("\n");
+  out.appendChild(h("<h3>這次產生的碼（可以直接複製）</h3>"));out.appendChild(ta);
+  var cp=h('<div class="ctl"><button class="pen">複製全部</button><button class="pen">複製成入班連結</button></div>');out.appendChild(cp);
+  var root=location.href.replace(/teacher\.html.*$/,"member.html");
+  function copy(bt,txt,done){ta.value=txt;ta.select();try{document.execCommand("copy")}catch(e){}bt.textContent=done}
+  cp.children[0].onclick=function(){copy(this,list.join("\n"),"已複製")};
+  cp.children[1].onclick=function(){copy(this,list.map(function(c){return root+"#code/"+c}).join("\n"),"已複製連結")};
+  out.appendChild(h('<p class="meta">連結版本的好處：學生點開就自動填入並兌換，不用自己打字（適合用 LINE 發給家長）。</p>'));
+ }
+
+ /* ---- 已發出的碼與使用紀錄 ---- */
+ function load(){
+  M.api("GET","/api/admin/codes").then(function(r){
+   box.innerHTML="";
+   var live=r.rows.filter(function(x){return !x.dead}),dead=r.rows.filter(function(x){return x.dead});
+   function tbl(list,title){
+    var w=h("<div></div>");w.appendChild(h("<h3>"+title+"（"+list.length+"）</h3>"));
+    if(!list.length){w.appendChild(h('<p class="meta">目前沒有。</p>'));return w}
+    var t='<table class="tb"><tr><th>碼</th><th>內容</th><th class="pc">已用／可用</th><th>期限</th><th>備註</th><th></th></tr>';
+    list.forEach(function(x){
+     t+='<tr><td><code>'+esc(x.code.slice(0,5)+"-"+x.code.slice(5))+'</code></td><td>'+esc(x.kind||"")
+      +(x.cls?'<br><small class="soft">'+esc(x.cls)+" 班・"+x.grade+" 年級・"+(x.role==="teacher"?"老師":"學生")+(x.eds?"・"+esc(x.eds):"")+"</small>":"")+'</td>'
+      +'<td class="pc">'+x.used+" ／ "+(x.uses?x.uses:"不限")+'</td><td>'+esc(x.expires||"不限")+'</td><td>'+esc(x.note||"")+'</td>'
+      +'<td><button class="pen" data-'+(x.active?"off":"on")+'="'+esc(x.code)+'">'+(x.active?"停用":"啟用")+'</button>'
+      +' <button class="pen" data-del="'+esc(x.code)+'">刪除</button></td></tr>'});
+    w.appendChild(h(t+"</table>"));return w}
+   box.appendChild(tbl(live,"可以用的碼"));
+   if(dead.length)box.appendChild(tbl(dead,"已失效（過期、用完或停用）"));
+
+   box.appendChild(h("<h3>使用紀錄（最近 "+r.uses.length+" 筆）</h3>"));
+   if(!r.uses.length)box.appendChild(h('<p class="meta">還沒有人用過。</p>'));
+   else{
+    var t3='<table class="tb"><tr><th>時間</th><th>碼</th><th>帳號</th><th>套用了什麼</th></tr>';
+    r.uses.forEach(function(u){t3+='<tr><td>'+when(u.ts)+'</td><td><code>'+esc(u.code)+'</code></td><td>'+esc(u.email)+'</td><td>'+esc(u.got)+'</td></tr>'});
+    box.appendChild(h(t3+"</table>"));
+   }
+   function act(body){M.api("POST","/api/admin/code/off",body).then(load,function(e){alert(cdErr(e))})}
+   box.querySelectorAll("button[data-off]").forEach(function(b){b.onclick=function(){act({code:b.dataset.off,on:0})}});
+   box.querySelectorAll("button[data-on]").forEach(function(b){b.onclick=function(){act({code:b.dataset.on,on:1})}});
+   box.querySelectorAll("button[data-del]").forEach(function(b){b.onclick=function(){
+    if(!confirm("刪除這組碼？已經用過的人不會受影響，但使用紀錄也會一起刪掉。"))return;act({code:b.dataset.del,del:1})}});
+  },function(e){box.innerHTML="";box.appendChild(h('<div class="fb no">'+esc(errs(e))+"</div>"))});
+ }
+ load();
+}
+function cdErr(e){var c=e&&e.code;return{need_grade:"入班碼要選年級。",empty_code:"至少要填一項：班級、延長天數、或贈送積分。",no_code:"缺少碼。"}[c]||errs(e)}
+
+NB.tadmin={roster:roster,bank:bank,settings:settings,data:data,reports:reports,prints:prints,mocks:mocks,assign:assign,books:books,guard:guard,codes:codes};
 })();

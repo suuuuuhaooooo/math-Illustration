@@ -773,3 +773,12 @@ body.pad-lock{overflow:hidden}
   .pad-sheet{height:clamp(190px,40vh,300px)}
 }
 @media print{.padwrap{display:none}}
+
+/* ───── 兌換碼與邀請碼 ───── */
+details.rdmd>summary{cursor:pointer;font-weight:600}
+details.rdmd>summary::-webkit-details-marker{color:var(--soft)}
+.rdm .in{text-transform:uppercase;letter-spacing:.06em}
+.cdform h3{margin:14px 0 4px;font-size:1rem}
+.cdform label{display:inline-flex;align-items:center;gap:5px;font-size:.9rem;color:var(--soft)}
+.cdform label .in{text-transform:none;letter-spacing:0}
+.tb code{font-size:.92em;letter-spacing:.04em}

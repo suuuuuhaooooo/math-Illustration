@@ -55,14 +55,15 @@ M.api=function(method,path,body){
   if(body){o.headers["Content-Type"]="application/json";o.body=JSON.stringify(body)}
   return fetch(CFG.api+path,o)}).then(function(r){return r.json().then(function(j){
    if(!r.ok){var e=new Error(j.err||"http");e.code=j.err||"http";e.status=r.status;
-    if(e.code==="other_device"&&!M._kick){M._kick=1;M.kicked()}if(j.subjects)e.subjects=j.subjects;if(j.subj)e.subj=j.subj;if(j.until!==undefined)e.until=j.until;if(j.why)e.why=j.why;if(j.cap!==undefined)e.cap=j.cap;throw e}return j},function(){var e=new Error("bad");e.code="net";throw e})},function(e){if(e.code)throw e;var x=new Error("net");x.code="net";throw x})};
+    if(e.code==="other_device"&&!M._kick){M._kick=1;M.kicked()}/* 不登出，回到首頁顯示「要改用這台嗎」 */if(j.subjects)e.subjects=j.subjects;if(j.subj)e.subj=j.subj;if(j.until!==undefined)e.until=j.until;if(j.why)e.why=j.why;if(j.cap!==undefined)e.cap=j.cap;throw e}return j},function(){var e=new Error("bad");e.code="net";throw e})},function(e){if(e.code)throw e;var x=new Error("net");x.code="net";throw x})};
 
-/* 被別的裝置踢掉：清乾淨並回登入頁，附上原因 */
-M.kicked=function(){try{sessionStorage.setItem("nb-kick","1")}catch(e){}
- return (M.logout()||Promise.resolve()).catch(function(){}).then(function(){
-  location.href=(document.body.getAttribute("data-root")||"./")+"member.html"})};
-/* 登入後占位 */
-M.claim=function(){return M.api("POST","/api/session/claim",{}).catch(function(){return null})};
+/* 位子被別台搶走：不要登出（登出要再按一次 Google 登入很煩），
+   直接回到學員專區首頁，那裡會顯示「這個帳號正在另一台裝置使用，要改用這台嗎」。 */
+M.kicked=function(){
+ location.href=(document.body.getAttribute("data-root")||"./")+"member.html";
+ return new Promise(function(){})}; /* 轉頁中，不要讓後續程式繼續跑 */
+/* 占裝置位。opt.soft＝只有空著才占（開頁面時用），沒帶 soft＝直接搶（按「改用這台」時用） */
+M.claim=function(opt){return M.api("POST","/api/session/claim",opt||{}).catch(function(){return null})};
 M.load=function(){return M.api("GET","/api/me").then(function(r){
  M.U=r.user;M.D=r.data;M.STK=r.stk;M.prog=r.prog||{};M.acct=r.acct||{};M.units=r.units;M.gens=r.gens;M.T=r.today;M.cfg=r.cfg;M.step=r.cfg.step;
  ls(CKS(),JSON.stringify({n:r.user.name,lv:M.lv(r.data),pts:r.data.pts,r:r.user.admin?"admin":r.user.role}));
@@ -74,10 +75,14 @@ M.forceOut=function(){var f=ls("nb-force-out");if(!f)return Promise.resolve();ls
 M.boot=function(){M.err=null;M.errX=null;return M.forceOut().then(M.loadCat).then(function(){return M.ready}).then(function(A){
  M.auth=A;if(!A){M.U=null;M.err=CFG.firebase&&CFG.firebase.apiKey?"noauth":"noconfig";return}
  if(!A.user()){M.U=null;return}
- /* 順序很重要：先占裝置位，再載入資料。
-    反過來的話，新裝置的 /api/me 會先被舊裝置的位子擋下來（other_device），
-    claim 根本輪不到執行，於是「新登入的贏」變成「舊的永遠贏」，新裝置就再也進不來了。 */
- return M.claim().then(function(){return M.load()}).catch(function(e){M.U=null;M.err=e.code||"net";M.errX=e})})};
+ /* 開頁面時先「輕占位」：空著就占下來，被別台占著就回 held。
+    這一步一定要在 M.load() 之前——/api/me 自己就會被別台的位子擋掉（other_device），
+    占位根本輪不到執行，「新登入的贏」會變成「舊的永遠贏」，新裝置就再也進不來。
+    而且是 soft 模式：不會一重新整理就把位子搶回來（兩台互搶的話永遠不會有人被擋，限制等於沒有）。 */
+ return M.claim({soft:1}).then(function(r){
+  if(r&&r.held){M.U=null;M.err="other_device";M.errX={code:"other_device",at:r.at||0};return}
+  return M.load();
+ }).catch(function(e){M.U=null;M.err=e.code||"net";M.errX=e})})};
 M.setData=function(D,pg){M.D=D;if(pg)M.prog=pg;ls(CKS(),JSON.stringify({n:M.U.name,lv:M.lv(D),pts:D.pts}))};
 M.signIn=function(){return M.auth.signIn()};
 M.logout=function(){

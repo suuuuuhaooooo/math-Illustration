@@ -33,6 +33,35 @@ function susMsg(e){
  else s+="請聯絡管理員解除。";
  if(e&&e.why)s+="（"+esc(String(e.why))+"）";
  return s+"如果你覺得這是誤判，請把這段訊息給管理員，他可以立刻解除。"}
+/* ---- 邀請碼／兌換碼 ----
+   同一個元件用在兩個地方：
+   1. 「不在班級名單裡」的畫面——這是最主要的用途。新學生登入後看到的就是那一頁，
+      邀請碼直接放在那裡，輸入完重新載入就進來了，管理員不用一個一個打 email。
+   2. 學員專區首頁——已經在名單裡的人用來延長期限或兌換積分。
+   成功後整頁重新載入：名單、期限、積分都可能變了，重載最單純也不會有漏更新的地方。 */
+function redeemMsg(c){return{bad_code:"查不到這組碼，請確認有沒有打錯（英文字母不分大小寫）。",
+ code_off:"這組碼已經被停用了。",code_expired:"這組碼已經過期了。",code_used_up:"這組碼的可用次數已經用完了。",
+ code_mine:"你已經用過這組碼了，同一組碼每個人只能用一次。",
+ need_join:"這是延長期限用的碼，但你還不在班級名單裡，要先用入班碼或請管理員把你加進名單。",
+ code_nothing:"這組碼對你沒有可以套用的內容（例如你已經在名單裡了，而這是入班碼）。",
+ rate_limit:"試太多次了，請等一分鐘再試。",no_code:"請輸入兌換碼。"}[c]||null}
+function redeemBox(opt){
+ opt=opt||{};
+ var w=h('<div class="rdm"><div class="ctl"><input class="in" placeholder="例：ABCDE-12345" maxlength="20" autocapitalize="characters" spellcheck="false" style="min-width:11em;text-transform:uppercase">'
+  +'<button class="pen go">兌換</button></div><div class="fb" hidden></div></div>');
+ var ip=w.querySelector("input"),bt=w.querySelector("button"),fb=w.querySelector(".fb");
+ function say(cls,html){fb.hidden=false;fb.className="fb"+(cls?" "+cls:"");fb.innerHTML=html}
+ bt.onclick=function(){
+  var v=ip.value.trim();if(!v)return say("no","請輸入兌換碼。");
+  bt.disabled=true;say("","兌換中…");
+  M.api("POST","/api/redeem",{code:v}).then(function(r){
+   say("ok","<b>兌換成功</b>："+r.got.map(esc).join("、")+"。正在重新載入…");
+   setTimeout(function(){location.href=(document.body.getAttribute("data-root")||"./")+"member.html"},1200);
+  },function(e){bt.disabled=false;say("no",esc(redeemMsg(e&&e.code)||errMsg(e)))});
+ };
+ ip.onkeydown=function(e){if(e.key==="Enter")bt.click()};
+ if(opt.code){ip.value=opt.code;setTimeout(function(){bt.click()},300)} /* 網址帶 #code/XXXXX 可以直接兌換，分享連結用 */
+ return w}
 function errMsg(e){var c=e&&e.code;if(c==="expired"&&M.U&&M.U.role==="teacher")return"你的老師帳號使用期限已到期，請聯絡管理員延長；延長後重新整理頁面就能繼續使用。";return{qr_off:"老師目前沒有開放 QR code 線上作答。",paper_closed:"這份卷已經關閉線上作答。",already_done:"你已經交過這份卷了。",bad_qr:"QR code 作答資料有問題，請重新出卷。",not_found:"找不到這份卷，請確認 QR code 是不是完整的。",plan_too_big:"題數超過上限了，請減少題數。",bad_plan:"大題設定有誤，請檢查後再試。",preview_limit:"審題預覽太頻繁了，請等幾分鐘再試（為了節省資源，預覽每 10 分鐘有次數上限）。",pool_limit:"挑題查得太頻繁了，請等幾分鐘再試。",rate_limit:"操作太快了，請等一分鐘再試。",suspended:susMsg(e),pull_limit:"今天下載整份題庫的次數已達上限（"+((e&&e.cap)||"")+" 次），請明天再試，或請管理員調整。",no_units:"請先勾選單元。",print_limit:"今天出的練習卷已經到上限了，明天再來，或請管理員調整。",net:"連不上伺服器，請檢查網路後再試一次。",noapi:"網站還沒設定好伺服器網址，請管理員完成設定。",bad_token:"登入已失效，請重新整理頁面再登入。",not_in_roster:"這個帳號不在班級名單裡。",no_session:"這份題目已經失效，請重新開始。",already_done:"這份題目已經交過了。",already_answered:"這題已經送出了。",expired:"你的正式學員授權已到期，請找管理員延期。",forbidden:"沒有權限。",no_questions:"這個範圍（或篩選條件）沒有可以出的題目。",closed:"這份卷子已經截止，或老師已經結束這份派卷。",not_found:"找不到這份卷子，可能已被老師刪除。",server:"伺服器忙碌中，請稍後再試。",wrong_subject:"這份卷是「"+((e&&M.SUBJ[e.subj])||"另一科")+"」的卷，請用正確的 QR code 或網址開啟。",no_subject:"你的帳號沒有開通「"+(M.SUBJ[M.subj]||M.subj)+"」。",last_subject:"每個帳號至少要保留一個科目；要停用請改用刪除。"}[c]||"發生了一點問題（"+(c||"未知")+"），請再試一次。"}
 /* 題組的共用題幹：每一小題上方都顯示一次（學生一題一題作答，不用往上翻）；只有一小題（例如錯題本單獨練習）就不寫「第幾小題」 */
 function gstem(g,s,im,k,n){return s?'<div class="gstem">'+(n>1?'<small class="gtag">題組・第 '+k+"／"+n+" 小題</small>":'<small class="gtag">題組</small>')+"<div>"+tx(s)+"</div>"+qimg(im)+"</div>":""}
@@ -65,7 +94,10 @@ function ymdT(){return M.T||M.today()}
 function shell(){
  app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="'+(SCI?M.SITE.sci:"island.html")+'">← '+(SCI?"回到見微理畫":"回到目錄")+'</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));
  app.appendChild(h('<h1 class="title"><mark>學員專區</mark><small class="subj-now">'+(M.SUBJ[M.subj]||"")+'</small></h1>'));
- var u=user();if(!u){login();return false}
+ var u=user();
+ /* 位子被別台占著：顯示「要改用這台嗎」，不是登入畫面也不是一般錯誤訊息 */
+ if(!u&&M.err==="other_device"){otherDevice();return false}
+ if(!u){login();return false}
  if(M.catErr)app.appendChild(h('<div class="fb no">讀不到見微理畫（國中理化網站）的單元目錄，單元名稱暫時無法顯示，請稍後再重新整理。</div>'));
  /* 兩科都開通：可以切換（同一個帳號、各科資料分開） */
  if((u.subjects||[]).length>1){var sw=h('<div class="ctl subj-sw noprint"><span class="meta">科目：</span></div>');u.subjects.forEach(function(k){if(!M.SUBJ[k])return;var a=h('<a class="pen'+(k===M.subj?" go":"")+'"></a>');a.textContent=M.SUBJ[k];a.href=location.pathname+(k==="math"?"":"?s="+k);sw.appendChild(a)});app.appendChild(sw)}
@@ -118,10 +150,33 @@ function subjMsg(e){var have=(e&&e.subjects)||[],cur=M.SUBJ[M.subj]||M.subj,o=ha
  if(o.length)t+="你開通的是「"+o.map(function(k){return M.SUBJ[k]}).join("、")+"」，"+(o[0]==="sci"?'請到 <a href="'+M.SITE.sci+'">見微理畫</a> 使用。':'請到 <a href="'+M.SITE.math+'site/member.html">數光島筆記本的學員專區</a> 使用。');
  else t+="如果需要，請找管理員開通。";
  return t}
+/* ---- 這個帳號正在另一台裝置使用 ----
+   一個帳號同時只能一台在線。以前的做法是直接把這一台登出，但那樣很糟：
+   訊息一閃就被登出，使用者要再按一次 Google 登入，而且不知道發生什麼事。
+   現在改成留在登入狀態、問一句就好——要不要改用這一台。
+   按下去才會把另一台請出去（開頁面本身不會搶，不然兩台互相搶就永遠不會有人被擋）。 */
+function otherDevice(){
+ var at=(M.errX&&+M.errX.at)||0,ago="";
+ if(at){var m=Math.round((Date.now()-at)/6e4);ago=m<1?"剛剛":m<60?m+" 分鐘前":Math.round(m/60)+" 小時前"}
+ var s=sheet("已在另一台裝置使用","一個帳號同時只能在一台裝置使用");
+ s.appendChild(h("<p>這個帳號"+(ago?"<b>"+esc(ago)+"</b>":"")+"在另一台裝置登入並正在使用中。"
+  +"為了保護付費內容，一個帳號同時只能在一台裝置使用。</p>"));
+ s.appendChild(h('<p class="meta">按「改用這台」就會把另一台請出去，你在這裡繼續使用；那一台的下一個動作會看到同樣的畫面。'
+  +'你沒有被登出，所以隨時可以切回去。</p>'));
+ var fb=h('<div class="fb" hidden></div>');
+ var bar=h('<div class="ctl"></div>'),go=h('<button class="pen go">改用這台</button>'),lo=h('<button class="pen">登出</button>');
+ bar.appendChild(go);bar.appendChild(lo);s.appendChild(bar);s.appendChild(fb);
+ go.onclick=function(){go.disabled=true;fb.hidden=false;fb.className="fb";fb.textContent="切換中…";
+  M.claim({}).then(function(r){
+   if(!r){go.disabled=false;fb.className="fb no";fb.textContent="連不上伺服器，請檢查網路後再試。";return}
+   location.reload();
+  })};
+ lo.onclick=function(){M.logout().then(function(){location.reload()},function(){location.reload()})};
+ s.appendChild(h('<p class="meta">如果不是你本人操作，表示帳號可能被別人使用了——請盡快告訴老師或管理員。</p>'));
+ app.appendChild(s);
+}
 function login(){
  try{if(sessionStorage.getItem("nb-idle")){sessionStorage.removeItem("nb-idle");setTimeout(function(){var f=document.querySelector(".fb");if(f){f.className="fb no";f.textContent="因為閒置太久，已為了帳號安全自動登出，請重新登入。"}},0)}}catch(e){}
- /* 被別台裝置踢掉：一個帳號只能一台在線 */
- try{if(sessionStorage.getItem("nb-kick")){sessionStorage.removeItem("nb-kick");setTimeout(function(){var f=document.querySelector(".fb");if(f){f.className="fb no";f.textContent="這個帳號剛剛在另一台裝置登入了。一個帳號同時只能在一台裝置使用，所以這一台已經登出。如果不是你本人操作，請盡快告訴老師或管理員。"}},0)}}catch(e){}
  var s=sheet("登入","僅供班內學員使用"),fb=h('<div class="fb"></div>'),em=M.auth&&M.auth.user()?M.auth.user().email:"";
  s.appendChild(h("<p>請使用老師登記的 Google 帳號登入平台。登入後，即可使用小測驗、模擬卷、錯題本、學習進度、貼紙獎勵、每日一題、列印練習卷及排行榜等功能。上述功能皆須登入後方可使用。</p>"));
  s.appendChild(h('<p class="meta">登入即表示你已閱讀並同意<a href="terms.html" target="_blank" rel="noopener">使用者條款</a>與<a href="privacy.html" target="_blank" rel="noopener">隱私權政策</a>。未滿 18 歲請家長或監護人一起閱讀。</p>'));
@@ -131,6 +186,12 @@ function login(){
  if(msg){fb.className="fb no";fb.innerHTML=msg}
  if(/Line\/|FBAN|FBAV|Instagram|MicroMessenger|; wv\)/i.test(navigator.userAgent)){var w=h('<div class="fb no">你正在 App 內建瀏覽器裡，Google 登入常會被擋住。請點右上角「⋯」選「用瀏覽器開啟」（Chrome／Safari），或 <button class="pen">複製網址</button> 貼到瀏覽器。</div>');w.querySelector("button").onclick=function(){var u=location.href.split("#")[0];(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){w.querySelector("button").textContent="已複製"},function(){prompt("請複製這個網址：",u)})};s.appendChild(w)}
  var bar=h('<div class="ctl"></div>');
+ if(M.err==="not_in_roster"){
+  /* 新學生最常看到的就是這一頁，所以邀請碼直接放在這裡 */
+  var rs=h('<section class="sheet"><h2><span class="tag">邀請碼</span>有邀請碼的話，在這裡輸入就能直接加入</h2></section>');
+  rs.appendChild(h('<p class="meta">邀請碼通常由老師或管理員提供，長得像 <code>ABCDE-12345</code>。輸入後就會自動把你加進班級，不用再等管理員處理。</p>'));
+  rs.appendChild(redeemBox({code:(location.hash.indexOf("#code/")===0?decodeURIComponent(location.hash.slice(6)):"")}));
+  app.appendChild(rs)}
  if(M.err==="not_in_roster"||M.err==="bad_token"||M.err==="no_subject"){var o=h('<button class="pen go">換一個帳號登入</button>');o.onclick=function(){M.logout().then(function(){M.err=null;booted=false;route()})};bar.appendChild(o)}
  else if(M.err&&M.auth&&M.auth.user()){var rt=h('<button class="pen go">重新載入</button>'),o2=h('<button class="pen">換一個帳號登入</button>');
   rt.onclick=function(){M.err=null;booted=false;booting=false;route()};o2.onclick=function(){M.logout().then(function(){M.err=null;booted=false;route()})};bar.appendChild(rt);bar.appendChild(o2)}
@@ -142,13 +203,17 @@ function login(){
    練習（小測驗、每日一題、錯題訂正）：每題送出就由伺服器判分並回傳解答
    模擬卷：全部寫完交卷才一次判分；時間由伺服器管，逾時視為未作答 */
 function run(o){
- var S=o.sess,qs=S.qs,exam=S.kind==="mock",i=0,ans=[],res=[],left=S.seconds||0,box=sheet(o.tag,o.title),body=h("<div></div>"),busy=false,fin=false,dres=null,hinted={},PAD=null;
+ var S=o.sess,qs=S.qs,exam=S.kind==="mock",i=0,ans=[],res=[],left=S.seconds||0,box=sheet(o.tag,o.title),body=h("<div></div>"),busy=false,fin=false,dres=null,hinted={},PAD=null,beat=0;
  box.appendChild(body);view.innerHTML="";view.appendChild(box);if(o.note)box.insertBefore(h('<p class="meta"></p>'),body).textContent=o.note;
  if(SCI){var tc=(M.cfg&&M.cfg.tools)||{practice:true,mock:false},okT=S.tools!==undefined?!!S.tools:exam?!!tc.mock:!!tc.practice; /* 理化小工具：派卷看老師的設定，其他看管理員的設定 */
   if(okT)sciTools(function(T){T.button()});else if(window.SciTools)SciTools.remove();
   box.insertBefore(h('<p class="meta">'+(okT?"這一份可以使用右下角的「小工具」（週期表、公式卡、單位換算）。":"這一份不開放使用小工具。")+"</p>"),body)}
  if(exam){var clock=h('<span class="clock"></span>');box.querySelector("h2").appendChild(clock);var t0=Date.now();TM=setInterval(tick,1000);tick();if(XG)XG();XG=NB.xg?NB.xg.start({sid:S.sid,lw:S.lw,user:user(),api:M.api,box:box}):null}
- function tick(){left=S.seconds-Math.floor((Date.now()-t0)/1000);if(left<0)left=0;clock.textContent="剩 "+pad(Math.floor(left/60))+":"+pad(left%60);if(left<=0)finish()}
+ function tick(){left=S.seconds-Math.floor((Date.now()-t0)/1000);if(left<0)left=0;clock.textContent="剩 "+pad(Math.floor(left/60))+":"+pad(left%60);if(left<=0)finish();
+  /* 模擬卷作答中幾乎不會打伺服器（題目一開始就全部拿到了，答案是最後交卷才送），
+     所以裝置限制在考試途中等於看不到——別台登入了也要等交卷才會被擋。
+     這裡每 60 秒確認一次位子還在自己手上，被接手就馬上停下來。 */
+  if(++beat%60===0&&M.claim)M.claim({soft:1}).then(function(r){if(r&&r.held){clearInterval(TM);M.kicked()}})}
  function show(){
   if(PAD){PAD.destroy();PAD=null}
   var q=qs[i],sel=null,done=false,ob=[],inp,hb,d=h('<div><div class="prog">第 '+(i+1)+" / "+qs.length+' 題</div>'+(q.g?gstem(0,q.g.s,q.g.i,q.g.k,q.g.n):"")+'<div class="q">'+tx(q.q)+"</div>"+qimg(q.img)+"</div>");body.innerHTML="";
@@ -210,6 +275,11 @@ V.home=function(){
  var a=M.acct||{};if(a.expired)view.appendChild(h('<div class="fb no">你的正式學員授權已到期（'+esc(a.expires)+'），目前只能查看資料。請找管理員延長授權。</div>'));else if(a.daysLeft!==null&&a.daysLeft!==undefined&&a.daysLeft<=14)view.appendChild(h('<div class="fb">提醒：你的授權將在 '+(a.daysLeft+1)+' 天內到期（'+esc(a.expires)+'），要續用請告訴管理員。</div>'));
  var bnr=h("<div></div>");view.appendChild(bnr);view.appendChild(tiles);
  M.api("GET","/api/assigns").then(function(r){var n=(r.rows||[]).filter(function(x){return x.st==="new"||x.st==="open"}).length;if(n)bnr.appendChild(h('<a class="fb" style="display:block;text-decoration:none;color:inherit" href="#assign"><b>你有 '+n+' 份待測的卷子</b>，點這裡查看。</a>'))},function(){});
+ /* 兌換碼：續訂、補償、活動獎勵都走這裡，學生自己輸入就好。
+    平常收起來只占一行，大部分時候用不到，不要一直占著首頁版面 */
+ var rd=h('<details class="sheet rdmd"><summary><span class="tag">兌換碼</span>有延長期限或贈送積分的碼？點這裡輸入</summary></details>');
+ rd.appendChild(redeemBox());
+ rd.appendChild(h('<p class="meta">同一組碼每個人只能用一次。碼不分大小寫，中間的「-」可以不打。</p>'));view.appendChild(rd);
  var c=M.cfg,s=sheet("獎勵","怎麼賺積分和勳章");s.appendChild(h("<ol class=\"steps\"><li>答對 1 題：依題目難度 +"+c.pts[0]+"／+"+c.pts[1]+"／+"+c.pts[2]+" 分（基礎／應用／挑戰，每天最多計 "+c.capQ+" 題）</li><li>完成一份小測驗（3 題以上）：+20 分</li><li>每日一題：每天只有一次機會，答對 +30 分，答錯 +5 分；做完就不用再做了</li><li>看提示：每題第一次看扣 "+(c.hint||0)+" 分，而且這題答對只拿一半積分</li><li>連續練習：第 2 天起每天加分，最多每天 +14 分</li><li>模擬卷：完成 +20 分，80 分以上再 +50 分（每天前 "+c.capMock+" 份）</li><li>錯題複習：同一題在 "+c.review.join("、")+" 天後各答對一次就畢業，+15 分</li><li>解鎖勳章：銅 +10、銀 +20、金 +30、白金 +50、鑽石 +80 分（共 "+M.STK.length+" 枚）。每 "+c.step+" 分升一級</li></ol>"));view.appendChild(s)};
 
 V.daily=function(){
