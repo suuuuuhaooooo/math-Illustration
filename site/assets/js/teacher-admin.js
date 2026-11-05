@@ -466,6 +466,19 @@ function settings(ctx){
   s.appendChild(field("AI 詳解（開放後，學生在作答回饋與錯題本會看到「AI 詳解」按鈕）",F.AI_ON));
   s.appendChild(field("每人每天可以產生幾次（0＝不限。已經產生過的詳解之後都讀快取，不算次數）",F.AI_CAP));
   s.appendChild(field("全站每天可以產生幾次（0＝不限。這是保護免費額度的最後一道防線）",F.AI_DAY_CAP));
+  /* 測試連線：AI 不能用的時候，直接把 Cloudflare 回的原因顯示出來，不要讓人去猜 */
+  var aitest=h('<div class="ctl"><button class="pen">測試 AI 連線</button></div>'),aiout=h('<div class="fb" hidden></div>');
+  s.appendChild(aitest);s.appendChild(aiout);
+  aitest.firstChild.onclick=function(){var b=this;b.disabled=true;aiout.hidden=false;aiout.className="fb";aiout.textContent="測試中…（第一次可能要等幾秒）";
+   M.api("POST","/api/admin/ai/test",{}).then(function(r){b.disabled=false;
+    if(r.ok){aiout.className="fb ok";aiout.innerHTML="<b>AI 可以用。</b>使用的模型：<code>"+esc(r.model)+"</code><br>它回答的內容："+esc(String(r.txt).slice(0,200));return}
+    aiout.className="fb no";
+    aiout.innerHTML="<b>AI 不能用。</b>Cloudflare 回報的原因：<br><code style=\"white-space:pre-wrap\">"+esc(r.err||"（沒有訊息）")+"</code>"
+     +(r.bound?'<br><br>常見原因：Cloudflare 帳號還沒啟用 Workers AI（到 Cloudflare 後台的 AI → Workers AI 看一下）、或這些模型你的帳號不能用。'
+       +'已經試過：<code>'+esc((r.tried||[]).join("、"))+'</code>'
+      :'<br><br>請在 <code>backend/wrangler.toml</code> 加上 <code>[ai]</code> 和 <code>binding = "AI"</code>，然後重新部署。');
+   },function(e){b.disabled=false;aiout.className="fb no";aiout.textContent=errs(e)})};
+  if(e.ai&&e.ai.lastErr)s.appendChild(h('<div class="fb no">最近一次失敗的原因：<code style="white-space:pre-wrap">'+esc(e.ai.lastErr)+"</code></div>"));
   if(e.ai)s.appendChild(h('<p class="meta">目前狀態：'
    +(e.ai.bound?"已綁定 Workers AI":"<b>尚未綁定</b>")+"・今天已產生 <b>"+(e.ai.today||0)+"</b> 次・"
    +"已快取 <b>"+(e.ai.cached||0)+"</b> 題，靠快取省下 <b>"+(e.ai.saved||0)+"</b> 次產生。<br>"
