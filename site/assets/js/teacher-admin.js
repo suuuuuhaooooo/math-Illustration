@@ -318,11 +318,11 @@ function bank(ctx){
    function pass(dry,k){ /* dry：只檢查不寫入；全部檢查完才真正寫入 */
     if(k>=jobs.length)return Promise.resolve(true);var j=jobs[k];msg(bf,(dry?"檢查中 ":"匯入中 ")+(k+1)+" / "+jobs.length+"（"+esc(j.file)+"）…",1);
     return M.api("POST",K.api,{rows:j.rows,mode:!dry&&k===0&&mode.value==="replace"?"replace":"merge",dry:dry?1:0,base:j.base,more:!dry&&k<jobs.length-1}).then(function(x){if(!x.ok)bad=bad.concat(x.errs.map(function(e){return"【"+j.file+"】"+e}));else if(dry){orphan+=x.orphans||0;gcount+=x.groups||0}return pass(dry,k+1)})}
-   /* 匯入中途不推進版本（省讀取），所以不管成功或失敗，結束都補打一次 refresh，
-      確保快取不會一直停在舊版本；順手把前端的題庫快取清掉。 */
-   var fin=function(){bankReset();return M.api("POST","/api/admin/refresh",{}).catch(function(){})};
+   /* 匯入中途不推進版本（省讀取）；最後一批完成時後端才 bump 一次，前端再重讀題庫。
+      不額外打 refresh（那會多 bump 一次，讓後面的快取也失效）；若最後一批失敗再補打一次確保版本一致。 */
+   var fin=function(ok){bankReset();if(!ok)return M.api("POST","/api/admin/refresh",{}).catch(function(){});return Promise.resolve()};
    pass(true,0).then(function(){if(bad.length){done();return msg(bf,"<b>有地方要修正，完全沒有匯入：</b><br>"+bad.slice(0,30).map(esc).join("<br>")+(bad.length>30?"<br>…還有 "+(bad.length-30)+" 項":""),0)}
-    return pass(false,0).then(fin,function(e){return fin().then(function(){throw e})}).then(function(){done();msg(bf,"已匯入 "+total+(kind.value==="bank"?" 題":" 列屬性")+"（"+src.length+" 個來源）"+(gcount?"，含 "+gcount+" 個題組":"")+(orphan?"。其中 "+orphan+" 列的 id 在題庫找不到，已先存起來，之後題庫有那題就會對上":""),1);setTimeout(ctx.go,900)})}).catch(function(e){done();msg(bf,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
+    return pass(false,0).then(function(){return fin(true)},function(e){return fin(false).then(function(){throw e})}).then(function(){done();msg(bf,"✓ 已匯入 "+total+(kind.value==="bank"?" 題":" 列屬性")+"（"+src.length+" 個來源）"+(gcount?"，含 "+gcount+" 個題組":"")+(orphan?"。其中 "+orphan+" 列的 id 在題庫找不到，已先存起來，之後題庫有那題就會對上":"")+"。",1)})}).catch(function(e){done();msg(bf,errs(e)+"。已完成的批次不會復原，可以重新匯入（相同 id 會更新，不會重複）。",0)})};
   bx.onclick=function(){download(kind.value==="bank"?"題庫範本.csv":"題目屬性表範本.csv",KINDS[kind.value].sample)};
   /* 匯出要帶題組欄位（題組ID、題組題幹、題組附圖、小題序），不然匯出再匯入題組會不見。
    欄位順序跟上面「範例檔」一樣，匯出的檔案可以直接拿回來匯入。
