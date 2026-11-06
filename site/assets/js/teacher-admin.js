@@ -478,6 +478,47 @@ function settings(ctx){
        +'已經試過：<code>'+esc((r.tried||[]).join("、"))+'</code>'
       :'<br><br>請在 <code>backend/wrangler.toml</code> 加上 <code>[ai]</code> 和 <code>binding = "AI"</code>，然後重新部署。');
    },function(e){b.disabled=false;aiout.className="fb no";aiout.textContent=errs(e)})};
+  /* ---- AI 快取管理 ---- */
+  s.appendChild(h("<h4>AI 快取管理</h4>"));
+  var cacheBox=h('<div></div>');
+  s.appendChild(cacheBox);
+  function loadCache(){
+   cacheBox.textContent="讀取中…";
+   M.api("GET","/api/admin/ai/cache").then(function(r){
+    var rows=r.rows||[];
+    if(!rows.length){cacheBox.innerHTML='<p class="meta">目前沒有 AI 快取。</p>';return}
+    var t='<table class="tb" style="font-size:.85em"><tr><th>題目 ID</th><th>科目</th><th>模型</th><th>被讀次數</th><th>字數</th><th>生成時間</th><th></th></tr>';
+    rows.forEach(function(x){
+     var id=String(x.k||"").replace(/^ai:/,"");
+     var ts=x.ts?new Date(x.ts).toLocaleString("zh-TW",{hour12:false}):"—";
+     t+='<tr><td class="sm">'+esc(id)+'</td><td>'+esc(x.subj||"")+'</td><td class="sm">'+esc((x.model||"").split("/").pop())+'</td>'
+      +'<td class="n">'+x.hits+'</td><td class="n">'+(x.txtlen||0)+'</td><td class="sm">'+esc(ts)+'</td>'
+      +'<td><button class="pen" data-del="'+esc(id)+'">刪除</button></td></tr>';
+    });
+    t+='</table>';
+    cacheBox.innerHTML=t;
+    cacheBox.querySelectorAll("button[data-del]").forEach(function(btn){
+     btn.onclick=function(){
+      var id=btn.dataset.del;
+      if(!confirm("刪掉「"+id+"」這一題的 AI 快取？下次有學生看這題時，AI 會重新生成。"))return;
+      btn.disabled=true;
+      M.api("DELETE","/api/admin/ai/cache",{id:id}).then(function(){loadCache()},function(er){alert(errs(er));btn.disabled=false});
+     };
+    });
+   },function(er){cacheBox.innerHTML='<div class="fb no">'+esc(errs(er))+"</div>"});
+  }
+  var cachectl=h('<div class="ctl" style="display:flex;gap:.5em;flex-wrap:wrap">'
+   +'<button class="pen">重新整理快取列表</button>'
+   +'<button class="pen" style="background:var(--red,#c44)">清除全部 AI 快取</button>'
+   +'</div>'),cachefb=h('<div class="fb"></div>');
+  s.appendChild(cachectl);s.appendChild(cachefb);
+  cachectl.children[0].onclick=function(){loadCache()};
+  cachectl.children[1].onclick=function(){
+   if(!confirm("確定要清除「全部」AI 快取嗎？之後每一題都要重新讓 AI 生成，會消耗 Neurons 額度。"))return;
+   M.api("DELETE","/api/admin/ai/cache",{}).then(function(r){msg(cachefb,"已清除 "+r.del+" 筆快取",1);loadCache()},function(er){msg(cachefb,errs(er),0)});
+  };
+  loadCache();
+
   if(e.ai&&e.ai.lastErr)s.appendChild(h('<div class="fb no">最近一次失敗的原因：<code style="white-space:pre-wrap">'+esc(e.ai.lastErr)+"</code></div>"));
   if(e.ai){
    var ai=e.ai,left=Math.max(0,(ai.dayCap||0)-(ai.today||0));
