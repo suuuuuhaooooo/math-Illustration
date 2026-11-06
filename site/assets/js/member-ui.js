@@ -114,6 +114,15 @@ function aiTx(str){
  /* 伺服器清掉不支援的語法後可能留下空的 $$$$，要先拿掉，不然會原樣印在畫面上。
     （只處理「$$ 中間沒東西 $$」這一種，不要用 \$\s*\$，那會把一般 $$ 算式的開頭吃掉。） */
  var src=String(str==null?"":str).replace(/#{2,}/g,"").replace(/\$\$[ \t]*\$\$/g,"");
+ /* AI 有時把含 \text{} 的算式直接裸寫（沒包 $），例如：
+      \text{書包價錢} = 389 + 174
+    在分割 $ 之前先把整行包成 $…$，讓後面的 KaTeX 路徑處理。
+    判斷條件：整個「token」（空白分隔）裡出現 \text 或 \frac 等 LaTeX 指令，
+    且本身不是已經在 $…$ 內的片段。 */
+ src=src.replace(/(?<!\$)((?:[^\s$]*\\(?:text|frac|sqrt|times|div|cdot|boxed|overline|mathrm|mathbf)[^\n$]*)+)/g,function(m){
+  /* 只包一次：如果已被 $ 包住就不動 */
+  return "$"+m.trim()+"$";
+ });
  return src.split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/).map(function(p,i){
   /* 非算式的部分：跳脫成純文字，並清掉落單的 $（沒有成對的時候） */
   if(i%2===0)return esc(p.replace(/\$/g,""));
