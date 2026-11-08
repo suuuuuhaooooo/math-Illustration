@@ -1,7 +1,7 @@
 /* 老師後台：班級分析、學生名單、題庫、設定、資料管理。資料由伺服器彙整，只有名單裡的 teacher 看得到。 */
 (function(){
 "use strict";
-var M=NB.member,app=document.getElementById("app"),h=NB.h,TAB="overview",CLS=null;document.body.classList.add("tpage");
+var M=NB.member,app=document.getElementById("app"),h=NB.h,TAB="overview",CLS=null,LAST=null;document.body.classList.add("tpage");
 var READY=false;TAB=decodeURIComponent(location.hash.slice(1))||TAB; /* 頁籤記在網址的 # 後面，例如 teacher.html#assign，上一頁與分享網址都能用 */
 var TABS_ALL=[["overview","班級分析"],["roster","學生名單"],["assign","派卷"],["draw","製圖"],["bank","題庫"],["settings","設定"],["data","資料管理"],["prints","列印紀錄"],["mocks","模擬考紀錄"],["reports","問題回報"],["books","卷類專區"],["codes","邀請碼"],["guard","題庫防護"]],TABS=TABS_ALL;/* 老師看不到題庫／設定／資料管理／題庫防護，這些只有管理員能改 */
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -9,6 +9,8 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;
    小節代號沒有改，所以分析、錯題本的資料完全不用動，只是章節編號跟著課本走。 */
 function title(id){if(window.NB&&NB.ed)return NB.ed.title(id);var o=NB.flat.filter(function(x){return x.id===id})[0];return o?o.sem+" "+o.num+" "+o.title:id}
 function pct(c,n){return n?Math.round(c/n*100):null}
+/* 班級代碼是「年級＋班號」（601＝六年一班）時，弱點分析預設打開這個年級現在的學期；其他寫法就看哪學期作答最多 */
+function gradeOf(cls){var m=/^([1-6])\d{2}$/.exec(String(cls||""));return m?+m[1]:0}
 function shell(notabs){app.innerHTML="";var bar=h('<nav class="bar"><a class="back" href="member.html'+(M.subj!=="math"?"?s="+M.subj:"")+'">← 回到學員專區</a></nav>');bar.appendChild(NB.themeBar());app.appendChild(bar);app.appendChild(h('<div class="ruler"></div>'));app.appendChild(h('<h1 class="title"><mark>老師後台</mark>'+(M.U?'<small class="subj-now">'+(M.SUBJ[M.subj]||M.subj)+"</small>":"")+'</h1>'));
  /* 科目切換：帳號開通兩科（老師、管理員預設都有）才顯示；切換後整頁重新載入，名單、題庫、派卷、紀錄都只看那一科 */
  var ss=M.U&&M.U.subjects||[];if(ss.length>1){var sw=h('<div class="ctl subj-sw noprint"><span class="meta">目前科目：</span></div>');ss.forEach(function(k){if(!M.SUBJ[k])return;var b=h('<button class="pen'+(k===M.subj?" go":"")+'"></button>');b.textContent=M.SUBJ[k];b.onclick=function(){if(k===M.subj)return;M.setSubj(k);location.reload()};sw.appendChild(b)});app.appendChild(sw)}
@@ -65,7 +67,7 @@ function compare(after){
   cs.appendChild(h('<p class="meta">點班級可以切換到那一班的詳細分析。'+(r.admin?"帳號概況只有管理員看得到。":"")+"</p>"))},function(e){cs.querySelector(".meta").textContent="載入失敗（"+(e.code||"未知")+"）"})}
 function render(r){
  if(r.empty){shell();var s0=sheet("班級","");s0.appendChild(h("<p>「"+(M.SUBJ[M.subj]||"")+"」目前還沒有你班上的學生。學生開通這一科後，這裡就會出現班級分析。</p>"));if(M.U.admin)compare(s0);return}
- CLS=r.cls;shell();var S=r.summary,rows=r.students,today=M.today(),limit=M.today(new Date(Date.now()-7*864e5));
+ CLS=r.cls;LAST=r;shell();var S=r.summary,rows=r.students,today=M.today(),limit=M.today(new Date(Date.now()-7*864e5));
  var s=sheet("班級",""),sel=h("<select></select>");r.classes.forEach(function(c){var o=h("<option></option>");o.value=c;o.textContent=c+" 班";if(c===r.cls)o.selected=true;sel.appendChild(o)});sel.onchange=function(){CLS=sel.value;load(CLS)};s.appendChild(sel);
  var tl=h('<div class="tiles"></div>');tl.innerHTML=[["已登入／全班",S.joined+" / "+S.total],["近 7 天有練習",S.active7+" 人"],["全班答對率",S.acc===null?"—":S.acc+"%"],["模擬卷平均",S.mockAvg===null?"—":S.mockAvg],["需要關心",S.atRisk+" 人"],["看提示次數",S.hints]].map(function(x){return'<div class="tile"><small>'+x[0]+"</small><strong>"+x[1]+"</strong></div>"}).join("");s.appendChild(tl);compare(s);
 
@@ -74,6 +76,9 @@ function render(r){
  var k=sheet("需要關心的同學","系統依規則自動標記：7 天沒練習、答對率低、近期退步、很依賴提示、錯題堆積、授權將到期");
  if(!risk.length)k.appendChild(h("<p>目前沒有需要特別關心的同學 👍</p>"));
  else k.appendChild(h('<table class="tb"><tr><th>座號</th><th>姓名</th><th>原因</th></tr>'+risk.map(function(x){return"<tr><td>"+x.no+"</td><td>"+esc(x.name)+"</td><td>"+x.flags.map(function(f){return'<span class="flag">'+esc(f)+"</span>"}).join(" ")+"</td></tr>"}).join("")+"</table>"));
+
+ /* 弱點分析：各章答對率雷達圖、全班最需要加強的章（幾個人低於 60%）、學習主題與題目分類 */
+ if(r.skills&&NB.sk){var wk=sheet("弱點分析","全班累積的作答；紅點＝答對率低於 60% 的章");NB.sk.panel(wk,{who:"class",CH:r.skills.ch,st:r.skills.st,ax:r.skills.ax,grade:gradeOf(r.cls)})}
 
  /* 趨勢 */
  var d=sheet("練習趨勢","近 30 天（以台灣時間計）");
@@ -114,6 +119,9 @@ function detail(cls,no){
  M.api("GET","/api/admin/student?cls="+encodeURIComponent(cls)+"&no="+no).then(function(d){
   var s=h('<section class="sheet"><h2><span class="tag">個人檔案</span>'+d.no+" 號 "+esc(d.name)+'</h2></section>'),close=h('<div class="ctl"><button class="pen">關閉</button></div>');
   s.appendChild(h('<div class="tiles"><div class="tile"><small>積分／等級</small><strong>'+d.pts+" ・Lv."+d.lv+'</strong></div><div class="tile"><small>答對率</small><strong>'+(pct(d.c,d.n)===null?"—":pct(d.c,d.n)+"%")+'</strong></div><div class="tile"><small>練習天數／連續</small><strong>'+d.days+" / "+d.streak+'</strong></div><div class="tile"><small>看提示</small><strong>'+d.hints+'</strong></div><div class="tile"><small>每日一題</small><strong>'+d.dqOk+" / "+d.dq+"</strong></div><div class=\"tile\"><small>勳章</small><strong>"+d.badges.length+"</strong></div></div>"));
+  if(NB.sk){var U={};d.overall.forEach(function(x){U[x.unit]={n:x.n,c:x.c}});var K=LAST&&LAST.cls===cls&&LAST.skills||null;
+   s.appendChild(h('<p class="meta">弱點分析（全部作答累積'+(K?"；實線是這位同學，虛線是全班平均":"")+"）</p>"));
+   NB.sk.panel(s,{who:"stu",U:U,ax:d.ax,us:M.cfg&&M.cfg.us,ref:K&&K.ch,refSt:K&&K.st,refAx:K&&K.ax,grade:gradeOf(cls)})}
   if(d.log.length){s.appendChild(h('<p class="meta">最近每天答題數（有看提示的天數會在標籤標示）</p>'));s.appendChild(h("<div>"+bars(d.log.map(function(x){return x.n}),d.log.map(function(x){return x.d.slice(5)+"・答對率 "+pct(x.c,x.n)+"%"+(x.h?"・提示 "+x.h:"")}),{label:"個人每日答題",unit:" 題"})+"</div>"))}
   if(d.mocks.length){s.appendChild(h('<p class="meta">模擬卷成績走勢</p>'));s.appendChild(h("<div>"+bars(d.mocks.map(function(x){return x.sc}),d.mocks.map(function(x){return x.d.slice(5)}),{label:"模擬卷",color:"var(--p1)",unit:" 分"})+"</div>"))}
   s.appendChild(h('<p class="meta">各單元（近 30 天，弱的在前）</p>'));

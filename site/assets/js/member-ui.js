@@ -114,19 +114,14 @@ function aiTx(str){
  /* 伺服器清掉不支援的語法後可能留下空的 $$$$，要先拿掉，不然會原樣印在畫面上。
     （只處理「$$ 中間沒東西 $$」這一種，不要用 \$\s*\$，那會把一般 $$ 算式的開頭吃掉。） */
  var src=String(str==null?"":str).replace(/#{2,}/g,"").replace(/\$\$[ \t]*\$\$/g,"");
- /* AI 有時把含 \text{} 的算式直接裸寫（沒包 $），例如：
-      \text{書包價錢} = 389 + 174
-    在分割 $ 之前先把整行包成 $…$，讓後面的 KaTeX 路徑處理。
-    判斷條件：整個「token」（空白分隔）裡出現 \text 或 \frac 等 LaTeX 指令，
-    且本身不是已經在 $…$ 內的片段。 */
- src=src.replace(/(?<!\$)((?:[^\s$]*\\(?:text|frac|sqrt|times|div|cdot|boxed|overline|mathrm|mathbf)[^\n$]*)+)/g,function(m){
-  /* 只包一次：如果已被 $ 包住就不動 */
-  return "$"+m.trim()+"$";
- });
  return src.split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/).map(function(p,i){
-  /* 非算式的部分：跳脫成純文字，並清掉落單的 $（沒有成對的時候） */
-  if(i%2===0)return esc(p.replace(/\$/g,""));
-  return p.slice(0,2)==="$$"?kxSafe(p.slice(2,-2),1):kxSafe(p.slice(1,-1),0)}).join("")}
+  if(i%2===1)return p.slice(0,2)==="$$"?kxSafe(p.slice(2,-2),1):kxSafe(p.slice(1,-1),0);
+  /* 不在 $ 裡面的部分：跳脫成純文字，清掉落單的 $。
+     AI 有時把含 \text{} 的算式直接裸寫（沒包 $），例如「\text{書包價錢} = 389 + 174」，
+     這種片段當成行內算式畫。一定要先把已經包好的 $…$ 切出去再找，
+     否則 $$\boxed{60 \text{ 個}}$$ 裡面的 \text 會被再包一次 $，整個算式就壞了。 */
+  return p.split(BARE_TEX).map(function(q,j){return j%2?kxSafe(q.trim(),0):esc(q.replace(/\$/g,""))}).join("")}).join("")}
+var BARE_TEX=/((?:[^\s$]*\\(?:text|frac|sqrt|times|div|cdot|boxed|overline|mathrm|mathbf)[^\n$]*)+)/;
 function aiRender(box,txt){
  var lines=String(txt||"").split(/\n/),cur=null,body=null,stepN=0;
  function sec(title,kind){
@@ -490,6 +485,8 @@ V.progress=function(){
  var D=M.D,tot=M.tot(D),s=sheet("學習進度","看看自己的成長"),tl=h('<div class="tiles"></div>');
  tl.innerHTML='<div class="tile"><small>累積答題</small><strong>'+tot.n+'</strong></div><div class="tile"><small>答對</small><strong>'+tot.c+'</strong></div><div class="tile"><small>逛過的單元</small><strong>'+M.seen(D)+'</strong></div><div class="tile"><small>練習天數</small><strong>'+Object.keys(D.day).length+"</strong></div>";
  s.appendChild(tl);
+ /* 弱點分析：雷達圖畫各章答對率，旁邊列出最該先補的章與單元（skillchart.js；資料就是上面這份個人資料，不另外讀伺服器） */
+ if(NB.sk){s.appendChild(h('<p class="meta">弱點分析（全部作答累積）</p>'));NB.sk.panel(s,{who:"me",U:D.u,ax:D.ax,us:M.cfg&&M.cfg.us,grade:user().grade,link:function(u){return"#quiz/"+u}})}
  var days=[],i,mx=5;for(i=6;i>=0;i--){var dt=new Date(Date.now()-i*864e5),k=M.today(dt),x=D.day[k]||{n:0,c:0};days.push({l:(dt.getMonth()+1)+"/"+dt.getDate(),n:x.n,c:x.c});mx=Math.max(mx,x.n)}
  s.appendChild(h('<p class="meta">最近 7 天（淺色＝答題數，綠色＝答對數）</p>'));var st=h('<div class="stage"></div>');s.appendChild(st);var sv=NB.svg(st,420,150);
  days.forEach(function(d,j){var X=30+j*56,H=d.n/mx*100,C=d.c/mx*100;NB.mk("rect",{x:X,y:120-H,width:34,height:H,fill:"var(--p2)",opacity:.28},sv,1.6);NB.mk("rect",{x:X,y:120-C,width:34,height:C,fill:"var(--p3)"},sv,1.6);NB.t(sv,X+17,142,d.l,{z:12,c:"var(--soft)"})});
