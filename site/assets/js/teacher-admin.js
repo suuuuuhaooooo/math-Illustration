@@ -319,9 +319,14 @@ function bank(ctx){
    if(mode.value==="replace"&&!confirm(kind.value==="bank"?"這會刪除現有全部題目，改成匯入的內容。確定？":"這會清掉現有全部屬性，改成匯入的內容。確定？"))return;
    var total=jobs.reduce(function(a,j){return a+j.rows.length},0),orphan=0,gcount=0;b1.disabled=true;
    function done(){b1.disabled=false}
+   /* 一批沒有正常回應（連線中斷、伺服器暫時出錯）就等一下再送，最多再試兩次。
+      同一批重送是安全的：相同 id 會更新、不會重複；伺服器回的是「資料有問題」就不重送，照常顯示。 */
+   function send(body,left){return M.api("POST",K.api,body).catch(function(e){
+    if(left>0&&(!e||!e.status||e.status>=500)){msg(bf,"連線不穩，2 秒後重送這一批…",1);return new Promise(function(r){setTimeout(r,2000)}).then(function(){return send(body,left-1)})}
+    throw e})}
    function pass(dry,k){ /* dry：只檢查不寫入；全部檢查完才真正寫入 */
     if(k>=jobs.length)return Promise.resolve(true);var j=jobs[k];msg(bf,(dry?"檢查中 ":"匯入中 ")+(k+1)+" / "+jobs.length+"（"+esc(j.file)+"）…",1);
-    return M.api("POST",K.api,{rows:j.rows,mode:!dry&&k===0&&mode.value==="replace"?"replace":"merge",dry:dry?1:0,base:j.base,more:!dry&&k<jobs.length-1}).then(function(x){if(!x.ok)bad=bad.concat(x.errs.map(function(e){return"【"+j.file+"】"+e}));else if(dry){orphan+=x.orphans||0;gcount+=x.groups||0}return pass(dry,k+1)})}
+    return send({rows:j.rows,mode:!dry&&k===0&&mode.value==="replace"?"replace":"merge",dry:dry?1:0,base:j.base,more:!dry&&k<jobs.length-1},2).then(function(x){if(!x.ok)bad=bad.concat(x.errs.map(function(e){return"【"+j.file+"】"+e}));else if(dry){orphan+=x.orphans||0;gcount+=x.groups||0}return pass(dry,k+1)})}
    /* 匯入中途不推進版本（省讀取）；最後一批完成時後端才 bump 一次，前端再重讀題庫。
       不額外打 refresh（那會多 bump 一次，讓後面的快取也失效）；若最後一批失敗再補打一次確保版本一致。 */
    var fin=function(ok){bankReset();if(!ok)return M.api("POST","/api/admin/refresh",{}).catch(function(){});return Promise.resolve()};
