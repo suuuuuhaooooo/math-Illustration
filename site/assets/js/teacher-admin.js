@@ -260,10 +260,14 @@ function bank(ctx){
       if(i>=0){var old=BK.rows[i];Object.keys(row).forEach(function(k){old[k]=row[k]})}else BK.rows.push(row)}
      if(nver)BK.ver=nver;
      msg(ef,"已儲存",1);setTimeout(ctx.go,500);}
-    M.api("POST","/api/admin/bank",{rows:[o],mode:"merge"}).then(function(r){if(!r.ok)return msg(ef,r.errs.map(esc).join("<br>"),0);
+    /* 省讀取：每存一次，伺服器就要把整科題庫重讀一次。所以屬性跟題目放在同一個請求一起存（題庫匯入本來就接受屬性欄，也會檢查），
+       一題只重讀一次。只有「把原本的屬性全部清空」要另外送屬性表（題庫那邊屬性欄全空＝不動），
+       這時第一個請求帶 more（先不推進版本），由第二個請求推進；第二個失敗就補打 refresh，快取才不會停在舊的。 */
+    var clear=had&&!has;if(has)["perf","content","diff","cog","know"].forEach(function(k){o[k]=at[k]});
+    M.api("POST","/api/admin/bank",{rows:[o],mode:"merge",more:clear?1:0}).then(function(r){if(!r.ok)return msg(ef,r.errs.map(esc).join("<br>"),0);
      var nid=(r.ids&&r.ids[0])||o.id;
-     if(!has&&!had){after(nid,r.ver);return}
-     at.id=nid;return M.api("POST","/api/admin/meta",{rows:[at],mode:"merge"}).then(function(m){if(!m.ok)return msg(ef,"題目已儲存，但屬性有問題："+m.errs.map(esc).join("<br>"),0);after(nid,m.ver||r.ver,at)})},function(e){msg(ef,errs(e),0)})};
+     if(!clear){after(nid,r.ver,has?at:null);return}
+     at.id=nid;return M.api("POST","/api/admin/meta",{rows:[at],mode:"merge"}).then(function(m){if(!m.ok){M.api("POST","/api/admin/refresh",{}).catch(function(){});return msg(ef,"題目已儲存，但屬性有問題："+m.errs.map(esc).join("<br>"),0)}after(nid,m.ver||r.ver,at)},function(e){M.api("POST","/api/admin/refresh",{}).catch(function(){});msg(ef,"題目已儲存，但屬性沒有清掉："+errs(e),0)})},function(e){msg(ef,errs(e),0)})};
    ed.scrollIntoView()}
   /* ---- 匯入／匯出（題庫與題目屬性共用同一個區塊）：先選資料類型，欄名不符就整份不匯入 ---- */
   var bk=ctx.sheet("匯入／匯出","題庫與題目屬性都在這裡匯入。先選資料類型；第一列必須是欄名，欄名不符就整份都不會匯入"),mi=h('<p class="meta">讀取中…</p>');
